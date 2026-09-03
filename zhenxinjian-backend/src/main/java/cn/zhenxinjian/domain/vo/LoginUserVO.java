@@ -1,0 +1,25 @@
+package cn.zhenxinjian.domain.vo;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
+
+/**
+ * 登录用户上下文 VO（ThreadLocal 使用）
+ * 作者: luote (luote) - https://luote996.cn
+ */
+@Data
+@Schema(description = "登录用户信息")
+public class LoginUserVO {
+
+    @Schema(description = "用户ID")
+    private Long id;
+
+    @Schema(description = "用户名")
+    private String username;
+
+    @Schema(description = "昵称")
+    private String nickname;
+
+    @Schema(description = "角色")
+    private String role;
+}

@@ -1,0 +1,76 @@
+# luote 生产环境配置
+# 作者: luote (luote) - https://luote996.cn
+
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/zhenxinjian?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&useSSL=true
+    username: ${DB_USER:root}
+    password: ${DB_PASSWORD:}
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      database: ${REDIS_DB:0}
+      timeout: 3000ms
+  ai:
+    dashscope:
+      api-key: ${AI_DASHSCOPE_API_KEY}
+  jackson:
+    deserialization:
+      fail-on-unknown-properties: true
+
+server:
+  forward-headers-strategy: framework
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+
+zhenxinjian:
+  jwt:
+    # 生产必须通过环境变量注入，禁止使用默认密钥
+    secret: ${JWT_SECRET}
+  websocket:
+    enabled: ${WS_ENABLED:true}
+    path: ${WS_PATH:/ws/demo}
+    protocol: ${WS_PROTOCOL:bearer}
+    # 生产建议显式写死业务域名；留空则用 CORS_ORIGINS
+    allowed-origins: []
+    max-message-bytes: ${WS_MAX_MESSAGE_BYTES:4096}
+    max-sessions: ${WS_MAX_SESSIONS:500}
+    max-sessions-per-user: ${WS_MAX_SESSIONS_PER_USER:3}
+  security:
+    cors-allowed-origins: ${CORS_ORIGINS}
+  storage:
+    minio:
+      enabled: ${MINIO_ENABLED:false}
+      endpoint: ${MINIO_ENDPOINT:http://127.0.0.1:9000}
+      access-key: ${MINIO_ACCESS_KEY:minioadmin}
+      secret-key: ${MINIO_SECRET_KEY:minioadmin}
+      bucket: ${MINIO_BUCKET:zhenxinjian}
+    oss:
+      enabled: ${OSS_ENABLED:true}
+      endpoint: ${OSS_ENDPOINT:oss-cn-hangzhou.aliyuncs.com}
+      access-key-id: ${OSS_ACCESS_KEY_ID}
+      access-key-secret: ${OSS_ACCESS_KEY_SECRET}
+      bucket: ${OSS_BUCKET:zhenxinjian}
+      custom-domain: ${OSS_CUSTOM_DOMAIN:}
+
+jetcache:
+  remote:
+    default:
+      # 生产建议用完整 URI；有密码示例: redis://:密码@host:6379/0
+      uri: ${JETCACHE_REDIS_URI:redis://${REDIS_HOST:127.0.0.1}:${REDIS_PORT:6379}/${REDIS_DB:0}}
+
+logging:
+  level:
+    cn.zhenxinjian: info
+    org.springframework.security: warn
+
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.nologging.NoLoggingImpl

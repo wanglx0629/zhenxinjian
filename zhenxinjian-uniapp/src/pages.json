@@ -1,0 +1,68 @@
+{
+  "pages": [
+    {
+      "path": "pages/login/index",
+      "style": {
+        "navigationBarTitleText": "登录",
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/register/index",
+      "style": {
+        "navigationBarTitleText": "注册",
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/home/index",
+      "style": {
+        "navigationBarTitleText": "首页"
+      }
+    },
+    {
+      "path": "pages/websocket/index",
+      "style": {
+        "navigationBarTitleText": "WebSocket"
+      }
+    },
+    {
+      "path": "pages/mine/index",
+      "style": {
+        "navigationBarTitleText": "我的"
+      }
+    }
+  ],
+  "globalStyle": {
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "zhenxinjian",
+    "navigationBarBackgroundColor": "#ffffff",
+    "backgroundColor": "#f5f7fa"
+  },
+  "tabBar": {
+    "color": "#909399",
+    "selectedColor": "#409eff",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/home/index",
+        "text": "首页",
+        "iconPath": "static/tab-home.png",
+        "selectedIconPath": "static/tab-home-active.png"
+      },
+      {
+        "pagePath": "pages/websocket/index",
+        "text": "消息",
+        "iconPath": "static/tab-ws.png",
+        "selectedIconPath": "static/tab-ws-active.png"
+      },
+      {
+        "pagePath": "pages/mine/index",
+        "text": "我的",
+        "iconPath": "static/tab-mine.png",
+        "selectedIconPath": "static/tab-mine-active.png"
+      }
+    ]
+  }
+}
