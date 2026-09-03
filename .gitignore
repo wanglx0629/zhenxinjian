@@ -1,30 +1,117 @@
-# Java 后端编译文件
-zhenxinjian-backend/target/
-zhenxinjian-backend/*.jar
-zhenxinjian-backend/*.war
-*.class
+# 创建全新的 .gitignore
+Remove-Item .gitignore -ErrorAction SilentlyContinue
 
-# 前端 & UniApp 依赖包（体积巨大，绝对不能传）
-zhenxinjian-front/node_modules/
-zhenxinjian-front/dist/
-zhenxinjian-front/.vite/
-zhenxinjian-uniapp/node_modules/
-zhenxinjian-uniapp/dist/
-zhenxinjian-uniapp/unpackage/
-zhenxinjian-uniapp/.vite/
-
-# 本地环境变量（防止泄漏密钥）
-*.env.local
-*.env.*.local
-application-dev.yml
-
-# IDE 配置（每个开发者习惯不同，不要强制同步）
+@"
+# ====================
+# IDE 和项目配置目录
+# ====================
+.agents/
+.claude/
+.codegraph/
 .idea/
-*.iml
 .vscode/
+*.iml
 *.swp
 .DS_Store
 Thumbs.db
 
+# ====================
+# 备份目录（注意空格）
+# ====================
+.git backup/
+.git_backup/
+.git_backup_*/
+*.git_backup
+backup/
+
+# ====================
+# 环境变量文件
+# ====================
+.env
+.env.*
+.env.development_*
+.env.production_*
+.env.example_*
+.env.*.local
+.env.local
+application-*.yml
+application-*.yaml
+application-*.properties
+
+# ====================
+# 依赖目录
+# ====================
+node_modules/
+**/node_modules/
+packages/*/node_modules/
+
+# ====================
+# 构建输出目录
+# ====================
+dist/
+build/
+target/
+out/
+unpackage/
+.vite/
+.cache/
+.parcel-cache/
+.nuxt/
+.output/
+.next/
+
+# ====================
 # 日志文件
+# ====================
 *.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ====================
+# 临时文件
+# ====================
+*.tmp
+*.temp
+*.cache
+*.pid
+*.seed
+*.pid.lock
+
+# ====================
+# 系统文件
+# ====================
+.DS_Store
+Thumbs.db
+desktop.ini
+$RECYCLE.BIN/
+
+# ====================
+# 压缩包
+# ====================
+*.zip
+*.tar.gz
+*.rar
+*.7z
+
+# ====================
+# 测试覆盖率
+# ====================
+coverage/
+.nyc_output/
+test-results/
+*.lcov
+
+# ====================
+# 其他
+# ====================
+_cleanup.ps1
+*.bak
+*.backup
+*.orig
+*.old
+"@ | Out-File -FilePath .gitignore -Encoding utf8
+# ���������ļ�
+.env*
