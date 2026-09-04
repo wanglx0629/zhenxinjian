@@ -1,0 +1,41 @@
+ide:
+  - claude
+  - opencode
+  - codex
+  - trae
+language: java
+frameworks:
+  ut: junit5
+  it: spring-boot-test
+  api: rest-assured
+  e2e: playwright
+directories:
+  ut: src/test/java/
+  it: src/test/java/
+  api: src/test/java/
+  e2e: e2e/
+coverage:
+  ut:
+    tool: jacoco
+    thresholds:
+      line: 80
+      branch: 70
+    formats:
+      - xml
+      - html
+      - csv
+    excludes:
+      - '**/dto/**'
+      - '**/entity/**'
+      - '**/config/**'
+  it:
+    tool: jacoco
+    thresholds:
+      line: 60
+      branch: 50
+    formats:
+      - xml
+      - html
+    excludes:
+      - '**/config/**'
+scope: project

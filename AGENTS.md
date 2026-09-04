@@ -1,78 +1,82 @@
-# AGENTS.md
+# AGENTS.md — 臻心减（zhenxinjian）约束资产总图
 
-本文件面向**所有** AI Coding Agent（Cursor / Claude Code / Codex / Copilot / Gemini / Windsurf 等），不绑定某一厂商目录。
+> 所有 AI Coding Agent（Trae / Claude Code / Codex / OpenCode / Copilot / Gemini 等）的统一入口与导航地图。从这里开始。
 
-作者: luote (luote) · https://luote996.cn
+| 项目 | 内容 |
+| ---- | ---- |
+| 产品名称 | 臻心减（微信小程序 · 生活化减脂工具） |
+| 脚手架来源 | [create-luote](https://create.luote996.cn/guide/getting-started.html) 三端工程 |
+| 文档版本 | V1.0（khufu-harness 生成） |
+| 整理日期 | 2026-09-04 |
+
+## 快速开始
+
+- 最高原则（宪法 · SDD 双循环门禁）：[Constitutions.md](./Constitutions.md)
+- Harness 约束三件套：[context-package](./docs/harness/context-package/) ·
+  [tool-schema](./docs/harness/tool-schema/tool-schema.md) ·
+  [eval-set](./docs/harness/eval-set/eval-set.md)
+- 知识库：[arch（ADR + 前后端架构）](./docs/knowledge/arch/) ·
+  [design-system](./docs/knowledge/design-system/design-system.md) ·
+  [quality 测试策略](./docs/knowledge/quality/test-strategy.md) ·
+  [code-standard](./docs/knowledge/code-standard/) ·
+  [business-rule 不变量](./docs/knowledge/business-rule/invariants.md)
+- 需求：[PRD 索引](./docs/prd/README.md)
+- 项目自述：[项目介绍](./doscFile/01-项目介绍.md) · [技术栈说明](./doscFile/02-技术栈说明.md) · [开发规范](./doscFile/03-开发规范.md)
 
 ## 项目是什么
 
-create-luote 生成的三端工程（或本脚手架仓）：
+create-luote 生成的三端工程（代码统一在 `apps/` 目录）：
 
-- `{name}-backend`：Spring Boot 3
-- `{name}-front`：Vue3 + Element Plus
-- `{name}-uniapp`：UniApp（H5 + 微信小程序）
-- `.agents/skills/luote-scaffold/`：跨 Agent 的任务 Skill + 可执行脚本
+- `apps/zhenxinjian-backend`：Spring Boot 3.4.5 + Java 17 + MyBatis-Plus + MySQL 8 + Redis/JetCache
+- `apps/zhenxinjian-front`：Vue 3 + Element Plus + Vite（PC 运营管理后台）
+- `apps/zhenxinjian-uniapp`：UniApp（Vue 3）用户小程序（主发微信小程序，可发 H5）
 
-## 新增业务 CRUD（必须）
+## 常用命令
 
-禁止手写整套样板。在项目根执行：
+```bash
+# 后端（端口 8080，上下文 /api；Swagger: /api/swagger-ui.html）
+cd apps/zhenxinjian-backend && mvn spring-boot:run
+
+# Web 管理后台（端口 5173，/api 代理到 8080）
+cd apps/zhenxinjian-front && npm install && npm run dev
+
+# UniApp H5 / 微信小程序（产物 dist/dev/mp-weixin 用微信开发者工具打开）
+cd apps/zhenxinjian-uniapp && npm install && npm run dev:h5
+cd apps/zhenxinjian-uniapp && npm run dev:mp-weixin
+```
+
+## 新增业务 CRUD
+
+> ⚠️ 脚手架原始 `AGENTS.md` 引用的 `.agents/skills/luote-scaffold/scripts/gen-crud.js` 当前**不存在**（`.agents/skills/` 已被 OpenSpec 技能目录占用）。在从 create-luote 恢复该脚本之前，新增 CRUD 请按 [Java 代码规范](./docs/knowledge/code-standard/java/standard.md) 与 [开发规范](./doscFile/03-开发规范.md) 手写样板，并完整遵守分层、软删、`Result`/`ExceptionConstant`、活跃唯一约束等约定。恢复脚本后用法：
 
 ```bash
 node .agents/skills/luote-scaffold/scripts/gen-crud.js Notice --zh 通知
-```
-
-自定义字段 / 端：
-
-```bash
 node .agents/skills/luote-scaffold/scripts/gen-crud.js Product --zh 商品 --fields "name:string:名称,price:long:价格分"
 node .agents/skills/luote-scaffold/scripts/gen-crud.js Notice --zh 通知 --ends backend,front,sql
 node .agents/skills/luote-scaffold/scripts/gen-crud.js Notice --zh 通知 --dry-run
 node .agents/skills/luote-scaffold/scripts/gen-crud.js Notice --zh 通知 --no-admin
 ```
 
-详细约定与触发说明：先读 `.agents/skills/luote-scaffold/SKILL.md`。
-
-## Skill 发现路径
-
-| 路径 | 用途 |
-|------|------|
-| `AGENTS.md`（本文件） | 全 Agent 通用入口 |
-| `.agents/skills/luote-scaffold/` | Agent Skills 规范目录（主真源） |
-| `.cursor/skills/luote-scaffold/` | Cursor 兼容镜像（内容与 `.agents` 相同） |
-
-在 **create-luote 脚手架仓**改 Skill 时，只改 `templates/.agents/skills/luote-scaffold/` 与 `templates/AGENTS.md`。
-
-## 硬性边界
+## 硬性边界（摘要，全文见宪法 §5）
 
 ### Always
 
-- CRUD 走 `gen-crud.js`
-- 注释：`作者: luote (luote) - https://luote996.cn`；注释另起一行
-- 错误文案进 `ExceptionConstant`；接口返回 `Result`
-- MySQL / Redis 遵守 `.agents/skills/luote-scaffold/mysql.md` 与 `redis.md`
+- 错误文案进 `ExceptionConstant`；接口返回 `Result`；注释：`作者: luote (luote) - https://luote996.cn`（另起一行）
+- 核心计算逻辑后置后端；人体数据区间前后端双重校验
+- MySQL / Redis 遵守 [开发规范](./doscFile/03-开发规范.md) §4、§5
 
 ### Never
 
-- WebSocket Token 放入 query
-- CORS / Origin 使用 `*`
-- 硬编码密钥、JWT、密码
-- 绕过脚本手写整套 CRUD（除非用户明确要求）
+- WebSocket Token 放 query；CORS / Origin 用 `*`；硬编码密钥、JWT、密码
 - 无 TTL 会话 Key、BigKey、金额用浮点、软删表乱加普通 UNIQUE
+- Controller 拼 SQL、`${}` 拼接用户输入、无上限 `selectList`
+- 私自实现一期范围外功能（AI 识物 / 社交 / 付费等）
 
-## 常用命令
+## 开发流程
 
-```bash
-# 后端
-cd {name}-backend && mvn spring-boot:run
+一切变更走 [SDD 双循环门禁](./Constitutions.md#6-sdd-双循环开发流程与门禁)：
+`openspec propose` → brainstorm → plan → execute →（可选）khufu 测试金字塔 →（可选）BDR → `openspec verify` → `openspec archive`。
 
-# Web
-cd {name}-front && npm install && npm run dev
+## 如何更新这些资产
 
-# UniApp H5
-cd {name}-uniapp && npm install && npm run dev:h5
-```
-
-更多规范：`.agents/skills/luote-scaffold/conventions.md`  
-MySQL：`.agents/skills/luote-scaffold/mysql.md`  
-Redis：`.agents/skills/luote-scaffold/redis.md`  
-联调清单：`.agents/skills/luote-scaffold/checklist.md`
+运行 `/khufu-harness`：带明确内容（自动分类写入）或不带内容（差异驱动修订，逐项确认）。

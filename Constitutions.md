@@ -1,80 +1,159 @@
-# Constitutions.md — 员工投资申报系统（ygtz）
+# Constitutions.md — 臻心减（zhenxinjian）
 
-> 本项目的最高原则。所有 AI Agent 与协作者**必须**遵守本文件。
+| 项目 | 内容 |
+| ---- | ---- |
+| 文档名称 | 臻心减项目宪法（Constitutions） |
+| 文档版本 | V1.0 |
+| 编写日期 | 2026-09-04 |
+| 适用范围 | 本文档为项目最高原则，所有 AI Agent（Trae / Claude Code / Codex / OpenCode 等）与人类贡献者**必须**遵守 |
 
-## 1. 上下文（Context）
+> **文档定位**：本项目采用 SDD（Spec-Driven Development，规格驱动开发）与 Harness Engineering（驾驭工程）方法论。本文件是全部约束资产的最高真源；下层资产（`docs/harness/`、`docs/knowledge/`、`docs/prd/`）均不得与本文件冲突。
 
-- **项目名称**：员工投资申报系统（ygtz）— 工作空间别名 `tzsb-all`。
-- **目标**：为员工提供投资申报的移动端 H5 申报入口，并提供 PC 管理后台进行合规审核与数据管理，后端提供统一数据服务。
-- **关键干系人**：申报员工（移动端用户）、合规审核人员（PC 后台）、后台数据维护人员、监管/合规部门。
-- **仓库形态**：Monorepo 聚合，根目录下 `apps/` 内含四个子项目：
-  - `apps/emp-shr-mobile`：移动端 H5（Vue 3 + Vite + Pinia + Vant 4），**维护中**。
-  - `apps/emp-shr-web`：PC 管理后台（Vue 2 + Webpack 3 + Vuex + Element UI），**维护中**。
-  - `apps/emp-shr-backend`：Java 后端服务（Spring Boot + MyBatis-Plus + Oracle），**维护中**。
-  - `apps/emp-shr-backend.wiki`：子项目技术文档仓库。
-- 工作区已有大量既有文档，见 `docsFile/`（含 PROJECT_CONFIG.yml、权限设计、代码审查报告等）与 `apps/emp-shr-backend.wiki/`。
-- 团队流程约束（日周月报规则）见 `RULES.md`，编码规范与后端分层规范见 `AGENT.md`。
+***
 
-## 2. 技术栈（Tech Stack）
+## 目录
 
-| 层 | 选择 |
+1. [项目上下文](#1-项目上下文)
+2. [技术栈](#2-技术栈)
+3. [架构分层](#3-架构分层)
+4. [工具状态](#4-工具状态)
+5. [硬性边界（Always / Never）](#5-硬性边界always--never)
+6. [SDD 双循环开发流程与门禁](#6-sdd-双循环开发流程与门禁)
+
+***
+
+## 1. 项目上下文
+
+**臻心减**是一款帮助健身新人小白开启生活化减脂第一步的**微信小程序**（私人陪伴式互联网健身搭子），由 create-luote 脚手架生成的三端工程承载：
+
+- **用户端小程序**（`apps/zhenxinjian-uniapp`）：面向 C 端用户，核心能力为「计算 + 食物库 + 记录 + 提醒」，一套代码可发布 H5 / 微信小程序。
+- **PC 运营管理后台**（`apps/zhenxinjian-front`）：面向运营人员，用户管理、食物库维护、数据查看。
+- **后端服务**（`apps/zhenxinjian-backend`）：统一提供 REST API、认证、核心计算、数据持久化。
+
+**目标**：把 BMR/TDEE/宏量计算、532 碳水渐降与碳循环两种减脂模式、食物库与饮食记录封装成「零学习成本」的工具。
+
+**干系人**：1 名产品经理 + 1 名开发；项目节奏无硬性时间要求，以打磨产品体验为核心。
+
+**需求真源**（优先级从高到低）：
+
+1. `MRD-PRD/臻心减-V1.1-最终版PRD-开发交付版.docx`（9/3 图片公式定稿，开发交付唯一口径）
+2. `MRD-PRD/臻心减_PRD_V1.1_含食物库.docx`（数据模型、埋点、食物库规则）
+3. `MRD-PRD/臻心减小程序V1.1高保真原型/`（16 页可交互原型，P01–P16 / F01–F27）
+4. `doscFile/`（项目介绍 / 技术栈说明 / 开发规范）
+
+> 任何需求变更须由 PM 更新 PRD 后同步至 [docs/prd/](./docs/prd/README.md)，代码实现以最新 PRD 与原型为准。
+
+***
+
+## 2. 技术栈
+
+| 层 | 选型 |
 |----|------|
-| 前端（移动端） | Vue 3.4 + Vite 5 + Pinia + Vant 4 + vue-router 4 + axios（rem 适配：amfe-flexible + postcss-pxtorem） |
-| 前端（PC 后台） | Vue 2.5 + Webpack 3 + Vuex + Element UI 2.15 + ECharts（老项目，仅维护） |
-| 后端 | Java + Spring Boot 2.1.15 + Maven 多模块（`gjzqDbGlf-Service`）+ MyBatis-Plus + 多数据源 |
-| 数据库 | Oracle（含层级查询 `connect by` / `sys_connect_by_path`） |
-| 缓存 | 未检测到（默认 None，如引入 Redis 需先记录 ADR） |
-| 部署 | 内网环境部署（详见 `docsFile/6.上线手册模板/`），未采用容器化 |
-| 包管理 | npm（前端两个子项目）、Maven（后端） |
+| 用户端 | UniApp 3（Vue 3 + TypeScript 4.9 + Vite 5 + Pinia + Sass），主发微信小程序 |
+| 管理后台 | Vue 3.4 + TypeScript 5.4 + Vite 5 + Element Plus 2.7 + Pinia + Axios + ECharts |
+| 后端 | Java 17 + Spring Boot 3.4.5（Web / Security / Validation / AOP / WebSocket） |
+| ORM | MyBatis-Plus 3.5.6（逻辑删除、自动填充、分页） |
+| 数据库 | MySQL 8（utf8mb4 + InnoDB） |
+| 缓存 | Redis 5+（Lettuce）+ JetCache 2.7.7（本地 Caffeine + 远程 Redis 两级） |
+| 认证 | Spring Security + JJWT 0.12.5；小程序端微信 `openid` 授权登录 |
+| 接口文档 | SpringDoc OpenAPI 2.8.8（Swagger UI） |
+| 对象存储 | MinIO（自建）/ 阿里云 OSS（默认关闭，按需开启） |
+| AI（预留） | Spring AI Alibaba 1.0.0.2（DashScope qwen-plus），一期不做 AI 识物 |
+| 包管理 | Maven（后端）/ npm（前端两端） |
 
-## 3. 架构分层（Architecture Layers）
+> 部署形态为单体应用（jar + Nginx 反向代理），小程序生产环境**必须 HTTPS** 并在微信公众平台配置合法域名。
 
-**后端（`com.gjzq`）**：分层 MVC 架构。
+***
 
-- 模块划分：`modules/{app,com,eboss,glr,glrba,glrlc,hr,job,mobile,ods,sys,task,th,tool,wehcat,zg}`。
-- 分层职责：**Controller**（HTTP 适配，不写业务）→ **Service 接口 + ServiceImpl**（业务编排/校验/事务）→ **Mapper**（数据访问，复杂查询在 SQL 完成）→ **Entity/DTO/VO**。
-- 公共设施：`common/`（annotation、aspect、mvc、exception、validator、xss、encWapper）、`datasource/`（多数据源）、`config/`、`template/`。
-- **两套体系并存**：新模块使用新 MVC 体系（`PageRequest<T>`/`PageResponse<T>` + 类型化 DTO/VO）；老模块保留 `R` + `Map<String,Object>` + `PageUtils` 旧体系。**新代码一律采用新体系，不混用**（详见 `AGENT.md` 后端分层架构节）。
+## 3. 架构分层
 
-**前端**：按路由/业务模块组织（`src/views` 页面 + `src/api` 接口 + `src/components` 组件 + 状态管理 store）。
+### 3.1 后端（`apps/zhenxinjian-backend`，根包 `cn.zhenxinjian`）
 
-## 4. 工具状态（Tooling Status）
+```
+controller → service（接口）→ service/impl（实现）→ mapper
+对象模型：po（表映射）/ dto（入参）/ query（查询入参）/ vo（出参）
+横切：common（ai / cache / constant / exception / query / result / utils）、config、security、websocket
+```
 
-| 工具 | 状态 | 安装命令 |
-|------|------|---------|
-| OpenSpec CLI | ✅ 已安装（1.8.0） | `npm install -g @fission-ai/openspec` |
-| Superpowers | ✅ 可用（`.agents/skills/superpowers-zh/`） | 按 agentic 工具机制安装 |
-| OpenMole（BDR 重构） | ✅ 已安装（0.9.0） | `npm install -g openmole` |
-| Khufu（khufu-kit） | ✅ 已安装（0.4.0），配置见 `.khufu/khufu.yaml` | `npm install -g khufu-kit` |
+- Controller 只做参数接收与结果返回，**不写业务、不写 SQL**。
+- 事务 `@Transactional` 写在 Service 实现类 public 方法；多表一致性写操作必须加事务。
+- 依赖方向只允许自上而下；`common` 不依赖业务包。
 
-## 5. SDD 双循环开发流程与门禁（SDD Dual-Loop Development Process & Gates）
+### 3.2 管理后台（`apps/zhenxinjian-front`）
 
-> 开发流程是严格的、带门禁的双循环。每一步**必须**完整完成并经用户确认后才进入下一步。循环由本宪法检测到的工具驱动（OpenSpec、Superpowers、OpenMole、Khufu）。未安装的工具，以对应人工操作代替。
+路由级 feature 模块：`view/<功能>` + `api/<资源>.ts`（一资源一文件）+ `component/`（通用组件）+ `store/`（Pinia）。
 
-**门禁规则：** 仅当当前步骤完成**且**用户确认后，才进入下一步。在步骤 **a**，询问用户是否以**自动模式**运行。
+### 3.3 用户端小程序（`apps/zhenxinjian-uniapp`）
 
-### 标准模式（门禁 a → i）
-`Qwen3.8-Max` `Doubao-Seed-Evolving` `DeepSeek-V4-Pro 正式版` `GLM-5.3` `Kimi-K3` `Doubao-Seed-Evolving`
-- **a. 探索（Explore）** — 在开始任何实现之前，通过 `/opsx:explore` 斜杠指令进入探索模式。给定需求描述后，AI 会扮演思维伙伴的角色，深入分析问题背景、梳理多种解决方案并评估各方案的风险与收益。→ **人工评审**（非自动）→ b。（主模型：`Qwen3.8-Max`,备模型：`Doubao-Seed-Evolving`）
-- **b. 提议（Propose）** — 运行 OpenSpec `propose`（`openspec propose` / `/opsx:propose`）创建带规划产物的 change（proposal、specs、design、tasks）。→ **人工评审**（非自动）→ c。（主模型：`DeepSeek-V4-Pro 正式版`,备模型：`GLM-5.3`）
-- **c. 头脑风暴（Brainstorm）** — 对提案运行 Superpowers **brainstorming**，探索意图、需求与设计备选。→ **人工评审**（非自动）→ d。（主模型：`Kimi-K3`,备模型：`Doubao-Seed-Evolving`）
-- **d. 计划（Plan）** — 运行 Superpowers **writing-plans** 将头脑风暴输出转为实施计划。→ **人工评审**（非自动）→ e。（主模型：`Doubao-Seed-Evolving`,备模型：`Qwen3.8-Max`）
-- **e. 执行（Execute）** — 选择 Superpowers 执行方式（**SubAgent** 或 **inline**）。询问用户是否启用**原子提交**。所有任务执行完成后，用户确认 → f。（主模型：`GLM-5.3`,备模型：`DeepSeek-V4-Pro 正式版`）
-- **f. 测试金字塔（Test pyramid）** — 依次运行：`khufu-ut` → `khufu-it` → `khufu-api` → `khufu-e2e`。**可选** — 用户可跳过。确认或跳过 → g。（主模型：`DeepSeek-V4-Pro`,备模型：`GLM-5.3`）
-- **g. 重构（BDR）** — 询问用户是否按 **OpenMole BDR**（Big Deal Refactoring）要求重构既有代码。**可选** — 用户可跳过。确认或跳过 → h。确认后按 BDR 全流程命令依次执行：（主模型：`DeepSeek-V4-Pro 正式版`,备模型：`Doubao-Seed-Evolving`）
-  - **g1. `/openmole-explore`** — 识别坏味道（级别：ARCH / DESIGN / IMPL），产出 `badsmells.md`。
-  - **g2. `/openmole-plan`** — 将「未清除 / 部分残余」坏味道拆解为任务（B-Txx），产出 `tasks.md`。
-  - **g3. `/openmole-verify`** — 差分验证 `badsmells.md` 与 `tasks.md` 覆盖一致性。**须在 `plan` 之后、`apply` 之前执行**（发现冲突先改文档，不先改代码）。
-  - **g4. `/openmole-apply`** — 执行重构任务，**每次仅一个**，循环直至全部完成；写操作须先展示 diff 并经用户确认（写操作门禁不可豁免）。
-  - **g5. `/openmole-archive`** — 检查完成度（badsmells 无未清除、tasks 无 `[ ]`）并归档 change 至 `openmole/changes/archive/`。
-  - 执行序：`explore → plan → verify → apply（循环）→ archive`。→ 全部完成后 → h。
-- **h. 验证（Verify）** — 运行 OpenSpec `verify`（`openspec verify` / `/opsx:verify`）。**必须执行。** 用户确认结果 → i。**自动模式下**，若验证报告问题，自动修复并重新验证。（主模型：`DeepSeek-V4-Pro 正式版`,备模型：`GLM-5.3`）
-- **i. 归档（Archive）** — 运行 OpenSpec `archive`（`openspec archive` / `/opsx:archive`）归档已完成 change 并合并 spec 更新。**必须执行。**（主模型：`DeepSeek-V4-Pro 正式版`,备模型：`GLM-5.3`）
+`pages.json` 声明式路由 + `pages/<页面>` + `api/` + `components/` + `store/`；跨端优先使用 `uni.*` API，禁止直接操作浏览器 DOM。
 
-### 自动模式（a → b → c → d → e → h → i）
+***
 
-当用户在步骤 **a** 选择**自动模式**时，循环无需逐步人工评审自动运行，使用精简序列：
+## 4. 工具状态
 
-`a（explore）` → `b（propose）` → `c（brainstorm）` → `d（plan）` → `e（execute）` → `h（verify，自动修复问题）` → `i（archive）`。
+| 工具 | 状态 | 说明 / 安装 |
+|------|------|------------|
+| OpenSpec CLI | **已安装**（全局） | `openspec/` 工作区已初始化（schema: spec-driven）；安装：`npm install -g @fission-ai/openspec` |
+| Superpowers | **可用** | brainstorming / writing-plans / executing-plans 等技能已在 Agent 技能列表中 |
+| OpenMole（BDR） | **已安装** v0.9.0 | `openmole/` 工作区已初始化；安装：`npm install -g openmole` |
+| Khufu（khufu-kit） | **已安装** | `.khufu/khufu.yaml` 已配置：UT=JUnit5、IT=spring-boot-test、API=rest-assured、E2E=playwright；UT 覆盖率 line≥80 / branch≥70，IT line≥60 / branch≥50；安装：`npm install -g khufu-kit` |
 
-步骤 **f**（测试金字塔）与 **g**（BDR 重构）在自动模式下**跳过**。
+> ⚠️ **已知缺口**：脚手架 AGENTS.md 引用的 `.agents/skills/luote-scaffold/scripts/gen-crud.js`（CRUD 样板生成脚本）当前**不存在**——`.agents/skills/` 已被 OpenSpec 技能覆盖。在其恢复（可从 create-luote 重新生成）之前，新增 CRUD 按本宪法与 [Java 代码规范](./docs/knowledge/code-standard/java/standard.md) 手写，并遵守其中全部分层/软删/Result 约定。
+
+***
+
+## 5. 硬性边界（Always / Never）
+
+### Always（必须）
+
+- 错误文案统一进 `ExceptionConstant`；接口统一返回 `Result`（`Result.ok` / `Result.fail`）。
+- **核心计算逻辑后置到后端**：BMR / TDEE / 碳循环图片公式 / 532 占比 / 体重调碳等一切健康计算，前端仅可做实时预览，**以后端计算为准**，前端参数不可篡改结果。
+- 人体数据区间**前后端双重校验**（越界前端标红、后端拒绝）：年龄 12–80、身高 100–250cm、体重 25–200kg、目标体重 25–200kg 且 ≤ 当前体重。
+- 碳循环日型除数 `2 / 2.2 / 2` 固定写死，周期 ≠ 7 天按比例放大；**禁止**用 `nH+1` 等动态值重算。
+- 营养克数后端按 `double` 存储防累计漂移，前端展示四舍五入到整数克；周期总量守恒允许 ±1g。
+- MySQL / Redis 遵守 [开发规范](./doscFile/03-开发规范.md) §4、§5（软删 + 活跃唯一约束、会话 Key 必须 TTL、无 BigKey）。
+- 管理端接口加 `@PreAuthorize("hasRole('ADMIN')")`。
+- 文件头注释：`作者: luote (luote) - https://luote996.cn`；注释另起一行。
+
+### Never（禁止）
+
+- WebSocket Token 放入 query 参数（只允许子协议 / Authorization）。
+- CORS / `Origin` 配置为 `*`。
+- 硬编码密钥、JWT、密码（一律走配置 / 环境变量）。
+- 无 TTL 的会话类 Redis Key、BigKey、金额用浮点（真实金额必须 `DECIMAL`）、软删表乱加普通 UNIQUE。
+- Controller 拼 SQL、`${}` 拼接用户输入、无上限 `selectList` 对外。
+- 修改数据库 Schema、核心类型（公共 Entity/DTO/VO）、认证鉴权、CI/CD 配置、删除已 commit 文件、修改 Harness 资产本身——以上高危操作**必须先做 Checkpoint 并经用户确认**。
+- 一期范围外功能私自引入：拍照识物 / AI 识物 / 条形码、运动课程 / 社区 / 打卡、付费 / 广告 / 营销、自动体重曲线 / 全自动复盘 / 详细微量元素。
+
+***
+
+## 6. SDD 双循环开发流程与门禁
+
+> 开发流程是严格的、带门禁的双循环。每一步必须**完全完成并经用户确认**后才能开始下一步。循环由本宪法第 4 节检测到的工具（OpenSpec、Superpowers、OpenMole、Khufu）驱动；若某工具未安装，则执行对应的替代手动动作。
+>
+> **门禁规则**：只有当前步骤完成**且**用户确认后，才允许进入下一步。在步骤 **a** 时，询问用户是否以**自动模式**运行。
+
+### 标准模式（门禁 a → h）
+
+- **a. 提案（Propose）** — 运行 OpenSpec `propose`（`openspec propose` / `/opsx:propose`）创建变更及规划产物（proposal、specs、design、tasks）。→ **人工评审**（非自动模式）→ b。
+- **b. 头脑风暴（Brainstorm）** — 对提案运行 Superpowers **brainstorming**，探索意图、需求与设计备选方案。→ **人工评审**（非自动模式）→ c。
+- **c. 计划（Plan）** — 运行 Superpowers **writing-plans** 将头脑风暴产出转化为实施计划。→ **人工评审**（非自动模式）→ d。
+- **d. 执行（Execute）** — 选择 Superpowers 执行方式（**子代理** 或 **内联**）。询问用户是否启用**原子提交**。全部任务执行完毕后由用户确认 → e。
+- **e. 测试金字塔（Test pyramid）** — 依次运行：`khufu-ut` → `khufu-it` → `khufu-api` → `khufu-e2e`。**可选**——用户可跳过。确认或跳过 → f。
+- **f. 重构（BDR）** — 请用户按 **OpenMole BDR**（Big Deal Refactoring）要求重构既有代码。**可选**——用户可跳过。确认或跳过 → g。
+- **g. 验证（Verify）** — 运行 OpenSpec `verify`（`openspec verify` / `/opsx:verify`）。**强制**。用户确认结果 → h。**自动模式**下若验证报告问题，自动修复并重新验证。
+- **h. 归档（Archive）** — 运行 OpenSpec `archive`（`openspec archive` / `/opsx:archive`）归档已完成的变更并合并规格更新。**强制**。
+
+### 自动模式（a → b → c → d → g → h）
+
+当用户在步骤 **a** 选择自动模式时，循环自动运行，无需逐步人工评审，序列缩短为：
+
+`a（提案）` → `b（头脑风暴）` → `c（计划）` → `d（执行）` → `g（验证，自动修复问题）` → `h（归档）`。
+
+步骤 **e**（测试金字塔）与 **f**（BDR 重构）在自动模式下**跳过**。
+
+***
+
+> **文档版本**：V1.0
+> **最后更新**：2026-09-04
+> **维护**：臻心减项目组

@@ -5,9 +5,6 @@ Remove-Item .gitignore -ErrorAction SilentlyContinue
 # ====================
 # IDE 和项目配置目录
 # ====================
-.agents/
-.claude/
-.codegraph/
 .idea/
 .vscode/
 *.iml
@@ -112,6 +109,16 @@ _cleanup.ps1
 *.backup
 *.orig
 *.old
+
+# ====================
+# GitHub Wiki（独立 git 仓库，单独推送）
+# ====================
+zhenxinjian.wiki/
 "@ | Out-File -FilePath .gitignore -Encoding utf8
-# ���������ļ�
+# ���������ļ�
 .env*
+
+# >>> openmole (managed by openmole init/update — do not edit) >>>
+# Machine-local OpenMole plugin symlinks (absolute paths differ per developer)
+/.gemini/extensions/openmole
+# <<< openmole <<<
