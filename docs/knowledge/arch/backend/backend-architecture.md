@@ -10,7 +10,7 @@
 
 ## 1. 定位
 
-Spring Boot 3.4.5 单体，统一提供小程序端与管理后台全部 API：认证（微信登录 + JWT）、核心计算（BMR/TDEE/宏量）、食物库、饮食记录、提醒、文件上传。上下文 `/api`，端口 8080，Swagger UI：`/api/swagger-ui.html`。
+Spring Boot 3.5.16 单体，统一提供小程序端与管理后台全部 API：认证（微信登录 + JWT）、核心计算（BMR/TDEE/宏量）、食物库、饮食记录、提醒、文件上传。上下文 `/api`，端口 8080，Swagger UI：`/api/swagger-ui.html`。
 
 ## 2. 包结构（根包 `cn.zhenxinjian`）
 

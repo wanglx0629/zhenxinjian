@@ -208,7 +208,7 @@
 
 | 目录 | 端 | 技术栈 | 说明 |
 |------|----|--------|------|
-| `apps/zhenxinjian-backend` | 后端服务 | Spring Boot 3 + Java 17 | 提供 REST API、WebSocket、认证、计算、文件存储 |
+| `apps/zhenxinjian-backend` | 后端服务 | Spring Boot 3.5 + Java 25 | 提供 REST API、WebSocket、认证、计算、文件存储 |
 | `apps/zhenxinjian-front` | 运营管理后台（Web） | Vue 3 + Element Plus + Vite | 管理端：用户管理、食物库维护、数据查看等 |
 | `apps/zhenxinjian-uniapp` | 用户端小程序 | UniApp（Vue 3）+ 微信小程序 | 面向 C 端用户，一套代码可发布 H5 / 微信小程序 |
 
@@ -226,8 +226,8 @@
 
 | 技术 | 版本 | 用途 |
 |------|------|------|
-| Java | 17 | 运行时（LTS） |
-| Spring Boot | 3.4.5 | 主框架 |
+| Java | 25 | 运行时（LTS） |
+| Spring Boot | 3.5.16 | 主框架 |
 | Spring Security | 随 Boot | 认证鉴权 |
 | Spring WebSocket | 随 Boot | 实时通信（Demo / 预留） |
 | Spring Validation | 随 Boot | 参数校验（`@Valid`） |
@@ -286,7 +286,7 @@ cn.zhenxinjian
 
 ### 2.4 环境要求与启动
 
-- JDK 17+、Maven 3.8+、MySQL 8、Redis 5+。
+- JDK 25+、Maven 3.9+、MySQL 8、Redis 5+。
 - 初始化：执行 `src/main/resources/data.sql`（建库、建表、演示数据）。
 
 ```bash
@@ -404,8 +404,8 @@ npm run type-check        # 类型检查（vue-tsc --noEmit）
 
 | 软件 | 版本要求 |
 |------|----------|
-| JDK | 17+ |
-| Maven | 3.8+ |
+| JDK | 25+ |
+| Maven | 3.9+ |
 | Node.js | 18+（建议 20 LTS） |
 | MySQL | 8.x |
 | Redis | 5.x+（建议 6+） |

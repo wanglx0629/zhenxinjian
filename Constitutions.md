@@ -51,7 +51,7 @@
 |----|------|
 | 用户端 | UniApp 3（Vue 3 + TypeScript 4.9 + Vite 5 + Pinia + Sass），主发微信小程序 |
 | 管理后台 | Vue 3.4 + TypeScript 5.4 + Vite 5 + Element Plus 2.7 + Pinia + Axios + ECharts |
-| 后端 | Java 17 + Spring Boot 3.4.5（Web / Security / Validation / AOP / WebSocket） |
+| 后端 | Java 25 + Spring Boot 3.5.16（Web / Security / Validation / AOP / WebSocket） |
 | ORM | MyBatis-Plus 3.5.6（逻辑删除、自动填充、分页） |
 | 数据库 | MySQL 8（utf8mb4 + InnoDB） |
 | 缓存 | Redis 5+（Lettuce）+ JetCache 2.7.7（本地 Caffeine + 远程 Redis 两级） |

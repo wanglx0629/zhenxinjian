@@ -27,7 +27,7 @@
 
 create-luote 生成的三端工程（代码统一在 `apps/` 目录）：
 
-- `apps/zhenxinjian-backend`：Spring Boot 3.4.5 + Java 17 + MyBatis-Plus + MySQL 8 + Redis/JetCache
+- `apps/zhenxinjian-backend`：Spring Boot 3.5.16 + Java 25 + MyBatis-Plus + MySQL 8 + Redis/JetCache
 - `apps/zhenxinjian-front`：Vue 3 + Element Plus + Vite（PC 运营管理后台）
 - `apps/zhenxinjian-uniapp`：UniApp（Vue 3）用户小程序（主发微信小程序，可发 H5）
 

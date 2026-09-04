@@ -4,7 +4,7 @@
 | ---- | ---- |
 | 文档版本 | V1.0 |
 | 编写日期 | 2026-09-04 |
-| 适用工程 | `apps/zhenxinjian-backend`（Java 17 + Spring Boot 3.4.5） |
+| 适用工程 | `apps/zhenxinjian-backend`（Java 25 + Spring Boot 3.5.16） |
 | 详细真源 | [doscFile/03-开发规范.md](../../../doscFile/03-开发规范.md)（本文件为约束摘要） |
 
 ***
