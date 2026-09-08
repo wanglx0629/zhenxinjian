@@ -82,6 +82,10 @@ zhenxinjian:
       - /auth/register
       - /auth/captcha
       - /ws/**
+      # Swagger 文档（dev 基线开箱即通；生产禁用 springdoc 属后续运维 change）
+      - /swagger-ui.html
+      - /swagger-ui/**
+      - /v3/api-docs/**
     cors-allowed-origins:
       - http://localhost:5173
       - http://127.0.0.1:5173

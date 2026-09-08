@@ -15,6 +15,7 @@
 | V1.1 开发上手指南 | `MRD-PRD/臻心减-V1.1-开发上手指南.docx` | 工程三端启动与口径摘要；提取件：`doscFile/projectFile/01-开发上手指南.md` |
 | 小程序工程骨架（完整版） | `MRD-PRD/小程序工程骨架（完整版·zip）/` | 原生小程序参考实现；算法层已 TS 移植进 uniapp（48 项对拍通过），分析见 `doscFile/projectFile/03-小程序工程骨架分析.md` |
 | 食物库基础数据 200 条 | `MRD-PRD/臻心减-V1.1-食物库基础数据200条（中国食物成分表第6版）.xlsx` | 10 大分类 / F001–F200；数据字典：`doscFile/projectFile/04-食物库数据字典.md` |
+| 食物库导入 JSON | `MRD-PRD/foods_200.json（开发导入用·下载）.json` | **后端导入唯一真源**（与 xlsx 及 `apps/zhenxinjian-uniapp/src/data/foods.ts` 全量 200 条对拍一致） |
 | 高保真原型 | `MRD-PRD/臻心减小程序V1.1高保真原型/` | 16 页 / F01–F27，公式真实可算 |
 | 后端核对清单 | `MRD-PRD/臻心减小程序 V1.1 后端开发落地核对清单（MRD+PRD定稿版）.pdf` | MRD+PRD 定稿 |
 
