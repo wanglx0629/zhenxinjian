@@ -1,0 +1,253 @@
+/**
+ * 内置食物库基础数据 200 条（离线兜底 / 预置数据）
+ * 作者: luote (luote) - https://luote996.cn
+ *
+ * 数据来源：《中国食物成分表 第6版》，口径：每 100g 可食部。
+ * 仅保留碳水 / 蛋白质 / 脂肪三项；kcal 按 4/4/9 换算（参考值，最大偏差 ±0.5）。
+ * 干制品（香菇干 / 木耳 / 腐竹等）一律按【干重】标注，不做泡发换算（PM 已确认口径）。
+ * 数据真源见 doscFile/projectFile/04-食物库数据字典.md；后端食物库上线后本文件仅作离线兜底。
+ */
+
+/** 食物条目（营养值均为每 100g 可食部） */
+export interface FoodItem {
+  /** 食物编号（F001 ~ F200） */
+  id: string
+  /** 分类（10 大分类） */
+  category: string
+  /** 食物名称（干制品保留「（干）」后缀） */
+  name: string
+  /** 别名 / 俗称 */
+  alias: string
+  /** 碳水化合物 g / 100g */
+  carb: number
+  /** 蛋白质 g / 100g */
+  protein: number
+  /** 脂肪 g / 100g */
+  fat: number
+  /** 能量 kcal / 100g（按 4/4/9 换算的参考值） */
+  kcal: number
+  /** 常用份量 g */
+  serving: number
+}
+
+export const FOODS: FoodItem[] = [
+  { id: 'F001', category: '01 谷薯杂豆·主食', name: '大米（粳米，生）', alias: '白米、东北大米', carb: 77.9, protein: 7.4, fat: 0.8, kcal: 348, serving: 75 },
+  { id: 'F002', category: '01 谷薯杂豆·主食', name: '米饭（蒸，粳米）', alias: '白米饭', carb: 25.9, protein: 2.6, fat: 0.3, kcal: 117, serving: 150 },
+  { id: 'F003', category: '01 谷薯杂豆·主食', name: '糙米（生）', alias: '', carb: 74.3, protein: 7.7, fat: 2.6, kcal: 351, serving: 75 },
+  { id: 'F004', category: '01 谷薯杂豆·主食', name: '黑米（生）', alias: '', carb: 72.2, protein: 9.4, fat: 2.5, kcal: 349, serving: 75 },
+  { id: 'F005', category: '01 谷薯杂豆·主食', name: '糯米（生）', alias: '江米', carb: 78.3, protein: 7.3, fat: 1.0, kcal: 351, serving: 75 },
+  { id: 'F006', category: '01 谷薯杂豆·主食', name: '小米', alias: '粟米', carb: 75.1, protein: 9.0, fat: 3.1, kcal: 364, serving: 50 },
+  { id: 'F007', category: '01 谷薯杂豆·主食', name: '燕麦片', alias: '即食燕麦', carb: 61.0, protein: 15.0, fat: 6.7, kcal: 364, serving: 40 },
+  { id: 'F008', category: '01 谷薯杂豆·主食', name: '藜麦', alias: '', carb: 64.2, protein: 14.1, fat: 6.1, kcal: 368, serving: 50 },
+  { id: 'F009', category: '01 谷薯杂豆·主食', name: '荞麦', alias: '', carb: 66.5, protein: 9.3, fat: 2.3, kcal: 324, serving: 60 },
+  { id: 'F010', category: '01 谷薯杂豆·主食', name: '荞麦面（干）', alias: '', carb: 70.0, protein: 11.0, fat: 1.5, kcal: 338, serving: 100 },
+  { id: 'F011', category: '01 谷薯杂豆·主食', name: '薏米（薏苡仁）', alias: '', carb: 71.1, protein: 12.8, fat: 3.3, kcal: 365, serving: 40 },
+  { id: 'F012', category: '01 谷薯杂豆·主食', name: '小麦粉（标准粉）', alias: '中筋面粉', carb: 73.6, protein: 11.2, fat: 1.5, kcal: 353, serving: 100 },
+  { id: 'F013', category: '01 谷薯杂豆·主食', name: '全麦粉', alias: '', carb: 71.0, protein: 12.0, fat: 2.0, kcal: 350, serving: 100 },
+  { id: 'F014', category: '01 谷薯杂豆·主食', name: '挂面（生）', alias: '', carb: 74.5, protein: 11.4, fat: 0.9, kcal: 352, serving: 100 },
+  { id: 'F015', category: '01 谷薯杂豆·主食', name: '面条（煮，小麦粉）', alias: '汤面', carb: 24.3, protein: 2.7, fat: 0.2, kcal: 110, serving: 200 },
+  { id: 'F016', category: '01 谷薯杂豆·主食', name: '馒头（蒸，标准粉）', alias: '', carb: 47.0, protein: 7.0, fat: 1.1, kcal: 226, serving: 100 },
+  { id: 'F017', category: '01 谷薯杂豆·主食', name: '花卷', alias: '', carb: 45.0, protein: 6.4, fat: 1.0, kcal: 215, serving: 100 },
+  { id: 'F018', category: '01 谷薯杂豆·主食', name: '面包（均值）', alias: '吐司', carb: 50.6, protein: 8.3, fat: 5.1, kcal: 282, serving: 80 },
+  { id: 'F019', category: '01 谷薯杂豆·主食', name: '全麦面包', alias: '', carb: 45.0, protein: 10.5, fat: 3.3, kcal: 252, serving: 80 },
+  { id: 'F020', category: '01 谷薯杂豆·主食', name: '玉米（鲜，甜玉米）', alias: '甜玉米', carb: 22.8, protein: 4.0, fat: 1.2, kcal: 118, serving: 150 },
+  { id: 'F021', category: '01 谷薯杂豆·主食', name: '玉米面', alias: '', carb: 69.6, protein: 8.1, fat: 3.3, kcal: 340, serving: 60 },
+  { id: 'F022', category: '01 谷薯杂豆·主食', name: '红薯（甘薯）', alias: '地瓜', carb: 24.7, protein: 1.1, fat: 0.2, kcal: 105, serving: 150 },
+  { id: 'F023', category: '01 谷薯杂豆·主食', name: '紫薯', alias: '', carb: 24.0, protein: 1.6, fat: 0.2, kcal: 104, serving: 150 },
+  { id: 'F024', category: '01 谷薯杂豆·主食', name: '马铃薯（土豆）', alias: '', carb: 17.2, protein: 2.0, fat: 0.2, kcal: 79, serving: 150 },
+  { id: 'F025', category: '01 谷薯杂豆·主食', name: '山药', alias: '', carb: 12.4, protein: 1.9, fat: 0.2, kcal: 59, serving: 150 },
+  { id: 'F026', category: '01 谷薯杂豆·主食', name: '芋头', alias: '', carb: 18.1, protein: 2.2, fat: 0.2, kcal: 83, serving: 120 },
+  { id: 'F027', category: '01 谷薯杂豆·主食', name: '方便面', alias: '', carb: 60.9, protein: 9.5, fat: 21.1, kcal: 472, serving: 100 },
+  { id: 'F028', category: '01 谷薯杂豆·主食', name: '油条', alias: '', carb: 51.0, protein: 6.9, fat: 17.6, kcal: 390, serving: 60 },
+  { id: 'F029', category: '01 谷薯杂豆·主食', name: '绿豆（干）', alias: '', carb: 62.0, protein: 21.6, fat: 0.8, kcal: 342, serving: 50 },
+  { id: 'F030', category: '01 谷薯杂豆·主食', name: '赤小豆（红豆，干）', alias: '', carb: 63.4, protein: 20.2, fat: 0.6, kcal: 340, serving: 50 },
+  { id: 'F031', category: '02 畜禽肉及制品', name: '猪肉（瘦）', alias: '', carb: 1.5, protein: 20.3, fat: 6.2, kcal: 143, serving: 100 },
+  { id: 'F032', category: '02 畜禽肉及制品', name: '猪肉（肥瘦，均值）', alias: '', carb: 2.4, protein: 13.2, fat: 37.0, kcal: 395, serving: 100 },
+  { id: 'F033', category: '02 畜禽肉及制品', name: '猪里脊', alias: '', carb: 0.7, protein: 20.2, fat: 7.9, kcal: 155, serving: 100 },
+  { id: 'F034', category: '02 畜禽肉及制品', name: '猪五花肉', alias: '', carb: 2.2, protein: 7.7, fat: 35.3, kcal: 357, serving: 80 },
+  { id: 'F035', category: '02 畜禽肉及制品', name: '猪排骨', alias: '', carb: 0.7, protein: 16.7, fat: 23.1, kcal: 278, serving: 120 },
+  { id: 'F036', category: '02 畜禽肉及制品', name: '猪蹄', alias: '', carb: 0.0, protein: 22.6, fat: 18.8, kcal: 260, serving: 100 },
+  { id: 'F037', category: '02 畜禽肉及制品', name: '猪肝', alias: '', carb: 5.0, protein: 19.3, fat: 3.5, kcal: 129, serving: 80 },
+  { id: 'F038', category: '02 畜禽肉及制品', name: '猪血', alias: '血豆腐', carb: 0.1, protein: 12.2, fat: 0.3, kcal: 52, serving: 100 },
+  { id: 'F039', category: '02 畜禽肉及制品', name: '牛肉（瘦）', alias: '', carb: 1.2, protein: 20.2, fat: 2.3, kcal: 106, serving: 100 },
+  { id: 'F040', category: '02 畜禽肉及制品', name: '牛肉（肥瘦，均值）', alias: '', carb: 1.7, protein: 19.9, fat: 4.2, kcal: 124, serving: 100 },
+  { id: 'F041', category: '02 畜禽肉及制品', name: '牛腩', alias: '', carb: 0.0, protein: 17.1, fat: 15.8, kcal: 211, serving: 100 },
+  { id: 'F042', category: '02 畜禽肉及制品', name: '牛肚', alias: '', carb: 0.0, protein: 14.5, fat: 1.6, kcal: 72, serving: 100 },
+  { id: 'F043', category: '02 畜禽肉及制品', name: '羊肉（瘦）', alias: '', carb: 0.8, protein: 20.5, fat: 3.9, kcal: 120, serving: 100 },
+  { id: 'F044', category: '02 畜禽肉及制品', name: '羊肉（肥瘦，均值）', alias: '', carb: 1.5, protein: 19.0, fat: 14.1, kcal: 209, serving: 100 },
+  { id: 'F045', category: '02 畜禽肉及制品', name: '鸡肉（均值）', alias: '', carb: 1.3, protein: 19.3, fat: 9.4, kcal: 167, serving: 100 },
+  { id: 'F046', category: '02 畜禽肉及制品', name: '鸡胸脯肉', alias: '鸡胸肉', carb: 2.5, protein: 19.4, fat: 5.0, kcal: 133, serving: 120 },
+  { id: 'F047', category: '02 畜禽肉及制品', name: '鸡腿', alias: '', carb: 0.0, protein: 16.0, fat: 13.0, kcal: 181, serving: 100 },
+  { id: 'F048', category: '02 畜禽肉及制品', name: '鸡翅', alias: '', carb: 2.3, protein: 17.4, fat: 11.8, kcal: 185, serving: 80 },
+  { id: 'F049', category: '02 畜禽肉及制品', name: '鸡胗', alias: '', carb: 0.0, protein: 17.7, fat: 2.1, kcal: 90, serving: 80 },
+  { id: 'F050', category: '02 畜禽肉及制品', name: '鸭肉', alias: '', carb: 0.2, protein: 15.5, fat: 19.7, kcal: 240, serving: 100 },
+  { id: 'F051', category: '02 畜禽肉及制品', name: '鹅肉', alias: '', carb: 0.0, protein: 17.9, fat: 19.9, kcal: 251, serving: 100 },
+  { id: 'F052', category: '02 畜禽肉及制品', name: '火腿肠', alias: '', carb: 6.0, protein: 14.0, fat: 10.4, kcal: 174, serving: 60 },
+  { id: 'F053', category: '02 畜禽肉及制品', name: '香肠', alias: '', carb: 5.9, protein: 24.0, fat: 40.7, kcal: 486, serving: 50 },
+  { id: 'F054', category: '02 畜禽肉及制品', name: '培根', alias: '', carb: 2.6, protein: 22.3, fat: 9.0, kcal: 181, serving: 40 },
+  { id: 'F055', category: '02 畜禽肉及制品', name: '午餐肉', alias: '', carb: 5.5, protein: 9.4, fat: 15.9, kcal: 203, serving: 60 },
+  { id: 'F056', category: '03 蛋奶及制品', name: '鸡蛋（均值）', alias: '', carb: 2.8, protein: 13.3, fat: 8.8, kcal: 144, serving: 50 },
+  { id: 'F057', category: '03 蛋奶及制品', name: '鸡蛋清', alias: '蛋白', carb: 3.1, protein: 11.6, fat: 0.1, kcal: 60, serving: 33 },
+  { id: 'F058', category: '03 蛋奶及制品', name: '鸡蛋黄', alias: '蛋黄', carb: 3.4, protein: 15.2, fat: 28.2, kcal: 328, serving: 17 },
+  { id: 'F059', category: '03 蛋奶及制品', name: '鸭蛋', alias: '', carb: 3.1, protein: 12.6, fat: 13.0, kcal: 180, serving: 60 },
+  { id: 'F060', category: '03 蛋奶及制品', name: '鹌鹑蛋', alias: '', carb: 2.1, protein: 12.8, fat: 11.1, kcal: 160, serving: 30 },
+  { id: 'F061', category: '03 蛋奶及制品', name: '咸鸭蛋', alias: '', carb: 6.0, protein: 12.7, fat: 12.7, kcal: 189, serving: 60 },
+  { id: 'F062', category: '03 蛋奶及制品', name: '皮蛋（松花蛋）', alias: '', carb: 4.5, protein: 13.5, fat: 10.6, kcal: 167, serving: 55 },
+  { id: 'F063', category: '03 蛋奶及制品', name: '牛奶（均值）', alias: '纯牛奶', carb: 3.4, protein: 3.0, fat: 3.2, kcal: 54, serving: 250 },
+  { id: 'F064', category: '03 蛋奶及制品', name: '脱脂牛奶', alias: '', carb: 5.0, protein: 3.4, fat: 0.3, kcal: 36, serving: 250 },
+  { id: 'F065', category: '03 蛋奶及制品', name: '酸奶（全脂）', alias: '', carb: 9.3, protein: 2.5, fat: 2.7, kcal: 72, serving: 150 },
+  { id: 'F066', category: '03 蛋奶及制品', name: '无糖酸奶', alias: '', carb: 4.5, protein: 3.5, fat: 3.2, kcal: 61, serving: 150 },
+  { id: 'F067', category: '03 蛋奶及制品', name: '奶酪（干酪）', alias: '芝士', carb: 3.5, protein: 25.7, fat: 23.5, kcal: 328, serving: 20 },
+  { id: 'F068', category: '03 蛋奶及制品', name: '全脂奶粉', alias: '', carb: 38.6, protein: 20.1, fat: 21.2, kcal: 426, serving: 25 },
+  { id: 'F069', category: '03 蛋奶及制品', name: '再制乳酪（片）', alias: '芝士片', carb: 5.0, protein: 15.0, fat: 20.0, kcal: 260, serving: 20 },
+  { id: 'F070', category: '04 水产及制品', name: '草鱼', alias: '', carb: 0.0, protein: 16.6, fat: 5.2, kcal: 113, serving: 120 },
+  { id: 'F071', category: '04 水产及制品', name: '鲤鱼', alias: '', carb: 0.5, protein: 17.6, fat: 4.1, kcal: 109, serving: 120 },
+  { id: 'F072', category: '04 水产及制品', name: '鲈鱼', alias: '', carb: 0.0, protein: 18.6, fat: 3.4, kcal: 105, serving: 120 },
+  { id: 'F073', category: '04 水产及制品', name: '带鱼', alias: '', carb: 0.0, protein: 17.7, fat: 4.9, kcal: 115, serving: 100 },
+  { id: 'F074', category: '04 水产及制品', name: '小黄鱼', alias: '黄花鱼', carb: 0.0, protein: 17.9, fat: 3.0, kcal: 99, serving: 100 },
+  { id: 'F075', category: '04 水产及制品', name: '三文鱼', alias: '大马哈鱼', carb: 0.0, protein: 17.2, fat: 7.8, kcal: 139, serving: 100 },
+  { id: 'F076', category: '04 水产及制品', name: '鳕鱼', alias: '', carb: 0.0, protein: 16.5, fat: 0.4, kcal: 70, serving: 120 },
+  { id: 'F077', category: '04 水产及制品', name: '金枪鱼', alias: '', carb: 0.0, protein: 23.6, fat: 4.9, kcal: 138, serving: 100 },
+  { id: 'F078', category: '04 水产及制品', name: '秋刀鱼', alias: '', carb: 0.0, protein: 18.9, fat: 14.5, kcal: 206, serving: 100 },
+  { id: 'F079', category: '04 水产及制品', name: '巴沙鱼', alias: '', carb: 0.0, protein: 15.0, fat: 3.0, kcal: 87, serving: 120 },
+  { id: 'F080', category: '04 水产及制品', name: '对虾', alias: '', carb: 0.0, protein: 18.6, fat: 0.8, kcal: 82, serving: 100 },
+  { id: 'F081', category: '04 水产及制品', name: '基围虾', alias: '', carb: 0.0, protein: 18.2, fat: 1.4, kcal: 85, serving: 100 },
+  { id: 'F082', category: '04 水产及制品', name: '虾仁', alias: '', carb: 0.0, protein: 18.0, fat: 0.6, kcal: 77, serving: 80 },
+  { id: 'F083', category: '04 水产及制品', name: '河蟹', alias: '大闸蟹', carb: 1.1, protein: 17.5, fat: 2.6, kcal: 98, serving: 100 },
+  { id: 'F084', category: '04 水产及制品', name: '海蟹', alias: '', carb: 0.0, protein: 13.8, fat: 2.3, kcal: 76, serving: 100 },
+  { id: 'F085', category: '04 水产及制品', name: '扇贝', alias: '', carb: 3.1, protein: 11.1, fat: 0.6, kcal: 62, serving: 80 },
+  { id: 'F086', category: '04 水产及制品', name: '牡蛎（生蚝）', alias: '', carb: 4.9, protein: 5.3, fat: 2.1, kcal: 60, serving: 100 },
+  { id: 'F087', category: '04 水产及制品', name: '蛤蜊', alias: '花蛤', carb: 2.8, protein: 10.1, fat: 1.1, kcal: 61, serving: 150 },
+  { id: 'F088', category: '04 水产及制品', name: '鱿鱼', alias: '', carb: 0.0, protein: 17.0, fat: 1.4, kcal: 81, serving: 100 },
+  { id: 'F089', category: '04 水产及制品', name: '海参（水发）', alias: '', carb: 0.0, protein: 6.0, fat: 0.1, kcal: 25, serving: 80 },
+  { id: 'F090', category: '05 大豆及制品', name: '黄豆（大豆）', alias: '', carb: 34.2, protein: 35.0, fat: 16.0, kcal: 421, serving: 40 },
+  { id: 'F091', category: '05 大豆及制品', name: '黑豆', alias: '', carb: 33.6, protein: 36.0, fat: 15.9, kcal: 422, serving: 40 },
+  { id: 'F092', category: '05 大豆及制品', name: '豆腐（北）', alias: '老豆腐', carb: 2.8, protein: 12.2, fat: 4.8, kcal: 103, serving: 150 },
+  { id: 'F093', category: '05 大豆及制品', name: '豆腐（南）', alias: '嫩豆腐', carb: 2.6, protein: 6.2, fat: 2.5, kcal: 58, serving: 150 },
+  { id: 'F094', category: '05 大豆及制品', name: '内酯豆腐', alias: '盒豆腐', carb: 2.0, protein: 5.0, fat: 1.9, kcal: 45, serving: 150 },
+  { id: 'F095', category: '05 大豆及制品', name: '豆腐干', alias: '香干', carb: 6.7, protein: 16.2, fat: 3.6, kcal: 124, serving: 60 },
+  { id: 'F096', category: '05 大豆及制品', name: '千张（豆腐皮）', alias: '', carb: 5.5, protein: 24.5, fat: 16.0, kcal: 264, serving: 60 },
+  { id: 'F097', category: '05 大豆及制品', name: '腐竹', alias: '', carb: 22.3, protein: 44.6, fat: 21.7, kcal: 463, serving: 25 },
+  { id: 'F098', category: '05 大豆及制品', name: '豆浆（无糖）', alias: '', carb: 1.2, protein: 1.8, fat: 0.7, kcal: 18, serving: 250 },
+  { id: 'F099', category: '05 大豆及制品', name: '黄豆芽', alias: '', carb: 4.5, protein: 4.5, fat: 1.6, kcal: 50, serving: 150 },
+  { id: 'F100', category: '05 大豆及制品', name: '绿豆芽', alias: '', carb: 2.9, protein: 2.1, fat: 0.1, kcal: 21, serving: 150 },
+  { id: 'F101', category: '05 大豆及制品', name: '毛豆（鲜）', alias: '', carb: 10.5, protein: 13.1, fat: 5.0, kcal: 139, serving: 100 },
+  { id: 'F102', category: '05 大豆及制品', name: '豌豆（鲜）', alias: '', carb: 21.2, protein: 7.4, fat: 0.3, kcal: 117, serving: 100 },
+  { id: 'F103', category: '05 大豆及制品', name: '素鸡', alias: '', carb: 4.0, protein: 16.5, fat: 12.5, kcal: 194, serving: 80 },
+  { id: 'F104', category: '06 蔬菜', name: '大白菜（均值）', alias: '', carb: 3.2, protein: 1.5, fat: 0.1, kcal: 20, serving: 200 },
+  { id: 'F105', category: '06 蔬菜', name: '小白菜', alias: '', carb: 2.7, protein: 1.5, fat: 0.3, kcal: 20, serving: 200 },
+  { id: 'F106', category: '06 蔬菜', name: '生菜', alias: '', carb: 2.0, protein: 1.4, fat: 0.2, kcal: 15, serving: 150 },
+  { id: 'F107', category: '06 蔬菜', name: '菠菜', alias: '', carb: 4.5, protein: 2.6, fat: 0.3, kcal: 31, serving: 200 },
+  { id: 'F108', category: '06 蔬菜', name: '油菜', alias: '', carb: 3.8, protein: 1.8, fat: 0.5, kcal: 27, serving: 200 },
+  { id: 'F109', category: '06 蔬菜', name: '空心菜', alias: '蕹菜', carb: 3.6, protein: 2.2, fat: 0.3, kcal: 26, serving: 200 },
+  { id: 'F110', category: '06 蔬菜', name: '芹菜（茎）', alias: '', carb: 4.5, protein: 1.2, fat: 0.2, kcal: 25, serving: 150 },
+  { id: 'F111', category: '06 蔬菜', name: '韭菜', alias: '', carb: 4.6, protein: 2.4, fat: 0.4, kcal: 32, serving: 150 },
+  { id: 'F112', category: '06 蔬菜', name: '茼蒿', alias: '', carb: 3.9, protein: 1.9, fat: 0.3, kcal: 26, serving: 200 },
+  { id: 'F113', category: '06 蔬菜', name: '西兰花', alias: '西蓝花', carb: 4.3, protein: 4.1, fat: 0.6, kcal: 39, serving: 150 },
+  { id: 'F114', category: '06 蔬菜', name: '花椰菜', alias: '菜花', carb: 4.6, protein: 2.1, fat: 0.2, kcal: 29, serving: 150 },
+  { id: 'F115', category: '06 蔬菜', name: '卷心菜', alias: '圆白菜、包菜', carb: 4.6, protein: 1.5, fat: 0.2, kcal: 26, serving: 200 },
+  { id: 'F116', category: '06 蔬菜', name: '紫甘蓝', alias: '', carb: 6.9, protein: 1.2, fat: 0.2, kcal: 34, serving: 100 },
+  { id: 'F117', category: '06 蔬菜', name: '芦笋', alias: '', carb: 4.9, protein: 1.4, fat: 0.1, kcal: 26, serving: 100 },
+  { id: 'F118', category: '06 蔬菜', name: '番茄', alias: '西红柿', carb: 4.0, protein: 0.9, fat: 0.2, kcal: 21, serving: 150 },
+  { id: 'F119', category: '06 蔬菜', name: '黄瓜', alias: '', carb: 2.9, protein: 0.8, fat: 0.2, kcal: 17, serving: 150 },
+  { id: 'F120', category: '06 蔬菜', name: '茄子', alias: '', carb: 4.9, protein: 1.1, fat: 0.2, kcal: 26, serving: 150 },
+  { id: 'F121', category: '06 蔬菜', name: '冬瓜', alias: '', carb: 2.6, protein: 0.4, fat: 0.2, kcal: 14, serving: 200 },
+  { id: 'F122', category: '06 蔬菜', name: '苦瓜', alias: '', carb: 4.9, protein: 1.0, fat: 0.1, kcal: 24, serving: 150 },
+  { id: 'F123', category: '06 蔬菜', name: '丝瓜', alias: '', carb: 4.2, protein: 1.0, fat: 0.2, kcal: 23, serving: 150 },
+  { id: 'F124', category: '06 蔬菜', name: '西葫芦', alias: '', carb: 3.8, protein: 0.8, fat: 0.2, kcal: 20, serving: 150 },
+  { id: 'F125', category: '06 蔬菜', name: '南瓜', alias: '', carb: 6.5, protein: 0.7, fat: 0.1, kcal: 30, serving: 200 },
+  { id: 'F126', category: '06 蔬菜', name: '青椒（灯笼椒）', alias: '彩椒', carb: 5.4, protein: 1.4, fat: 0.3, kcal: 30, serving: 100 },
+  { id: 'F127', category: '06 蔬菜', name: '尖椒（青辣椒）', alias: '', carb: 8.9, protein: 1.4, fat: 0.3, kcal: 44, serving: 50 },
+  { id: 'F128', category: '06 蔬菜', name: '洋葱', alias: '', carb: 9.0, protein: 1.1, fat: 0.2, kcal: 42, serving: 100 },
+  { id: 'F129', category: '06 蔬菜', name: '胡萝卜', alias: '', carb: 8.8, protein: 1.0, fat: 0.2, kcal: 41, serving: 100 },
+  { id: 'F130', category: '06 蔬菜', name: '白萝卜', alias: '', carb: 4.1, protein: 0.9, fat: 0.1, kcal: 21, serving: 150 },
+  { id: 'F131', category: '06 蔬菜', name: '莴笋', alias: '', carb: 2.8, protein: 1.0, fat: 0.1, kcal: 16, serving: 150 },
+  { id: 'F132', category: '06 蔬菜', name: '竹笋', alias: '', carb: 3.6, protein: 2.6, fat: 0.2, kcal: 27, serving: 150 },
+  { id: 'F133', category: '06 蔬菜', name: '莲藕', alias: '', carb: 16.4, protein: 1.9, fat: 0.2, kcal: 75, serving: 150 },
+  { id: 'F134', category: '06 蔬菜', name: '秋葵', alias: '', carb: 7.1, protein: 2.0, fat: 0.1, kcal: 37, serving: 100 },
+  { id: 'F135', category: '06 蔬菜', name: '荷兰豆', alias: '', carb: 6.0, protein: 2.5, fat: 0.3, kcal: 37, serving: 100 },
+  { id: 'F136', category: '06 蔬菜', name: '四季豆', alias: '青刀豆', carb: 5.7, protein: 2.0, fat: 0.4, kcal: 34, serving: 150 },
+  { id: 'F137', category: '06 蔬菜', name: '蒜苔', alias: '', carb: 15.4, protein: 2.0, fat: 0.1, kcal: 70, serving: 100 },
+  { id: 'F138', category: '06 蔬菜', name: '香菜', alias: '芫荽', carb: 6.2, protein: 1.8, fat: 0.4, kcal: 36, serving: 20 },
+  { id: 'F139', category: '06 蔬菜', name: '小葱', alias: '', carb: 6.5, protein: 1.6, fat: 0.4, kcal: 36, serving: 20 },
+  { id: 'F140', category: '06 蔬菜', name: '生姜', alias: '', carb: 10.3, protein: 1.3, fat: 0.6, kcal: 52, serving: 10 },
+  { id: 'F141', category: '06 蔬菜', name: '大蒜', alias: '', carb: 27.6, protein: 4.5, fat: 0.2, kcal: 130, serving: 10 },
+  { id: 'F142', category: '07 菌藻', name: '香菇（鲜）', alias: '', carb: 5.2, protein: 2.2, fat: 0.3, kcal: 32, serving: 100 },
+  { id: 'F143', category: '07 菌藻', name: '香菇（干）', alias: '冬菇', carb: 61.7, protein: 20.0, fat: 1.2, kcal: 338, serving: 10 },
+  { id: 'F144', category: '07 菌藻', name: '金针菇', alias: '', carb: 6.0, protein: 2.4, fat: 0.4, kcal: 37, serving: 100 },
+  { id: 'F145', category: '07 菌藻', name: '平菇', alias: '', carb: 4.6, protein: 1.9, fat: 0.3, kcal: 29, serving: 150 },
+  { id: 'F146', category: '07 菌藻', name: '杏鲍菇', alias: '', carb: 8.3, protein: 1.3, fat: 0.1, kcal: 39, serving: 120 },
+  { id: 'F147', category: '07 菌藻', name: '蟹味菇', alias: '', carb: 6.0, protein: 2.3, fat: 0.3, kcal: 36, serving: 100 },
+  { id: 'F148', category: '07 菌藻', name: '黑木耳（干）', alias: '', carb: 65.6, protein: 12.1, fat: 1.5, kcal: 324, serving: 10 },
+  { id: 'F149', category: '07 菌藻', name: '银耳（干）', alias: '白木耳', carb: 67.3, protein: 10.0, fat: 1.4, kcal: 322, serving: 10 },
+  { id: 'F150', category: '07 菌藻', name: '海带（鲜）', alias: '', carb: 2.1, protein: 1.2, fat: 0.1, kcal: 14, serving: 150 },
+  { id: 'F151', category: '08 水果', name: '苹果', alias: '', carb: 13.5, protein: 0.2, fat: 0.2, kcal: 57, serving: 200 },
+  { id: 'F152', category: '08 水果', name: '梨', alias: '', carb: 13.3, protein: 0.4, fat: 0.2, kcal: 57, serving: 200 },
+  { id: 'F153', category: '08 水果', name: '香蕉', alias: '', carb: 22.0, protein: 1.4, fat: 0.2, kcal: 95, serving: 120 },
+  { id: 'F154', category: '08 水果', name: '橙子', alias: '', carb: 11.1, protein: 0.8, fat: 0.2, kcal: 49, serving: 200 },
+  { id: 'F155', category: '08 水果', name: '蜜橘', alias: '橘子', carb: 10.3, protein: 0.8, fat: 0.4, kcal: 48, serving: 150 },
+  { id: 'F156', category: '08 水果', name: '柚子', alias: '', carb: 9.5, protein: 0.8, fat: 0.2, kcal: 43, serving: 200 },
+  { id: 'F157', category: '08 水果', name: '柠檬', alias: '', carb: 6.2, protein: 1.1, fat: 1.2, kcal: 40, serving: 30 },
+  { id: 'F158', category: '08 水果', name: '葡萄', alias: '', carb: 10.3, protein: 0.5, fat: 0.2, kcal: 45, serving: 150 },
+  { id: 'F159', category: '08 水果', name: '西瓜', alias: '', carb: 5.8, protein: 0.6, fat: 0.1, kcal: 26, serving: 300 },
+  { id: 'F160', category: '08 水果', name: '哈密瓜', alias: '', carb: 7.9, protein: 0.5, fat: 0.1, kcal: 34, serving: 200 },
+  { id: 'F161', category: '08 水果', name: '香瓜', alias: '甜瓜', carb: 6.2, protein: 0.4, fat: 0.1, kcal: 27, serving: 200 },
+  { id: 'F162', category: '08 水果', name: '草莓', alias: '', carb: 7.1, protein: 1.0, fat: 0.2, kcal: 34, serving: 150 },
+  { id: 'F163', category: '08 水果', name: '蓝莓', alias: '', carb: 14.5, protein: 0.7, fat: 0.3, kcal: 64, serving: 80 },
+  { id: 'F164', category: '08 水果', name: '猕猴桃', alias: '奇异果', carb: 14.5, protein: 0.8, fat: 0.6, kcal: 67, serving: 120 },
+  { id: 'F165', category: '08 水果', name: '芒果', alias: '', carb: 8.3, protein: 0.6, fat: 0.2, kcal: 37, serving: 150 },
+  { id: 'F166', category: '08 水果', name: '菠萝', alias: '凤梨', carb: 10.8, protein: 0.5, fat: 0.1, kcal: 46, serving: 150 },
+  { id: 'F167', category: '08 水果', name: '桃', alias: '', carb: 12.2, protein: 0.9, fat: 0.2, kcal: 54, serving: 200 },
+  { id: 'F168', category: '08 水果', name: '李子', alias: '', carb: 8.7, protein: 0.7, fat: 0.2, kcal: 39, serving: 150 },
+  { id: 'F169', category: '08 水果', name: '樱桃', alias: '车厘子', carb: 10.2, protein: 1.1, fat: 0.2, kcal: 47, serving: 100 },
+  { id: 'F170', category: '08 水果', name: '石榴', alias: '', carb: 18.7, protein: 1.4, fat: 0.2, kcal: 82, serving: 150 },
+  { id: 'F171', category: '08 水果', name: '火龙果', alias: '', carb: 13.0, protein: 1.1, fat: 0.4, kcal: 60, serving: 200 },
+  { id: 'F172', category: '08 水果', name: '柿子', alias: '', carb: 18.5, protein: 0.4, fat: 0.1, kcal: 76, serving: 150 },
+  { id: 'F173', category: '08 水果', name: '荔枝', alias: '', carb: 16.6, protein: 0.9, fat: 0.2, kcal: 72, serving: 100 },
+  { id: 'F174', category: '08 水果', name: '鲜枣', alias: '冬枣', carb: 28.6, protein: 1.1, fat: 0.3, kcal: 122, serving: 80 },
+  { id: 'F175', category: '08 水果', name: '百香果', alias: '', carb: 11.2, protein: 2.2, fat: 0.7, kcal: 60, serving: 60 },
+  { id: 'F176', category: '08 水果', name: '牛油果', alias: '鳄梨', carb: 7.4, protein: 2.0, fat: 15.3, kcal: 175, serving: 100 },
+  { id: 'F177', category: '09 坚果·种子', name: '核桃（干）', alias: '', carb: 19.1, protein: 14.9, fat: 58.8, kcal: 665, serving: 20 },
+  { id: 'F178', category: '09 坚果·种子', name: '杏仁（大杏仁）', alias: '巴旦木', carb: 23.9, protein: 22.5, fat: 45.4, kcal: 594, serving: 20 },
+  { id: 'F179', category: '09 坚果·种子', name: '腰果', alias: '', carb: 41.6, protein: 17.3, fat: 36.7, kcal: 566, serving: 20 },
+  { id: 'F180', category: '09 坚果·种子', name: '花生（炒）', alias: '', carb: 23.8, protein: 21.7, fat: 48.0, kcal: 614, serving: 25 },
+  { id: 'F181', category: '09 坚果·种子', name: '葵花子（炒）', alias: '瓜子', carb: 17.3, protein: 22.6, fat: 52.8, kcal: 635, serving: 25 },
+  { id: 'F182', category: '09 坚果·种子', name: '黑芝麻', alias: '', carb: 24.0, protein: 19.1, fat: 46.1, kcal: 587, serving: 15 },
+  { id: 'F183', category: '09 坚果·种子', name: '开心果', alias: '', carb: 27.2, protein: 20.6, fat: 45.3, kcal: 599, serving: 20 },
+  { id: 'F184', category: '09 坚果·种子', name: '松子', alias: '', carb: 19.0, protein: 12.6, fat: 62.6, kcal: 690, serving: 15 },
+  { id: 'F185', category: '09 坚果·种子', name: '夏威夷果', alias: '', carb: 13.8, protein: 7.9, fat: 75.8, kcal: 769, serving: 20 },
+  { id: 'F186', category: '09 坚果·种子', name: '栗子（熟）', alias: '板栗', carb: 46.0, protein: 4.8, fat: 1.5, kcal: 217, serving: 60 },
+  { id: 'F187', category: '10 油脂·调味·饮品', name: '花生油', alias: '', carb: 0.0, protein: 0.0, fat: 99.9, kcal: 899, serving: 10 },
+  { id: 'F188', category: '10 油脂·调味·饮品', name: '橄榄油', alias: '', carb: 0.0, protein: 0.0, fat: 99.9, kcal: 899, serving: 10 },
+  { id: 'F189', category: '10 油脂·调味·饮品', name: '芝麻油', alias: '香油', carb: 0.0, protein: 0.0, fat: 99.7, kcal: 897, serving: 5 },
+  { id: 'F190', category: '10 油脂·调味·饮品', name: '黄油', alias: '', carb: 0.0, protein: 0.5, fat: 82.5, kcal: 744, serving: 10 },
+  { id: 'F191', category: '10 油脂·调味·饮品', name: '白砂糖', alias: '', carb: 99.9, protein: 0.0, fat: 0.0, kcal: 400, serving: 10 },
+  { id: 'F192', category: '10 油脂·调味·饮品', name: '蜂蜜', alias: '', carb: 75.6, protein: 0.4, fat: 1.9, kcal: 321, serving: 15 },
+  { id: 'F193', category: '10 油脂·调味·饮品', name: '可乐', alias: '', carb: 10.8, protein: 0.0, fat: 0.0, kcal: 43, serving: 330 },
+  { id: 'F194', category: '10 油脂·调味·饮品', name: '无糖可乐', alias: '', carb: 0.0, protein: 0.0, fat: 0.0, kcal: 0, serving: 330 },
+  { id: 'F195', category: '10 油脂·调味·饮品', name: '啤酒', alias: '', carb: 3.1, protein: 0.4, fat: 0.0, kcal: 14, serving: 330 },
+  { id: 'F196', category: '10 油脂·调味·饮品', name: '白酒（52度）', alias: '', carb: 0.0, protein: 0.0, fat: 0.0, kcal: 0, serving: 50 },
+  { id: 'F197', category: '10 油脂·调味·饮品', name: '鲜榨橙汁', alias: '', carb: 10.0, protein: 0.6, fat: 0.1, kcal: 43, serving: 250 },
+  { id: 'F198', category: '10 油脂·调味·饮品', name: '拿铁（全脂奶）', alias: '', carb: 4.5, protein: 2.6, fat: 2.2, kcal: 48, serving: 350 },
+  { id: 'F199', category: '10 油脂·调味·饮品', name: '全糖奶茶', alias: '', carb: 12.0, protein: 1.2, fat: 3.5, kcal: 84, serving: 500 },
+  { id: 'F200', category: '10 油脂·调味·饮品', name: '生抽（酱油）', alias: '', carb: 10.1, protein: 5.6, fat: 0.1, kcal: 64, serving: 10 },
+]
+
+/** 按关键词搜索（名称 / 别名 / 分类，不区分大小写） */
+export function searchFoods(keyword: string): FoodItem[] {
+  const kw = keyword.trim().toLowerCase()
+  if (!kw) return []
+  return FOODS.filter((f) => {
+    const hay = `${f.name} ${f.alias} ${f.category}`.toLowerCase()
+    return hay.includes(kw)
+  })
+}
+
+/** 按分类分组 */
+export function groupByCategory(): Record<string, FoodItem[]> {
+  const map: Record<string, FoodItem[]> = {}
+  FOODS.forEach((f) => {
+    ;(map[f.category] = map[f.category] || []).push(f)
+  })
+  return map
+}
