@@ -1,0 +1,19 @@
+<!-- P13 提醒设置 -->
+<view class="container">
+  <view class="card">
+    <view class="card-title">三餐提醒 <text class="fn">F27</text></view>
+    <view wx:for="{{keys}}" wx:key="k" class="input-line">
+      <text>{{item.label}}</text>
+      <picker mode="time" value="{{remind.times[item.k]}}" data-k="{{item.k}}" bindchange="onTime">
+        <text class="pv">{{remind.times[item.k]}} ›</text>
+      </picker>
+      <switch checked="{{remind[item.k]}}" data-k="{{item.k}}" bindchange="onToggle" color="#0D9488" />
+    </view>
+  </view>
+
+  <view class="note">
+    · 提醒依赖微信订阅消息，需用户授权「一次性订阅」，每条授权仅生效一次（PRD §2.9 已知限制）。
+    · 建议服务端按用户设置的三个时间点做定时触发，客户端仅负责授权。
+    · 已授权后重复提醒不额外消耗额度；未授权时静默降级，不打扰用户。
+  </view>
+</view>

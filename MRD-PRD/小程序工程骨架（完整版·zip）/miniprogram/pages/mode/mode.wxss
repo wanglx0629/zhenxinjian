@@ -1,0 +1,10 @@
+.mode-card { background: #fff; border: 2rpx solid #E4EBE9; border-radius: 20rpx; padding: 32rpx; margin-bottom: 24rpx; }
+.mode-card.on { border-color: #0D9488; background: #F0FDFA; }
+.mc-head { display: flex; align-items: center; }
+.mc-title { font-size: 36rpx; font-weight: 800; color: #0F3E3A; }
+.fn { font-size: 20rpx; color: #94A3A0; margin-left: 12rpx; }
+.mc-desc { font-size: 26rpx; color: #5B6B69; margin-top: 16rpx; line-height: 1.7; }
+.mc-tags { margin-top: 20rpx; }
+.mc-tags .tag { margin-right: 12rpx; }
+.mc-check { margin-top: 20rpx; color: #0D9488; font-weight: 700; font-size: 26rpx; }
+.tip { font-size: 24rpx; color: #94A3A0; line-height: 1.8; padding: 0 8rpx; }

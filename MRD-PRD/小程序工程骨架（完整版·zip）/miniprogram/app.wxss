@@ -1,0 +1,77 @@
+/* app.wxss —— 全局样式，配色与高保真原型保持一致 */
+page {
+  --brand: #0D9488;
+  --brand-light: #14B8A6;
+  --bg: #F6F8F8;
+  --card: #FFFFFF;
+  --text: #1F2D2B;
+  --text-2: #5B6B69;
+  --text-3: #94A3A0;
+  --line: #E4EBE9;
+  --warn: #F59E0B;
+  --danger: #DC2626;
+
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 28rpx;
+  line-height: 1.6;
+}
+
+.container { padding: 24rpx; }
+.card {
+  background: var(--card);
+  border-radius: 20rpx;
+  padding: 28rpx;
+  margin-bottom: 24rpx;
+  box-shadow: 0 2rpx 12rpx rgba(15, 62, 58, 0.04);
+}
+.card-title { font-size: 32rpx; font-weight: 700; margin-bottom: 16rpx; display: flex; align-items: center; }
+.muted { color: var(--text-3); font-size: 24rpx; }
+.mono { font-variant-numeric: tabular-nums; }
+
+.btn {
+  height: 88rpx; line-height: 88rpx; border-radius: 16rpx;
+  text-align: center; font-size: 30rpx; font-weight: 600;
+}
+.btn-primary { background: var(--brand); color: #fff; }
+.btn-ghost { background: #fff; color: var(--brand); border: 2rpx solid var(--brand); }
+.btn-disabled { background: #CBD5D1; color: #fff; }
+
+.row { display: flex; align-items: center; }
+.row-between { display: flex; align-items: center; justify-content: space-between; }
+
+/* 宏量营养素色条 */
+.mac-row { display: flex; align-items: center; margin-bottom: 12rpx; }
+.mac-dot { width: 16rpx; height: 16rpx; border-radius: 50%; margin-right: 12rpx; }
+.mac-c { background: #F59E0B; }
+.mac-p { background: #0D9488; }
+.mac-f { background: #6366F1; }
+
+/* 数字大卡 */
+.metric { text-align: center; }
+.metric-num { font-size: 56rpx; font-weight: 800; color: var(--brand); line-height: 1.1; }
+.metric-lab { font-size: 24rpx; color: var(--text-3); }
+
+/* 进度环占位（开发可用 canvas 替换） */
+.ring-wrap { width: 200rpx; height: 200rpx; margin: 0 auto; }
+
+.list-item {
+  display: flex; align-items: center; padding: 28rpx 0;
+  border-bottom: 2rpx solid var(--line);
+}
+.li-main { flex: 1; margin-left: 20rpx; }
+.li-title { font-size: 30rpx; }
+.li-sub { font-size: 24rpx; color: var(--text-3); margin-top: 4rpx; }
+.li-arrow { color: var(--text-3); font-size: 32rpx; }
+
+.tag { display: inline-block; padding: 4rpx 16rpx; border-radius: 8rpx; font-size: 22rpx; }
+.tag-primary { background: #DCFCE7; color: #15803D; }
+.tag-warn { background: #FEF3C7; color: #B45309; }
+.tag-danger { background: #FEE2E2; color: #B91C1C; }
+
+.input-line { display: flex; align-items: center; justify-content: space-between; padding: 24rpx 0; border-bottom: 2rpx solid var(--line); }
+.input-line input { text-align: right; flex: 1; margin-left: 24rpx; }
+
+.err { color: var(--danger); font-size: 24rpx; margin-top: 8rpx; }
+.empty { text-align: center; color: var(--text-3); padding: 80rpx 0; }

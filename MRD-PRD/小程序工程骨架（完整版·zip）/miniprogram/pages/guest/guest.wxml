@@ -1,0 +1,20 @@
+<!-- P01 登录 / 游客入口 -->
+<view class="wrap">
+  <view class="hero">
+    <view class="logo">臻</view>
+    <view class="slogan">臻心减</view>
+    <view class="desc">生活化减脂 · 不挨饿 · 可持续</view>
+  </view>
+
+  <view class="btns">
+    <button class="btn btn-primary" bindtap="onLogin">微信一键登录</button>
+    <button class="btn btn-ghost" bindtap="onGuest">先以游客身份体验</button>
+  </view>
+
+  <view class="tip">
+    <text>游客模式可完整使用所有功能，数据保存在本机；</text>
+    <text>登录后自动继承，不会丢失。</text>
+  </view>
+
+  <view class="disclaimer">本应用提供饮食与运动建议，不构成医疗建议。</view>
+</view>

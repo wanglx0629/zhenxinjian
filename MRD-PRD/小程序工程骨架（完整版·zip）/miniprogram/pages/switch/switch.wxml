@@ -1,0 +1,18 @@
+<!-- P16 切换模式确认 -->
+<view class="container">
+  <view class="card warn-card">
+    <view class="wc-title">⚠️ 切换模式会终止当前周期</view>
+    <view class="wc-body">
+      <view>当前模式：<b>{{curLabel}}</b></view>
+      <view>切换至：<b class="to">{{toLabel}}</b></view>
+    </view>
+    <view class="wc-list">
+      <view>· 未消耗的碳水 / 脂肪池（{{pool}}g）将被清空，不可恢复</view>
+      <view>· 已标记的运动日全部取消</view>
+      <view>· 身体数据、饮食记录、体重记录<b>不受影响</b></view>
+    </view>
+  </view>
+
+  <button class="btn btn-primary" bindtap="onConfirm">确认切换</button>
+  <button class="btn btn-ghost" style="margin-top:24rpx" bindtap="onCancel">取消</button>
+</view>

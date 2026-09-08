@@ -1,0 +1,67 @@
+<!-- P08 532 碳水渐降计划 -->
+<view class="container">
+  <!-- 今日目标 -->
+  <view class="card">
+    <view class="card-title">阶段 1 · 月初适应期 <text class="fn">F16</text></view>
+    <view class="macro-grid">
+      <view class="mg-item"><view class="mg-num c">{{stages[0].carb}}</view><view class="mg-lab">碳水 g</view></view>
+      <view class="mg-item"><view class="mg-num p">{{stages[0].protein}}</view><view class="mg-lab">蛋白 g</view></view>
+      <view class="mg-item"><view class="mg-num f">{{stages[0].fat}}</view><view class="mg-lab">脂肪 g</view></view>
+      <view class="mg-item"><view class="mg-num k">{{stages[0].kcal}}</view><view class="mg-lab">热量 kcal</view></view>
+    </view>
+  </view>
+
+  <!-- F18 / F29 经期周期管理（女性专属） -->
+  <view wx:if="{{isFemale}}" class="card">
+    <view class="card-title">🌸 经期周期管理 <text class="fn">F18 / F29</text></view>
+    <view class="row-between">
+      <view class="sw-main">
+        <view class="sw-title">开启经期周期管理</view>
+        <view class="muted">开启后需录入经期时间，饮食方案按所处阶段自动匹配</view>
+      </view>
+      <switch checked="{{period}}" bindchange="onTogglePeriod" color="#0D9488" />
+    </view>
+
+    <view wx:if="{{period}}" class="period-form">
+      <view class="input-line">
+        <text>本次经期开始日期</text>
+        <picker mode="date" value="{{periodStart}}" bindchange="onDateChange">{{periodStart}} ›</picker>
+      </view>
+      <view class="input-line">
+        <text>月经周期长度（21–35 天）</text>
+        <input type="number" data-k="cycleLen" value="{{cycleLen}}" bindinput="onNumChange" />
+      </view>
+      <view class="input-line">
+        <text>经期持续天数（3–10 天）</text>
+        <input type="number" data-k="periodDays" value="{{periodDays}}" bindinput="onNumChange" />
+      </view>
+
+      <view wx:if="{{phase}}" class="phase-box" style="border-left-color: {{phase.color}}">
+        <view class="pb-head">
+          <text class="pb-tag" style="background: {{phase.color}}">{{phase.label}}</text>
+          <text class="pb-day">周期第 {{phase.dayIdx}} / {{phase.cycleLen}} 天</text>
+        </view>
+        <view class="pb-focus">{{phase.focus}}</view>
+        <view class="pb-tip">今日适配：碳水 {{phase.carb > 0 ? '+' : ''}}{{phase.carb}}g，热量 {{phase.kcal > 0 ? '+' : ''}}{{phase.kcal}} kcal</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 四阶段 -->
+  <view class="card">
+    <view class="card-title">四阶段降碳计划 <text class="fn">F16 / F17</text></view>
+    <view wx:for="{{stages}}" wx:key="n" class="stage-card">
+      <view class="sc-head">
+        <text class="sc-name">{{item.name}}</text>
+        <text wx:if="{{item.n===1}}" class="tag tag-primary">进行中</text>
+      </view>
+      <view class="sc-macros">
+        <text>碳水 {{item.carb}}g</text>
+        <text>蛋白 {{item.protein}}g</text>
+        <text>脂肪 {{item.fat}}g</text>
+        <text class="sc-kcal">{{item.kcal}} kcal</text>
+      </view>
+      <view class="sc-desc">{{item.desc}}</view>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,13 @@
+.fn { font-size: 20rpx; color: #94A3A0; margin-left: 12rpx; font-weight: 400; }
+.qty-row { display: flex; align-items: baseline; justify-content: center; }
+.qty-input { width: 220rpx; text-align: center; font-size: 56rpx; font-weight: 800; color: #0D9488; }
+.qty-unit { font-size: 30rpx; color: #94A3A0; }
+.delta { font-weight: 700; }
+/* 体重变化配色：下降 = 正向（绿），上升 = 警示（红）。
+   与股票「涨红跌绿」相反，此处按健康目标的语义取色。 */
+.delta.down { color: #16A34A; }
+.delta.up   { color: #DC2626; }
+.plateau { margin-top: 20rpx; background: #FFFBEB; border: 2rpx solid #FDE68A; border-radius: 12rpx; padding: 20rpx; font-size: 24rpx; color: #92400E; line-height: 1.7; }
+.w-row { display: flex; justify-content: space-between; padding: 18rpx 0; border-bottom: 2rpx solid #F1F5F4; font-size: 28rpx; }
+.w-val { font-weight: 700; color: #0D9488; }
+.empty { text-align: center; color: #94A3A0; padding: 60rpx 0; }

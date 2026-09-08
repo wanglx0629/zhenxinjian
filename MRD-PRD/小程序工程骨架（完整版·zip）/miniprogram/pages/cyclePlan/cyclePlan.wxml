@@ -1,0 +1,50 @@
+<!-- P07 碳循环计划 -->
+<view class="hero">
+  <view class="h-label">{{totalDays}} 天碳水总池</view>
+  <view class="h-num">{{pool}} <text class="unit">g</text></view>
+  <view class="h-sub">已消耗 {{used}}g · 剩余 {{remain}}g</view>
+</view>
+
+<view wx:if="{{phase}}" class="phase-banner" style="border-left-color: {{phase.color}}">
+  <view class="pb-head">
+    <text class="pb-tag" style="background: {{phase.color}}">{{phase.label}}</text>
+    <text class="pb-day">周期第 {{phase.dayIdx}} / {{phase.cycleLen}} 天</text>
+  </view>
+  <view class="pb-tip">{{phase.tip}}</view>
+</view>
+
+<view class="container">
+  <view class="card">
+    <view class="card-title">三种日型配比 <text class="fn">F21</text></view>
+    <view class="type-row th">
+      <text class="c1">日型</text><text class="c2">碳水</text><text class="c2">脂肪</text><text class="c2">蛋白</text><text class="c2">热量</text>
+    </view>
+    <view wx:for="{{types}}" wx:key="t" class="type-row">
+      <text class="c1" style="color: {{item.color}}; font-weight: 700">{{item.label}}</text>
+      <text class="c2">{{item.carb}}g</text>
+      <text class="c2">{{item.fat}}g</text>
+      <text class="c2 dim">{{protein}}g</text>
+      <text class="c2">{{item.kcal}}</text>
+    </view>
+    <view class="note">蛋白质 = 当前体重 × 1.5，在整个周期内固定不变（F14）。</view>
+  </view>
+
+  <view class="card">
+    <view class="card-title">每日计划</view>
+    <view wx:for="{{days}}" wx:key="index" class="day-card">
+      <view class="dc-head">
+        <text class="dc-day">第 {{item.index}} 天</text>
+        <text class="dc-type" style="background: {{item.type==='high'?'#FEF3C7':item.type==='mid'?'#DCFCE7':'#E0E7FF'}}; color: {{item.type==='high'?'#B45309':item.type==='mid'?'#15803D':'#4338CA'}}">{{item.typeLabel}}</text>
+        <text wx:if="{{item.isTrain}}" class="dc-train">运动</text>
+      </view>
+      <view class="dc-macros">
+        <text>碳水 {{item.carb}}g</text>
+        <text>蛋白 {{item.protein}}g</text>
+        <text>脂肪 {{item.fat}}g</text>
+        <text class="dc-kcal">{{item.kcal}} kcal</text>
+      </view>
+    </view>
+  </view>
+
+  <button class="btn btn-primary" bindtap="onGoHome">回到首页开始记录</button>
+</view>

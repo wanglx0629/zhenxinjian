@@ -1,0 +1,31 @@
+<!-- P14 体重记录 -->
+<view class="container">
+  <view class="card">
+    <view class="card-title">记录今日体重 <text class="fn">F06</text></view>
+    <view class="qty-row">
+      <input class="qty-input" type="digit" value="{{weight}}" bindinput="onInput" placeholder="0.0" />
+      <text class="qty-unit">kg</text>
+    </view>
+    <button class="btn btn-primary" style="margin-top:24rpx" bindtap="onSave">保存</button>
+  </view>
+
+  <view wx:if="{{latest}}" class="card">
+    <view class="card-title">趋势</view>
+    <view class="row-between">
+      <text>最新 {{latest.weight}} kg</text>
+      <text wx:if="{{delta !== null}}" class="delta {{delta<0?'down':'up'}}">{{delta > 0 ? '+' : ''}}{{delta}} kg</text>
+    </view>
+    <view wx:if="{{plateau}}" class="plateau" bindtap="onPlateauAction">
+      ⚠️ 检测到平台期（近 7 天波动 <0.3kg），点击启用阶段 4 微调 →
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="card-title">历史记录</view>
+    <view wx:if="{{list.length===0}}" class="empty">还没有记录</view>
+    <view wx:for="{{list}}" wx:key="date" class="w-row">
+      <text>{{item.date}}</text>
+      <text class="w-val">{{item.weight}} kg</text>
+    </view>
+  </view>
+</view>

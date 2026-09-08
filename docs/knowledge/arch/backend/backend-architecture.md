@@ -2,8 +2,8 @@
 
 | 项目 | 内容 |
 | ---- | ---- |
-| 文档版本 | V1.0 |
-| 编写日期 | 2026-09-04 |
+| 文档版本 | V1.1 |
+| 编写日期 | 2026-09-04　V1.1 修订：2026-09-08（食物库导入口径） |
 | 工程路径 | `apps/zhenxinjian-backend` |
 
 ***
@@ -17,7 +17,6 @@ Spring Boot 3.5.16 单体，统一提供小程序端与管理后台全部 API：
 ```
 ├── ZhenxinjianApplication.java   # 启动类
 ├── common
-│   ├── ai/        # Spring AI 校验切面（AiValidate / AiValidationAspect）
 │   ├── cache/     # CacheValueGuard、UserCacheService、缓存预热
 │   ├── constant/  # Cache/Common/Exception/Storage Constant
 │   ├── exception/ # BusinessException + GlobalExceptionHandler
@@ -56,13 +55,14 @@ Spring Boot 3.5.16 单体，统一提供小程序端与管理后台全部 API：
 1. 新增业务 CRUD（脚手架脚本恢复前按规范手写）：controller + service 接口/impl + mapper + po/dto/query/vo + `data.sql` + `ExceptionConstant`。
 2. 计算类能力做成**纯函数工具或独立 Service**，便于 khufu-ut 覆盖定稿样例（如碳循环 241/23、153/49、72/77）。
 3. 多表一致性写操作加 `@Transactional`；更新后清 JetCache 缓存。
+4. **食物库建表**：内置 200 条（F001–F200，10 大分类）从 `MRD-PRD/foods_200.json（开发导入用）.json` 批量导入；营养值 `DECIMAL(5,1)`、`kcal INT`；字段口径见 [doscFile/projectFile/04-食物库数据字典.md](../../../doscFile/projectFile/04-食物库数据字典.md) §6（含活跃唯一约束与自定义食物软删约定）。
 
 ## 6. 已知事项
 
 - `gen-crud.js` 脚本缺失（见宪法 §4 缺口说明）。
 - WebSocket 为 Demo 性质（`enabled` 可关）；臻心减一期无实时推送需求（提醒走微信订阅消息）。
-- Spring AI Alibaba 已集成但一期不启用 AI 识物。
+- Spring AI / DashScope 依赖已移除（一期不做 AI 识物，需要时再引入）。
 
 ***
 
-> **文档版本**：V1.0　**最后更新**：2026-09-04　**维护**：臻心减项目组
+> **文档版本**：V1.1　**最后更新**：2026-09-08　**维护**：臻心减项目组

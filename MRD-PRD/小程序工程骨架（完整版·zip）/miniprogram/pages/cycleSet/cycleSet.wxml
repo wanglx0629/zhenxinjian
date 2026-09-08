@@ -1,0 +1,38 @@
+<!-- P06 碳循环设置 -->
+<view class="container">
+  <view class="card">
+    <view class="card-title">周期长度 <text class="fn">F12</text></view>
+    <view class="seg">
+      <view class="seg-item {{cycleDays===7?'on':''}}" data-v="7" bindtap="onDays">7 天</view>
+      <view class="seg-item {{cycleDays===14?'on':''}}" data-v="14" bindtap="onDays">14 天</view>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="card-title">目标体重 (kg) <text class="fn">F06</text></view>
+    <input class="inline-input" type="digit" value="{{targetWeight}}" bindinput="onTargetWeight" placeholder="碳水池与脂肪池的核算基数" />
+    <view class="note">7 天总碳水 = 目标体重 × 2.5 × {{cycleDays}}；7 天总脂肪 = 目标体重 × 脂肪系数 × {{cycleDays}}</view>
+  </view>
+
+  <view class="card">
+    <view class="card-title">脂肪系数 <text class="fn">F19</text></view>
+    <view class="seg">
+      <view wx:for="{{coefs}}" wx:key="*this" class="seg-item {{coefIndex===index?'on':''}}" data-i="{{index}}" bindtap="onCoef">
+        {{item}} <text class="si-sub">{{index===0?'标准':'更易执行'}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="card-title">标记运动日 <text class="fn">F13</text></view>
+    <view class="day-grid">
+      <view wx:for="{{days}}" wx:key="i" class="day-item {{item.isTrain?'on':''}}" data-i="{{item.i}}" bindtap="onToggleTrain">
+        <view class="di-day">{{item.i + 1}}</view>
+        <view class="di-lab">{{item.isTrain ? '运动' : '休息'}}</view>
+      </view>
+    </view>
+    <view class="note">运动日会优先占据高碳日，其次中碳日（原型运动日智能适配逻辑）。</view>
+  </view>
+
+  <button class="btn btn-primary" bindtap="onNext">生成碳循环计划</button>
+</view>

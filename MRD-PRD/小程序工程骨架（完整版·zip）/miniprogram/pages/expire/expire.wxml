@@ -1,0 +1,9 @@
+<!-- 周期到期 -->
+<view class="wrap">
+  <view class="icon">🔄</view>
+  <view class="title">{{cycleDays}} 天周期已结束</view>
+  <view class="desc">碳水与脂肪池已用尽，可以开启新一轮周期了。<br/>建议先回顾上一轮的体重变化，再决定是否调整目标体重或脂肪系数。</view>
+
+  <button class="btn btn-primary" bindtap="onRestart">开启新一轮周期</button>
+  <button class="btn btn-ghost" bindtap="onBackHome">先回首页</button>
+</view>

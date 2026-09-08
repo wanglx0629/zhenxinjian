@@ -1,0 +1,3 @@
+.fn { font-size: 20rpx; color: #94A3A0; margin-left: 12rpx; font-weight: 400; }
+.pv { color: #0D9488; margin: 0 24rpx; }
+.note { font-size: 24rpx; color: #5B6B69; line-height: 1.9; padding: 0 8rpx; }

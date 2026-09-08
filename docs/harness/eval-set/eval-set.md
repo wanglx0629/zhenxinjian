@@ -2,8 +2,8 @@
 
 | 项目 | 内容 |
 | ---- | ---- |
-| 文档版本 | V1.0 |
-| 编写日期 | 2026-09-04 |
+| 文档版本 | V1.1 |
+| 编写日期 | 2026-09-04　V1.1 修订：2026-09-08（EVAL-010 四阶段细化；新增 EVAL-021/022） |
 | 用途 | 评估系统（及其 AI Agent）是否满足约束资产的场景集；新增约束时同步补充场景 |
 
 | ID | 场景 | 预期 | 关联资产 |
@@ -16,8 +16,8 @@
 | EVAL-006 | 用户切换减脂模式（532 → 碳循环） | 当前周期自动终止、当期进度清空、新周期重新核算；历史数据不受影响 | [invariants.md](../../knowledge/business-rule/invariants.md) I2 |
 | EVAL-007 | 游客第 4 天 0 点打开小程序 | 强制授权弹窗不可关闭（仅授权登录 / 退出）；数据迁移由后端判定 | [business.md](../context-package/business.md) §1.2 |
 | EVAL-008 | 游客授权登录 | 临时数据自动迁移合并至正式账号；未迁移数据保留 7 天后清空 | [invariants.md](../../knowledge/business-rule/invariants.md) I6 |
-| EVAL-009 | 532 模式第 3 周体重无下降 | 碳水 −20g、总热量 −80kcal，蛋白脂肪不变；且不与上一周递减叠加（单次仅 20g） | [invariants.md](../../knowledge/business-rule/invariants.md) I5 |
-| EVAL-010 | 532 经期阶段 | 碳水自动 +15g、总热量 +60kcal（蛋白脂肪不变） | [business.md](../context-package/business.md) §1.3 |
+| EVAL-009 | 532 模式平台期触发（近 7 天体重波动 < 0.3kg） | 碳水 −20g、总热量 −80kcal，蛋白脂肪不变；且不与上一周递减叠加（单次仅 20g） | [invariants.md](../../knowledge/business-rule/invariants.md) I5 |
+| EVAL-010 | 532 经期阶段（经期日） | 碳水自动 +15g、总热量 +60kcal（蛋白脂肪不变）；排卵期 +5g/+20kcal、黄体期 +10g/+120kcal、卵泡期基线不变；男性/未开启不叠加 | [business.md](../context-package/business.md) §1.3 |
 | EVAL-011 | 删除已被历史饮食记录引用的自定义食物 | 食物标记「已停用」（软删），历史记录保留完整快照数据 | [invariants.md](../../knowledge/business-rule/invariants.md) I8 |
 | EVAL-012 | 自定义食物：蛋白 50g / 脂肪 50g / 碳水 50g / 热量 100kcal | 宏量校验不通过（50×4+50×9+50×4=850，偏差远超 ±10%），提示「请检查数据是否准确」 | [business.md](../context-package/business.md) §1.4 |
 | EVAL-013 | 当日蛋白摄入超过目标值 | 进度条红色高亮 +「已超标 XXg」+ 微调建议文案 | [business.md](../context-package/business.md) §1.4 |
@@ -28,7 +28,9 @@
 | EVAL-018 | 任何健康计算结果页 | 页面 / 返回体携带免责声明（仅作生活化减脂参考，非医疗建议） | [invariants.md](../../knowledge/business-rule/invariants.md) I3 |
 | EVAL-019 | 新用户首次打开小程序 | 弹窗提示游客 3 天体验规则，确认后进入游客模式（完整功能无阉割） | [business.md](../context-package/business.md) §1.2 |
 | EVAL-020 | 已记录饮食当日到达提醒时间 | 不重复推送（每日单次） | [business.md](../context-package/business.md) §1.4 |
+| EVAL-021 | 平台期检测：近 7 天体重记录 [55.0, 55.1, 54.9, 55.05, 55.0]（最大-最小 = 0.2 < 0.3） | 判定平台期成立，触发单次微调（碳水 −20g / 热量 −80kcal）；记录不足 2 条或波动 ≥ 0.3kg 不判定 | [invariants.md](../../knowledge/business-rule/invariants.md) I5 |
+| EVAL-022 | 食物库检索「白米饭」并录入 150g | 命中 F002 米饭（蒸）；换算碳 38.9g / 蛋 3.9g / 脂 0.5g / 热量 175kcal（每 100g × 1.5 口径） | [business.md](../context-package/business.md) §1.4、`doscFile/projectFile/04-食物库数据字典.md` |
 
 ***
 
-> **文档版本**：V1.0　**最后更新**：2026-09-04　**维护**：臻心减项目组
+> **文档版本**：V1.1　**最后更新**：2026-09-08　**维护**：臻心减项目组

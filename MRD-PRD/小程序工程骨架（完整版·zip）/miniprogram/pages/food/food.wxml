@@ -1,0 +1,27 @@
+<!-- P10 食物库 -->
+<view class="container">
+  <view class="search-bar">
+    <input class="search-input" placeholder="搜索食材名称或别名" value="{{kw}}" bindinput="onKw" />
+    <text wx:if="{{kw}}" class="clear" bindtap="clearKw">✕</text>
+  </view>
+
+  <scroll-view class="cats" scroll-x>
+    <text wx:for="{{cats}}" wx:key="*this"
+          class="cat-chip {{curCat===item?'on':''}}"
+          data-v="{{item}}" bindtap="onCat">{{item}}</text>
+  </scroll-view>
+
+  <view class="count">共 {{total}} 条</view>
+
+  <view wx:if="{{list.length===0}}" class="empty">没有找到相关食材，换个关键词试试</view>
+
+  <view wx:for="{{list}}" wx:key="id" class="food-item" data-id="{{item.id}}" bindtap="pick">
+    <view class="fi-main">
+      <view class="fi-name">{{item.name}}</view>
+      <view class="fi-meta">{{item.cat}} · 每100g 碳{{item.c}}g / 蛋{{item.p}}g / 脂{{item.f}}g</view>
+    </view>
+    <view class="fi-kcal">{{item.k}}<text class="u"> kcal</text></view>
+  </view>
+  <view wx:if="{{total > 100}}" class="more">仅显示前 100 条，请细化搜索</view>
+  <view class="note">数据来源《中国食物成分表 第 6 版》· 每 100g 可食部 · 干制品按干重标注，不做泡发换算。</view>
+</view>

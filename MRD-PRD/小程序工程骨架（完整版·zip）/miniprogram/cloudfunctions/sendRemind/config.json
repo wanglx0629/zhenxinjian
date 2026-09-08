@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "openapi": [
+      "subscribeMessage.send"
+    ]
+  },
+  "triggers": [
+    {
+      "name": "remindBreakfast",
+      "type": "timer",
+      "config": "0 */1 7-9 * * * *"
+    },
+    {
+      "name": "remindLunch",
+      "type": "timer",
+      "config": "0 */1 11-13 * * * *"
+    },
+    {
+      "name": "remindDinner",
+      "type": "timer",
+      "config": "0 */1 17-19 * * * *"
+    }
+  ]
+}

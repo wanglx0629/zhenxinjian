@@ -1,0 +1,28 @@
+<!-- P12 当日饮食记录 -->
+<view class="container">
+  <view class="card summary">
+    <view class="row-between">
+      <text class="s-date">{{dateLabel}} 共 {{records.length}} 条</text>
+      <text class="s-kcal">{{total.kcal}} kcal</text>
+    </view>
+    <view class="s-macros">碳水 {{total.carb}}g · 蛋白 {{total.protein}}g · 脂肪 {{total.fat}}g</view>
+  </view>
+
+  <view wx:if="{{grouped.length===0}}" class="empty">今天还没有记录，点击下方按钮添加</view>
+
+  <view wx:for="{{grouped}}" wx:key="meal" class="card">
+    <view class="card-title">{{item.meal}}</view>
+    <view wx:for="{{item.items}}" wx:for-item="r" wx:key="id" class="rec">
+      <view class="rec-main">
+        <view class="rec-name">{{r.name}}</view>
+        <view class="rec-meta">{{r.grams}}g · 碳{{r.carb}} 蛋{{r.protein}} 脂{{r.fat}} · {{r.kcal}}kcal</view>
+      </view>
+      <view class="rec-ops">
+        <text class="op" data-id="{{r.id}}" bindtap="onEdit">改</text>
+        <text class="op del" data-id="{{r.id}}" bindtap="onDelete">删</text>
+      </view>
+    </view>
+  </view>
+
+  <button class="btn btn-primary" bindtap="onAdd">＋ 添加饮食</button>
+</view>

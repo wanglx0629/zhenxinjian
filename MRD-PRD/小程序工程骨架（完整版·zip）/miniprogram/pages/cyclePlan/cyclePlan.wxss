@@ -1,0 +1,23 @@
+.hero { background: linear-gradient(135deg, #0D9488, #14B8A6); color: #fff; padding: 40rpx 32rpx; }
+.h-label { font-size: 24rpx; opacity: .9; }
+.h-num { font-size: 64rpx; font-weight: 800; line-height: 1.2; }
+.unit { font-size: 26rpx; font-weight: 400; }
+.h-sub { font-size: 24rpx; opacity: .9; }
+.phase-banner { background: #FFF; margin: 24rpx; padding: 20rpx 24rpx; border-radius: 12rpx; border-left: 8rpx solid #DB2777; }
+.pb-head { display: flex; align-items: center; }
+.pb-tag { color: #fff; font-size: 22rpx; padding: 4rpx 16rpx; border-radius: 8rpx; }
+.pb-day { font-size: 24rpx; color: #5B6B69; margin-left: 16rpx; }
+.pb-tip { font-size: 24rpx; color: #5B6B69; margin-top: 10rpx; line-height: 1.7; }
+.fn { font-size: 20rpx; color: #94A3A0; margin-left: 12rpx; font-weight: 400; }
+.type-row { display: flex; padding: 12rpx 0; border-bottom: 2rpx solid #F1F5F4; font-size: 26rpx; }
+.type-row.th { color: #94A3A0; font-size: 22rpx; border-bottom: 2rpx solid #E4EBE9; }
+.c1 { flex: 1.4; } .c2 { flex: 1; text-align: right; } .dim { color: #94A3A0; }
+.note { font-size: 24rpx; color: #5B6B69; margin-top: 16rpx; line-height: 1.7; }
+.day-card { border: 2rpx solid #F1F5F4; border-radius: 12rpx; padding: 20rpx; margin-bottom: 16rpx; }
+.dc-head { display: flex; align-items: center; }
+.dc-day { font-weight: 700; flex: 1; }
+.dc-type { font-size: 22rpx; padding: 4rpx 16rpx; border-radius: 8rpx; }
+.dc-train { font-size: 22rpx; padding: 4rpx 16rpx; border-radius: 8rpx; background: #DCFCE7; color: #15803D; margin-left: 12rpx; }
+.dc-macros { display: flex; margin-top: 12rpx; font-size: 24rpx; color: #5B6B69; }
+.dc-macros text { margin-right: 20rpx; }
+.dc-kcal { color: #0D9488; font-weight: 700; }

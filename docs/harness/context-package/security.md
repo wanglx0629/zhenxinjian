@@ -35,7 +35,7 @@
 
 ## 4. 密钥管理
 
-- JWT Secret、DB / Redis 密码、OSS AK/SK、DashScope API Key 一律走**环境变量 / 配置**：`JWT_SECRET`、`DB_HOST/DB_PORT/DB_USER/DB_PASSWORD`、`JETCACHE_REDIS_URI`、`OSS_ACCESS_KEY_ID/OSS_ACCESS_KEY_SECRET` 等。
+- JWT Secret、DB / Redis 密码、OSS AK/SK 一律走**环境变量 / 配置**：`JWT_SECRET`、`DB_HOST/DB_PORT/DB_USER/DB_PASSWORD`、`JETCACHE_REDIS_URI`、`OSS_ACCESS_KEY_ID/OSS_ACCESS_KEY_SECRET` 等。
 - 生产环境必须替换 `application.yml` 中的默认值；禁止提交真实 `.env` 与 `application-*.yml`（已在 `.gitignore`）。
 - CORS 白名单（`security.cors-allowed-origins`）生产必须替换为真实域名，**禁止 `*`**。
 
@@ -57,7 +57,7 @@
 
 ## 8. 信任边界
 
-- 信任边界内的三端 + 后端；边界外：微信开放平台 API、通义千问 DashScope、MinIO/OSS、公网用户。
+- 信任边界内的三端 + 后端；边界外：微信开放平台 API、MinIO/OSS、公网用户。
 - **核心计算结果不可被前端参数篡改**：前端只做预览，后端计算为准（防「计算器类产品刷数据」风险）。
 
 ***

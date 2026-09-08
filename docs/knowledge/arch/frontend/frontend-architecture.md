@@ -2,8 +2,8 @@
 
 | 项目 | 内容 |
 | ---- | ---- |
-| 文档版本 | V1.0 |
-| 编写日期 | 2026-09-04 |
+| 文档版本 | V1.1 |
+| 编写日期 | 2026-09-04　V1.1 修订：2026-09-08（补充小程序骨架移植层） |
 
 ***
 
@@ -47,13 +47,18 @@ src/
 src/
 ├── api/        # request.ts（http 封装，绝对 URL baseUrl）/ auth.ts / user.ts / types.ts
 ├── components/ # CaptchaInput / TeLogo / WsBoard / WsStatusCard
+├── config/     # constants.ts ★ 全局业务常量（活动系数/缺口档位/532配比/碳循环参数/经期四阶段/录入区间）
+├── data/       # foods.ts ★ 内置食物库 200 条（每 100g 口径，离线兜底）
 ├── pages/      # 脚手架初始页（home/login/mine/register/websocket）
 ├── static/     # tabBar 图标 / logo / 提示音
 ├── store/      # Pinia（user.ts）
 ├── utils/      # request / ws / storage / notify / throttle
+│              # + calculator.ts ★ 核心算法 / validate.ts ★ 录入校验 / format.ts ★ 格式化
 ├── pages.json  # 路由 + tabBar + 全局样式
 └── manifest.json # 应用配置（小程序 AppID）
 ```
+
+> ★ 标记五个文件移植自 MRD-PRD 小程序骨架（原生微信小程序参考实现），TypeScript 化且通过 48 项对拍断言（BMR/TDEE/532/碳循环/经期四阶段/食物换算全部与 PRD 图片公式一致）。移植分析见 [doscFile/projectFile/03-小程序工程骨架分析.md](../../../doscFile/projectFile/03-小程序工程骨架分析.md)。
 
 > 当前为脚手架初始页面集，需按 PRD 信息架构新增：游客引导（P01）、身体数据（P03）、代谢结果（P04）、模式选择（P05）、碳循环周期设置 / 计划（P06/P07）、532 月度计划（P08）、体重记录调碳（P09）、食物搜索（P10）、食物详情（P11）、当日记录（P12）、提醒设置（P13）、我的（P14）、到期强制授权（P15）、切换模式确认（P16）。页面对照表见 [mvp-v1.md](../../prd/mvp/mvp-v1.md) §6。
 
@@ -64,6 +69,7 @@ src/
 - 跨端优先 `uni.*` API，禁止直接操作 DOM；样式 Sass + `uni.scss` 变量。
 - 请求统一 `utils/request.ts`；提醒走微信订阅消息（`wx.requestSubscribeMessage()`）。
 - 类型检查：`npm run type-check`（vue-tsc --noEmit）。
+- **算法层口径**：`config/constants.ts` 为前端唯一常量真源；`utils/calculator.ts` 仅做即时展示与离线兜底，改动须重跑对拍断言（基准见 [doscFile/projectFile/02-业务规则与公式速查.md](../../../doscFile/projectFile/02-业务规则与公式速查.md) §9 验算基准）。
 
 ## C. 两端共享口径
 
@@ -73,4 +79,4 @@ src/
 
 ***
 
-> **文档版本**：V1.0　**最后更新**：2026-09-04　**维护**：臻心减项目组
+> **文档版本**：V1.1　**最后更新**：2026-09-08　**维护**：臻心减项目组

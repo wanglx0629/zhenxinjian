@@ -1,0 +1,33 @@
+<!-- P04 代谢结果 -->
+<view class="container">
+  <view class="card hero-card">
+    <view class="hero-label">你的每日总消耗 TDEE</view>
+    <view class="hero-num">{{tdee}} <text class="unit">kcal</text></view>
+    <view class="hero-sub">基础代谢 BMR {{bmr}} kcal × 活动系数</view>
+  </view>
+
+  <view class="card">
+    <view class="card-title">选择每日热量缺口 <text class="fn">F09</text></view>
+    <view class="grid">
+      <view wx:for="{{deficits}}" wx:key="*this"
+            class="grid-item {{deficitIndex===index?'on':''}}"
+            data-i="{{index}}" bindtap="onDeficit">
+        <view class="gi-num">−{{item}}</view>
+        <view class="gi-lab">kcal / 天</view>
+      </view>
+    </view>
+    <view class="note">缺口越大掉秤越快，但饥饿感与执行难度同步上升。建议初次使用选 300。</view>
+  </view>
+
+  <view class="card">
+    <view class="card-title">你的减脂基准热量 <text class="fn">F08</text></view>
+    <view class="row-between big">
+      <text>TDEE − 缺口 =</text>
+      <text class="hl">{{target}} kcal</text>
+    </view>
+    <view class="note">532 与碳循环两种模式共用该基准（PRD §2.4 / §2.5）。</view>
+    <view class="note">按此执行，预计每周减重约 {{weeklyLoss}} kg（7700 kcal ≈ 1 kg 脂肪，仅供参考）。</view>
+  </view>
+
+  <button class="btn btn-primary" bindtap="onNext">下一步 · 选择减脂模式</button>
+</view>

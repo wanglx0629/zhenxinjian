@@ -1,0 +1,13 @@
+.summary { background: linear-gradient(135deg, #0D9488, #14B8A6); color: #fff; }
+.s-date { font-size: 26rpx; opacity: .9; }
+.s-kcal { font-size: 36rpx; font-weight: 800; }
+.s-macros { font-size: 24rpx; opacity: .9; margin-top: 8rpx; }
+.rec { display: flex; align-items: center; padding: 20rpx 0; border-bottom: 2rpx solid #F1F5F4; }
+.rec:last-child { border-bottom: none; }
+.rec-main { flex: 1; }
+.rec-name { font-size: 30rpx; }
+.rec-meta { font-size: 22rpx; color: #94A3A0; margin-top: 4rpx; }
+.rec-ops { }
+.op { font-size: 24rpx; color: #0D9488; padding: 8rpx 20rpx; border: 2rpx solid #E4EBE9; border-radius: 8rpx; margin-left: 12rpx; }
+.op.del { color: #DC2626; }
+.empty { text-align: center; color: #94A3A0; padding: 100rpx 0; }

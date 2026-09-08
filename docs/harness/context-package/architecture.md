@@ -28,7 +28,7 @@ PC 管理后台 (front)      ─┼─ HTTPS → Nginx 反向代理 → Spring B
 ```
 controller → service（接口）→ service/impl → mapper
 对象：po（表映射）/ dto（入参）/ query（查询入参）/ vo（出参）
-横切：common（ai/cache/constant/exception/query/result/utils）· config · security · websocket
+横切：common（cache/constant/exception/query/result/utils）· config · security · websocket
 ```
 
 ### 2.2 管理后台（front）
@@ -59,7 +59,6 @@ controller → service（接口）→ service/impl → mapper
 | 外部系统 | 协议 | 用途 | 备注 |
 | -------- | ---- | ---- | ---- |
 | 微信开放平台 | HTTPS API | `wx.login` 换 openid、订阅消息推送 | 生产需 HTTPS + 域名白名单 |
-| 通义千问 DashScope | HTTPS（Spring AI Alibaba） | AI 能力预留 | 一期**不做** AI 识物，依赖已集成 |
 | MinIO / 阿里云 OSS | HTTP(S) SDK | 头像 / 文件上传 | 默认关闭，按需开启（`zhenxinjian.storage.*`） |
 
 > 新增外部依赖必须先经 Checkpoint 确认（宪法 §5 高危操作）。

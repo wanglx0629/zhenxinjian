@@ -1,0 +1,12 @@
+.wrap { padding: 80rpx 48rpx; }
+.hero { text-align: center; margin-bottom: 120rpx; }
+.logo { width: 140rpx; height: 140rpx; line-height: 140rpx; border-radius: 36rpx;
+  background: linear-gradient(135deg, #0D9488, #14B8A6); color: #fff;
+  font-size: 64rpx; font-weight: 800; margin: 0 auto 24rpx; }
+.slogan { font-size: 44rpx; font-weight: 800; color: #0F3E3A; }
+.desc { font-size: 26rpx; color: #94A3A0; margin-top: 12rpx; }
+.btns { }
+.btn { margin-bottom: 24rpx; }
+.tip { text-align: center; font-size: 24rpx; color: #5B6B69; line-height: 1.8; margin-top: 40rpx; }
+.tip text { display: block; }
+.disclaimer { text-align: center; font-size: 22rpx; color: #B9C4C2; margin-top: 80rpx; }

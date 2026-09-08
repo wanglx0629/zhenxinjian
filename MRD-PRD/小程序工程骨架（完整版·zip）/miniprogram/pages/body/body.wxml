@@ -1,0 +1,37 @@
+<!-- P03 身体数据录入 -->
+<view class="container">
+  <view class="card">
+    <view class="card-title">性别 <text class="fn">F05</text></view>
+    <view class="seg">
+      <view class="seg-item {{gender==='male'?'on':''}}" data-v="male" bindtap="onGender">男</view>
+      <view class="seg-item {{gender==='female'?'on':''}}" data-v="female" bindtap="onGender">女</view>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="card-title">基础数据 <text class="fn">F06</text></view>
+    <view class="input-line"><text>年龄</text><input type="number" data-k="age" value="{{age}}" bindinput="onInput" placeholder="请输入 12 – 80" /></view>
+    <view wx:if="{{errors.age}}" class="err">{{errors.age}}</view>
+
+    <view class="input-line"><text>身高 (cm)</text><input type="digit" data-k="height" value="{{height}}" bindinput="onInput" placeholder="请输入 100 – 250" /></view>
+    <view wx:if="{{errors.height}}" class="err">{{errors.height}}</view>
+
+    <view class="input-line"><text>当前体重 (kg)</text><input type="digit" data-k="weight" value="{{weight}}" bindinput="onInput" placeholder="请输入 25 – 200" /></view>
+    <view wx:if="{{errors.weight}}" class="err">{{errors.weight}}</view>
+
+    <view class="input-line"><text>目标体重 (kg)</text><input type="digit" data-k="targetWeight" value="{{targetWeight}}" bindinput="onInput" placeholder="碳循环按此核算碳水池" /></view>
+    <view wx:if="{{errors.targetWeight}}" class="err">{{errors.targetWeight}}</view>
+  </view>
+
+  <view class="card">
+    <view class="card-title">活动系数 <text class="fn">F07</text></view>
+    <picker mode="selector" range="{{acts}}" range-key="label" value="{{actIndex}}" bindchange="onAct">
+      <view class="picker-line">
+        <text>{{acts[actIndex].label}}</text>
+        <text class="picker-val">× {{acts[actIndex].value}} ›</text>
+      </view>
+    </picker>
+  </view>
+
+  <button class="btn btn-primary" bindtap="onSubmit">下一步 · 查看代谢结果</button>
+</view>

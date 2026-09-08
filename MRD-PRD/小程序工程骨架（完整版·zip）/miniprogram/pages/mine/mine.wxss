@@ -1,0 +1,5 @@
+.profile { background: linear-gradient(135deg, #0D9488, #14B8A6); color: #fff; }
+.pf-name { font-size: 36rpx; font-weight: 800; }
+.pf-sub { font-size: 24rpx; opacity: .9; margin-top: 4rpx; }
+.danger { color: #DC2626; }
+.disclaimer { text-align: center; font-size: 22rpx; color: #B9C4C2; line-height: 1.8; padding: 40rpx 20rpx; }

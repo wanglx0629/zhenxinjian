@@ -1,0 +1,54 @@
+{
+  "pages": [
+    "pages/guest/guest",
+    "pages/home/home",
+    "pages/body/body",
+    "pages/meta/meta",
+    "pages/mode/mode",
+    "pages/cycleSet/cycleSet",
+    "pages/cyclePlan/cyclePlan",
+    "pages/plan532/plan532",
+    "pages/food/food",
+    "pages/add/add",
+    "pages/diary/diary",
+    "pages/remind/remind",
+    "pages/weight/weight",
+    "pages/mine/mine",
+    "pages/switch/switch",
+    "pages/expire/expire"
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#0D9488",
+    "navigationBarTitleText": "臻心减",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#F6F8F8"
+  },
+  "tabBar": {
+    "color": "#94A3A0",
+    "selectedColor": "#0D9488",
+    "backgroundColor": "#FFFFFF",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/home/home",
+        "text": "首页"
+      },
+      {
+        "pagePath": "pages/diary/diary",
+        "text": "记录"
+      },
+      {
+        "pagePath": "pages/food/food",
+        "text": "食物库"
+      },
+      {
+        "pagePath": "pages/mine/mine",
+        "text": "我的"
+      }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
+}

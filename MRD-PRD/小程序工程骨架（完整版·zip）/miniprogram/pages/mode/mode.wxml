@@ -1,0 +1,24 @@
+<!-- P05 模式选择 -->
+<view class="container">
+  <view class="mode-card {{mode==='532'?'on':''}}" data-v="532" bindtap="onPick">
+    <view class="mc-head">
+      <text class="mc-title">532 碳水渐降</text>
+      <text class="fn">F10</text>
+    </view>
+    <view class="mc-desc">按 50% 碳水 / 30% 蛋白 / 20% 脂肪固定配比，分四阶段逐步降碳，经期自动适配。</view>
+    <view class="mc-tags"><text class="tag tag-primary">推荐新手</text><text class="tag">执行简单</text></view>
+    <view wx:if="{{mode==='532'}}" class="mc-check">当前模式</view>
+  </view>
+
+  <view class="mode-card {{mode==='cycle'?'on':''}}" data-v="cycle" bindtap="onPick">
+    <view class="mc-head">
+      <text class="mc-title">碳循环</text>
+      <text class="fn">F11</text>
+    </view>
+    <view class="mc-desc">以目标体重核算 7 天碳水 / 脂肪池，高·中·低碳日轮换，运动日智能占位，突破平台期。</view>
+    <view class="mc-tags"><text class="tag tag-warn">进阶</text><text class="tag">需配合训练</text></view>
+    <view wx:if="{{mode==='cycle'}}" class="mc-check">当前模式</view>
+  </view>
+
+  <view class="tip">两种模式的基准热量均为 TDEE − 你选择的缺口，可随时在「我的 → 切换模式」调整。</view>
+</view>

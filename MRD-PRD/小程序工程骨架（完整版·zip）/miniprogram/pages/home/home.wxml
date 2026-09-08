@@ -1,0 +1,60 @@
+<!-- P02 首页 · 今日总览 -->
+<view wx:if="{{!hasProfile}}" class="empty-wrap">
+  <view class="empty">还没有身体数据，先录入才能生成方案</view>
+  <button class="btn btn-primary" bindtap="goBody">去录入</button>
+</view>
+
+<block wx:if="{{hasProfile}}">
+  <view class="hero">
+    <view class="h-top">
+      <view>
+        <view class="h-date">{{dateLabel}}</view>
+        <view class="h-mode">{{modeLabel}}</view>
+      </view>
+      <view wx:if="{{phase}}" class="h-phase" style="background: {{phase.color}}">{{phase.label}} · 第{{phase.dayIdx}}天</view>
+    </view>
+    <view class="h-kcal">
+      <text class="hk-num">{{actual.kcal}}</text>
+      <text class="hk-sep">/</text>
+      <text class="hk-tgt">{{target.kcal}}</text>
+      <text class="hk-unit">kcal</text>
+    </view>
+    <view class="progress"><view class="progress-in" style="width: {{pct.kcal}}%"></view></view>
+  </view>
+
+  <view class="container">
+    <view class="card">
+      <view class="card-title">今日配比 <text class="fn">F03 / F04</text></view>
+      <view class="mac">
+        <view class="mac-row"><view class="mac-dot mac-c"></view><text class="mac-lab">碳水</text>
+          <text class="mac-val">{{actual.carb}} / {{target.carb}} g</text></view>
+        <view class="bar"><view class="bar-in bc" style="width: {{pct.carb}}%"></view></view>
+
+        <view class="mac-row"><view class="mac-dot mac-p"></view><text class="mac-lab">蛋白质</text>
+          <text class="mac-val">{{actual.protein}} / {{target.protein}} g</text></view>
+        <view class="bar"><view class="bar-in bp" style="width: {{pct.protein}}%"></view></view>
+
+        <view class="mac-row"><view class="mac-dot mac-f"></view><text class="mac-lab">脂肪</text>
+          <text class="mac-val">{{actual.fat}} / {{target.fat}} g</text></view>
+        <view class="bar"><view class="bar-in bf" style="width: {{pct.fat}}%"></view></view>
+      </view>
+    </view>
+
+    <view wx:if="{{over.isOver}}" class="card over-card">
+      <view class="card-title">⚠️ 今日超标提醒 <text class="fn">F26</text></view>
+      <view class="chips">
+        <text wx:for="{{over.overs}}" wx:key="key" class="chip">{{item.label}} 超出 {{item.value}}{{item.unit}}</text>
+      </view>
+      <view class="advice">{{over.advice}}</view>
+    </view>
+
+    <view class="card">
+      <view class="card-title">快捷操作</view>
+      <view class="quick">
+        <view class="q-item" bindtap="goAdd"><text class="q-icon">＋</text><text>记一餐</text></view>
+        <view class="q-item" bindtap="goPlan"><text class="q-icon">📋</text><text>查看计划</text></view>
+        <view class="q-item" bindtap="goBody"><text class="q-icon">⚖️</text><text>更新体重</text></view>
+      </view>
+    </view>
+  </view>
+</block>

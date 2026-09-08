@@ -1,0 +1,46 @@
+<!-- P11 添加饮食 -->
+<view class="container" wx:if="{{food}}">
+  <view class="card">
+    <view class="f-head">
+      <view class="f-name">{{food.name}}</view>
+      <view class="f-cat">{{food.cat}} · 每 100g</view>
+    </view>
+    <view class="f-base">碳 {{food.c}}g · 蛋 {{food.p}}g · 脂 {{food.f}}g · {{food.k}} kcal</view>
+    <view wx:if="{{isDry}}" class="dry-tip">⚠️ 该食材为干制品，请按<b>干重</b>称重，不做泡发换算。</view>
+  </view>
+
+  <view class="card">
+    <view class="card-title">重量</view>
+    <view class="qty-row">
+      <view class="qty-btn" data-d="-10" bindtap="onQtyStep">−10</view>
+      <input class="qty-input" type="number" value="{{qty}}" bindinput="onQty" />
+      <text class="qty-unit">g</text>
+      <view class="qty-btn" data-d="10" bindtap="onQtyStep">＋10</view>
+    </view>
+    <view class="quick-qty">
+      <text class="qq" data-d="{{50-qty}}" bindtap="onQtyStep">50g</text>
+      <text class="qq" data-d="{{100-qty}}" bindtap="onQtyStep">100g</text>
+      <text class="qq" data-d="{{150-qty}}" bindtap="onQtyStep">150g</text>
+      <text class="qq" data-d="{{200-qty}}" bindtap="onQtyStep">200g</text>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="card-title">本餐营养 <text class="fn">F24</text></view>
+    <view class="macro-grid">
+      <view class="mg"><view class="mg-num c">{{macro.carb}}</view><view class="mg-lab">碳水 g</view></view>
+      <view class="mg"><view class="mg-num p">{{macro.protein}}</view><view class="mg-lab">蛋白 g</view></view>
+      <view class="mg"><view class="mg-num f">{{macro.fat}}</view><view class="mg-lab">脂肪 g</view></view>
+      <view class="mg"><view class="mg-num k">{{macro.kcal}}</view><view class="mg-lab">热量 kcal</view></view>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="card-title">归属餐次</view>
+    <picker mode="selector" range="{{meals}}" value="{{mealIndex}}" bindchange="onMeal">
+      <view class="picker-line"><text>{{meals[mealIndex]}}</text><text class="pv">切换 ›</text></view>
+    </picker>
+  </view>
+
+  <button class="btn btn-primary" bindtap="onSave">保存记录</button>
+</view>
