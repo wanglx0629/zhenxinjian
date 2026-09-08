@@ -12,11 +12,6 @@ spring:
     deserialization:
       # 拒绝未知字段，防止 JSON 反序列化注入额外属性
       fail-on-unknown-properties: true
-  ai:
-    dashscope:
-      chat:
-        options:
-          model: qwen-plus
   servlet:
     multipart:
       max-file-size: 10MB

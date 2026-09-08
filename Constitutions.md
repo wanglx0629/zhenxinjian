@@ -58,7 +58,6 @@
 | 认证 | Spring Security + JJWT 0.12.5；小程序端微信 `openid` 授权登录 |
 | 接口文档 | SpringDoc OpenAPI 2.8.8（Swagger UI） |
 | 对象存储 | MinIO（自建）/ 阿里云 OSS（默认关闭，按需开启） |
-| AI（预留） | Spring AI Alibaba 1.0.0.2（DashScope qwen-plus），一期不做 AI 识物 |
 | 包管理 | Maven（后端）/ npm（前端两端） |
 
 > 部署形态为单体应用（jar + Nginx 反向代理），小程序生产环境**必须 HTTPS** 并在微信公众平台配置合法域名。
@@ -72,7 +71,7 @@
 ```
 controller → service（接口）→ service/impl（实现）→ mapper
 对象模型：po（表映射）/ dto（入参）/ query（查询入参）/ vo（出参）
-横切：common（ai / cache / constant / exception / query / result / utils）、config、security、websocket
+横切：common（cache / constant / exception / query / result / utils）、config、security、websocket
 ```
 
 - Controller 只做参数接收与结果返回，**不写业务、不写 SQL**。

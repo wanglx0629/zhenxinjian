@@ -51,11 +51,6 @@ public final class ExceptionConstant {
     /** 验证码生成失败 */
     public static final String CAPTCHA_GENERATE_FAIL = "验证码生成失败";
 
-    // ==================== AI 验证 ====================
-
-    /** AI 内容安全验证未通过 */
-    public static final String AI_VALIDATE_FAIL = "内容未通过AI安全验证";
-
     // ==================== 参数校验 ====================
 
     /** 页码最小为1 */
