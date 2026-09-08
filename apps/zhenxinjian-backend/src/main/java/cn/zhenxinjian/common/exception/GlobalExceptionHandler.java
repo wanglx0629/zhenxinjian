@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 /**
  * 全局异常处理器
- * 作者: luote (luote) - https://luote996.cn
+ * 作者: wanglx
  */
 @Slf4j
 @RestControllerAdvice

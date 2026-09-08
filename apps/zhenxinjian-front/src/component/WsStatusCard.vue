@@ -1,7 +1,7 @@
 <script setup lang="ts">
 /**
  * WebSocket 连通状态卡片（仅探测，不聊天）
- * 作者: luote (luote) - https://luote996.cn
+ * 作者: wanglx
  */
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'

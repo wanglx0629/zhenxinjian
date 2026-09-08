@@ -1,0 +1,38 @@
+# 后端开发环境配置示例（复制为 application-dev.yml 后按本机修改；真实文件被 .gitignore 忽略，禁止提交）
+# 作者: wanglx
+#
+# 复制命令：cp application-dev.yml.example application-dev.yml
+
+spring:
+  # MySQL 数据源
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    # characterEncoding=UTF-8 映射 utf8mb4；allowPublicKeyRetrieval 用于 MySQL 8 非 SSL 连接
+    url: "${MYSQL_URL:jdbc:mysql://127.0.0.1:3306/zhenxinjian?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true}"
+    username: "${MYSQL_USERNAME:root}"
+    password: "${MYSQL_PASSWORD:change-me}"
+  # Redis（密码与本机 Redis requirepass 一致）
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+      database: 0
+      password: "${REDIS_PASSWORD:change-me}"
+      timeout: 5s
+
+# 开发环境打开 SQL 日志（主配置默认关闭）
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+# JetCache 远程缓存连接串（密码中的 @ 需 URL 编码为 %40）
+jetcache:
+  remote:
+    default:
+      uri: redis://:change-me@127.0.0.1:6379/0
+
+# 微信小程序（appid/secret 仅本地，禁止提交）
+zhenxinjian:
+  wechat:
+    appid: ${WECHAT_APPID:wx-your-appid}
+    secret: ${WECHAT_SECRET:your-secret}

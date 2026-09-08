@@ -4,6 +4,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.zhenxinjian.common.cache.UserCacheService;
 import cn.zhenxinjian.common.constant.CommonConstant;
 import cn.zhenxinjian.common.constant.ExceptionConstant;
+import cn.zhenxinjian.common.enums.UserStatusEnum;
 import cn.zhenxinjian.common.exception.BusinessException;
 import cn.zhenxinjian.common.utils.JwtUtils;
 import cn.zhenxinjian.common.utils.RedisUtils;
@@ -26,13 +27,15 @@ import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 
 /**
  * JWT 认证过滤器
  * 拦截 Token，写入 ThreadLocal，有互动则续期
  * 白名单接口上无效 Token 不阻断（便于登录页带过期 Token 仍可拉验证码）
- * 作者: luote (luote) - https://luote996.cn
+ * 作者: wanglx
  */
 @Slf4j
 @Component
@@ -42,7 +45,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtUtils jwtUtils;
     private final RedisUtils redisUtils;
     private final SecurityJsonWriter securityJsonWriter;
-    private final ZhenxinjianProperties luoteProperties;
+    private final ZhenxinjianProperties zhenxinjianProperties;
     private final UserCacheService userCacheService;
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
@@ -86,6 +89,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private void authenticateToken(String token, HttpServletResponse response) {
         Claims claims = jwtUtils.parseToken(token);
         Long userId = Long.valueOf(claims.getSubject());
+        boolean guest = CommonConstant.USER_TYPE_GUEST.equals(jwtUtils.getUserType(claims));
+
+        // 游客到期 claim 早判：gexp < now 直接拒绝（无须查库）
+        Date gexp = jwtUtils.getGuestExpireAt(claims);
+        if (guest && gexp != null && gexp.before(new Date())) {
+            throw new BusinessException(CommonConstant.GUEST_EXPIRED_CODE, ExceptionConstant.GUEST_EXPIRED);
+        }
 
         String cachedToken = redisUtils.getToken(userId);
         if (cachedToken == null || !StrUtil.equals(cachedToken, token)) {
@@ -98,9 +108,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             redisUtils.removeToken(userId);
             throw new BusinessException(CommonConstant.UNAUTHORIZED_CODE, ExceptionConstant.TOKEN_EXPIRED);
         }
-        if (user.getStatus() != null && user.getStatus() == 0) {
+        // 非正常状态（冻结/注销）账号立即作废会话
+        if (user.getStatus() == null || UserStatusEnum.of(user.getStatus()) != UserStatusEnum.NORMAL) {
             redisUtils.removeToken(userId);
             throw new BusinessException(CommonConstant.UNAUTHORIZED_CODE, ExceptionConstant.ACCOUNT_DISABLED);
+        }
+        // 游客到期 DB 兜底：guest_expire_at 为最终真源（支持管理侧改库提前作废）
+        if (guest && user.getGuestExpireAt() != null
+                && user.getGuestExpireAt().isBefore(LocalDateTime.now())) {
+            throw new BusinessException(CommonConstant.GUEST_EXPIRED_CODE, ExceptionConstant.GUEST_EXPIRED);
         }
         String username = user.getUsername();
         String role = StrUtil.blankToDefault(user.getRole(), CommonConstant.ROLE_USER);
@@ -109,7 +125,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         if (jwtUtils.isNearExpire(claims)) {
-            String newToken = jwtUtils.generateToken(userId, username, role);
+            // 续期保留身份 claim（游客 userType/gexp 随新 token 延续）
+            String newToken = jwtUtils.generateToken(userId, username, role,
+                    jwtUtils.getUserType(claims), jwtUtils.getGuestExpireAt(claims));
             redisUtils.saveToken(userId, newToken);
             response.setHeader("X-Refresh-Token", newToken);
             response.setHeader("Access-Control-Expose-Headers", "X-Refresh-Token");
@@ -141,7 +159,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (StrUtil.isBlank(path)) {
             path = "/";
         }
-        List<String> permitUrls = luoteProperties.getSecurity().getPermitUrls();
+        List<String> permitUrls = zhenxinjianProperties.getSecurity().getPermitUrls();
         if (permitUrls == null || permitUrls.isEmpty()) {
             return false;
         }

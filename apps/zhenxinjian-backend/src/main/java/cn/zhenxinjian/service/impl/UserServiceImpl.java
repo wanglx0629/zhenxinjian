@@ -7,6 +7,7 @@ import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.zhenxinjian.common.constant.CommonConstant;
 import cn.zhenxinjian.common.constant.ExceptionConstant;
+import cn.zhenxinjian.common.enums.UserStatusEnum;
 import cn.zhenxinjian.common.exception.BusinessException;
 import cn.zhenxinjian.common.cache.UserCacheService;
 import cn.zhenxinjian.common.utils.JwtUtils;
@@ -38,7 +39,7 @@ import java.util.Set;
 
 /**
  * 用户 Service 实现
- * 作者: luote (luote) - https://luote996.cn
+ * 作者: wanglx
  */
 @Service
 @RequiredArgsConstructor
@@ -52,7 +53,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     private final RedisUtils redisUtils;
     private final UserCacheService userCacheService;
     private final WebSocketSessionRegistry webSocketSessionRegistry;
-    private final ZhenxinjianProperties luoteProperties;
+    private final ZhenxinjianProperties zhenxinjianProperties;
 
     @Override
     public CaptchaVO getCaptcha() {
@@ -68,7 +69,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Override
     public LoginResultVO login(LoginDTO dto, String ip) {
         validateCaptcha(dto.getCaptchaUuid(), dto.getCaptcha());
-        int failMax = Math.max(1, luoteProperties.getRedis().getLoginFailMax());
+        int failMax = Math.max(1, zhenxinjianProperties.getRedis().getLoginFailMax());
         if (redisUtils.getLoginFailCount(dto.getUsername()) >= failMax) {
             throw new BusinessException(CommonConstant.TOO_MANY_REQUESTS_CODE, ExceptionConstant.LOGIN_LOCKED);
         }
@@ -77,7 +78,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             redisUtils.recordLoginFail(dto.getUsername());
             throw new BusinessException(CommonConstant.UNAUTHORIZED_CODE, ExceptionConstant.BAD_CREDENTIALS);
         }
-        if (user.getStatus() != null && user.getStatus() == 0) {
+        // 非正常状态（冻结/注销）账号拒绝登录
+        if (user.getStatus() == null || UserStatusEnum.of(user.getStatus()) != UserStatusEnum.NORMAL) {
             throw new BusinessException(ExceptionConstant.ACCOUNT_DISABLED);
         }
         redisUtils.clearLoginFail(dto.getUsername());
@@ -120,8 +122,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         user.setNickname(StrUtil.blankToDefault(dto.getNickname(), dto.getUsername()));
         user.setEmail(dto.getEmail());
         user.setRole(CommonConstant.ROLE_USER);
-        user.setStatus(1);
-        user.setCreateBy("register");
+        user.setStatus(UserStatusEnum.NORMAL.getCode());
+        user.setCreateBy(CommonConstant.CREATE_BY_REGISTER);
         save(user);
     }
 
@@ -176,7 +178,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         User user = BeanUtil.copyProperties(dto, User.class);
         user.setPassword(passwordEncoder.encode(dto.getPassword()));
         user.setRole(normalizeRole(dto.getRole()));
-        user.setStatus(dto.getStatus() != null ? dto.getStatus() : 1);
+        user.setStatus(dto.getStatus() != null ? dto.getStatus() : UserStatusEnum.NORMAL.getCode());
         user.setCreateBy(UserContext.get() != null ? UserContext.get().getUsername() : "system");
         save(user);
     }
@@ -206,14 +208,15 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (passwordChanged) {
             user.setPassword(passwordEncoder.encode(dto.getPassword()));
         }
-        user.setUpdateBy(UserContext.get() != null ? UserContext.get().getUsername() : "system");
+        user.setUpdateBy(UserContext.get() != null ? UserContext.get().getUsername() : CommonConstant.CREATE_BY_SYSTEM);
         updateById(user);
         userCacheService.evict(dto.getId());
-        // 改密、禁用或角色变更后立即踢下线，避免权限滞后
-        boolean disabled = dto.getStatus() != null && dto.getStatus() == 0
-                && !Objects.equals(oldStatus, 0);
+        // 改密、非正常化或角色变更后立即踢下线，避免权限滞后
+        boolean becameAbnormal = dto.getStatus() != null
+                && UserStatusEnum.of(dto.getStatus()) != UserStatusEnum.NORMAL
+                && UserStatusEnum.of(oldStatus) == UserStatusEnum.NORMAL;
         boolean roleChanged = !Objects.equals(oldRole, newRole);
-        if (passwordChanged || disabled || roleChanged) {
+        if (passwordChanged || becameAbnormal || roleChanged) {
             invalidateUserSession(dto.getId());
         }
     }

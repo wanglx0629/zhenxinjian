@@ -1,7 +1,6 @@
 # 臻心减（zhenxinjian）项目文档
 
 > 产品载体：微信小程序（基于 UniApp，一套代码可发布 H5 / 微信小程序）
-> 脚手架来源：[create-luote](https://create.luote996.cn/guide/getting-started.html) 三端工程
 > 文档版本：V1.1　整理日期：2026-09-04
 > 依据资料：《臻心减-V1.1-最终版PRD-开发交付版》《臻心减_PRD_V1.1_含食物库》《V1.1 高保真原型》《后端开发落地核对清单》
 
@@ -422,23 +421,19 @@ cd apps/zhenxinjian-front && npm install && npm run dev
 cd apps/zhenxinjian-uniapp && npm install && npm run dev:h5
 # 小程序微信端
 cd apps/zhenxinjian-uniapp && npm run dev:mp-weixin
-
-# 新增业务 CRUD（三端样板自动生成，勿手写）
-node .agents/skills/luote-scaffold/scripts/gen-crud.js Food --zh 食物 \
-  --fields "name:string:名称,calorie:long:热量分"
 ```
 
 ---
 
 # 第三部分 · 开发规范
 
-> 规范真源：`.agents/skills/luote-scaffold/`（`conventions.md` / `mysql.md` / `redis.md` / `checklist.md`）与根目录 `AGENTS.md`。
+> 规范真源：根目录 `AGENTS.md` 与 [Java 代码规范](docs/knowledge/code-standard/java/standard.md)。
 
 ## 0. 硬性边界（红线）
 
 ### Always（必须）
-- 新增业务 CRUD **必须**执行 `.agents/skills/luote-scaffold/scripts/gen-crud.js`，禁止手抄整套样板。
-- 文件头注释：`作者: luote (luote) - https://luote996.cn`；注释另起一行。
+- 新增业务 CRUD 按 [Java 代码规范](docs/knowledge/code-standard/java/standard.md) 手写样板，并完整遵守分层、软删、`Result`/`ExceptionConstant`、活跃唯一约束等约定。
+- 文件头注释：`作者: wanglx`；注释另起一行。
 - 错误文案统一进 `ExceptionConstant`；接口统一返回 `Result`（`Result.ok` / `Result.fail`）。
 - MySQL / Redis 严格遵守本部分 §4、§5。
 - 管理端接口加 `@PreAuthorize("hasRole('ADMIN')")`。
@@ -448,7 +443,7 @@ node .agents/skills/luote-scaffold/scripts/gen-crud.js Food --zh 食物 \
 - CORS / `Origin` 配置为 `*`。
 - 硬编码密钥、JWT、密码（走配置 / 环境变量）。
 - 无 TTL 的会话类 Redis Key、BigKey、金额用浮点、软删表乱加普通 UNIQUE。
-- 绕过脚本手写整套 CRUD（除非用户明确要求）。
+- 绕过规范手写不符合分层的 CRUD（除非用户明确要求）。
 - Controller 拼 SQL、`${}` 拼接用户输入、无上限 `selectList` 对外。
 
 ## 1. 通用规范
@@ -483,29 +478,13 @@ controller → service（接口）→ service/impl（实现）→ mapper
 - 生产环境 `JWT_SECRET`、CORS 白名单必须替换默认值，禁止 `*`。
 - 日志禁止打印完整身份证、银行卡、明文密码、完整 Token。
 
-## 3. CRUD 代码生成（必须走脚本）
+## 3. 新增业务 CRUD
 
-在项目根目录执行：
-
-```bash
-# 基础用法
-node .agents/skills/luote-scaffold/scripts/gen-crud.js Notice --zh 通知
-
-# 自定义字段
-node .agents/skills/luote-scaffold/scripts/gen-crud.js Product --zh 商品 \
-  --fields "name:string:名称,price:long:价格分"
-
-# 指定生成端 / 预览 / 不生成管理端
-node .agents/skills/luote-scaffold/scripts/gen-crud.js Notice --zh 通知 --ends backend,front,sql
-node .agents/skills/luote-scaffold/scripts/gen-crud.js Notice --zh 通知 --dry-run
-node .agents/skills/luote-scaffold/scripts/gen-crud.js Notice --zh 通知 --no-admin
-```
-
-生成后按需补充：活跃唯一约束、乐观锁、金额 DECIMAL 字段，并同步 PO / DTO / `data.sql` / `ExceptionConstant`。
+按 [Java 代码规范](docs/knowledge/code-standard/java/standard.md) 手写样板（controller → service → mapper，对象 po / dto / query / vo），并同步 `data.sql` / `ExceptionConstant`。
 
 新增 CRUD 自查：
 ```
-- [ ] 已执行 gen-crud.js（非手写整套）
+- [ ] 分层 / 软删 / Result / 活跃唯一约束符合规范
 - [ ] data.sql / ExceptionConstant 已含新实体
 - [ ] Swagger：登录 → Authorize → 接口 200
 - [ ] front 路由与导航可打开；（可选）uniapp pages.json 可打开
@@ -677,4 +656,4 @@ UNIQUE KEY uk_xxx_username_active (username_active)
 
 ---
 
-> 需求口径以两份 PRD 原文与高保真原型为最终基准；数据存储细则以 `.agents/skills/luote-scaffold/mysql.md`、`redis.md` 为真源。
+> 需求口径以两份 PRD 原文与高保真原型为最终基准；数据存储细则以本规范 §4、§5 为真源。

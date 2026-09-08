@@ -5,7 +5,7 @@ import lombok.Getter;
 
 /**
  * 业务异常
- * 作者: luote (luote) - https://luote996.cn
+ * 作者: wanglx
  */
 @Getter
 public class BusinessException extends RuntimeException {

@@ -2,7 +2,7 @@
 
 /**
  * 环境变量类型
- * 作者: luote (luote) - https://luote996.cn
+ * 作者: wanglx
  */
 interface ImportMetaEnv {
   readonly VITE_API_BASE_URL: string

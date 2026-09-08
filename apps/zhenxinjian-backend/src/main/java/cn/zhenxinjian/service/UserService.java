@@ -13,7 +13,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 
 /**
  * 用户 Service 接口
- * 作者: luote (luote) - https://luote996.cn
+ * 作者: wanglx
  */
 public interface UserService extends IService<User> {
 

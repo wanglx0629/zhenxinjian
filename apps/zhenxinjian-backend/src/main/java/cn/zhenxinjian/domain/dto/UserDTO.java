@@ -9,7 +9,7 @@ import lombok.Data;
 
 /**
  * 用户新增/修改 DTO
- * 作者: luote (luote) - https://luote996.cn
+ * 作者: wanglx
  */
 @Data
 @Schema(description = "用户请求")

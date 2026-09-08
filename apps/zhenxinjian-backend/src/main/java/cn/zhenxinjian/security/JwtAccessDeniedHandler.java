@@ -13,7 +13,7 @@ import java.io.IOException;
 
 /**
  * 权限不足统一 403 响应
- * 作者: luote (luote) - https://luote996.cn
+ * 作者: wanglx
  */
 @Component
 @RequiredArgsConstructor

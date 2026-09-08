@@ -1,7 +1,7 @@
 <script setup lang="ts">
 /**
  * WebSocket Demo 页（广播聊天板子）
- * 作者: luote (luote) - https://luote996.cn
+ * 作者: wanglx
  */
 import DemoWebSocket from '@/component/DemoWebSocket.vue'
 </script>

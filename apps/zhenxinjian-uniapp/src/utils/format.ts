@@ -1,6 +1,6 @@
 /**
  * 格式化工具
- * 作者: luote (luote) - https://luote996.cn
+ * 作者: wanglx
  */
 import { round } from './calculator'
 

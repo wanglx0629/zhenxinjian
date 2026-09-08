@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.*;
 
 /**
  * 认证控制器（登录/注册/验证码）
- * 作者: luote (luote) - https://luote996.cn
+ * 作者: wanglx
  */
 @Tag(name = "认证管理")
 @RestController

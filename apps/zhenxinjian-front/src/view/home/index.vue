@@ -1,7 +1,7 @@
 <script setup lang="ts">
 /**
  * 首页：欢迎区 + WebSocket 连通状态 + 示例图表
- * 作者: luote (luote) - https://luote996.cn
+ * 作者: wanglx
  */
 import { computed } from 'vue'
 import { useUserStore } from '@/store/user'
@@ -32,7 +32,7 @@ const displayName = computed(
         </div>
         <div class="meta-item">
           <span class="meta-label">站点</span>
-          <span class="meta-value">luote996.cn</span>
+          <span class="meta-value">wanglx</span>
         </div>
       </div>
     </section>

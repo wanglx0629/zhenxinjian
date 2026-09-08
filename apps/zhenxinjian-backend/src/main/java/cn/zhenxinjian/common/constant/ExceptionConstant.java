@@ -2,7 +2,7 @@ package cn.zhenxinjian.common.constant;
 
 /**
  * 异常常量（错误码 + 错误信息）
- * 作者: luote (luote) - https://luote996.cn
+ * 作者: wanglx
  */
 public final class ExceptionConstant {
 
@@ -28,6 +28,25 @@ public final class ExceptionConstant {
 
     /** 账号已被禁用 */
     public static final String ACCOUNT_DISABLED = "账号已被禁用";
+
+    // ==================== 微信登录（401xx） ====================
+
+    /** 40101 微信登录 code 无效或已使用 */
+    public static final String WECHAT_CODE_INVALID = "登录凭证无效，请重新登录";
+
+    /** 40102 微信服务暂不可用 */
+    public static final String WECHAT_UNAVAILABLE = "微信服务暂不可用，请稍后重试";
+
+    /** 40103 微信 OpenID 绑定冲突 */
+    public static final String WECHAT_OPENID_CONFLICT = "微信账号绑定异常，请重试";
+
+    // ==================== 游客模式（402xx） ====================
+
+    /** 40201 游客体验已到期 */
+    public static final String GUEST_EXPIRED = "游客体验已到期，请授权微信后继续使用";
+
+    /** 40202 游客标识无效 */
+    public static final String GUEST_KEY_INVALID = "游客身份无效，请重新进入";
 
     // ==================== 用户业务 ====================
 

@@ -14,16 +14,16 @@ import java.util.List;
 
 /**
  * 启动安全自检：生产环境强制校验 JWT / CORS
- * 作者: luote (luote) - https://luote996.cn
+ * 作者: wanglx
  */
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class SecurityStartupChecker implements ApplicationRunner {
 
-    private static final String WEAK_DEFAULT = "zhenxinjian-jwt-secret-key-change-in-production-luote996-cn";
+    private static final String WEAK_DEFAULT = "zhenxinjian-jwt-secret-key-change-in-production-wanglx";
 
-    private final ZhenxinjianProperties luoteProperties;
+    private final ZhenxinjianProperties zhenxinjianProperties;
     private final Environment environment;
 
     @Override
@@ -37,7 +37,7 @@ public class SecurityStartupChecker implements ApplicationRunner {
      * 校验 JWT 密钥（按 UTF-8 字节长度，与 JwtUtils 一致）
      */
     private void checkJwtSecret(boolean prod) {
-        String secret = luoteProperties.getJwt().getSecret();
+        String secret = zhenxinjianProperties.getJwt().getSecret();
         int byteLen = secret == null ? 0 : secret.getBytes(StandardCharsets.UTF_8).length;
         if (StrUtil.isBlank(secret) || byteLen < 32) {
             String msg = "JWT secret 未配置或 UTF-8 字节长度不足 32，请通过 JWT_SECRET 注入";
@@ -59,7 +59,7 @@ public class SecurityStartupChecker implements ApplicationRunner {
      * 生产环境要求显式 CORS，禁止 *
      */
     private void checkCors(boolean prod) {
-        List<String> origins = luoteProperties.getSecurity().getCorsAllowedOrigins();
+        List<String> origins = zhenxinjianProperties.getSecurity().getCorsAllowedOrigins();
         List<String> resolved = CollUtil.isEmpty(origins) ? List.of() : origins;
         if (resolved.size() == 1 && StrUtil.contains(resolved.get(0), ',')) {
             resolved = StrUtil.splitTrim(resolved.get(0), ',');

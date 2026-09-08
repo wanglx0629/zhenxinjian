@@ -5,7 +5,7 @@ import lombok.Data;
 
 /**
  * 图形验证码 VO
- * 作者: luote (luote) - https://luote996.cn
+ * 作者: wanglx
  */
 @Data
 @Schema(description = "图形验证码")

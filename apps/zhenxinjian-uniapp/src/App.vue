@@ -1,13 +1,13 @@
 /**
  * 应用入口样式与生命周期
- * 作者: luote (luote) - https://luote996.cn
+ * 作者: wanglx
  */
 <script setup lang="ts">
 import { onLaunch } from '@dcloudio/uni-app'
 import { getToken } from '@/utils/storage'
 
 onLaunch(() => {
-  // 已登录则进首页，否则留在登录页（pages.json 首页为 login）
+  // pages.json 首页为 auth/guide（P01）；已登录（游客或正式）直接进首页
   if (getToken()) {
     uni.switchTab({ url: '/pages/home/index' })
   }

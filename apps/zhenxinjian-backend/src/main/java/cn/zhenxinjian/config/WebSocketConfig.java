@@ -19,7 +19,7 @@ import java.util.List;
 /**
  * WebSocket 配置（Demo 板子）
  * 路径 / 开关 / Origin / 限流均由 zhenxinjian.websocket.* 管控
- * 作者: luote (luote) - https://luote996.cn
+ * 作者: wanglx
  */
 @Slf4j
 @Configuration
@@ -30,11 +30,11 @@ public class WebSocketConfig implements WebSocketConfigurer {
 
     private final DemoWebSocketHandler demoWebSocketHandler;
     private final DemoWebSocketInterceptor demoWebSocketInterceptor;
-    private final ZhenxinjianProperties luoteProperties;
+    private final ZhenxinjianProperties zhenxinjianProperties;
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        ZhenxinjianProperties.Websocket ws = luoteProperties.getWebsocket();
+        ZhenxinjianProperties.Websocket ws = zhenxinjianProperties.getWebsocket();
         String path = StrUtil.blankToDefault(ws.getPath(), "/ws/demo");
         if (!StrUtil.startWith(path, "/")) {
             path = "/" + path;
@@ -51,7 +51,7 @@ public class WebSocketConfig implements WebSocketConfigurer {
      */
     @Bean
     public ServletServerContainerFactoryBean createWebSocketContainer() {
-        int maxBytes = Math.max(1024, luoteProperties.getWebsocket().getMaxMessageBytes());
+        int maxBytes = Math.max(1024, zhenxinjianProperties.getWebsocket().getMaxMessageBytes());
         ServletServerContainerFactoryBean container = new ServletServerContainerFactoryBean();
         container.setMaxTextMessageBufferSize(maxBytes);
         container.setMaxBinaryMessageBufferSize(maxBytes);
@@ -62,9 +62,9 @@ public class WebSocketConfig implements WebSocketConfigurer {
      * Origin：优先 zhenxinjian.websocket.allowed-origins，否则复用 CORS 白名单（禁止 *）
      */
     private String[] resolveOrigins() {
-        List<String> origins = luoteProperties.getWebsocket().getAllowedOrigins();
+        List<String> origins = zhenxinjianProperties.getWebsocket().getAllowedOrigins();
         if (CollUtil.isEmpty(origins)) {
-            origins = luoteProperties.getSecurity().getCorsAllowedOrigins();
+            origins = zhenxinjianProperties.getSecurity().getCorsAllowedOrigins();
         }
         List<String> resolved;
         if (CollUtil.isEmpty(origins)) {

@@ -31,14 +31,14 @@ import java.util.Locale;
 /**
  * 对象存储 Service 实现
  * MinIO 优先，失败自动切换 OSS 保底
- * 作者: luote (luote) - https://luote996.cn
+ * 作者: wanglx
  */
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class StorageServiceImpl implements StorageService {
 
-    private final ZhenxinjianProperties luoteProperties;
+    private final ZhenxinjianProperties zhenxinjianProperties;
     private final ObjectProvider<MinioClient> minioClientProvider;
     private final ObjectProvider<OSS> ossClientProvider;
 
@@ -48,7 +48,7 @@ public class StorageServiceImpl implements StorageService {
         String objectKey = buildObjectKey(file.getOriginalFilename());
         String contentType = StrUtil.blankToDefault(file.getContentType(), "application/octet-stream");
 
-        if (luoteProperties.getStorage().getMinio().isEnabled()) {
+        if (zhenxinjianProperties.getStorage().getMinio().isEnabled()) {
             try {
                 return uploadToMinio(file, objectKey, contentType);
             } catch (BusinessException e) {
@@ -59,7 +59,7 @@ public class StorageServiceImpl implements StorageService {
             }
         }
 
-        if (luoteProperties.getStorage().getOss().isEnabled()) {
+        if (zhenxinjianProperties.getStorage().getOss().isEnabled()) {
             try {
                 return uploadToOss(file, objectKey, contentType);
             } catch (BusinessException e) {
@@ -78,7 +78,7 @@ public class StorageServiceImpl implements StorageService {
             throw new BusinessException(ExceptionConstant.FILE_KEY_REQUIRED);
         }
         boolean deleted = false;
-        if (luoteProperties.getStorage().getMinio().isEnabled()) {
+        if (zhenxinjianProperties.getStorage().getMinio().isEnabled()) {
             try {
                 deleteFromMinio(objectKey);
                 deleted = true;
@@ -89,7 +89,7 @@ public class StorageServiceImpl implements StorageService {
                         e.getClass().getSimpleName(), e.getMessage());
             }
         }
-        if (!deleted && luoteProperties.getStorage().getOss().isEnabled()) {
+        if (!deleted && zhenxinjianProperties.getStorage().getOss().isEnabled()) {
             try {
                 deleteFromOss(objectKey);
                 deleted = true;
@@ -111,12 +111,12 @@ public class StorageServiceImpl implements StorageService {
         if (file == null || file.isEmpty()) {
             throw new BusinessException(ExceptionConstant.FILE_EMPTY);
         }
-        long maxBytes = luoteProperties.getStorage().getMaxSizeMb() * 1024 * 1024;
+        long maxBytes = zhenxinjianProperties.getStorage().getMaxSizeMb() * 1024 * 1024;
         if (file.getSize() > maxBytes) {
             throw new BusinessException(ExceptionConstant.FILE_TOO_LARGE);
         }
         String ext = FileUtil.extName(file.getOriginalFilename());
-        List<String> allowed = luoteProperties.getStorage().getAllowedExtensions();
+        List<String> allowed = zhenxinjianProperties.getStorage().getAllowedExtensions();
         if (StrUtil.isBlank(ext) || allowed == null || allowed.stream()
                 .noneMatch(item -> item.equalsIgnoreCase(ext))) {
             throw new BusinessException(ExceptionConstant.FILE_TYPE_NOT_ALLOWED);
@@ -127,7 +127,7 @@ public class StorageServiceImpl implements StorageService {
      * 生成对象 Key
      */
     private String buildObjectKey(String originalFilename) {
-        String prefix = StrUtil.blankToDefault(luoteProperties.getStorage().getPathPrefix(), "upload/");
+        String prefix = StrUtil.blankToDefault(zhenxinjianProperties.getStorage().getPathPrefix(), "upload/");
         if (!prefix.endsWith("/")) {
             prefix = prefix + "/";
         }
@@ -144,7 +144,7 @@ public class StorageServiceImpl implements StorageService {
         if (client == null) {
             throw new BusinessException(ExceptionConstant.FILE_UPLOAD_FAIL);
         }
-        ZhenxinjianProperties.Storage.Minio minio = luoteProperties.getStorage().getMinio();
+        ZhenxinjianProperties.Storage.Minio minio = zhenxinjianProperties.getStorage().getMinio();
         ensureMinioBucket(client, minio.getBucket());
         try (InputStream inputStream = file.getInputStream()) {
             client.putObject(PutObjectArgs.builder()
@@ -170,7 +170,7 @@ public class StorageServiceImpl implements StorageService {
         if (client == null) {
             throw new BusinessException(ExceptionConstant.FILE_UPLOAD_FAIL);
         }
-        ZhenxinjianProperties.Storage.Oss oss = luoteProperties.getStorage().getOss();
+        ZhenxinjianProperties.Storage.Oss oss = zhenxinjianProperties.getStorage().getOss();
         ObjectMetadata metadata = new ObjectMetadata();
         metadata.setContentLength(file.getSize());
         metadata.setContentType(contentType);
@@ -193,7 +193,7 @@ public class StorageServiceImpl implements StorageService {
         if (client == null) {
             throw new BusinessException(ExceptionConstant.FILE_DELETE_FAIL);
         }
-        String bucket = luoteProperties.getStorage().getMinio().getBucket();
+        String bucket = zhenxinjianProperties.getStorage().getMinio().getBucket();
         client.removeObject(RemoveObjectArgs.builder().bucket(bucket).object(objectKey).build());
     }
 
@@ -205,7 +205,7 @@ public class StorageServiceImpl implements StorageService {
         if (client == null) {
             throw new BusinessException(ExceptionConstant.FILE_DELETE_FAIL);
         }
-        String bucket = luoteProperties.getStorage().getOss().getBucket();
+        String bucket = zhenxinjianProperties.getStorage().getOss().getBucket();
         client.deleteObject(bucket, objectKey);
     }
 

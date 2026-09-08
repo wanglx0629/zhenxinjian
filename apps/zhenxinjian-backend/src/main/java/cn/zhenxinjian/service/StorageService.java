@@ -5,7 +5,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 /**
  * 对象存储 Service（MinIO 主存储，OSS 保底）
- * 作者: luote (luote) - https://luote996.cn
+ * 作者: wanglx
  */
 public interface StorageService {
 

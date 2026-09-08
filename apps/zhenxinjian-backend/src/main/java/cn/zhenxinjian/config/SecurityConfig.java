@@ -28,7 +28,7 @@ import java.util.List;
 
 /**
  * Spring Security 配置
- * 作者: luote (luote) - https://luote996.cn
+ * 作者: wanglx
  */
 @Configuration
 @EnableWebSecurity
@@ -39,7 +39,7 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
-    private final ZhenxinjianProperties luoteProperties;
+    private final ZhenxinjianProperties zhenxinjianProperties;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -54,7 +54,7 @@ public class SecurityConfig {
                         .contentTypeOptions(contentType -> {})
                         .frameOptions(frame -> frame.deny()))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(luoteProperties.getSecurity().getPermitUrls().toArray(new String[0]))
+                        .requestMatchers(zhenxinjianProperties.getSecurity().getPermitUrls().toArray(new String[0]))
                         .permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
@@ -74,7 +74,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        List<String> origins = resolveCorsOrigins(luoteProperties.getSecurity().getCorsAllowedOrigins());
+        List<String> origins = resolveCorsOrigins(zhenxinjianProperties.getSecurity().getCorsAllowedOrigins());
         if (CollUtil.isNotEmpty(origins)) {
             config.setAllowedOrigins(origins);
         } else {

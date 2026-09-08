@@ -5,7 +5,7 @@ import lombok.Data;
 
 /**
  * 登录响应 VO
- * 作者: luote (luote) - https://luote996.cn
+ * 作者: wanglx
  */
 @Data
 @Schema(description = "登录响应")

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 /**
  * 主布局 - 上导航栏
- * 作者: luote (luote) - https://luote996.cn
+ * 作者: wanglx
  */
 import { computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'

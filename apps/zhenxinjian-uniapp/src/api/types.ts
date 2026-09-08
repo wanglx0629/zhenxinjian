@@ -1,6 +1,6 @@
 /**
  * API 类型定义（与 Web 端 / 后端约定对齐）
- * 作者: luote (luote) - https://luote996.cn
+ * 作者: wanglx
  */
 
 /** 统一响应结构 */
@@ -39,6 +39,8 @@ export interface UserInfo {
   role?: string
   status?: number
   gender?: number
+  userType?: string
+  guestExpireAt?: string
   lastLoginTime?: string
   createTime?: string
 }
@@ -47,6 +49,17 @@ export interface UserInfo {
 export interface LoginResult {
   token: string
   user: UserInfo
+}
+
+/** 游客登录响应 */
+export interface GuestLoginResult extends LoginResult {
+  guestKey: string
+}
+
+/** 微信登录请求 */
+export interface WechatLoginRequest {
+  code: string
+  guestKey?: string
 }
 
 /** 验证码响应 */

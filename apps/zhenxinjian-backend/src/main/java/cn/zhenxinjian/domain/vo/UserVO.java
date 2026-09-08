@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 
 /**
  * 用户视图对象
- * 作者: luote (luote) - https://luote996.cn
+ * 作者: wanglx
  */
 @Data
 @Schema(description = "用户视图")
@@ -31,6 +31,12 @@ public class UserVO {
     @Schema(description = "头像URL")
     private String avatar;
 
+    @Schema(description = "用户类型：WECHAT微信正式用户 GUEST游客")
+    private String userType;
+
+    @Schema(description = "游客到期时间（游客身份有效）")
+    private LocalDateTime guestExpireAt;
+
     @Schema(description = "微信OpenID")
     private String wechatOpenid;
 
@@ -52,7 +58,7 @@ public class UserVO {
     @Schema(description = "性别")
     private Integer gender;
 
-    @Schema(description = "状态")
+    @Schema(description = "状态:0冻结 1正常 2注销")
     private Integer status;
 
     @Schema(description = "角色")

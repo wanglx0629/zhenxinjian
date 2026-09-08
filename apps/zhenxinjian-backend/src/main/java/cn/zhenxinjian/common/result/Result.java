@@ -8,7 +8,7 @@ import java.io.Serializable;
 
 /**
  * 统一响应结果
- * 作者: luote (luote) - https://luote996.cn
+ * 作者: wanglx
  */
 @Data
 @Schema(description = "统一响应结果")

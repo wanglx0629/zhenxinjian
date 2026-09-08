@@ -1,7 +1,7 @@
 <script setup lang="ts">
 /**
  * WebSocket Demo 看板（广播聊天板子）
- * 作者: luote (luote) - https://luote996.cn
+ * 作者: wanglx
  */
 import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import { ElMessage } from 'element-plus'

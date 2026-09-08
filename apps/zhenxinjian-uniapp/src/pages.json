@@ -1,16 +1,16 @@
 {
   "pages": [
     {
-      "path": "pages/login/index",
+      "path": "pages/auth/guide",
       "style": {
         "navigationBarTitleText": "登录",
         "navigationStyle": "custom"
       }
     },
     {
-      "path": "pages/register/index",
+      "path": "pages/auth/expire",
       "style": {
-        "navigationBarTitleText": "注册",
+        "navigationBarTitleText": "体验到期",
         "navigationStyle": "custom"
       }
     },
@@ -21,9 +21,15 @@
       }
     },
     {
-      "path": "pages/websocket/index",
+      "path": "pages/record/index",
       "style": {
-        "navigationBarTitleText": "WebSocket"
+        "navigationBarTitleText": "记录"
+      }
+    },
+    {
+      "path": "pages/food/index",
+      "style": {
+        "navigationBarTitleText": "食物库"
       }
     },
     {
@@ -52,10 +58,16 @@
         "selectedIconPath": "static/tab-home-active.png"
       },
       {
-        "pagePath": "pages/websocket/index",
-        "text": "消息",
-        "iconPath": "static/tab-ws.png",
-        "selectedIconPath": "static/tab-ws-active.png"
+        "pagePath": "pages/record/index",
+        "text": "记录",
+        "iconPath": "static/tab-record.png",
+        "selectedIconPath": "static/tab-record-active.png"
+      },
+      {
+        "pagePath": "pages/food/index",
+        "text": "食物库",
+        "iconPath": "static/tab-food.png",
+        "selectedIconPath": "static/tab-food-active.png"
       },
       {
         "pagePath": "pages/mine/index",

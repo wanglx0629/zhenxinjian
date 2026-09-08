@@ -13,7 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 /**
  * 文件存储控制器（MinIO + OSS 保底）
- * 作者: luote (luote) - https://luote996.cn
+ * 作者: wanglx
  */
 @Tag(name = "文件存储")
 @RestController

@@ -5,7 +5,6 @@
 | 项目 | 内容 |
 | ---- | ---- |
 | 产品名称 | 臻心减（微信小程序 · 生活化减脂工具） |
-| 脚手架来源 | [create-luote](https://create.luote996.cn/guide/getting-started.html) 三端工程 |
 | 文档版本 | V1.0（khufu-harness 生成） |
 | 整理日期 | 2026-09-04 |
 
@@ -25,7 +24,7 @@
 
 ## 项目是什么
 
-create-luote 生成的三端工程（代码统一在 `apps/` 目录）：
+三端单体工程（代码统一在 `apps/` 目录）：
 
 - `apps/zhenxinjian-backend`：Spring Boot 3.5.16 + Java 25 + MyBatis-Plus + MySQL 8 + Redis/JetCache
 - `apps/zhenxinjian-front`：Vue 3 + Element Plus + Vite（PC 运营管理后台）
@@ -47,23 +46,17 @@ cd apps/zhenxinjian-uniapp && npm run dev:mp-weixin
 
 ## 新增业务 CRUD
 
-> ⚠️ 脚手架原始 `AGENTS.md` 引用的 `.agents/skills/luote-scaffold/scripts/gen-crud.js` 当前**不存在**（`.agents/skills/` 已被 OpenSpec 技能目录占用）。在从 create-luote 恢复该脚本之前，新增 CRUD 请按 [Java 代码规范](./docs/knowledge/code-standard/java/standard.md) 与 [开发规范](./doscFile/03-开发规范.md) 手写样板，并完整遵守分层、软删、`Result`/`ExceptionConstant`、活跃唯一约束等约定。恢复脚本后用法：
-
-```bash
-node .agents/skills/luote-scaffold/scripts/gen-crud.js Notice --zh 通知
-node .agents/skills/luote-scaffold/scripts/gen-crud.js Product --zh 商品 --fields "name:string:名称,price:long:价格分"
-node .agents/skills/luote-scaffold/scripts/gen-crud.js Notice --zh 通知 --ends backend,front,sql
-node .agents/skills/luote-scaffold/scripts/gen-crud.js Notice --zh 通知 --dry-run
-node .agents/skills/luote-scaffold/scripts/gen-crud.js Notice --zh 通知 --no-admin
-```
+> 新增 CRUD 请按 [Java 代码规范](./docs/knowledge/code-standard/java/standard.md) 与 [开发规范](./doscFile/03-开发规范.md) 手写样板，并完整遵守分层、软删、`Result`/`ExceptionConstant`、活跃唯一约束等约定。
 
 ## 硬性边界（摘要，全文见宪法 §5）
 
 ### Always
 
-- 错误文案进 `ExceptionConstant`；接口返回 `Result`；注释：`作者: luote (luote) - https://luote996.cn`（另起一行）
+- Git 提交信息：功能开发用 `feature：功能说明`；修 bug 用 `fix：问题说明`（详见 [开发规范 §10](./doscFile/03-开发规范.md)）
+- 错误文案进 `ExceptionConstant`；接口返回 `Result`；注释：`作者: wanglx`（另起一行）
 - 核心计算逻辑后置后端；人体数据区间前后端双重校验
 - MySQL / Redis 遵守 [开发规范](./doscFile/03-开发规范.md) §4、§5
+- **建表规约**：所有表必备 `delete_flag`（`@TableLogic` 逻辑删除）；业务表必备 `status` 状态列；列名跨表统一；建表同时必须新建对应字典枚举（`common/enums/`，code+desc+of）
 
 ### Never
 

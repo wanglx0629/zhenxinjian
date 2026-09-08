@@ -9,13 +9,13 @@ import org.springframework.stereotype.Component;
 
 /**
  * 缓存大 key 校验
- * 作者: luote (luote) - https://luote996.cn
+ * 作者: wanglx
  */
 @Component
 @RequiredArgsConstructor
 public class CacheValueGuard {
 
-    private final ZhenxinjianProperties luoteProperties;
+    private final ZhenxinjianProperties zhenxinjianProperties;
 
     /**
      * 校验缓存值体积，避免大 key 打满 Redis
@@ -24,7 +24,7 @@ public class CacheValueGuard {
         if (value == null) {
             return;
         }
-        int maxBytes = luoteProperties.getCache().getMaxValueBytes();
+        int maxBytes = zhenxinjianProperties.getCache().getMaxValueBytes();
         int size = JSONUtil.toJsonStr(value).getBytes().length;
         if (size > maxBytes) {
             throw new BusinessException(ExceptionConstant.CACHE_VALUE_TOO_LARGE);

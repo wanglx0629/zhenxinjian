@@ -7,8 +7,8 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 /**
- * luote 自定义配置属性
- * 作者: luote (luote) - https://luote996.cn
+ * 自定义配置属性
+ * 作者: wanglx
  */
 @Data
 @Component

@@ -1,6 +1,6 @@
 /**
  * 全局常量（所有口径与 PRD / 高保真原型严格一致，修改前请同步更新 PRD）
- * 作者: luote (luote) - https://luote996.cn
+ * 作者: wanglx
  */
 
 /** 活动系数（PRD §2.2） */

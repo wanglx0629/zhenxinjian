@@ -2,7 +2,7 @@ package cn.zhenxinjian.common.constant;
 
 /**
  * 通用常量
- * 作者: luote (luote) - https://luote996.cn
+ * 作者: wanglx
  */
 public final class CommonConstant {
 
@@ -24,6 +24,37 @@ public final class CommonConstant {
     /** 请求过于频繁 / 登录锁定 */
     public static final int TOO_MANY_REQUESTS_CODE = 429;
 
+    // ==================== 微信登录错误码（401xx） ====================
+
+    /** 微信登录 code 无效或已使用 */
+    public static final int WECHAT_CODE_INVALID_CODE = 40101;
+
+    /** 微信服务不可用（code2session 超时/异常） */
+    public static final int WECHAT_UNAVAILABLE_CODE = 40102;
+
+    /** 微信 OpenID 绑定冲突 */
+    public static final int WECHAT_OPENID_CONFLICT_CODE = 40103;
+
+    // ==================== 游客模式错误码（402xx） ====================
+
+    /** 游客体验已到期 */
+    public static final int GUEST_EXPIRED_CODE = 40201;
+
+    /** 游客标识无效 */
+    public static final int GUEST_KEY_INVALID_CODE = 40202;
+
+    /** 用户类型：微信正式用户 */
+    public static final String USER_TYPE_WECHAT = "WECHAT";
+
+    /** 用户类型：游客 */
+    public static final String USER_TYPE_GUEST = "GUEST";
+
+    /** 游客体验天数 */
+    public static final int GUEST_TRIAL_DAYS = 3;
+
+    /** 游客到期后数据保留天数（窗口期内登录仍可迁移） */
+    public static final int GUEST_GRACE_DAYS = 7;
+
     /** 默认页码 */
     public static final long DEFAULT_PAGE = 1L;
 
@@ -41,6 +72,41 @@ public final class CommonConstant {
 
     /** 普通用户角色 */
     public static final String ROLE_USER = "USER";
+
+    // ==================== 用户账号通用常量 ====================
+    // 账号状态取值统一走 UserStatusEnum 字典枚举（0冻结 1正常 2注销），不再此处定义散常量
+
+    /** 微信绑定状态：已绑定 */
+    public static final int WECHAT_BIND_YES = 1;
+
+    // ==================== 微信侧内部识别常量（仅后端分类用，严禁透传前端） ====================
+
+    /** 微信 errcode：code 无效或已使用（后端归类为系统码 40101，不外泄） */
+    public static final int WECHAT_ERR_CODE_INVALID = 40029;
+
+    /** 微信登录用户名前缀（后接 UUID） */
+    public static final String USERNAME_PREFIX_WECHAT = "wx_";
+
+    /** 游客用户名前缀（后接 UUID） */
+    public static final String USERNAME_PREFIX_GUEST = "guest_";
+
+    /** 微信新用户默认昵称 */
+    public static final String NICKNAME_WECHAT_DEFAULT = "微信用户";
+
+    /** 游客默认昵称 */
+    public static final String NICKNAME_GUEST_DEFAULT = "游客";
+
+    /** createBy 来源：微信登录建号 */
+    public static final String CREATE_BY_WECHAT_LOGIN = "wechat-login";
+
+    /** createBy 来源：游客签发 */
+    public static final String CREATE_BY_GUEST_LOGIN = "guest-login";
+
+    /** createBy 来源：后台注册 */
+    public static final String CREATE_BY_REGISTER = "register";
+
+    /** createBy 来源：系统操作 */
+    public static final String CREATE_BY_SYSTEM = "system";
 
     /** 分页最大条数 */
     public static final long MAX_PAGE_SIZE = 100L;

@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration;
 
 /**
  * Swagger / OpenAPI 配置
- * 作者: luote (luote) - https://luote996.cn
+ * 作者: wanglx
  */
 @Configuration
 public class SwaggerConfig {
@@ -19,13 +19,12 @@ public class SwaggerConfig {
     public OpenAPI openAPI() {
         return new OpenAPI()
                 .info(new Info()
-                        .title("luote API 文档")
-                        .description("luote 后端接口文档 - luote996.cn")
+                        .title("zhenxinjian API 文档")
+                        .description("zhenxinjian 后端接口文档")
                         .version("1.0.0")
                         .contact(new Contact()
-                                .name("luote")
-                                .url("https://luote996.cn")
-                                .email("luote@luote996.cn")))
+                                .name("wanglx")
+                                .email("wanglx@zhenxinjian.cn")))
                 .addSecurityItem(new SecurityRequirement().addList("Bearer"))
                 .schemaRequirement("Bearer", new SecurityScheme()
                         .type(SecurityScheme.Type.HTTP)

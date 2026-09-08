@@ -10,18 +10,18 @@ import org.springframework.context.annotation.Configuration;
 
 /**
  * 对象存储客户端配置（MinIO + OSS）
- * 作者: luote (luote) - https://luote996.cn
+ * 作者: wanglx
  */
 @Configuration
 @RequiredArgsConstructor
 public class StorageConfig {
 
-    private final ZhenxinjianProperties luoteProperties;
+    private final ZhenxinjianProperties zhenxinjianProperties;
 
     @Bean
     @ConditionalOnProperty(prefix = "zhenxinjian.storage.minio", name = "enabled", havingValue = "true")
     public MinioClient minioClient() {
-        ZhenxinjianProperties.Storage.Minio minio = luoteProperties.getStorage().getMinio();
+        ZhenxinjianProperties.Storage.Minio minio = zhenxinjianProperties.getStorage().getMinio();
         return MinioClient.builder()
                 .endpoint(minio.getEndpoint())
                 .credentials(minio.getAccessKey(), minio.getSecretKey())
@@ -31,7 +31,7 @@ public class StorageConfig {
     @Bean(destroyMethod = "shutdown")
     @ConditionalOnProperty(prefix = "zhenxinjian.storage.oss", name = "enabled", havingValue = "true")
     public OSS ossClient() {
-        ZhenxinjianProperties.Storage.Oss oss = luoteProperties.getStorage().getOss();
+        ZhenxinjianProperties.Storage.Oss oss = zhenxinjianProperties.getStorage().getOss();
         return new OSSClientBuilder().build(oss.getEndpoint(), oss.getAccessKeyId(), oss.getAccessKeySecret());
     }
 }

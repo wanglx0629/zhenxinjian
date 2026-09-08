@@ -13,7 +13,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
  * WebSocket 会话注册表：支持按用户踢下线与连接数控制
- * 作者: luote (luote) - https://luote996.cn
+ * 作者: wanglx
  */
 @Slf4j
 @Component

@@ -1,6 +1,6 @@
 /**
  * 认证相关 API
- * 作者: luote (luote) - https://luote996.cn
+ * 作者: wanglx
  */
 import request from './request'
 import type { CaptchaResult, LoginRequest, LoginResult, RegisterRequest, UserInfo } from './types'

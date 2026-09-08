@@ -10,7 +10,7 @@ import lombok.Data;
 
 /**
  * 登录请求 DTO
- * 作者: luote (luote) - https://luote996.cn
+ * 作者: wanglx
  */
 @Data
 @Schema(description = "登录请求")

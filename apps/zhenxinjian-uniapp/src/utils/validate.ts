@@ -1,6 +1,6 @@
 /**
  * 录入区间校验（PRD §2.2 / §8.1）
- * 作者: luote (luote) - https://luote996.cn
+ * 作者: wanglx
  */
 import { RANGES } from '@/config/constants'
 

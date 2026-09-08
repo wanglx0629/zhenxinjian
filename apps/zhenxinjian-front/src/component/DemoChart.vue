@@ -1,7 +1,7 @@
 <script setup lang="ts">
 /**
  * ECharts 示例图表（柱状图）
- * 作者: luote (luote) - https://luote996.cn
+ * 作者: wanglx
  */
 import { onMounted, onBeforeUnmount, ref, shallowRef } from 'vue'
 import * as echarts from 'echarts/core'

@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * WebSocketSessionRegistry 单元测试（手写 Session stub，避免高版本 JDK 下 Mockito 插桩失败）。
- * 作者: luote (luote) - https://luote996.cn
+ * 作者: wanglx
  */
 class WebSocketSessionRegistryTest {
 

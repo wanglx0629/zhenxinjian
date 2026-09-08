@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 /**
  * 用户 CRUD 控制器（仅管理员）
- * 作者: luote (luote) - https://luote996.cn
+ * 作者: wanglx
  */
 @Tag(name = "用户管理")
 @RestController

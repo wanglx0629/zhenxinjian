@@ -1,6 +1,6 @@
 /**
  * Axios 请求封装
- * 作者: luote (luote) - https://luote996.cn
+ * 作者: wanglx
  */
 import axios, { type AxiosRequestConfig } from 'axios'
 import type { Result } from './types'

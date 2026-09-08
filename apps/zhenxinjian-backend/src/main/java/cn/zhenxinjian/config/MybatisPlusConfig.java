@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 
 /**
  * MyBatis-Plus 配置
- * 作者: luote (luote) - https://luote996.cn
+ * 作者: wanglx
  */
 @Configuration
 public class MybatisPlusConfig {

@@ -2,7 +2,7 @@
 
 /**
  * Vue 类型声明
- * 作者: luote (luote) - https://luote996.cn
+ * 作者: wanglx
  */
 declare module '*.vue' {
   import type { DefineComponent } from 'vue'

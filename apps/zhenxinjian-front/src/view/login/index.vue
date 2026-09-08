@@ -1,7 +1,7 @@
 <script setup lang="ts">
 /**
  * 登录页
- * 作者: luote (luote) - https://luote996.cn
+ * 作者: wanglx
  */
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
@@ -59,7 +59,7 @@ async function handleLogin() {
       <div class="auth-header">
         <TeLogo />
         <h2>登录 zhenxinjian</h2>
-        <p class="subtitle">luote996.cn</p>
+        <p class="subtitle">wanglx</p>
       </div>
       <el-form :model="form" label-width="0" @submit.prevent="handleLogin">
         <el-form-item>

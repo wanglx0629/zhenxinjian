@@ -1,8 +1,8 @@
 {
   "name": "zhenxinjian-front",
   "version": "1.0.0",
-  "description": "zhenxinjian 前端脚手架 - luote996.cn",
-  "author": "luote <luote@luote996.cn> (https://luote996.cn)",
+  "description": "zhenxinjian 前端",
+  "author": "wanglx",
   "private": true,
   "type": "module",
   "scripts": {

@@ -1,6 +1,6 @@
 /**
  * Vite 配置
- * 作者: luote (luote) - https://luote996.cn
+ * 作者: wanglx
  */
 import { defineConfig } from 'vite'
 import uni from '@dcloudio/vite-plugin-uni'

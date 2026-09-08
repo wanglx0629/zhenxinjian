@@ -1,6 +1,6 @@
 /**
  * 用户状态管理
- * 作者: luote (luote) - https://luote996.cn
+ * 作者: wanglx
  */
 import { defineStore } from 'pinia'
 import { ref } from 'vue'

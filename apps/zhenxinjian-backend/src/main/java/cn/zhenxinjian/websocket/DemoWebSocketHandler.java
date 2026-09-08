@@ -22,7 +22,7 @@ import java.time.format.DateTimeFormatter;
  * 协议（JSON 文本）：
  * 客户端发送 {"type":"chat","content":"你好"} 或 {"type":"ping"}
  * 服务端推送 {"type":"chat|system|pong","from":"...","content":"...","time":"..."}
- * 作者: luote (luote) - https://luote996.cn
+ * 作者: wanglx
  */
 @Slf4j
 @Component
@@ -32,7 +32,7 @@ public class DemoWebSocketHandler extends TextWebSocketHandler {
     private static final DateTimeFormatter TIME_FMT = DateTimeFormatter.ofPattern("HH:mm:ss");
 
     private final WebSocketSessionRegistry sessionRegistry;
-    private final ZhenxinjianProperties luoteProperties;
+    private final ZhenxinjianProperties zhenxinjianProperties;
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
@@ -50,7 +50,7 @@ public class DemoWebSocketHandler extends TextWebSocketHandler {
         if (StrUtil.isBlank(payload)) {
             return;
         }
-        int maxBytes = luoteProperties.getWebsocket().getMaxMessageBytes();
+        int maxBytes = zhenxinjianProperties.getWebsocket().getMaxMessageBytes();
         if (maxBytes > 0 && utf8Length(payload) > maxBytes) {
             session.sendMessage(new TextMessage(buildMessage("system", "系统", "消息过长，已拒绝")));
             return;
@@ -134,7 +134,7 @@ public class DemoWebSocketHandler extends TextWebSocketHandler {
             return "";
         }
         String cleaned = content.replaceAll("[\\x00-\\x08\\x0B\\x0C\\x0E-\\x1F]", "");
-        int maxBytes = luoteProperties.getWebsocket().getMaxMessageBytes();
+        int maxBytes = zhenxinjianProperties.getWebsocket().getMaxMessageBytes();
         if (maxBytes > 0) {
             cleaned = truncateUtf8(cleaned, maxBytes);
         }

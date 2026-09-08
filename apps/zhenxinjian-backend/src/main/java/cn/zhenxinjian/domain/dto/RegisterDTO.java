@@ -11,7 +11,7 @@ import lombok.Data;
 
 /**
  * 注册请求 DTO
- * 作者: luote (luote) - https://luote996.cn
+ * 作者: wanglx
  */
 @Data
 @Schema(description = "注册请求")

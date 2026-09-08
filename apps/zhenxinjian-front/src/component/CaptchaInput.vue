@@ -1,7 +1,7 @@
 <script setup lang="ts">
 /**
  * 图形验证码组件（输入框 + 右侧验证码图片）
- * 作者: luote (luote) - https://luote996.cn
+ * 作者: wanglx
  */
 import { ref, onMounted } from 'vue'
 import { getCaptcha } from '@/api/auth'

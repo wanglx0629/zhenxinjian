@@ -1,6 +1,6 @@
-# luote UniApp
+# zhenxinjian UniApp
 
-作者: luote (luote) · [luote996.cn](https://luote996.cn)
+作者: wanglx
 
 对接同一套 Spring Boot 后端的移动端板子（Vue3 + TypeScript + Pinia），风格与 Web 端一致：淡蓝 + 灰 + 白。
 

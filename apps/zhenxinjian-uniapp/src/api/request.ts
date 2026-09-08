@@ -1,6 +1,6 @@
 /**
  * uni.request 统一封装
- * 作者: luote (luote) - https://luote996.cn
+ * 作者: wanglx
  */
 import type { Result } from './types'
 import { getToken, removeToken, setToken } from '@/utils/storage'
@@ -8,8 +8,11 @@ import { useUserStore } from '@/store/user'
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api'
 
+/** 业务错误码：游客体验已到期 */
+const GUEST_EXPIRED_CODE = 40201
+
 /** 登录相关接口不附带 Authorization */
-const AUTH_SKIP_URLS = ['/auth/login', '/auth/register', '/auth/captcha']
+const AUTH_SKIP_URLS = ['/auth/login', '/auth/register', '/auth/captcha', '/auth/wechat/login', '/auth/guest']
 
 interface RequestOptions {
   url: string
@@ -70,6 +73,12 @@ function request<T>(options: RequestOptions): Promise<T> {
           if (body.code === 401) {
             clearSessionAndGoLogin()
           }
+          // 游客到期：清登录态并跳强制授权页（spec：到期强制授权拦截）
+          if (body.code === GUEST_EXPIRED_CODE) {
+            clearSessionAndGoExpire()
+            reject(new Error('guest expired'))
+            return
+          }
           uni.showToast({ title: body.message || '请求失败', icon: 'none' })
           reject(new Error(body.message || 'request failed'))
           return
@@ -96,7 +105,22 @@ function clearSessionAndGoLogin() {
   } catch {
     // ignore
   }
-  uni.reLaunch({ url: '/pages/login/index' })
+  uni.reLaunch({ url: '/pages/auth/guide' })
+}
+
+/**
+ * 游客到期：清登录态（保留 guestKey，7 天内授权仍可迁移）并跳强制授权页
+ */
+function clearSessionAndGoExpire() {
+  removeToken()
+  try {
+    const userStore = useUserStore()
+    userStore.token = ''
+    userStore.userInfo = null
+  } catch {
+    // ignore
+  }
+  uni.reLaunch({ url: '/pages/auth/expire' })
 }
 
 const http = {

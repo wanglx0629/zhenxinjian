@@ -2,7 +2,7 @@ package cn.zhenxinjian.common.constant;
 
 /**
  * 缓存常量
- * 作者: luote (luote) - https://luote996.cn
+ * 作者: wanglx
  */
 public final class CacheConstant {
 

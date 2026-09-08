@@ -4,7 +4,7 @@ import { resolve } from 'path'
 
 /**
  * Vite 配置
- * 作者: luote (luote) - https://luote996.cn
+ * 作者: wanglx
  */
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')

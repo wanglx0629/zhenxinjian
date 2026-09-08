@@ -24,7 +24,7 @@
 
 ## 1. 项目上下文
 
-**臻心减**是一款帮助健身新人小白开启生活化减脂第一步的**微信小程序**（私人陪伴式互联网健身搭子），由 create-luote 脚手架生成的三端工程承载：
+**臻心减**是一款帮助健身新人小白开启生活化减脂第一步的**微信小程序**（私人陪伴式互联网健身搭子），由三端单体工程承载：
 
 - **用户端小程序**（`apps/zhenxinjian-uniapp`）：面向 C 端用户，核心能力为「计算 + 食物库 + 记录 + 提醒」，一套代码可发布 H5 / 微信小程序。
 - **PC 运营管理后台**（`apps/zhenxinjian-front`）：面向运营人员，用户管理、食物库维护、数据查看。
@@ -97,7 +97,7 @@ controller → service（接口）→ service/impl（实现）→ mapper
 | OpenMole（BDR） | **已安装** v0.9.0 | `openmole/` 工作区已初始化；安装：`npm install -g openmole` |
 | Khufu（khufu-kit） | **已安装** | `.khufu/khufu.yaml` 已配置：UT=JUnit5、IT=spring-boot-test、API=rest-assured、E2E=playwright；UT 覆盖率 line≥80 / branch≥70，IT line≥60 / branch≥50；安装：`npm install -g khufu-kit` |
 
-> ⚠️ **已知缺口**：脚手架 AGENTS.md 引用的 `.agents/skills/luote-scaffold/scripts/gen-crud.js`（CRUD 样板生成脚本）当前**不存在**——`.agents/skills/` 已被 OpenSpec 技能覆盖。在其恢复（可从 create-luote 重新生成）之前，新增 CRUD 按本宪法与 [Java 代码规范](./docs/knowledge/code-standard/java/standard.md) 手写，并遵守其中全部分层/软删/Result 约定。
+> 新增 CRUD 按本宪法与 [Java 代码规范](./docs/knowledge/code-standard/java/standard.md) 手写，并遵守其中全部分层/软删/Result 约定。
 
 ***
 
@@ -106,21 +106,32 @@ controller → service（接口）→ service/impl（实现）→ mapper
 ### Always（必须）
 
 - 错误文案统一进 `ExceptionConstant`；接口统一返回 `Result`（`Result.ok` / `Result.fail`）。
+- **错误码分段管理**：业务错误码按「域码 + 序号」5 位分段（401xx 第三方登录 / 402xx 游客 / 400xx 参数 / 500xx 系统，完整段表见 [Java 代码规范 §4](./docs/knowledge/code-standard/java/standard.md)）；新增业务域必须先申请段位，禁止跨段乱用。
+- **第三方错误码只进不出**：微信等第三方服务的原始错误码（errcode）仅在后端识别、记日志、归类映射为本系统错误码；响应给前端的必须且只能是本系统错误码与文案，**严禁透传**第三方原始码 / 原始 message。
+- **常量与枚举先行**：状态值（0/1）、类型值、前缀、默认文案、createBy 标识等一律进 `CommonConstant` 或各自业务枚举；业务代码**禁止出现魔法值**（裸数字 / 裸字符串）。
+- **全量注释**：所有方法必须有 Javadoc（说明用途、关键参数、返回/异常语义）；关键语句（安全校验、事务边界、并发兜底、第三方调用、计算口径）必须有行内注释，供 review 核对实现与意图一致。
+- 统一返回结构三件套：正常 `Result.ok(data)`；业务异常 `BusinessException(code, message)`；框架异常 `GlobalExceptionHandler` 兜底——三路出口之外**禁止** Controller / Service 手拼错误 JSON。
 - **核心计算逻辑后置到后端**：BMR / TDEE / 碳循环图片公式 / 532 占比 / 体重调碳等一切健康计算，前端仅可做实时预览，**以后端计算为准**，前端参数不可篡改结果。
 - 人体数据区间**前后端双重校验**（越界前端标红、后端拒绝）：年龄 12–80、身高 100–250cm、体重 25–200kg、目标体重 25–200kg 且 ≤ 当前体重。
 - 碳循环日型除数 `2 / 2.2 / 2` 固定写死，周期 ≠ 7 天按比例放大；**禁止**用 `nH+1` 等动态值重算。
 - 营养克数后端按 `double` 存储防累计漂移，前端展示四舍五入到整数克；周期总量守恒允许 ±1g。
 - MySQL / Redis 遵守 [开发规范](./doscFile/03-开发规范.md) §4、§5（软删 + 活跃唯一约束、会话 Key 必须 TTL、无 BigKey）。
 - 管理端接口加 `@PreAuthorize("hasRole('ADMIN')")`。
-- 文件头注释：`作者: luote (luote) - https://luote996.cn`；注释另起一行。
+- 文件头注释：`作者: wanglx`；注释另起一行。
+- Git 提交信息：功能开发用 `feature：功能说明`；修 bug 用 `fix：问题说明`（详见 [开发规范 §10](./doscFile/03-开发规范.md)）。
+- **分层结构强制**：后端 `controller → service → service/impl → mapper（+xml）`、对象 `po/dto/query/vo` 各就各位（§3.1）；前端两端按各自规范目录（§3.2 / §3.3）；新文件必须落在对应层，**禁止跨层引用**（如 Controller 直调 Mapper）、禁止自创目录结构。
 
 ### Never（禁止）
 
 - WebSocket Token 放入 query 参数（只允许子协议 / Authorization）。
 - CORS / `Origin` 配置为 `*`。
 - 硬编码密钥、JWT、密码（一律走配置 / 环境变量）。
+- **透传第三方错误码 / 原始 message 给前端**；前端展示第三方内部细节。
+- **魔法值**：业务代码中直接写裸状态数字（`0/1/2`）、裸类型字符串（`"WECHAT"`）等，未走常量 / 枚举。
+- 提交无 Javadoc 的方法、无注释的关键逻辑。
 - 无 TTL 的会话类 Redis Key、BigKey、金额用浮点（真实金额必须 `DECIMAL`）、软删表乱加普通 UNIQUE。
 - Controller 拼 SQL、`${}` 拼接用户输入、无上限 `selectList` 对外。
+- 绕过分层直连（Controller → Mapper、前端页面裸调 HTTP 绕过 `request.ts` 等）。
 - 修改数据库 Schema、核心类型（公共 Entity/DTO/VO）、认证鉴权、CI/CD 配置、删除已 commit 文件、修改 Harness 资产本身——以上高危操作**必须先做 Checkpoint 并经用户确认**。
 - 一期范围外功能私自引入：拍照识物 / AI 识物 / 条形码、运动课程 / 社区 / 打卡、付费 / 广告 / 营销、自动体重曲线 / 全自动复盘 / 详细微量元素。
 

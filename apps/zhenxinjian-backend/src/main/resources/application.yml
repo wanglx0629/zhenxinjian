@@ -1,5 +1,5 @@
-# luote 后端主配置
-# 作者: luote (luote) - https://luote996.cn
+# 后端主配置
+# 作者: wanglx
 
 spring:
   application:
@@ -28,7 +28,8 @@ mybatis-plus:
   global-config:
     db-config:
       id-type: auto
-      logic-delete-field: deleted
+      # 逻辑删除全局字段（对应列 delete_flag，所有表统一）
+      logic-delete-field: deleteFlag
       logic-delete-value: 1
       logic-not-delete-value: 0
   configuration:
@@ -44,10 +45,10 @@ springdoc:
     tags-sorter: alpha
     operations-sorter: alpha
 
-# luote 自定义配置
+# 自定义配置
 zhenxinjian:
   jwt:
-    secret: zhenxinjian-jwt-secret-key-change-in-production-luote996-cn
+    secret: zhenxinjian-jwt-secret-key-change-in-production-wanglx
     expire-minutes: 120
     refresh-threshold-minutes: 30
   redis:
@@ -81,6 +82,9 @@ zhenxinjian:
       - /auth/login
       - /auth/register
       - /auth/captcha
+      # 小程序认证（微信登录 / 游客签发）
+      - /auth/wechat/login
+      - /auth/guest
       - /ws/**
       # Swagger 文档（dev 基线开箱即通；生产禁用 springdoc 属后续运维 change）
       - /swagger-ui.html

@@ -10,7 +10,7 @@ import lombok.EqualsAndHashCode;
 
 /**
  * 用户分页查询条件
- * 作者: luote (luote) - https://luote996.cn
+ * 作者: wanglx
  */
 @Data
 @EqualsAndHashCode(callSuper = true)

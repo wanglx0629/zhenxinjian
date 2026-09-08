@@ -18,7 +18,7 @@ import java.util.concurrent.ThreadLocalRandom;
  * 击穿：CachePenetrationProtect 单线程回源
  * 雪崩：随机过期时间
  * 热点：CacheType.BOTH 本地 + Redis
- * 作者: luote (luote) - https://luote996.cn
+ * 作者: wanglx
  */
 @Service
 @RequiredArgsConstructor

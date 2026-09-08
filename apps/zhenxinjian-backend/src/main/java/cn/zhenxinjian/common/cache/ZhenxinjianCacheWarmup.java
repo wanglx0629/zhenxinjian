@@ -12,34 +12,29 @@ import org.springframework.stereotype.Component;
 
 /**
  * 缓存预热：启动时加载热点数据
- * 作者: luote (luote) - https://luote996.cn
+ * 作者: wanglx
  */
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class ZhenxinjianCacheWarmup implements ApplicationRunner {
 
-    private final ZhenxinjianProperties luoteProperties;
+    private final ZhenxinjianProperties zhenxinjianProperties;
     private final UserMapper userMapper;
     private final UserCacheService userCacheService;
 
     @Override
     public void run(ApplicationArguments args) {
-        if (!luoteProperties.getCache().isWarmupEnabled()) {
+        if (!zhenxinjianProperties.getCache().isWarmupEnabled()) {
             return;
         }
         try {
-            // 优先预热 admin，兼容旧种子数据里的 luote 账号
+            // 优先预热 admin
             User admin = userMapper.selectOne(new LambdaQueryWrapper<User>()
                     .eq(User::getUsername, "admin")
                     .last("LIMIT 1"));
             if (admin == null) {
-                admin = userMapper.selectOne(new LambdaQueryWrapper<User>()
-                        .eq(User::getUsername, "luote")
-                        .last("LIMIT 1"));
-            }
-            if (admin == null) {
-                log.warn("[cache-warmup] 未找到 admin/luote 用户，跳过预热");
+                log.warn("[cache-warmup] 未找到 admin 用户，跳过预热");
                 return;
             }
             userCacheService.getById(admin.getId());

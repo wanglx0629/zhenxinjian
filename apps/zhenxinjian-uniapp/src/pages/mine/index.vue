@@ -1,7 +1,7 @@
 <script setup lang="ts">
 /**
- * 我的页面
- * 作者: luote (luote) - https://luote996.cn
+ * 我的页面：游客展示体验状态，正式用户展示账号信息
+ * 作者: wanglx
  */
 import { onShow } from '@dcloudio/uni-app'
 import { computed } from 'vue'
@@ -13,16 +13,25 @@ const userStore = useUserStore()
 const displayName = computed(
   () => userStore.userInfo?.nickname || userStore.userInfo?.username || '用户'
 )
-const roleText = computed(() => userStore.userInfo?.role || '-')
+
+/** 游客体验期剩余天数（不足 1 天按 1 天计） */
+const guestDaysLeft = computed(() => {
+  const expireAt = userStore.userInfo?.guestExpireAt
+  if (!expireAt || !userStore.isGuest) return null
+  const diffMs = new Date(expireAt).getTime() - Date.now()
+  if (diffMs <= 0) return 0
+  return Math.max(1, Math.ceil(diffMs / 86400000))
+})
 
 onShow(() => {
   if (!getToken()) {
-    uni.reLaunch({ url: '/pages/login/index' })
+    uni.reLaunch({ url: '/pages/auth/guide' })
     return
   }
   userStore.fetchUserInfo().catch(() => undefined)
 })
 
+/** 退出登录（正式用户走登出接口；游客直接清本地态） */
 async function handleLogout() {
   uni.showModal({
     title: '提示',
@@ -41,24 +50,34 @@ async function handleLogout() {
     <view class="profile card">
       <TeLogo :size="96" />
       <view class="info">
-        <text class="name">{{ displayName }}</text>
-        <text class="meta">@{{ userStore.userInfo?.username || '-' }}</text>
-        <text class="role">角色 {{ roleText }}</text>
+        <view class="name-row">
+          <text class="name">{{ displayName }}</text>
+          <text v-if="userStore.isGuest" class="badge">游客</text>
+        </view>
+        <text v-if="userStore.isGuest" class="meta">体验剩余 {{ guestDaysLeft ?? 0 }} 天</text>
+        <text v-else class="meta">@{{ userStore.userInfo?.username || '-' }}</text>
       </view>
     </view>
 
     <view class="card list">
-      <view class="row">
-        <text class="label">邮箱</text>
-        <text class="value">{{ userStore.userInfo?.email || '未填写' }}</text>
-      </view>
-      <view class="row">
-        <text class="label">手机</text>
-        <text class="value">{{ userStore.userInfo?.phone || '未填写' }}</text>
+      <template v-if="!userStore.isGuest">
+        <view class="row">
+          <text class="label">邮箱</text>
+          <text class="value">{{ userStore.userInfo?.email || '未填写' }}</text>
+        </view>
+        <view class="row">
+          <text class="label">手机</text>
+          <text class="value">{{ userStore.userInfo?.phone || '未填写' }}</text>
+        </view>
+      </template>
+      <view v-else class="guest-tip">
+        <text class="tip-text">
+          体验期内可随时授权微信登录，数据将自动保留到你的账号。
+        </text>
       </view>
       <view class="row">
         <text class="label">品牌</text>
-        <text class="value">luote · luote996.cn</text>
+        <text class="value">wanglx</text>
       </view>
     </view>
 
@@ -94,16 +113,40 @@ async function handleLogout() {
   gap: 8rpx;
 }
 
+.name-row {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
 .name {
   font-size: 34rpx;
   font-weight: 600;
   color: $zhenxinjian-text;
 }
 
-.meta,
-.role {
+.badge {
+  padding: 4rpx 16rpx;
+  border-radius: 8rpx;
+  background: $zhenxinjian-primary-light;
+  color: $zhenxinjian-primary;
+  font-size: 22rpx;
+}
+
+.meta {
   font-size: 24rpx;
   color: $zhenxinjian-text-secondary;
+}
+
+.guest-tip {
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid $zhenxinjian-border;
+}
+
+.tip-text {
+  font-size: 24rpx;
+  color: $zhenxinjian-text-secondary;
+  line-height: 1.6;
 }
 
 .row {

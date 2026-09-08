@@ -5,7 +5,7 @@ import lombok.Data;
 
 /**
  * 登录用户上下文 VO（ThreadLocal 使用）
- * 作者: luote (luote) - https://luote996.cn
+ * 作者: wanglx
  */
 @Data
 @Schema(description = "登录用户信息")

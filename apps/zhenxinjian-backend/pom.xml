@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
   zhenxinjian-backend 后端脚手架
-  作者: luote (luote) - https://luote996.cn
+  作者: wanglx
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -19,7 +19,7 @@
     <artifactId>zhenxinjian-backend</artifactId>
     <version>1.0.0</version>
     <name>zhenxinjian-backend</name>
-    <description>zhenxinjian 后端脚手架 - luote996.cn</description>
+    <description>zhenxinjian 后端</description>
 
     <properties>
         <java.version>25</java.version>
@@ -36,6 +36,7 @@
         <aliyun-oss.version>3.18.1</aliyun-oss.version>
         <jetcache.version>2.7.7</jetcache.version>
         <bytebuddy.version>1.18.11</bytebuddy.version>
+        <weixin-java.version>4.7.0</weixin-java.version>
     </properties>
 
     <dependencies>
@@ -153,6 +154,13 @@
             <groupId>com.aliyun.oss</groupId>
             <artifactId>aliyun-sdk-oss</artifactId>
             <version>${aliyun-oss.version}</version>
+        </dependency>
+
+        <!-- 微信小程序 SDK（code2session / 订阅消息） -->
+        <dependency>
+            <groupId>com.github.binarywang</groupId>
+            <artifactId>weixin-java-miniapp</artifactId>
+            <version>${weixin-java.version}</version>
         </dependency>
 
         <!-- Lombok -->

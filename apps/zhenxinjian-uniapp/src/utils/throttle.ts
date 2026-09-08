@@ -1,6 +1,6 @@
 /**
  * 提交节流：防止连续点击
- * 作者: luote (luote) - https://luote996.cn
+ * 作者: wanglx
  */
 
 let lastSubmitAt = 0

@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * JwtUtils 单元测试（无 Spring 容器）
- * 作者: luote (luote) - https://luote996.cn
+ * 作者: wanglx
  */
 class JwtUtilsTest {
 
@@ -25,7 +25,7 @@ class JwtUtilsTest {
     @BeforeEach
     void setUp() {
         ZhenxinjianProperties properties = new ZhenxinjianProperties();
-        properties.getJwt().setSecret("luote-test-jwt-secret-key-32bytes!!");
+        properties.getJwt().setSecret("zxj-test-jwt-secret-key-32bytes!!");
         properties.getJwt().setExpireMinutes(120);
         properties.getJwt().setRefreshThresholdMinutes(30);
         jwtUtils = new JwtUtils(properties);

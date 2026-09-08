@@ -1,7 +1,7 @@
 <script setup lang="ts">
 /**
  * Te Logo 组件
- * 作者: luote (luote) - https://luote996.cn
+ * 作者: wanglx
  */
 defineProps<{
   size?: number

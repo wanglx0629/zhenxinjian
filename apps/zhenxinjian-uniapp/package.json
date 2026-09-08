@@ -1,8 +1,8 @@
 {
   "name": "zhenxinjian-uniapp",
   "version": "1.0.0",
-  "description": "zhenxinjian UniApp 脚手架 - luote996.cn",
-  "author": "luote <luote@luote996.cn> (https://luote996.cn)",
+  "description": "zhenxinjian UniApp",
+  "author": "wanglx",
   "private": true,
   "scripts": {
     "dev:custom": "uni -p",

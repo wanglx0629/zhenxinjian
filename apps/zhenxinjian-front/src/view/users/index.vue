@@ -1,7 +1,7 @@
 <script setup lang="ts">
 /**
  * 用户管理页（管理员）
- * 作者: luote (luote) - https://luote996.cn
+ * 作者: wanglx
  */
 import { onMounted, reactive, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -12,6 +12,13 @@ import type { UserInfo } from '@/api/types'
 const loading = ref(false)
 const tableData = ref<UserInfo[]>([])
 const total = ref(0)
+
+/** 用户状态字典（后端 UserStatusEnum：0冻结 1正常 2注销） */
+const STATUS_MAP: Record<number, { label: string; type: 'success' | 'danger' | 'info' }> = {
+  0: { label: '冻结', type: 'danger' },
+  1: { label: '正常', type: 'success' },
+  2: { label: '注销', type: 'info' }
+}
 
 const query = reactive({
   page: 1,
@@ -189,8 +196,9 @@ onMounted(loadUsers)
           @keyup.enter="handleSearch"
         />
         <el-select v-model="query.status" clearable placeholder="状态" style="width: 120px">
+          <el-option label="冻结" :value="0" />
           <el-option label="正常" :value="1" />
-          <el-option label="禁用" :value="0" />
+          <el-option label="注销" :value="2" />
         </el-select>
         <el-select v-model="query.role" clearable placeholder="角色" style="width: 120px">
           <el-option label="管理员" value="ADMIN" />
@@ -215,8 +223,8 @@ onMounted(loadUsers)
       </el-table-column>
       <el-table-column prop="status" label="状态" width="90">
         <template #default="{ row }">
-          <el-tag :type="row.status === 1 ? 'success' : 'warning'" size="small">
-            {{ row.status === 1 ? '正常' : '禁用' }}
+          <el-tag :type="STATUS_MAP[row.status]?.type || 'info'" size="small">
+            {{ STATUS_MAP[row.status]?.label ?? '未知' }}
           </el-tag>
         </template>
       </el-table-column>
@@ -271,7 +279,8 @@ onMounted(loadUsers)
         <el-form-item label="状态">
           <el-radio-group v-model="form.status">
             <el-radio :value="1">正常</el-radio>
-            <el-radio :value="0">禁用</el-radio>
+            <el-radio :value="0">冻结</el-radio>
+            <el-radio :value="2">注销</el-radio>
           </el-radio-group>
         </el-form-item>
       </el-form>

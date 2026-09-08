@@ -1,6 +1,6 @@
 /**
  * API 类型定义
- * 作者: luote (luote) - https://luote996.cn
+ * 作者: wanglx
  */
 
 /** 统一响应结构 */

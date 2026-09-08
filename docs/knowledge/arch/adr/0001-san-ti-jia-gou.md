@@ -1,4 +1,4 @@
-# ADR 0001: create-luote 三端单体架构选型
+# ADR 0001: 三端单体架构选型
 
 - 状态：Accepted
 - 日期：2026-09-04
@@ -11,11 +11,11 @@
 2. 单体 Spring Boot + 三端仓库；
 3. Serverless（云函数 + 云开发）。
 
-团队规模小、无硬性时间要求、以打磨体验为核心，且 create-luote 脚手架可一键生成三端样板。
+团队规模小、无硬性时间要求、以打磨体验为核心，且初始脚手架可一键生成三端样板。
 
 ## 决策
 
-采用 **create-luote 脚手架生成的三端单体架构**：
+采用 **三端单体架构**：
 
 - `apps/zhenxinjian-backend`：Spring Boot 3.4.5 单体（MyBatis-Plus + MySQL 8 + Redis/JetCache），统一 `/api` 上下文；
 - `apps/zhenxinjian-front`：Vue 3 + Element Plus 管理后台；

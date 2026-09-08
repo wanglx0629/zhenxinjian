@@ -12,7 +12,7 @@ import java.io.Serializable;
 
 /**
  * 分页查询基类（各业务 Query 继承本类）
- * 作者: luote (luote) - https://luote996.cn
+ * 作者: wanglx
  */
 @Data
 @Schema(description = "分页查询基类")

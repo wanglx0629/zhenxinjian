@@ -1,5 +1,5 @@
--- luote 数据库初始化脚本
--- 作者: luote (luote) - https://luote996.cn
+-- 数据库初始化脚本
+-- 作者: wanglx
 -- 说明: 首次部署前在 MySQL 中执行本脚本，创建库表并写入默认管理员
 
 CREATE DATABASE IF NOT EXISTS zhenxinjian DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -37,8 +37,8 @@ CREATE TABLE users (
     wechat_bind_time DATETIME       DEFAULT NULL COMMENT '微信绑定完成时间',
     -- 基础资料：性别枚举
     gender          TINYINT         DEFAULT 0 COMMENT '性别：0未知 1男 2女',
-    -- 账号状态：禁用后无法登录
-    status          TINYINT         DEFAULT 1 COMMENT '账号状态：0禁用(禁止登录) 1正常',
+    -- 账号状态：冻结/注销后禁止登录（取值见 UserStatusEnum 字典枚举）
+    status          TINYINT         DEFAULT 1 COMMENT '账号状态：0冻结(禁止登录) 1正常 2注销(用户主动注销)',
     -- 权限角色：配合 Spring Security 的 ROLE_ 前缀使用
     role            VARCHAR(32)     DEFAULT 'USER' COMMENT '角色：USER普通用户 ADMIN管理员',
     -- 组织：预留部门表关联，多租户/组织架构扩展用
@@ -57,13 +57,13 @@ CREATE TABLE users (
     create_time     DATETIME        DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间，插入时自动生成',
     -- 审计：更新时间，修改时自动刷新
     update_time     DATETIME        DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间，修改时自动刷新',
-    -- 软删除：1 表示已删除，MyBatis-Plus 逻辑删除会自动过滤
-    deleted         TINYINT         DEFAULT 0 COMMENT '软删除标记：0未删除 1已删除，查询默认过滤已删',
+    -- 软删除：1 表示已删除，MyBatis-Plus 逻辑删除会自动过滤（列名 delete_flag 全表统一）
+    delete_flag     TINYINT         DEFAULT 0 COMMENT '软删除标记：0未删除 1已删除，查询默认过滤已删',
     -- 乐观锁：并发更新时版本比对，防止覆盖写
     version         INT             DEFAULT 0 COMMENT '乐观锁版本号，更新时自动+1，防并发覆盖',
     -- 仅未删除用户占用唯一用户名；已删除行生成列为 NULL，不占用唯一约束
-    username_active VARCHAR(64)     GENERATED ALWAYS AS (IF(deleted = 0, username, NULL)) STORED COMMENT '活跃用户名生成列，用于软删后复用登录名',
-    wechat_openid_active VARCHAR(64) GENERATED ALWAYS AS (IF(deleted = 0, wechat_openid, NULL)) STORED COMMENT '活跃OpenID生成列，用于软删后复用绑定',
+    username_active VARCHAR(64)     GENERATED ALWAYS AS (IF(delete_flag = 0, username, NULL)) STORED COMMENT '活跃用户名生成列，用于软删后复用登录名',
+    wechat_openid_active VARCHAR(64) GENERATED ALWAYS AS (IF(delete_flag = 0, wechat_openid, NULL)) STORED COMMENT '活跃OpenID生成列，用于软删后复用绑定',
     PRIMARY KEY (id),
     UNIQUE KEY uk_username_active (username_active),
     KEY idx_email (email),
@@ -89,4 +89,4 @@ CREATE TABLE users (
 -- 用户名: admin
 -- 密码: admin123（下方为 BCrypt 哈希，登录时由 PasswordEncoder 校验）
 INSERT INTO users (username, password, nickname, email, role, status, create_by)
-VALUES ('admin', '$2b$10$xDtKBGBkkmC.Kbkm.rwo2eHNxrp7WaAK18tr6tnEPBSU9FrMdndE6', '管理员', 'luote@luote996.cn', 'ADMIN', 1, 'system');
+VALUES ('admin', '$2b$10$xDtKBGBkkmC.Kbkm.rwo2eHNxrp7WaAK18tr6tnEPBSU9FrMdndE6', '管理员', 'wanglx@zhenxinjian.cn', 'ADMIN', 1, 'system');

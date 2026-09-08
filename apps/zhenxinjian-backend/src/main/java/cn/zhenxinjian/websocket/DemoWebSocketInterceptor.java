@@ -25,7 +25,7 @@ import java.util.Map;
  * 禁止 query token（避免日志/Referer 泄露）
  * H5：new WebSocket(url, [protocol, jwt])
  * 微信小程序等：header Authorization: Bearer jwt
- * 作者: luote (luote) - https://luote996.cn
+ * 作者: wanglx
  */
 @Slf4j
 @Component
@@ -39,7 +39,7 @@ public class DemoWebSocketInterceptor implements HandshakeInterceptor {
 
     private final JwtUtils jwtUtils;
     private final RedisUtils redisUtils;
-    private final ZhenxinjianProperties luoteProperties;
+    private final ZhenxinjianProperties zhenxinjianProperties;
     private final WebSocketSessionRegistry sessionRegistry;
 
     @Override
@@ -62,12 +62,12 @@ public class DemoWebSocketInterceptor implements HandshakeInterceptor {
                 log.warn("[ws] 握手失败：Token 无效或已登出, userId={}", userId);
                 return false;
             }
-            int maxSessions = luoteProperties.getWebsocket().getMaxSessions();
+            int maxSessions = zhenxinjianProperties.getWebsocket().getMaxSessions();
             if (maxSessions > 0 && sessionRegistry.size() >= maxSessions) {
                 log.warn("[ws] 握手失败：全局限流已满, max={}", maxSessions);
                 return false;
             }
-            int maxPerUser = luoteProperties.getWebsocket().getMaxSessionsPerUser();
+            int maxPerUser = zhenxinjianProperties.getWebsocket().getMaxSessionsPerUser();
             if (maxPerUser > 0 && sessionRegistry.countByUser(userId) >= maxPerUser) {
                 log.warn("[ws] 握手失败：用户连接数已满, userId={}, max={}", userId, maxPerUser);
                 return false;
@@ -113,7 +113,7 @@ public class DemoWebSocketInterceptor implements HandshakeInterceptor {
             return null;
         }
         String expected = StrUtil.blankToDefault(
-                luoteProperties.getWebsocket().getProtocol(), DEFAULT_PROTOCOL);
+                zhenxinjianProperties.getWebsocket().getProtocol(), DEFAULT_PROTOCOL);
         String matchedProtocol = null;
         String token = null;
         for (String raw : protocols) {

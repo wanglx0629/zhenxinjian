@@ -1,6 +1,6 @@
 /**
  * WebSocket 地址与鉴权工具（Token 走子协议，不进 query）
- * 作者: luote (luote) - https://luote996.cn
+ * 作者: wanglx
  */
 
 /**

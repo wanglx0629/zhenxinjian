@@ -1,6 +1,6 @@
 /**
  * UniApp 入口
- * 作者: luote (luote) - https://luote996.cn
+ * 作者: wanglx
  */
 import { createSSRApp } from 'vue'
 import { createPinia } from 'pinia'

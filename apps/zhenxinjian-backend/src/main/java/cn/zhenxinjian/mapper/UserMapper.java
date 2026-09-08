@@ -6,7 +6,7 @@ import org.apache.ibatis.annotations.Mapper;
 
 /**
  * 用户 Mapper
- * 作者: luote (luote) - https://luote996.cn
+ * 作者: wanglx
  */
 @Mapper
 public interface UserMapper extends BaseMapper<User> {
