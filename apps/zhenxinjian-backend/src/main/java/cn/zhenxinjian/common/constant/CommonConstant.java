@@ -43,6 +43,20 @@ public final class CommonConstant {
     /** 游客标识无效 */
     public static final int GUEST_KEY_INVALID_CODE = 40202;
 
+    // ==================== 身体数据错误码（403xx） ====================
+
+    /** 目标体重须不大于当前体重（容差+0.1kg） */
+    public static final int BODY_TARGET_WEIGHT_INVALID_CODE = 40301;
+
+    /** 减脂缺口档位非法（仅200/300/400/500） */
+    public static final int BODY_DEFICIT_INVALID_CODE = 40302;
+
+    /** 脂肪系数非法（仅0.8/1.0） */
+    public static final int BODY_CFC_INVALID_CODE = 40303;
+
+    /** 健康计算免责声明（不可移除，业务不变量 I3） */
+    public static final String HEALTH_DISCLAIMER = "以上结果基于通用公式估算，仅作生活化减脂参考，不构成医疗建议；如有特殊健康状况请咨询医生";
+
     /** 用户类型：微信正式用户 */
     public static final String USER_TYPE_WECHAT = "WECHAT";
 

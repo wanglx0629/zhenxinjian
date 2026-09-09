@@ -48,6 +48,17 @@ public final class ExceptionConstant {
     /** 40202 游客标识无效 */
     public static final String GUEST_KEY_INVALID = "游客身份无效，请重新进入";
 
+    // ==================== 身体数据（403xx） ====================
+
+    /** 40301 目标体重须不大于当前体重 */
+    public static final String BODY_TARGET_WEIGHT_INVALID = "目标体重须不大于当前体重";
+
+    /** 40302 减脂缺口档位非法 */
+    public static final String BODY_DEFICIT_INVALID = "减脂缺口仅支持200/300/400/500";
+
+    /** 40303 脂肪系数非法 */
+    public static final String BODY_CFC_INVALID = "脂肪系数仅支持0.8或1.0";
+
     // ==================== 用户业务 ====================
 
     /** 用户名已存在 */

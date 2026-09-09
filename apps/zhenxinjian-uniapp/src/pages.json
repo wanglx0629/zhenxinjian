@@ -37,6 +37,18 @@
       "style": {
         "navigationBarTitleText": "我的"
       }
+    },
+    {
+      "path": "pages/body/profile",
+      "style": {
+        "navigationBarTitleText": "身体数据"
+      }
+    },
+    {
+      "path": "pages/body/result",
+      "style": {
+        "navigationBarTitleText": "代谢结果"
+      }
     }
   ],
   "globalStyle": {
