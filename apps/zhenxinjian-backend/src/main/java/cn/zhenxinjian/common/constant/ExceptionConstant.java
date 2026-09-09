@@ -59,6 +59,26 @@ public final class ExceptionConstant {
     /** 40303 脂肪系数非法 */
     public static final String BODY_CFC_INVALID = "脂肪系数仅支持0.8或1.0";
 
+    // ==================== 食物库（404xx） ====================
+
+    /** 40401 食物名称重复 */
+    public static final String FOOD_NAME_DUPLICATE = "该名称的食物已存在，请换个名称";
+
+    /** 40402 宏量数值非法 */
+    public static final String FOOD_MACRO_INVALID = "碳水/蛋白/脂肪须在0-100之间";
+
+    /** 40403 能量与宏量不守恒 */
+    public static final String FOOD_KCAL_MISMATCH = "能量须约等于碳水×4+蛋白×4+脂肪×9（偏差10%以内）";
+
+    /** 40404 食物不存在或不可操作 */
+    public static final String FOOD_NOT_FOUND = "食物不存在或不可操作";
+
+    /** 40405 无权限操作他人食物 */
+    public static final String FOOD_NOT_OWNER = "无权操作他人的食物";
+
+    /** 40406 试算克数超区间 */
+    public static final String FOOD_GRAMS_INVALID = "试算克数须在1-10000之间";
+
     // ==================== 用户业务 ====================
 
     /** 用户名已存在 */

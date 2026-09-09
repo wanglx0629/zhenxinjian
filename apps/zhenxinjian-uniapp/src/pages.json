@@ -33,6 +33,24 @@
       }
     },
     {
+      "path": "pages/food/detail",
+      "style": {
+        "navigationBarTitleText": "食物详情"
+      }
+    },
+    {
+      "path": "pages/food/custom-edit",
+      "style": {
+        "navigationBarTitleText": "新增自定义食物"
+      }
+    },
+    {
+      "path": "pages/food/custom-list",
+      "style": {
+        "navigationBarTitleText": "我的自定义食物"
+      }
+    },
+    {
       "path": "pages/mine/index",
       "style": {
         "navigationBarTitleText": "我的"

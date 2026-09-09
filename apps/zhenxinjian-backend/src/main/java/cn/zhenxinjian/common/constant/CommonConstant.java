@@ -54,6 +54,35 @@ public final class CommonConstant {
     /** 脂肪系数非法（仅0.8/1.0） */
     public static final int BODY_CFC_INVALID_CODE = 40303;
 
+    // ==================== 食物库错误码（404xx） ====================
+
+    /** 自定义食物名称重复（同用户活跃唯一） */
+    public static final int FOOD_NAME_DUPLICATE_CODE = 40401;
+
+    /** 自定义食物宏量数值非法 */
+    public static final int FOOD_MACRO_INVALID_CODE = 40402;
+
+    /** 自定义食物能量与宏量不守恒（±10%） */
+    public static final int FOOD_KCAL_MISMATCH_CODE = 40403;
+
+    /** 食物不存在或不可操作（含内置食物写请求拒绝） */
+    public static final int FOOD_NOT_FOUND_CODE = 40404;
+
+    /** 无权限操作他人食物 */
+    public static final int FOOD_NOT_OWNER_CODE = 40405;
+
+    /** 试算克数超区间（1-10000） */
+    public static final int FOOD_GRAMS_INVALID_CODE = 40406;
+
+    /** 食物搜索单页上限 */
+    public static final long FOOD_SEARCH_MAX_SIZE = 50L;
+
+    /** 试算克数下限 */
+    public static final int FOOD_CALC_MIN_GRAMS = 1;
+
+    /** 试算克数上限 */
+    public static final int FOOD_CALC_MAX_GRAMS = 10000;
+
     /** 健康计算免责声明（不可移除，业务不变量 I3） */
     public static final String HEALTH_DISCLAIMER = "以上结果基于通用公式估算，仅作生活化减脂参考，不构成医疗建议；如有特殊健康状况请咨询医生";
 
