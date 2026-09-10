@@ -43,6 +43,9 @@ public class BodyProfileVO {
     @Schema(description = "脂肪系数:0.8/1.0")
     private Double cfc;
 
+    @Schema(description = "减脂模式:1=532 2=碳循环")
+    private Integer mode;
+
     @Schema(description = "BMR kcal")
     private Integer bmr;
 

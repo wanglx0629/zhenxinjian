@@ -22,6 +22,8 @@ export interface BodyProfileSaveRequest {
   deficit?: number
   /** 脂肪系数:0.8/1.0，缺省后端默认 0.8（碳循环预留） */
   cfc?: number
+  /** 减脂模式:1=532 2=碳循环（持久化于档案，默认 532） */
+  mode?: number
 }
 
 /** 身体档案 + 核心计算结果（与后端 BodyProfileVO 对齐） */
@@ -38,6 +40,8 @@ export interface BodyProfileResult {
   activityFactor?: number
   deficit?: number
   cfc?: number
+  /** 减脂模式:1=532 2=碳循环（持久化于档案，默认 532） */
+  mode?: number
   /** BMR 快照kcal（整数） */
   bmr?: number
   /** TDEE 快照kcal（整数） */

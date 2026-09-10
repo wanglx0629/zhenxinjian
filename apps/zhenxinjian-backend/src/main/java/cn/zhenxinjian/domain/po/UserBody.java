@@ -56,6 +56,9 @@ public class UserBody implements Serializable {
     @Schema(description = "脂肪系数（碳循环预留）:0.8/1.0")
     private Double cfc;
 
+    @Schema(description = "减脂模式:1=532 2=碳循环")
+    private Integer mode;
+
     @Schema(description = "BMR快照kcal")
     private Integer bmr;
 

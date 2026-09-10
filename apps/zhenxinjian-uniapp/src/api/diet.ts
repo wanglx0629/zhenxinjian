@@ -53,10 +53,10 @@ export interface DietDayVO {
 /** 当日累计与目标进度（与后端 DietSummaryVO 对齐） */
 export interface DietSummaryVO {
   date: string
-  /** 是否有已录入的身体档案（空态标记） */
+  /** 是否有已录入的身体档案（空态标记；碳循环无周期同口径） */
   recorded: boolean
-  /** 模式（当前恒 532） */
-  mode: string
+  /** 减脂模式：1=532 2=碳循环（目标来源随之分发） */
+  mode: number
   carbActual: number
   proteinActual: number
   fatActual: number

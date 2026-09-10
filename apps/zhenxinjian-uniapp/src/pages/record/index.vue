@@ -7,12 +7,14 @@ import { computed, ref } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
 import { useDietStore } from '@/store/diet'
 import { useBodyStore } from '@/store/body'
-import { MEAL_TYPES, PROGRESS_THRESHOLD, PROGRESS_COLORS, OVER_ADVICE } from '@/config/constants'
+import { useCycleStore } from '@/store/cycle'
+import { MEAL_TYPES, PROGRESS_THRESHOLD, PROGRESS_COLORS, OVER_ADVICE, CYCLE_DAY_TYPES } from '@/config/constants'
 import { ymd, md, week } from '@/utils/format'
 import type { DietRecordVO } from '@/api/diet'
 
 const dietStore = useDietStore()
 const bodyStore = useBodyStore()
+const cycleStore = useCycleStore()
 
 /** 是否显示删除确认弹窗 */
 const showDeleteConfirm = ref(false)
@@ -20,18 +22,18 @@ const showDeleteConfirm = ref(false)
 const deleteTargetId = ref<number | null>(null)
 
 /** 当前日期是否今日 */
-const isToday = computed(() => dietStore.currentDate.value === ymd(new Date()))
+const isToday = computed(() => dietStore.currentDate === ymd(new Date()))
 
 /** 日期显示文本 */
 const dateLabel = computed(() => {
-  const d = dietStore.currentDate.value
+  const d = dietStore.currentDate
   if (isToday.value) return '今天'
   return md(d) + ' ' + week(d)
 })
 
 /** 进度条数据（三宏 + 总热量） */
 const progressItems = computed(() => {
-  const s = dietStore.summary.value
+  const s = dietStore.summary
   if (!s || !s.recorded) return []
   const items = [
     { key: 'carb', label: '碳水', actual: s.carbActual, target: s.carbTarget, rate: s.carbRate, unit: 'g' },
@@ -68,6 +70,20 @@ const adviceList = computed(() => {
   return list
 })
 
+/** 是否碳循环模式（目标口径按日型分发） */
+const isCycle = computed(() => dietStore.summary?.mode === 2)
+
+/** 目标口径标签：532「今日目标」/ 碳循环「今日高/中/低碳日」 */
+const targetLabel = computed(() => {
+  if (!isCycle.value) return '今日目标'
+  const dayType = cycleStore.todayDay?.dayType
+  return dayType ? `今日${CYCLE_DAY_TYPES[dayType]?.name ?? '目标'}` : '今日目标'
+})
+
+/** 空态分流：未建档 → 引导录入身体数据；已建档但碳循环无周期 → 引导创建周期 */
+const showBodyEmpty = computed(() => dietStore.noProfile && !bodyStore.profile?.recorded)
+const showCycleEmpty = computed(() => dietStore.noProfile && !!bodyStore.profile?.recorded && isCycle.value)
+
 /** 页面显示时拉取数据 */
 onShow(async () => {
   try {
@@ -76,14 +92,18 @@ onShow(async () => {
     // 请求失败已由 request.ts toast
   }
   // 同步拉取身体档案（判断空态）
-  if (!bodyStore.loaded.value) {
+  if (!bodyStore.loaded) {
     try { await bodyStore.fetchProfile() } catch { /* ignore */ }
+  }
+  // 碳循环模式拉取当前周期（今日日型标签）
+  if (isCycle.value) {
+    try { await cycleStore.fetchCurrent() } catch { /* ignore */ }
   }
 })
 
 /** 日期导航：前一天 */
 function prevDay() {
-  const d = new Date(dietStore.currentDate.value)
+  const d = new Date(dietStore.currentDate)
   d.setDate(d.getDate() - 1)
   dietStore.changeDate(ymd(d))
 }
@@ -91,7 +111,7 @@ function prevDay() {
 /** 日期导航：后一天（超今日禁用） */
 function nextDay() {
   if (isToday.value) return
-  const d = new Date(dietStore.currentDate.value)
+  const d = new Date(dietStore.currentDate)
   d.setDate(d.getDate() + 1)
   dietStore.changeDate(ymd(d))
 }
@@ -151,6 +171,11 @@ function cancelDelete() {
 function goBodyProfile() {
   uni.navigateTo({ url: '/pages/body/profile' })
 }
+
+/** 去创建碳循环周期（P06） */
+function goCycleSetting() {
+  uni.navigateTo({ url: '/pages/cycle/setting' })
+}
 </script>
 
 <template>
@@ -170,15 +195,22 @@ function goBodyProfile() {
     </view>
 
     <!-- 未建档空态 -->
-    <view v-if="dietStore.noProfile" class="panel empty-profile">
+    <view v-if="showBodyEmpty" class="panel empty-profile">
       <text class="empty-title">先录入身体数据</text>
       <text class="empty-desc">录入身高体重后，这里会显示目标与进度</text>
       <view class="empty-btn" @click="goBodyProfile">去录入</view>
     </view>
 
+    <!-- 碳循环无周期空态 -->
+    <view v-else-if="showCycleEmpty" class="panel empty-profile">
+      <text class="empty-title">还没有进行中的碳循环</text>
+      <text class="empty-desc">创建周期后，这里会按高/中/低碳日显示目标与进度</text>
+      <view class="empty-btn" @click="goCycleSetting">去创建周期</view>
+    </view>
+
     <!-- 三色进度区 -->
     <view v-if="!dietStore.noProfile && progressItems.length" class="panel">
-      <text class="panel-title">当日进度</text>
+      <text class="panel-title">当日进度 · {{ targetLabel }}</text>
       <view v-for="item in progressItems" :key="item.key" class="progress-row">
         <view class="progress-info">
           <text class="progress-label">{{ item.label }}</text>

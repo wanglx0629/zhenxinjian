@@ -40,9 +40,9 @@ function editProfile() {
   uni.redirectTo({ url: '/pages/body/profile' })
 }
 
-/** 预留入口：去选择模式（P05，后续 change 实现） */
+/** 去选择模式（P05） */
 function goChooseMode() {
-  uni.showToast({ title: '模式选择即将上线，敬请期待', icon: 'none' })
+  uni.navigateTo({ url: '/pages/mode/select' })
 }
 </script>
 

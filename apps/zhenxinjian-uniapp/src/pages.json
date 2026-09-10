@@ -73,6 +73,24 @@
       "style": {
         "navigationBarTitleText": "代谢结果"
       }
+    },
+    {
+      "path": "pages/mode/select",
+      "style": {
+        "navigationBarTitleText": "模式选择"
+      }
+    },
+    {
+      "path": "pages/cycle/setting",
+      "style": {
+        "navigationBarTitleText": "周期设置"
+      }
+    },
+    {
+      "path": "pages/cycle/plan",
+      "style": {
+        "navigationBarTitleText": "碳循环计划"
+      }
     }
   ],
   "globalStyle": {

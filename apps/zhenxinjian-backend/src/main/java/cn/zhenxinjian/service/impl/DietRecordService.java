@@ -2,12 +2,14 @@ package cn.zhenxinjian.service.impl;
 
 import cn.zhenxinjian.common.constant.CommonConstant;
 import cn.zhenxinjian.common.constant.ExceptionConstant;
+import cn.zhenxinjian.common.enums.DietModeEnum;
 import cn.zhenxinjian.common.enums.DietRecordSourceEnum;
 import cn.zhenxinjian.common.enums.FoodSourceEnum;
 import cn.zhenxinjian.common.enums.MealTypeEnum;
 import cn.zhenxinjian.common.exception.BusinessException;
 import cn.zhenxinjian.domain.dto.DietRecordCreateDTO;
 import cn.zhenxinjian.domain.dto.DietRecordUpdateDTO;
+import cn.zhenxinjian.domain.po.CarbCycleDay;
 import cn.zhenxinjian.domain.po.DietRecord;
 import cn.zhenxinjian.domain.po.Food;
 import cn.zhenxinjian.domain.po.UserBody;
@@ -64,14 +66,13 @@ public class DietRecordService {
     /** 每 100g 换算基数 */
     private static final BigDecimal PER_100G = new BigDecimal("100");
 
-    /** 减脂模式：当前恒 532（碳循环落地后按日型扩展，design D8） */
-    private static final String MODE_532 = "532";
-
     private final DietRecordMapper dietRecordMapper;
 
     private final FoodMapper foodMapper;
 
     private final UserBodyMapper userBodyMapper;
+
+    private final CyclePlanService cyclePlanService;
 
     /**
      * 新增饮食记录
@@ -198,6 +199,8 @@ public class DietRecordService {
 
     /**
      * 当日累计与目标进度（未建档空态：recorded=false，目标与达成率为空）
+     * 目标来源按模式分发（carb-cycle design §4.1）：532 取档案快照；碳循环取进行中周期当日日型目标，
+     * 无周期/当日不在周期内同未建档空态口径（D3 复用 recorded=false）
      *
      * @param userId 当前用户ID
      * @param date   查询日期（空默认当日；未来日期 40505）
@@ -216,7 +219,6 @@ public class DietRecordService {
 
         DietSummaryVO vo = new DietSummaryVO();
         vo.setDate(queryDate);
-        vo.setMode(MODE_532);
         double carb = toDouble(sums.get("carb"));
         double protein = toDouble(sums.get("protein"));
         double fat = toDouble(sums.get("fat"));
@@ -230,8 +232,33 @@ public class DietRecordService {
                 Wrappers.<UserBody>lambdaQuery().eq(UserBody::getUserId, userId));
         if (body == null) {
             vo.setRecorded(false);
+            vo.setMode(DietModeEnum.TAPER_532.getCode());
             return vo;
         }
+        Integer mode = body.getMode() == null ? DietModeEnum.TAPER_532.getCode() : body.getMode();
+        vo.setMode(mode);
+
+        if (DietModeEnum.CARB_CYCLE.getCode().equals(mode)) {
+            CarbCycleDay day = cyclePlanService.findActiveDay(userId, queryDate);
+            if (day == null) {
+                vo.setRecorded(false);
+                return vo;
+            }
+            vo.setRecorded(true);
+            Double carbTarget = day.getCarbG() == null ? null : day.getCarbG().doubleValue();
+            Double proteinTarget = day.getProteinG() == null ? null : day.getProteinG().doubleValue();
+            Double fatTarget = day.getFatG() == null ? null : day.getFatG().doubleValue();
+            vo.setCarbTarget(carbTarget);
+            vo.setProteinTarget(proteinTarget);
+            vo.setFatTarget(fatTarget);
+            vo.setKcalTarget(day.getKcal());
+            vo.setCarbRate(rate(carb, carbTarget));
+            vo.setProteinRate(rate(protein, proteinTarget));
+            vo.setFatRate(rate(fat, fatTarget));
+            vo.setKcalRate(rate(kcal, day.getKcal() == null ? null : day.getKcal().doubleValue()));
+            return vo;
+        }
+
         vo.setRecorded(true);
         vo.setCarbTarget(body.getTargetCarb());
         vo.setProteinTarget(body.getTargetProtein());

@@ -3,8 +3,10 @@ package cn.zhenxinjian.controller;
 import cn.zhenxinjian.common.result.Result;
 import cn.zhenxinjian.common.utils.UserContext;
 import cn.zhenxinjian.domain.dto.BodyProfileSaveDTO;
+import cn.zhenxinjian.domain.dto.ModeSwitchDTO;
 import cn.zhenxinjian.domain.vo.BodyProfileVO;
 import cn.zhenxinjian.service.impl.BodyProfileService;
+import cn.zhenxinjian.service.impl.CyclePlanService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -27,10 +29,19 @@ public class BodyController {
 
     private final BodyProfileService bodyProfileService;
 
+    private final CyclePlanService cyclePlanService;
+
     @Operation(summary = "保存身体档案", description = "录入/修改一体，幂等覆盖当前档案；旧值归档留痕，计算结果快照同步重算")
     @PutMapping("/profile")
     public Result<BodyProfileVO> saveProfile(@Valid @RequestBody BodyProfileSaveDTO dto) {
         return Result.ok(bodyProfileService.save(UserContext.getUserId(), dto));
+    }
+
+    @Operation(summary = "切换减脂模式", description = "mode:1=532 2=碳循环；切出碳循环自动终止进行中周期（切换即重置）；mode 非法 40602，未建档 40601")
+    @PutMapping("/mode")
+    public Result<Void> switchMode(@Valid @RequestBody ModeSwitchDTO dto) {
+        cyclePlanService.switchMode(UserContext.getUserId(), dto.getMode());
+        return Result.ok();
     }
 
     @Operation(summary = "查询当前身体档案", description = "返回档案与计算结果快照（含低热量风险标记与免责声明）；未录入返回空态")

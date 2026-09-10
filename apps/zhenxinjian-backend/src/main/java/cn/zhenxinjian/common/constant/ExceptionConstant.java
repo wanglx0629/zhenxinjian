@@ -102,6 +102,23 @@ public final class ExceptionConstant {
     /** 40507 餐别或来源非法 */
     public static final String DIET_MEAL_TYPE_INVALID = "餐别或来源非法";
 
+    // ==================== 碳循环（406xx） ====================
+
+    /** 40601 未建档 */
+    public static final String CYCLE_NOT_PROFILED = "请先完成身体档案录入";
+
+    /** 40602 模式或周期参数非法 */
+    public static final String CYCLE_PARAM_INVALID = "模式或周期参数非法";
+
+    /** 40603 周期不存在 */
+    public static final String CYCLE_PLAN_NOT_FOUND = "周期不存在";
+
+    /** 40604 运动日越界或过多 */
+    public static final String CYCLE_SPORT_DAY_INVALID = "运动日须落在周期内";
+
+    /** 40605 越权或不可操作 */
+    public static final String CYCLE_NOT_OWNER = "周期不存在或不可操作";
+
     // ==================== 用户业务 ====================
 
     /** 用户名已存在 */

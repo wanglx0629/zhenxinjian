@@ -97,6 +97,23 @@ public final class CommonConstant {
     /** 餐别或来源非法 */
     public static final int DIET_MEAL_TYPE_INVALID_CODE = 40507;
 
+    // ==================== 碳循环错误码（406xx） ====================
+
+    /** 未建档（碳循环周期创建须先完成身体档案） */
+    public static final int CYCLE_NOT_PROFILED_CODE = 40601;
+
+    /** 模式或周期参数非法 */
+    public static final int CYCLE_PARAM_INVALID_CODE = 40602;
+
+    /** 周期不存在 */
+    public static final int CYCLE_PLAN_NOT_FOUND_CODE = 40603;
+
+    /** 运动日越界或过多 */
+    public static final int CYCLE_SPORT_DAY_INVALID_CODE = 40604;
+
+    /** 越权或不可操作（不泄露存在性） */
+    public static final int CYCLE_NOT_OWNER_CODE = 40605;
+
     /** 食物搜索单页上限 */
     public static final long FOOD_SEARCH_MAX_SIZE = 50L;
 

@@ -167,3 +167,52 @@ export const OVER_ADVICE = {
   kcal: '总热量超标：建议散步 20–30 分钟，不要跳过下一餐。',
   disclaimer: '以上建议为通用饮食调整方向，非医疗建议。如有特殊健康状况请咨询专业医师。'
 } as const
+
+/* ------------------------------------------------------------------ */
+/* Change 6 碳循环：模式字典 / 日型字典（code 与后端枚举对齐） */
+/* ------------------------------------------------------------------ */
+
+/** 减脂模式（与后端 DietModeEnum 对齐） */
+export interface DietModeCfg {
+  code: number
+  name: string
+  desc: string
+}
+
+export const DIET_MODES: DietModeCfg[] = [
+  { code: 1, name: '532', desc: '碳水渐降 · 固定配比 50/30/20，适合稳健起步' },
+  { code: 2, name: '碳循环', desc: '高/中/低碳日轮播，运动日自动高配，易坚持' }
+]
+
+/** 碳循环日型字典（与后端 CycleDayTypeEnum 对齐；色值与原型 P07 一致） */
+export interface CycleDayTypeCfg {
+  code: number
+  name: string
+  short: string
+  color: string
+  bg: string
+}
+
+export const CYCLE_DAY_TYPES: Record<number, CycleDayTypeCfg> = {
+  1: { code: 1, name: '高碳日', short: '高', color: '#F56C6C', bg: '#FEF0F0' },
+  2: { code: 2, name: '中碳日', short: '中', color: '#409EFF', bg: '#ECF5FF' },
+  3: { code: 3, name: '低碳日', short: '低', color: '#909399', bg: '#F4F4F5' }
+}
+
+/** 周期天数区间（运动日多选随天数裁剪上限） */
+export const CYCLE_DAYS_RANGE = { min: 7, max: 14, default: 7 } as const
+
+/* ------------------------------------------------------------------ */
+/* Change 7 首页与我的：问候语时段（餐次名复用 MEAL_TYPES，模式/日型复用上方字典） */
+/* ------------------------------------------------------------------ */
+
+/** 分时段问候语时段表（05–11 早上好 / 11–14 中午好 / 14–18 下午好 / 18–23 晚上好） */
+export const GREETING_SLOTS = [
+  { from: 5, to: 11, text: '早上好' },
+  { from: 11, to: 14, text: '中午好' },
+  { from: 14, to: 18, text: '下午好' },
+  { from: 18, to: 23, text: '晚上好' }
+] as const
+
+/** 默认问候语（23–05 夜深了） */
+export const GREETING_DEFAULT = '夜深了'

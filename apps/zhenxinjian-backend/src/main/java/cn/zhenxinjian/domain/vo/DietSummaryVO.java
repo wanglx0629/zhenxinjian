@@ -22,8 +22,8 @@ public class DietSummaryVO implements Serializable {
     @Schema(description = "是否已录入身体档案（false 时空态，目标/达成率为空）")
     private Boolean recorded;
 
-    @Schema(description = "减脂模式（当前恒 532；碳循环落地后按日型扩展）")
-    private String mode;
+    @Schema(description = "减脂模式：1=532 2=碳循环（目标来源随之分发）")
+    private Integer mode;
 
     @Schema(description = "已摄入碳水 g")
     private Double carbActual;

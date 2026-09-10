@@ -1,12 +1,14 @@
 package cn.zhenxinjian.service.impl;
 
 import cn.zhenxinjian.common.constant.CommonConstant;
+import cn.zhenxinjian.common.enums.DietModeEnum;
 import cn.zhenxinjian.common.enums.DietRecordSourceEnum;
 import cn.zhenxinjian.common.enums.FoodSourceEnum;
 import cn.zhenxinjian.common.enums.MealTypeEnum;
 import cn.zhenxinjian.common.exception.BusinessException;
 import cn.zhenxinjian.domain.dto.DietRecordCreateDTO;
 import cn.zhenxinjian.domain.dto.DietRecordUpdateDTO;
+import cn.zhenxinjian.domain.po.CarbCycleDay;
 import cn.zhenxinjian.domain.po.DietRecord;
 import cn.zhenxinjian.domain.po.Food;
 import cn.zhenxinjian.domain.po.UserBody;
@@ -49,6 +51,7 @@ class DietRecordServiceTest {
     private DietRecordMapper dietRecordMapper;
     private FoodMapper foodMapper;
     private UserBodyMapper userBodyMapper;
+    private CyclePlanService cyclePlanService;
     private DietRecordService service;
 
     @BeforeEach
@@ -61,7 +64,8 @@ class DietRecordServiceTest {
         dietRecordMapper = mock(DietRecordMapper.class);
         foodMapper = mock(FoodMapper.class);
         userBodyMapper = mock(UserBodyMapper.class);
-        service = new DietRecordService(dietRecordMapper, foodMapper, userBodyMapper);
+        cyclePlanService = mock(CyclePlanService.class);
+        service = new DietRecordService(dietRecordMapper, foodMapper, userBodyMapper, cyclePlanService);
     }
 
     /** 场景：150g 鸡胸肉（24.6/1.9/0.6/118 每100g）→ 摄入 36.9/2.9/0.9/177（±0.1g/±1kcal） */
@@ -232,7 +236,7 @@ class DietRecordServiceTest {
         DietSummaryVO vo = service.summary(1L, LocalDate.now().minusDays(7));
 
         assertTrue(vo.getRecorded());
-        assertEquals("532", vo.getMode());
+        assertEquals(DietModeEnum.TAPER_532.getCode(), vo.getMode());
         assertEquals(120.0, vo.getCarbActual(), 0.001);
         assertEquals(190.1, vo.getCarbTarget(), 0.001);
         assertEquals(63.1, vo.getCarbRate(), 0.05);
@@ -261,6 +265,53 @@ class DietRecordServiceTest {
         BusinessException e = assertThrows(BusinessException.class,
                 () -> service.summary(1L, LocalDate.now().plusDays(1)));
         assertEquals(CommonConstant.DIET_FUTURE_DATE_CODE, e.getCode());
+    }
+
+    /** 场景：碳循环模式 → 目标取当日日型行（高碳日 240.6/85.5/23.1/1512），mode=2 */
+    @Test
+    void summary_carbCycleMode_dispatchesToCycleDay() {
+        LocalDate today = LocalDate.now();
+        when(dietRecordMapper.selectMaps(any(Wrapper.class))).thenReturn(List.of(sumMap("120", "60", "30", "1000")));
+        UserBody body = new UserBody();
+        body.setMode(DietModeEnum.CARB_CYCLE.getCode());
+        when(userBodyMapper.selectOne(any(Wrapper.class))).thenReturn(body);
+        CarbCycleDay day = new CarbCycleDay();
+        day.setCarbG(new BigDecimal("240.6"));
+        day.setProteinG(new BigDecimal("85.5"));
+        day.setFatG(new BigDecimal("23.1"));
+        day.setKcal(1512);
+        when(cyclePlanService.findActiveDay(1L, today)).thenReturn(day);
+
+        DietSummaryVO vo = service.summary(1L, today);
+
+        assertTrue(vo.getRecorded());
+        assertEquals(DietModeEnum.CARB_CYCLE.getCode(), vo.getMode());
+        assertEquals(240.6, vo.getCarbTarget(), 0.001);
+        assertEquals(85.5, vo.getProteinTarget(), 0.001);
+        assertEquals(23.1, vo.getFatTarget(), 0.001);
+        assertEquals(1512, vo.getKcalTarget());
+        assertEquals(49.9, vo.getCarbRate(), 0.05);
+        // 532 档案快照不参与分发
+        assertNull(body.getTargetCarb());
+    }
+
+    /** 场景：碳循环模式无进行中周期 → 空态（recorded=false，目标为空），不报错 */
+    @Test
+    void summary_carbCycleNoPlan_emptyState() {
+        LocalDate today = LocalDate.now();
+        when(dietRecordMapper.selectMaps(any(Wrapper.class))).thenReturn(List.of(sumMap("50", "20", "10", "400")));
+        UserBody body = new UserBody();
+        body.setMode(DietModeEnum.CARB_CYCLE.getCode());
+        when(userBodyMapper.selectOne(any(Wrapper.class))).thenReturn(body);
+        when(cyclePlanService.findActiveDay(1L, today)).thenReturn(null);
+
+        DietSummaryVO vo = service.summary(1L, today);
+
+        assertFalse(vo.getRecorded());
+        assertEquals(DietModeEnum.CARB_CYCLE.getCode(), vo.getMode());
+        assertEquals(50.0, vo.getCarbActual(), 0.001);
+        assertNull(vo.getCarbTarget());
+        assertNull(vo.getKcalTarget());
     }
 
     // ==================== 构造辅助 ====================
