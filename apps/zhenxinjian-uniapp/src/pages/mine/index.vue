@@ -1,26 +1,45 @@
 <script setup lang="ts">
 /**
- * 我的页面：游客展示体验状态，正式用户展示账号信息
+ * P14 我的：用户信息卡（游客/正式双态）+ 迁移提示 + 身体数据/减脂模式入口 + 留存说明
  * 作者: wanglx
  */
 import { onShow } from '@dcloudio/uni-app'
 import { computed } from 'vue'
 import TeLogo from '@/components/TeLogo.vue'
 import { useUserStore } from '@/store/user'
+import { useDietStore } from '@/store/diet'
+import { useBodyStore } from '@/store/body'
+import { useCycleStore } from '@/store/cycle'
+import { DIET_MODES } from '@/config/constants'
+import { guestLeftText } from '@/utils/format'
 import { getToken } from '@/utils/storage'
 
 const userStore = useUserStore()
+const dietStore = useDietStore()
+const bodyStore = useBodyStore()
+const cycleStore = useCycleStore()
+
 const displayName = computed(
   () => userStore.userInfo?.nickname || userStore.userInfo?.username || '用户'
 )
 
-/** 游客体验期剩余天数（不足 1 天按 1 天计） */
-const guestDaysLeft = computed(() => {
-  const expireAt = userStore.userInfo?.guestExpireAt
-  if (!expireAt || !userStore.isGuest) return null
-  const diffMs = new Date(expireAt).getTime() - Date.now()
-  if (diffMs <= 0) return 0
-  return Math.max(1, Math.ceil(diffMs / 86400000))
+/** 游客剩余时长文案（与首页同一算法） */
+const guestLeft = computed(() =>
+  userStore.isGuest ? guestLeftText(userStore.userInfo?.guestExpireAt) : ''
+)
+
+/** 身体数据档案摘要（未录入展示「未录入」） */
+const bodyBrief = computed(() => {
+  const p = bodyStore.profile
+  if (!p?.recorded) return '未录入'
+  const gender = p.gender === 1 ? '男' : '女'
+  return `${gender} · ${p.age} 岁 · ${p.height}cm · ${p.weight}kg`
+})
+
+/** 当前减脂模式名（以档案 mode 为准，默认 532） */
+const modeName = computed(() => {
+  const mode = bodyStore.profile?.mode ?? 1
+  return DIET_MODES.find(m => m.code === mode)?.name ?? '532'
 })
 
 onShow(() => {
@@ -29,17 +48,42 @@ onShow(() => {
     return
   }
   userStore.fetchUserInfo().catch(() => undefined)
+  if (!bodyStore.loaded) {
+    bodyStore.fetchProfile().catch(() => undefined)
+  }
 })
 
-/** 退出登录（正式用户走登出接口；游客直接清本地态） */
-async function handleLogout() {
+/** 授权登录（游客 → 复用引导页完整授权流程） */
+function goAuth() {
+  uni.navigateTo({ url: '/pages/auth/guide' })
+}
+
+/** 身体数据（P03） */
+function goBody() {
+  uni.navigateTo({ url: '/pages/body/profile' })
+}
+
+/** 减脂模式（P05） */
+function goMode() {
+  uni.navigateTo({ url: '/pages/mode/select' })
+}
+
+/** 隐私与安全（静态说明） */
+function showPrivacy() {
+  uni.showToast({ title: '数据已加密存储，禁止明文传输', icon: 'none' })
+}
+
+/** 退出登录（二次确认；清理全部业务 store 后登出回引导页） */
+function handleLogout() {
   uni.showModal({
     title: '提示',
     content: '确认退出登录？',
     success: async (res) => {
-      if (res.confirm) {
-        await userStore.logout()
-      }
+      if (!res.confirm) return
+      dietStore.reset()
+      bodyStore.reset()
+      cycleStore.reset()
+      await userStore.logout()
     }
   })
 }
@@ -47,48 +91,92 @@ async function handleLogout() {
 
 <template>
   <view class="page">
-    <view class="profile card">
-      <TeLogo :size="96" />
-      <view class="info">
+    <!-- 头部用户卡 -->
+    <view class="hero">
+      <view class="avatar">
+        <image v-if="userStore.userInfo?.avatar" class="avatar-img" :src="userStore.userInfo.avatar" mode="aspectFill" />
+        <TeLogo v-else :size="72" />
+      </view>
+      <view class="hero-info">
         <view class="name-row">
           <text class="name">{{ displayName }}</text>
           <text v-if="userStore.isGuest" class="badge">游客</text>
         </view>
-        <text v-if="userStore.isGuest" class="meta">体验剩余 {{ guestDaysLeft ?? 0 }} 天</text>
+        <text v-if="userStore.isGuest" class="meta">🎁 游客体验中 · 剩 {{ guestLeft }}</text>
         <text v-else class="meta">@{{ userStore.userInfo?.username || '-' }}</text>
       </view>
+      <view v-if="userStore.isGuest" class="auth-btn" @click="goAuth">授权登录</view>
     </view>
 
-    <view class="card list">
-      <template v-if="!userStore.isGuest">
-        <view class="row">
-          <text class="label">邮箱</text>
-          <text class="value">{{ userStore.userInfo?.email || '未填写' }}</text>
-        </view>
-        <view class="row">
-          <text class="label">手机</text>
-          <text class="value">{{ userStore.userInfo?.phone || '未填写' }}</text>
-        </view>
-      </template>
-      <view v-else class="guest-tip">
-        <text class="tip-text">
-          体验期内可随时授权微信登录，数据将自动保留到你的账号。
+    <!-- 游客数据迁移提示（F03，仅游客） -->
+    <view v-if="userStore.isGuest" class="card migrate-card">
+      <text class="migrate-icon">📦</text>
+      <view class="migrate-main">
+        <text class="migrate-title">体验期数据将自动迁移</text>
+        <text class="migrate-desc">
+          当前所有计算数据、饮食记录、周期配置均为临时缓存，授权登录后自动迁移至个人账号并永久留存。过期未登录，临时数据保留 7 天后清空。
         </text>
       </view>
-      <view class="row">
-        <text class="label">品牌</text>
-        <text class="value">wanglx</text>
+    </view>
+
+    <!-- 功能列表 -->
+    <view class="card list-card">
+      <view class="list-item" @click="goBody">
+        <text class="list-icon">👤</text>
+        <view class="list-main">
+          <text class="list-title">身体数据</text>
+          <text class="list-sub">{{ bodyBrief }}</text>
+        </view>
+        <text class="list-arrow">›</text>
+      </view>
+      <view class="list-item" @click="goMode">
+        <text class="list-icon">🔄</text>
+        <view class="list-main">
+          <text class="list-title">减脂模式</text>
+          <text class="list-sub">当前：{{ modeName }}</text>
+        </view>
+        <text class="list-tag">切换</text>
+        <text class="list-arrow">›</text>
+      </view>
+      <view class="list-item" @click="showPrivacy">
+        <text class="list-icon">🔒</text>
+        <view class="list-main">
+          <text class="list-title">隐私与安全</text>
+          <text class="list-sub">隐私数据加密存储 · 禁止明文传输</text>
+        </view>
+        <text class="list-arrow">›</text>
       </view>
     </view>
 
+    <!-- 数据留存说明（F04/F28） -->
+    <view class="card">
+      <text class="card-title">☁️ 数据留存说明</text>
+      <view class="note-list">
+        <text class="note-item">· 个人资料、减脂模式、周期数据、饮食记录 永久云端留存，不自动清空</text>
+        <text class="note-item">· 登录状态持久化，下次打开自动加载个人数据</text>
+        <text class="note-item">· 游客数据临时留存，登录后自动迁移合并</text>
+        <text class="note-item">· 游客体验过期未登录，临时数据保留 7 天后自动清空</text>
+      </view>
+    </view>
+
+    <!-- 关于 -->
+    <view class="card">
+      <text class="card-title">📌 关于</text>
+      <text class="about-text">臻心减 V1.1 · 生活化减脂计算器</text>
+      <text class="about-text">计算核心后置，前端参数不可篡改；核心计算响应速度与页面加载满足一期性能标准。</text>
+    </view>
+
+    <!-- 退出登录 -->
     <button class="logout" @click="handleLogout">退出登录</button>
+
+    <text class="disclaimer">📌 本工具所有健康计算结果内置免责声明，仅作生活化减脂参考，非医疗建议。</text>
   </view>
 </template>
 
 <style scoped lang="scss">
 .page {
   min-height: 100vh;
-  padding: 24rpx;
+  padding: 24rpx 24rpx 48rpx;
   box-sizing: border-box;
   background: $zhenxinjian-bg;
 }
@@ -101,13 +189,44 @@ async function handleLogout() {
   margin-bottom: 24rpx;
 }
 
-.profile {
+.card-title {
+  display: block;
+  font-size: 30rpx;
+  font-weight: 600;
+  color: $zhenxinjian-text;
+  margin-bottom: 16rpx;
+}
+
+/* 头部用户卡 */
+.hero {
+  background: linear-gradient(160deg, #0d9488 0%, #14b8a6 100%);
+  border-radius: 16rpx;
+  padding: 32rpx;
+  margin-bottom: 24rpx;
   display: flex;
   align-items: center;
   gap: 24rpx;
+  color: #fff;
 }
 
-.info {
+.avatar {
+  width: 104rpx;
+  height: 104rpx;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.avatar-img {
+  width: 104rpx;
+  height: 104rpx;
+}
+
+.hero-info {
+  flex: 1;
   display: flex;
   flex-direction: column;
   gap: 8rpx;
@@ -121,55 +240,134 @@ async function handleLogout() {
 
 .name {
   font-size: 34rpx;
-  font-weight: 600;
-  color: $zhenxinjian-text;
+  font-weight: 700;
 }
 
 .badge {
   padding: 4rpx 16rpx;
   border-radius: 8rpx;
-  background: $zhenxinjian-primary-light;
-  color: $zhenxinjian-primary;
+  background: rgba(255, 255, 255, 0.25);
   font-size: 22rpx;
 }
 
 .meta {
   font-size: 24rpx;
-  color: $zhenxinjian-text-secondary;
+  opacity: 0.9;
 }
 
-.guest-tip {
-  padding: 20rpx 0;
-  border-bottom: 1rpx solid $zhenxinjian-border;
-}
-
-.tip-text {
+.auth-btn {
+  padding: 12rpx 24rpx;
+  border-radius: 24rpx;
+  background: rgba(255, 255, 255, 0.22);
   font-size: 24rpx;
-  color: $zhenxinjian-text-secondary;
-  line-height: 1.6;
+  font-weight: 600;
 }
 
-.row {
+/* 游客迁移提示卡 */
+.migrate-card {
   display: flex;
-  justify-content: space-between;
-  padding: 22rpx 0;
-  border-bottom: 1rpx solid $zhenxinjian-border;
+  gap: 20rpx;
+  background: #fffbf0;
+  border-color: #f5e6c0;
 }
 
-.row:last-child {
+.migrate-icon {
+  font-size: 40rpx;
+}
+
+.migrate-main {
+  flex: 1;
+}
+
+.migrate-title {
+  display: block;
+  font-size: 28rpx;
+  font-weight: 600;
+  color: $zhenxinjian-text;
+  margin-bottom: 8rpx;
+}
+
+.migrate-desc {
+  font-size: 22rpx;
+  color: $zhenxinjian-text-secondary;
+  line-height: 1.7;
+}
+
+/* 功能列表 */
+.list-card {
+  padding: 0 28rpx;
+}
+
+.list-item {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+  padding: 28rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.list-item:last-child {
   border-bottom: none;
 }
 
-.label {
-  color: $zhenxinjian-text-secondary;
-  font-size: 26rpx;
+.list-icon {
+  font-size: 36rpx;
 }
 
-.value {
+.list-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6rpx;
+}
+
+.list-title {
+  font-size: 28rpx;
   color: $zhenxinjian-text;
-  font-size: 26rpx;
 }
 
+.list-sub {
+  font-size: 22rpx;
+  color: $zhenxinjian-text-secondary;
+}
+
+.list-tag {
+  padding: 4rpx 16rpx;
+  border-radius: 16rpx;
+  background: $zhenxinjian-primary-light;
+  color: $zhenxinjian-primary;
+  font-size: 22rpx;
+  font-weight: 600;
+  margin-right: 8rpx;
+}
+
+.list-arrow {
+  font-size: 32rpx;
+  color: $zhenxinjian-text-secondary;
+}
+
+/* 留存说明 */
+.note-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10rpx;
+}
+
+.note-item {
+  font-size: 22rpx;
+  color: $zhenxinjian-text-secondary;
+  line-height: 1.7;
+}
+
+/* 关于 */
+.about-text {
+  display: block;
+  font-size: 22rpx;
+  color: $zhenxinjian-text-secondary;
+  line-height: 1.7;
+}
+
+/* 退出登录 */
 .logout {
   margin-top: 16rpx;
   height: 88rpx;
@@ -179,5 +377,13 @@ async function handleLogout() {
   border: 1rpx solid $zhenxinjian-border;
   border-radius: 12rpx;
   font-size: 30rpx;
+}
+
+.disclaimer {
+  display: block;
+  font-size: 22rpx;
+  color: $zhenxinjian-text-secondary;
+  line-height: 1.6;
+  padding: 24rpx 16rpx 0;
 }
 </style>

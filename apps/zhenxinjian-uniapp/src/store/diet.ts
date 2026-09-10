@@ -42,6 +42,14 @@ export const useDietStore = defineStore('diet', () => {
     loaded.value = true
   }
 
+  /** 拉取指定日期数据但不切换当前查看日期（首页强制当日，不污染记录页历史日期） */
+  async function peekDay(date: string) {
+    const [day, sum] = await Promise.all([listDietRecords(date), getDietSummary(date)])
+    dayData.value = day
+    summary.value = sum
+    loaded.value = true
+  }
+
   /** 新增记录（成功后重拉） */
   async function addRecord(data: DietRecordCreateRequest) {
     submitting.value = true
@@ -93,6 +101,7 @@ export const useDietStore = defineStore('diet', () => {
     submitting,
     noProfile,
     fetchDay,
+    peekDay,
     addRecord,
     editRecord,
     removeRecord,
