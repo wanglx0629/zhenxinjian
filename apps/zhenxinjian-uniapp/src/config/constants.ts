@@ -123,3 +123,47 @@ export const STAGE_532: Stage532[] = [
     desc: '针对体重停滞用户触发固定微调：碳水 −20g、总热量 −80 kcal，蛋白脂肪保持不变，平稳突破平台。'
   }
 ]
+
+/* ------------------------------------------------------------------ */
+/* Change 5 饮食记录：餐别 / 三色进度 / 微调建议（与后端 MealTypeEnum 对齐） */
+/* ------------------------------------------------------------------ */
+
+/** 餐别列表（code 与后端 MealTypeEnum 一致） */
+export interface MealTypeCfg {
+  code: number
+  name: string
+}
+
+export const MEAL_TYPES: MealTypeCfg[] = [
+  { code: 1, name: '早餐' },
+  { code: 2, name: '午餐' },
+  { code: 3, name: '晚餐' },
+  { code: 4, name: '加餐' }
+]
+
+/**
+ * 按当前时段取默认餐别（05–10 早 / 10–15 午 / 15–20:30 晚 / 其余加餐）
+ * @param hour 当前小时（0–23），可含小数表示分钟
+ */
+export function defaultMealType(hour?: number): number {
+  const h = hour ?? new Date().getHours() + new Date().getMinutes() / 60
+  if (h >= 5 && h < 10) return 1
+  if (h >= 10 && h < 15) return 2
+  if (h >= 15 && h < 20.5) return 3
+  return 4
+}
+
+/** 三色进度阈值（达成率 %）：80–100 绿 / <80 黄 / >100 红 */
+export const PROGRESS_THRESHOLD = { green: 80, red: 100 } as const
+
+/** 三色进度颜色 */
+export const PROGRESS_COLORS = { green: '#67C23A', yellow: '#E6A23C', red: '#F56C6C' } as const
+
+/** 微调建议文案（按超标项动态拼接，spec：超标微调建议） */
+export const OVER_ADVICE = {
+  fat: '脂肪超标：建议换清蒸/水煮做法、去肥肉油碟，以鸡胸/虾/豆腐替代部分肥肉。',
+  carb: '碳水超标：建议主食减半或换糙米/红薯，先菜肉后饭。',
+  protein: '蛋白超标：问题不大，压回脂肪碳水即可，无需刻意减少蛋白。',
+  kcal: '总热量超标：建议散步 20–30 分钟，不要跳过下一餐。',
+  disclaimer: '以上建议为通用饮食调整方向，非医疗建议。如有特殊健康状况请咨询专业医师。'
+} as const

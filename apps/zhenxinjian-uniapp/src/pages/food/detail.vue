@@ -1,7 +1,7 @@
 <script setup lang="ts">
 /**
  * 食物详情页：每 100g 营养值展示 + 份量克数输入实时试算（默认常用单份克数）
- * 本期仅查看与试算，「写入饮食记录」入口留待 Change 5
+ * 「加入记录」跳转 P11 添加饮食页（携带 foodId + 当前克数）
  * 作者: wanglx
  */
 import { computed, ref } from 'vue'
@@ -75,6 +75,13 @@ function useServing() {
 function setGrams(g: number) {
   gramsInput.value = String(g)
   runCalc()
+}
+
+/** 加入饮食记录：携带 foodId + 当前克数跳 P11 */
+function goAddRecord() {
+  if (!food.value) return
+  const g = grams.value ?? Math.round(food.value.serving)
+  uni.navigateTo({ url: `/pages/record/add?foodId=${food.value.id}&grams=${g}` })
 }
 </script>
 
@@ -155,8 +162,8 @@ function setGrams(g: number) {
         </view>
       </view>
 
-      <view class="tip">
-        <text>试算结果仅供记录参考，写入饮食记录功能即将上线</text>
+      <view class="add-record-area">
+        <view class="add-record-btn" @click="goAddRecord">加入记录</view>
       </view>
     </template>
   </view>
@@ -305,13 +312,19 @@ function setGrams(g: number) {
   display: block;
 }
 
-.tip {
-  padding: 0 8rpx;
+.add-record-area {
+  margin-top: 32rpx;
 }
 
-.tip text {
-  font-size: 22rpx;
-  color: $zhenxinjian-text-secondary;
+.add-record-btn {
+  height: 88rpx;
+  line-height: 88rpx;
+  text-align: center;
+  background: $zhenxinjian-primary;
+  color: #fff;
+  font-size: 30rpx;
+  font-weight: 600;
+  border-radius: 12rpx;
 }
 
 .empty {

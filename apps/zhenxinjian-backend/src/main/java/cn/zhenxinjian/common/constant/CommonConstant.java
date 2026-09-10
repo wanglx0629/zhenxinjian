@@ -74,6 +74,29 @@ public final class CommonConstant {
     /** 试算克数超区间（1-10000） */
     public static final int FOOD_GRAMS_INVALID_CODE = 40406;
 
+    // ==================== 饮食记录错误码（405xx） ====================
+
+    /** 份量克数非法（>0 且 ≤5000） */
+    public static final int DIET_AMOUNT_INVALID_CODE = 40501;
+
+    /** 宏量数值非法（非负且在上限内） */
+    public static final int DIET_MACRO_INVALID_CODE = 40502;
+
+    /** 能量与宏量不守恒（±10%） */
+    public static final int DIET_KCAL_MISMATCH_CODE = 40503;
+
+    /** 记录不存在或不可操作（越权同码不泄露存在性） */
+    public static final int DIET_RECORD_NOT_FOUND_CODE = 40504;
+
+    /** 不允许未来日期 */
+    public static final int DIET_FUTURE_DATE_CODE = 40505;
+
+    /** 食物不存在或已删除（含他人自定义食物） */
+    public static final int DIET_FOOD_INVALID_CODE = 40506;
+
+    /** 餐别或来源非法 */
+    public static final int DIET_MEAL_TYPE_INVALID_CODE = 40507;
+
     /** 食物搜索单页上限 */
     public static final long FOOD_SEARCH_MAX_SIZE = 50L;
 

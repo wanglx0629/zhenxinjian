@@ -27,6 +27,12 @@
       }
     },
     {
+      "path": "pages/record/add",
+      "style": {
+        "navigationBarTitleText": "添加饮食"
+      }
+    },
+    {
       "path": "pages/food/index",
       "style": {
         "navigationBarTitleText": "食物库"

@@ -79,6 +79,29 @@ public final class ExceptionConstant {
     /** 40406 试算克数超区间 */
     public static final String FOOD_GRAMS_INVALID = "试算克数须在1-10000之间";
 
+    // ==================== 饮食记录（405xx） ====================
+
+    /** 40501 份量克数非法 */
+    public static final String DIET_AMOUNT_INVALID = "份量克数须大于0且不超过5000";
+
+    /** 40502 宏量数值非法 */
+    public static final String DIET_MACRO_INVALID = "名称与宏量数值非法，请检查输入";
+
+    /** 40503 能量与宏量不守恒 */
+    public static final String DIET_KCAL_MISMATCH = "能量须约等于碳水×4+蛋白×4+脂肪×9（偏差10%以内）";
+
+    /** 40504 记录不存在或不可操作 */
+    public static final String DIET_RECORD_NOT_FOUND = "记录不存在或不可操作";
+
+    /** 40505 不允许未来日期 */
+    public static final String DIET_FUTURE_DATE = "不能记录或查看未来日期";
+
+    /** 40506 食物不存在或已删除 */
+    public static final String DIET_FOOD_INVALID = "食物不存在或已删除，请重新选择";
+
+    /** 40507 餐别或来源非法 */
+    public static final String DIET_MEAL_TYPE_INVALID = "餐别或来源非法";
+
     // ==================== 用户业务 ====================
 
     /** 用户名已存在 */
