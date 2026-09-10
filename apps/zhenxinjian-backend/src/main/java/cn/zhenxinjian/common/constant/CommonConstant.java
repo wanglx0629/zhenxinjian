@@ -114,6 +114,14 @@ public final class CommonConstant {
     /** 越权或不可操作（不泄露存在性） */
     public static final int CYCLE_NOT_OWNER_CODE = 40605;
 
+    // ==================== 饮食提醒错误码（407xx） ====================
+
+    /** 提醒时间格式非法（须 24 小时制 HH:mm） */
+    public static final int REMINDER_TIME_INVALID_CODE = 40701;
+
+    /** 订阅消息模板未配置（预留，运行时任务空转不报错） */
+    public static final int REMINDER_TEMPLATE_MISSING_CODE = 40702;
+
     /** 食物搜索单页上限 */
     public static final long FOOD_SEARCH_MAX_SIZE = 50L;
 

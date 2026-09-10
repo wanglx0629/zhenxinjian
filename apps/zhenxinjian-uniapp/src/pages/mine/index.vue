@@ -4,7 +4,7 @@
  * 作者: wanglx
  */
 import { onShow } from '@dcloudio/uni-app'
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import TeLogo from '@/components/TeLogo.vue'
 import { useUserStore } from '@/store/user'
 import { useDietStore } from '@/store/diet'
@@ -13,11 +13,15 @@ import { useCycleStore } from '@/store/cycle'
 import { DIET_MODES } from '@/config/constants'
 import { guestLeftText } from '@/utils/format'
 import { getToken } from '@/utils/storage'
+import { getReminder } from '@/api/reminder'
 
 const userStore = useUserStore()
 const dietStore = useDietStore()
 const bodyStore = useBodyStore()
 const cycleStore = useCycleStore()
+
+/** 提醒设置状态（onShow 同步；任一开启项视为已开启） */
+const reminderEnabled = ref(false)
 
 const displayName = computed(
   () => userStore.userInfo?.nickname || userStore.userInfo?.username || '用户'
@@ -51,7 +55,19 @@ onShow(() => {
   if (!bodyStore.loaded) {
     bodyStore.fetchProfile().catch(() => undefined)
   }
+  syncReminderStatus()
 })
+
+/** 同步提醒设置副标题（失败静默不阻塞页面） */
+function syncReminderStatus() {
+  getReminder()
+    .then((vo) => {
+      reminderEnabled.value =
+        vo.masterSwitch === 1 &&
+        (vo.breakfastSwitch === 1 || vo.lunchSwitch === 1 || vo.dinnerSwitch === 1)
+    })
+    .catch(() => undefined)
+}
 
 /** 授权登录（游客 → 复用引导页完整授权流程） */
 function goAuth() {
@@ -66,6 +82,11 @@ function goBody() {
 /** 减脂模式（P05） */
 function goMode() {
   uni.navigateTo({ url: '/pages/mode/select' })
+}
+
+/** 提醒设置（P13） */
+function goReminder() {
+  uni.navigateTo({ url: '/pages/reminder/index' })
 }
 
 /** 隐私与安全（静态说明） */
@@ -136,6 +157,14 @@ function handleLogout() {
           <text class="list-sub">当前：{{ modeName }}</text>
         </view>
         <text class="list-tag">切换</text>
+        <text class="list-arrow">›</text>
+      </view>
+      <view class="list-item" @click="goReminder">
+        <text class="list-icon">🔔</text>
+        <view class="list-main">
+          <text class="list-title">提醒设置</text>
+          <text class="list-sub">{{ reminderEnabled ? '已开启' : '已关闭' }}</text>
+        </view>
         <text class="list-arrow">›</text>
       </view>
       <view class="list-item" @click="showPrivacy">

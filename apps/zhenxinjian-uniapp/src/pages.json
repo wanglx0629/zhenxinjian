@@ -91,6 +91,12 @@
       "style": {
         "navigationBarTitleText": "碳循环计划"
       }
+    },
+    {
+      "path": "pages/reminder/index",
+      "style": {
+        "navigationBarTitleText": "提醒设置"
+      }
     }
   ],
   "globalStyle": {

@@ -47,6 +47,11 @@ springdoc:
 
 # 自定义配置
 zhenxinjian:
+  wechat:
+    # 三餐提醒订阅消息模板ID（一次性订阅，微信公众平台申请；未配置时推送任务空转）
+    remind-template-id: ${WECHAT_REMIND_TEMPLATE_ID:}
+    # 订阅消息跳转小程序版本：developer开发版/trial体验版/formal正式版
+    remind-miniprogram-state: ${WECHAT_REMIND_MP_STATE:formal}
   jwt:
     secret: zhenxinjian-jwt-secret-key-change-in-production-wanglx
     expire-minutes: 120

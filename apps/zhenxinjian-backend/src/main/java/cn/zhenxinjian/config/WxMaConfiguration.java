@@ -37,5 +37,9 @@ public class WxMaConfiguration {
         private String appid;
         /** 小程序 AppSecret */
         private String secret;
+        /** 三餐提醒订阅消息模板ID（一次性订阅；未配置时推送任务空转） */
+        private String remindTemplateId;
+        /** 订阅消息跳转小程序版本：developer开发版/trial体验版/formal正式版（默认正式版） */
+        private String remindMiniprogramState = "formal";
     }
 }

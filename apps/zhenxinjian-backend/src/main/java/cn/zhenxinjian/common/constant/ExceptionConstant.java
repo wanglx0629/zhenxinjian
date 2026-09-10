@@ -119,6 +119,14 @@ public final class ExceptionConstant {
     /** 40605 越权或不可操作 */
     public static final String CYCLE_NOT_OWNER = "周期不存在或不可操作";
 
+    // ==================== 饮食提醒（407xx） ====================
+
+    /** 40701 提醒时间格式非法 */
+    public static final String REMINDER_TIME_INVALID = "提醒时间格式非法";
+
+    /** 40702 订阅消息模板未配置 */
+    public static final String REMINDER_TEMPLATE_MISSING = "订阅消息模板未配置";
+
     // ==================== 用户业务 ====================
 
     /** 用户名已存在 */
