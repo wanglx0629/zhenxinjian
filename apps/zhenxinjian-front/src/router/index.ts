@@ -15,20 +15,15 @@ const router = createRouter({
       meta: { public: true }
     },
     {
-      path: '/register',
-      name: 'Register',
-      component: () => import('@/view/register/index.vue'),
-      meta: { public: true }
-    },
-    {
       path: '/',
       component: () => import('@/layout/MainLayout.vue'),
-      redirect: '/home',
+      redirect: '/dashboard',
       children: [
         {
-          path: 'home',
-          name: 'Home',
-          component: () => import('@/view/home/index.vue')
+          path: 'dashboard',
+          name: 'Dashboard',
+          component: () => import('@/view/dashboard/index.vue'),
+          meta: { admin: true }
         },
         {
           path: 'users',
@@ -37,9 +32,16 @@ const router = createRouter({
           meta: { admin: true }
         },
         {
-          path: 'websocket',
-          name: 'WebSocket',
-          component: () => import('@/view/websocket/index.vue')
+          path: 'foods',
+          name: 'Foods',
+          component: () => import('@/view/foods/index.vue'),
+          meta: { admin: true }
+        },
+        {
+          path: 'diet-records',
+          name: 'DietRecords',
+          component: () => import('@/view/diet-records/index.vue'),
+          meta: { admin: true }
         }
       ]
     }
@@ -53,7 +55,7 @@ router.beforeEach(async (to, _from, next) => {
     next('/login')
     return
   }
-  if (token && (to.path === '/login' || to.path === '/register')) {
+  if (token && to.path === '/login') {
     next('/')
     return
   }
@@ -63,12 +65,16 @@ router.beforeEach(async (to, _from, next) => {
       try {
         await userStore.fetchUserInfo()
       } catch {
-        next('/home')
+        // 拉取用户信息失败视为会话失效，回登录页
+        localStorage.removeItem('token')
+        next('/login')
         return
       }
     }
     if (userStore.userInfo?.role !== 'ADMIN') {
-      next('/home')
+      // 非管理员无可见页面，清除会话回登录页
+      localStorage.removeItem('token')
+      next('/login')
       return
     }
   }

@@ -23,16 +23,20 @@ async function handleLogout() {
   await userStore.logout()
 }
 
-function goHome() {
-  router.push('/home')
+function goDashboard() {
+  router.push('/dashboard')
 }
 
 function goUsers() {
   router.push('/users')
 }
 
-function goWebSocket() {
-  router.push('/websocket')
+function goFoods() {
+  router.push('/foods')
+}
+
+function goDietRecords() {
+  router.push('/diet-records')
 }
 </script>
 
@@ -44,12 +48,13 @@ function goWebSocket() {
         <span class="brand">zhenxinjian</span>
         <nav class="nav-links">
           <a
+            v-if="isAdmin"
             class="nav-link"
-            :class="{ active: route.path === '/home' }"
+            :class="{ active: route.path === '/dashboard' }"
             href="javascript:void(0)"
-            @click="goHome"
+            @click="goDashboard"
           >
-            首页
+            数据看板
           </a>
           <a
             v-if="isAdmin"
@@ -61,12 +66,22 @@ function goWebSocket() {
             用户管理
           </a>
           <a
+            v-if="isAdmin"
             class="nav-link"
-            :class="{ active: route.path === '/websocket' }"
+            :class="{ active: route.path === '/foods' }"
             href="javascript:void(0)"
-            @click="goWebSocket"
+            @click="goFoods"
           >
-            WebSocket
+            食物库
+          </a>
+          <a
+            v-if="isAdmin"
+            class="nav-link"
+            :class="{ active: route.path === '/diet-records' }"
+            href="javascript:void(0)"
+            @click="goDietRecords"
+          >
+            饮食记录
           </a>
         </nav>
       </div>
