@@ -97,6 +97,24 @@
       "style": {
         "navigationBarTitleText": "提醒设置"
       }
+    },
+    {
+      "path": "pages/taper/plan",
+      "style": {
+        "navigationBarTitleText": "532 推进计划"
+      }
+    },
+    {
+      "path": "pages/weight/index",
+      "style": {
+        "navigationBarTitleText": "体重记录"
+      }
+    },
+    {
+      "path": "pages/menstrual/index",
+      "style": {
+        "navigationBarTitleText": "经期管理"
+      }
     }
   ],
   "globalStyle": {

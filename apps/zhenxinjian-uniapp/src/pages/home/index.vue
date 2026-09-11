@@ -14,6 +14,7 @@ import OverLimitCard from '@/components/OverLimitCard.vue'
 import { CYCLE_DAY_TYPES, MEAL_TYPES } from '@/config/constants'
 import { greeting, guestLeftText, mdWeek, ymd } from '@/utils/format'
 import { getToken } from '@/utils/storage'
+import { getMenstrual } from '@/api/menstrual'
 
 const userStore = useUserStore()
 const dietStore = useDietStore()
@@ -23,6 +24,9 @@ const cycleStore = useCycleStore()
 /** 页面加载态 / 错误态 */
 const loading = ref(true)
 const loadError = ref(false)
+
+/** 经期阶段徽标（仅女性且已开启时非空） */
+const periodPhase = ref('')
 
 const displayName = computed(
   () => userStore.userInfo?.nickname || userStore.userInfo?.username || '用户'
@@ -115,6 +119,12 @@ async function loadAll() {
         // 周期拉取失败不阻塞首页主数据
       }
     }
+    // 经期阶段徽标（仅女性且已开启时返回阶段；失败静默不阻塞首页）
+    getMenstrual()
+      .then((vo) => {
+        periodPhase.value = vo.applicable && vo.enabled === 1 ? vo.phaseName || '' : ''
+      })
+      .catch(() => undefined)
   } catch {
     loadError.value = true
   } finally {
@@ -147,12 +157,12 @@ function goRecord() {
   uni.switchTab({ url: '/pages/record/index' })
 }
 
-/** 看计划：碳循环 → P07；532 → P04 代谢结果 */
+/** 看计划：碳循环 → P07；532 → P08 四阶段计划卡 */
 function goPlan() {
   if (isCycle.value) {
     uni.navigateTo({ url: '/pages/cycle/plan' })
   } else {
-    uni.navigateTo({ url: '/pages/body/result' })
+    uni.navigateTo({ url: '/pages/taper/plan' })
   }
 }
 </script>
@@ -206,6 +216,7 @@ function goPlan() {
             <view class="hero-bar-fill" :style="{ width: kcalBarRate + '%' }"></view>
           </view>
           <text class="hero-mode">{{ modeTag }}</text>
+          <text v-if="periodPhase" class="hero-period">🩸 {{ periodPhase }}</text>
         </template>
       </view>
 
@@ -473,6 +484,16 @@ function goPlan() {
   font-size: 22rpx;
   opacity: 0.9;
   margin-top: 12rpx;
+}
+
+.hero-period {
+  display: inline-block;
+  margin-top: 12rpx;
+  padding: 4rpx 16rpx;
+  border-radius: 20rpx;
+  background: rgba(255, 255, 255, 0.22);
+  font-size: 22rpx;
+  font-weight: 600;
 }
 
 /* 身体数据摘要行 */

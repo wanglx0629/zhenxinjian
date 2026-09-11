@@ -122,6 +122,14 @@ public final class CommonConstant {
     /** 订阅消息模板未配置（预留，运行时任务空转不报错） */
     public static final int REMINDER_TEMPLATE_MISSING_CODE = 40702;
 
+    // ==================== 经期管理/体重记录错误码（408xx） ====================
+
+    /** 经期设置非法（L/D 越界或起始日非法/未来） */
+    public static final int MENSTRUAL_SETTING_INVALID_CODE = 40801;
+
+    /** 体重记录非法（越界/未来日期） */
+    public static final int WEIGHT_INVALID_CODE = 40802;
+
     /** 食物搜索单页上限 */
     public static final long FOOD_SEARCH_MAX_SIZE = 50L;
 

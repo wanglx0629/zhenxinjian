@@ -10,6 +10,8 @@ import { useUserStore } from '@/store/user'
 import { useDietStore } from '@/store/diet'
 import { useBodyStore } from '@/store/body'
 import { useCycleStore } from '@/store/cycle'
+import { useWeightStore } from '@/store/weight'
+import { useMenstrualStore } from '@/store/menstrual'
 import { DIET_MODES } from '@/config/constants'
 import { guestLeftText } from '@/utils/format'
 import { getToken } from '@/utils/storage'
@@ -19,6 +21,8 @@ const userStore = useUserStore()
 const dietStore = useDietStore()
 const bodyStore = useBodyStore()
 const cycleStore = useCycleStore()
+const weightStore = useWeightStore()
+const menstrualStore = useMenstrualStore()
 
 /** 提醒设置状态（onShow 同步；任一开启项视为已开启） */
 const reminderEnabled = ref(false)
@@ -46,6 +50,21 @@ const modeName = computed(() => {
   return DIET_MODES.find(m => m.code === mode)?.name ?? '532'
 })
 
+/** 体重记录副标题（最近体重 / 未记录） */
+const weightBrief = computed(() => {
+  const w = weightStore.latestWeight
+  return w != null ? `${w}kg` : '未记录'
+})
+
+/** 月经周期副标题（当前阶段 / 未设置） */
+const menstrualBrief = computed(() => {
+  if (!menstrualStore.applicable) return ''
+  return menstrualStore.phaseName || '未设置'
+})
+
+/** 是否展示月经周期入口（仅女性） */
+const showMenstrual = computed(() => menstrualStore.applicable)
+
 onShow(() => {
   if (!getToken()) {
     uni.reLaunch({ url: '/pages/auth/guide' })
@@ -56,7 +75,14 @@ onShow(() => {
     bodyStore.fetchProfile().catch(() => undefined)
   }
   syncReminderStatus()
+  syncWeightAndMenstrual()
 })
+
+/** 同步体重与经期入口副标题（失败静默不阻塞页面） */
+function syncWeightAndMenstrual() {
+  weightStore.fetchRecords().catch(() => undefined)
+  menstrualStore.fetch().catch(() => undefined)
+}
 
 /** 同步提醒设置副标题（失败静默不阻塞页面） */
 function syncReminderStatus() {
@@ -89,6 +115,16 @@ function goReminder() {
   uni.navigateTo({ url: '/pages/reminder/index' })
 }
 
+/** 体重记录（P09） */
+function goWeight() {
+  uni.navigateTo({ url: '/pages/weight/index' })
+}
+
+/** 月经周期（经期设置） */
+function goMenstrual() {
+  uni.navigateTo({ url: '/pages/menstrual/index' })
+}
+
 /** 隐私与安全（静态说明） */
 function showPrivacy() {
   uni.showToast({ title: '数据已加密存储，禁止明文传输', icon: 'none' })
@@ -104,6 +140,8 @@ function handleLogout() {
       dietStore.reset()
       bodyStore.reset()
       cycleStore.reset()
+      weightStore.reset()
+      menstrualStore.reset()
       await userStore.logout()
     }
   })
@@ -164,6 +202,22 @@ function handleLogout() {
         <view class="list-main">
           <text class="list-title">提醒设置</text>
           <text class="list-sub">{{ reminderEnabled ? '已开启' : '已关闭' }}</text>
+        </view>
+        <text class="list-arrow">›</text>
+      </view>
+      <view class="list-item" @click="goWeight">
+        <text class="list-icon">⚖️</text>
+        <view class="list-main">
+          <text class="list-title">体重记录</text>
+          <text class="list-sub">{{ weightBrief }}</text>
+        </view>
+        <text class="list-arrow">›</text>
+      </view>
+      <view v-if="showMenstrual" class="list-item" @click="goMenstrual">
+        <text class="list-icon">🩸</text>
+        <view class="list-main">
+          <text class="list-title">月经周期</text>
+          <text class="list-sub">{{ menstrualBrief }}</text>
         </view>
         <text class="list-arrow">›</text>
       </view>

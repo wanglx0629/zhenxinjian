@@ -16,6 +16,7 @@ import cn.zhenxinjian.domain.po.UserBody;
 import cn.zhenxinjian.domain.vo.DietDayVO;
 import cn.zhenxinjian.domain.vo.DietRecordVO;
 import cn.zhenxinjian.domain.vo.DietSummaryVO;
+import cn.zhenxinjian.domain.vo.Taper532VO;
 import cn.zhenxinjian.mapper.DietRecordMapper;
 import cn.zhenxinjian.mapper.FoodMapper;
 import cn.zhenxinjian.mapper.UserBodyMapper;
@@ -73,6 +74,8 @@ public class DietRecordService {
     private final UserBodyMapper userBodyMapper;
 
     private final CyclePlanService cyclePlanService;
+
+    private final Taper532Service taper532Service;
 
     /**
      * 新增饮食记录
@@ -238,6 +241,11 @@ public class DietRecordService {
         Integer mode = body.getMode() == null ? DietModeEnum.TAPER_532.getCode() : body.getMode();
         vo.setMode(mode);
 
+        // 经期上浮值（跨模式通用：碳水 +X / 热量 +Y，蛋白脂肪不变）
+        MenstrualCalcService.PhaseResult phase = taper532Service.resolvePhase(body);
+        int carbUplift = phase == null ? 0 : phase.carbUplift();
+        int kcalUplift = phase == null ? 0 : phase.kcalUplift();
+
         if (DietModeEnum.CARB_CYCLE.getCode().equals(mode)) {
             CarbCycleDay day = cyclePlanService.findActiveDay(userId, queryDate);
             if (day == null) {
@@ -245,29 +253,33 @@ public class DietRecordService {
                 return vo;
             }
             vo.setRecorded(true);
-            Double carbTarget = day.getCarbG() == null ? null : day.getCarbG().doubleValue();
+            Double carbTarget = day.getCarbG() == null ? null
+                    : round1(day.getCarbG().doubleValue() + carbUplift);
             Double proteinTarget = day.getProteinG() == null ? null : day.getProteinG().doubleValue();
             Double fatTarget = day.getFatG() == null ? null : day.getFatG().doubleValue();
+            int kcalTarget = (day.getKcal() == null ? 0 : day.getKcal()) + kcalUplift;
             vo.setCarbTarget(carbTarget);
             vo.setProteinTarget(proteinTarget);
             vo.setFatTarget(fatTarget);
-            vo.setKcalTarget(day.getKcal());
+            vo.setKcalTarget(kcalTarget);
             vo.setCarbRate(rate(carb, carbTarget));
             vo.setProteinRate(rate(protein, proteinTarget));
             vo.setFatRate(rate(fat, fatTarget));
-            vo.setKcalRate(rate(kcal, day.getKcal() == null ? null : day.getKcal().doubleValue()));
+            vo.setKcalRate(rate(kcal, (double) kcalTarget));
             return vo;
         }
 
+        // 532 模式：目标取推进口径（基线 + 平台下调 + 经期上浮，蛋白脂肪不变）
+        Taper532VO.TodayTarget target = taper532Service.todayTarget(userId);
         vo.setRecorded(true);
-        vo.setCarbTarget(body.getTargetCarb());
-        vo.setProteinTarget(body.getTargetProtein());
-        vo.setFatTarget(body.getTargetFat());
-        vo.setKcalTarget(body.getTargetKcal());
-        vo.setCarbRate(rate(carb, body.getTargetCarb()));
-        vo.setProteinRate(rate(protein, body.getTargetProtein()));
-        vo.setFatRate(rate(fat, body.getTargetFat()));
-        vo.setKcalRate(rate(kcal, body.getTargetKcal() == null ? null : body.getTargetKcal().doubleValue()));
+        vo.setCarbTarget(target.getCarb());
+        vo.setProteinTarget(target.getProtein());
+        vo.setFatTarget(target.getFat());
+        vo.setKcalTarget(target.getKcal());
+        vo.setCarbRate(rate(carb, target.getCarb()));
+        vo.setProteinRate(rate(protein, target.getProtein()));
+        vo.setFatRate(rate(fat, target.getFat()));
+        vo.setKcalRate(rate(kcal, target.getKcal() == null ? null : target.getKcal().doubleValue()));
         return vo;
     }
 

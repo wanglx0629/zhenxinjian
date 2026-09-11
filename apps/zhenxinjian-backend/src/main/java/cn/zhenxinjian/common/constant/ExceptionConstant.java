@@ -127,6 +127,14 @@ public final class ExceptionConstant {
     /** 40702 订阅消息模板未配置 */
     public static final String REMINDER_TEMPLATE_MISSING = "订阅消息模板未配置";
 
+    // ==================== 经期管理/体重记录（408xx） ====================
+
+    /** 40801 经期设置非法 */
+    public static final String MENSTRUAL_SETTING_INVALID = "经期设置非法";
+
+    /** 40802 体重记录非法 */
+    public static final String WEIGHT_INVALID = "体重记录非法";
+
     // ==================== 用户业务 ====================
 
     /** 用户名已存在 */

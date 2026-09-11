@@ -77,6 +77,12 @@ public class UserBody implements Serializable {
     @Schema(description = "目标脂肪g（1位小数）")
     private Double targetFat;
 
+    @Schema(description = "平台下调态：0未下调 1已下调")
+    private Integer isAdjusted;
+
+    @Schema(description = "触发下调的参考体重kg（下调生效时记录，恢复清除）")
+    private Double triggerWeight;
+
     @Schema(description = "状态:0停用 1有效")
     private Integer status;
 
