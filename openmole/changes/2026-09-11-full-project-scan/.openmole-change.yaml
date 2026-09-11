@@ -1,0 +1,11 @@
+# OpenMole change metadata
+name: 2026-09-11-full-project-scan
+created_at: "2026-09-11T15:35:00+08:00"
+status: active
+default_level: arch
+scope: "."
+detected_languages:
+  - java
+  - typescript
+  - vue
+notes: 一期功能全量收敛后首次全项目 ARCH 级坏味道盘点
