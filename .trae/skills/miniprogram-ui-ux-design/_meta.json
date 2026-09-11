@@ -1,0 +1,6 @@
+{
+  "slug": "miniprogram-ui-ux-design",
+  "version": "1.0.0",
+  "description": "微信小程序 UI/UX 设计规范，覆盖 rpx 体系、WXSS 布局、组件模式、无障碍",
+  "description_zh": "微信小程序 UI/UX 设计规范，覆盖 rpx 体系、WXSS 布局、组件模式、无障碍"
+}

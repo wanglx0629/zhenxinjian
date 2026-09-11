@@ -77,6 +77,9 @@ pnpm-debug.log*
 # AI 会话临时脚本（tmp- / .tmp- 前缀）
 tmp-*
 .tmp-*
+# Python 字节码缓存
+__pycache__/
+*.pyc
 
 # ====================
 # 系统文件
