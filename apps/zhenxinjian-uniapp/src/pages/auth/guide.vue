@@ -9,11 +9,13 @@ import { onShow } from '@dcloudio/uni-app'
 import { useUserStore } from '@/store/user'
 import { getToken } from '@/utils/storage'
 import { canSubmit } from '@/utils/throttle'
+import { track, trackPage } from '@/utils/track'
 
 const userStore = useUserStore()
 const loading = ref(false)
 
 onShow(() => {
+  trackPage('pages/auth/guide')
   // 已有登录态（游客或正式）直接进首页
   if (getToken()) {
     uni.switchTab({ url: '/pages/home/index' })
@@ -34,16 +36,19 @@ async function handleWechatLogin() {
     const loginRes = (Array.isArray(result) ? result[1] : result) as { code?: string }
     const code = loginRes?.code
     if (!code) {
+      track('login_fail')
       uni.showToast({ title: '获取登录凭证失败，请重试', icon: 'none' })
       return
     }
     await userStore.loginByWechat(code)
+    track('login_wechat')
     uni.showToast({ title: '登录成功', icon: 'success' })
     setTimeout(() => {
       uni.switchTab({ url: '/pages/home/index' })
     }, 400)
   } catch {
     // 失败可重试：下次点击重新 wx.login() 取新 code
+    track('login_fail')
     uni.showToast({ title: '登录失败，请重试', icon: 'none' })
   } finally {
     loading.value = false
@@ -60,6 +65,7 @@ async function handleGuest() {
   loading.value = true
   try {
     await userStore.loginAsGuest()
+    track('login_guest')
     uni.switchTab({ url: '/pages/home/index' })
   } catch {
     uni.showToast({ title: '进入失败，请重试', icon: 'none' })

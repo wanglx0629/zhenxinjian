@@ -5,8 +5,11 @@
 <script setup lang="ts">
 import { onLaunch } from '@dcloudio/uni-app'
 import { getToken } from '@/utils/storage'
+import { startTrackFlushTimer } from '@/utils/track'
 
 onLaunch(() => {
+  // 启动埋点队列定时上报（补发上次未发成功的事件）
+  startTrackFlushTimer()
   // pages.json 首页为 auth/guide（P01）；已登录（游客或正式）直接进首页
   if (getToken()) {
     uni.switchTab({ url: '/pages/home/index' })

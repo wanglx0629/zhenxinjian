@@ -5,10 +5,11 @@
  * 作者: wanglx
  */
 import { computed, reactive, ref } from 'vue'
-import { onLoad } from '@dcloudio/uni-app'
+import { onLoad, onShow } from '@dcloudio/uni-app'
 import { useFoodStore } from '@/store/food'
 import type { FoodCategoryVO } from '@/api/food'
 import { canSubmit } from '@/utils/throttle'
+import { track, trackPage } from '@/utils/track'
 
 const foodStore = useFoodStore()
 
@@ -69,6 +70,10 @@ onLoad(async (options) => {
   } catch {
     uni.showToast({ title: '食物加载失败', icon: 'none' })
   }
+})
+
+onShow(() => {
+  trackPage('pages/food/custom-edit')
 })
 
 /** 数值解析：空/非法返回 null */
@@ -145,6 +150,7 @@ async function handleSubmit() {
       kcal: num(form.kcal)!,
       serving: form.serving.trim() ? num(form.serving)! : undefined
     })
+    if (!editId.value) track('food_custom_add')
     uni.showToast({ title: editId.value ? '保存成功' : '新增成功', icon: 'success' })
     setTimeout(() => uni.navigateBack(), 600)
   } catch {

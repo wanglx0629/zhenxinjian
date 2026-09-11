@@ -11,6 +11,7 @@ import { useCycleStore } from '@/store/cycle'
 import { MEAL_TYPES, PROGRESS_THRESHOLD, PROGRESS_COLORS, OVER_ADVICE, CYCLE_DAY_TYPES } from '@/config/constants'
 import { ymd, md, week } from '@/utils/format'
 import type { DietRecordVO } from '@/api/diet'
+import { track, trackPage } from '@/utils/track'
 
 const dietStore = useDietStore()
 const bodyStore = useBodyStore()
@@ -86,6 +87,7 @@ const showCycleEmpty = computed(() => dietStore.noProfile && !!bodyStore.profile
 
 /** 页面显示时拉取数据 */
 onShow(async () => {
+  trackPage('pages/record/index')
   try {
     await dietStore.fetchDay()
   } catch {
@@ -154,6 +156,7 @@ async function confirmDelete() {
   showDeleteConfirm.value = false
   try {
     await dietStore.removeRecord(deleteTargetId.value)
+    track('record_delete')
     uni.showToast({ title: '已删除', icon: 'success' })
   } catch {
     // 错误已由 request.ts toast

@@ -5,12 +5,13 @@
  * 作者: wanglx
  */
 import { computed, reactive, ref } from 'vue'
-import { onLoad } from '@dcloudio/uni-app'
+import { onLoad, onShow } from '@dcloudio/uni-app'
 import { useBodyStore } from '@/store/body'
 import { ACTIVITY, DEFICIT_OPTIONS, RANGES } from '@/config/constants'
 import { bmr, tdee, macro532Base, type CalcProfile } from '@/utils/calculator'
 import { checkAll, checkTargetWeight } from '@/utils/validate'
 import { canSubmit } from '@/utils/throttle'
+import { track, trackPage } from '@/utils/track'
 
 const bodyStore = useBodyStore()
 
@@ -79,6 +80,10 @@ onLoad(async () => {
   }
 })
 
+onShow(() => {
+  trackPage('pages/body/profile')
+})
+
 /** 提交：前端区间/交叉校验 → 后端保存 → 跳结果页 */
 async function handleSubmit() {
   Object.keys(errors).forEach((k) => delete errors[k])
@@ -110,6 +115,7 @@ async function handleSubmit() {
       activityLevel: form.activityLevel,
       deficit: form.deficit
     })
+    track('body_save')
     uni.redirectTo({ url: '/pages/body/result' })
   } catch {
     // request.ts 已统一 toast；此处仅保持表单可重试

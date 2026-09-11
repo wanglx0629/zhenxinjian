@@ -9,6 +9,7 @@ import { onShow } from '@dcloudio/uni-app'
 import { useWeightStore } from '@/store/weight'
 import { ymd } from '@/utils/format'
 import { canSubmit } from '@/utils/throttle'
+import { track, trackPage } from '@/utils/track'
 
 const weightStore = useWeightStore()
 
@@ -31,6 +32,7 @@ function displayWeight(kg: number): string {
 }
 
 onShow(async () => {
+  trackPage('pages/weight/index')
   try {
     await weightStore.fetchRecords()
     if (weightStore.loaded) {
@@ -66,6 +68,7 @@ async function handleSave() {
   if (weightStore.submitting || !canSubmit()) return
   try {
     await weightStore.save({ recordDate: recordDate.value, weight: Math.round(kg * 10) / 10 })
+    track('weight_add')
     weight.value = ''
     uni.showToast({ title: '已记录', icon: 'success' })
   } catch {

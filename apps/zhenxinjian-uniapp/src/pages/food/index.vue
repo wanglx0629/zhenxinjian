@@ -5,9 +5,10 @@
  * 作者: wanglx
  */
 import { computed, ref } from 'vue'
-import { onLoad, onReachBottom } from '@dcloudio/uni-app'
+import { onLoad, onReachBottom, onShow } from '@dcloudio/uni-app'
 import { useFoodStore } from '@/store/food'
 import type { FoodCategoryVO, FoodVO } from '@/api/food'
+import { track, trackPage } from '@/utils/track'
 
 const foodStore = useFoodStore()
 
@@ -52,6 +53,7 @@ function clearHistory() {
 /** 执行搜索：重置到第 1 页并请求 */
 async function doSearch(targetPage = 1) {
   const kw = keyword.value.trim()
+  track('food_search', { keyword: kw })
   if (!kw && !categoryCode.value) {
     records.value = []
     total.value = 0
@@ -93,11 +95,13 @@ function selectCategory(code: string) {
 
 function tapHistory(kw: string) {
   keyword.value = kw
+  track('food_history_click', { keyword: kw })
   doSearch(1)
 }
 
 function tapHot(food: FoodVO) {
   keyword.value = food.name
+  track('food_hot_click', { foodId: food.id })
   doSearch(1)
 }
 
@@ -113,6 +117,10 @@ onLoad(async () => {
   loadHistory()
   categories.value = await foodStore.fetchCategories()
   hotList.value = await foodStore.fetchHot()
+})
+
+onShow(() => {
+  trackPage('pages/food/index')
 })
 
 /** 触底翻页 */

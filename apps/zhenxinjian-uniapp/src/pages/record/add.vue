@@ -4,12 +4,13 @@
  * 作者: wanglx
  */
 import { computed, ref } from 'vue'
-import { onLoad } from '@dcloudio/uni-app'
+import { onLoad, onShow } from '@dcloudio/uni-app'
 import { useDietStore } from '@/store/diet'
 import { useFoodStore } from '@/store/food'
 import { MEAL_TYPES, defaultMealType, KCAL_PER_G } from '@/config/constants'
 import type { FoodVO } from '@/api/food'
 import { ymd } from '@/utils/format'
+import { track, trackPage } from '@/utils/track'
 
 const dietStore = useDietStore()
 const foodStore = useFoodStore()
@@ -144,6 +145,10 @@ onLoad(async (options) => {
   }
 })
 
+onShow(() => {
+  trackPage('pages/record/add')
+})
+
 /** 克数输入 */
 function handleGramsInput() {
   foodErr.value = ''
@@ -174,6 +179,7 @@ async function handleSubmit() {
           amountG: grams.value,
           remark: remark.value || undefined
         })
+        track('record_edit', { mealType: mealType.value })
         uni.showToast({ title: '已更新', icon: 'success' })
       } else {
         await dietStore.addRecord({
@@ -184,6 +190,7 @@ async function handleSubmit() {
           recordDate: recordDate.value,
           remark: remark.value || undefined
         })
+        track('record_add', { mealType: mealType.value, source: food.value.source === 2 ? 2 : 1 })
         uni.showToast({ title: '记录成功', icon: 'success' })
       }
       setTimeout(() => uni.navigateBack(), 800)
@@ -204,6 +211,7 @@ async function handleSubmit() {
           kcal: Number(manualKcal.value),
           remark: remark.value || undefined
         })
+        track('record_edit', { mealType: mealType.value })
         uni.showToast({ title: '已更新', icon: 'success' })
       } else {
         await dietStore.addRecord({
@@ -217,6 +225,7 @@ async function handleSubmit() {
           recordDate: recordDate.value,
           remark: remark.value || undefined
         })
+        track('record_add', { mealType: mealType.value, source: 3 })
         uni.showToast({ title: '记录成功', icon: 'success' })
       }
       setTimeout(() => uni.navigateBack(), 800)

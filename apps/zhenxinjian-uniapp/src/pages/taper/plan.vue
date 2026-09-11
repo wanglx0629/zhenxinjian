@@ -6,6 +6,7 @@
 import { computed, ref } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
 import { getTaper532Plan, type Taper532Plan } from '@/api/taper'
+import { track, trackPage } from '@/utils/track'
 import { getToken } from '@/utils/storage'
 
 const loading = ref(true)
@@ -20,9 +21,11 @@ onShow(async () => {
     uni.reLaunch({ url: '/pages/auth/guide' })
     return
   }
+  trackPage('pages/taper/plan')
   loading.value = true
   try {
     plan.value = await getTaper532Plan()
+    track('plan_view', { mode: 1 })
   } catch {
     // request.ts 已统一 toast
   } finally {

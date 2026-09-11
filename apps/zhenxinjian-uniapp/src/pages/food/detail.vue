@@ -5,9 +5,10 @@
  * 作者: wanglx
  */
 import { computed, ref } from 'vue'
-import { onLoad } from '@dcloudio/uni-app'
+import { onLoad, onShow } from '@dcloudio/uni-app'
 import { useFoodStore } from '@/store/food'
 import type { FoodCalcVO, FoodVO } from '@/api/food'
+import { track, trackPage } from '@/utils/track'
 
 const foodStore = useFoodStore()
 
@@ -38,11 +39,16 @@ onLoad(async (options) => {
   }
   try {
     food.value = await foodStore.detail(id)
+    track('food_detail', { foodId: id })
     gramsInput.value = String(Math.round(food.value.serving))
     await runCalc()
   } catch {
     loadFailed.value = true
   }
+})
+
+onShow(() => {
+  trackPage('pages/food/detail')
 })
 
 /** 执行试算：在线优先后端，失败/降级由 store 本地换算 */

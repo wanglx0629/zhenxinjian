@@ -7,6 +7,7 @@
 import { computed, ref } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
 import { useBodyStore } from '@/store/body'
+import { trackPage } from '@/utils/track'
 
 const bodyStore = useBodyStore()
 const loading = ref(true)
@@ -20,6 +21,7 @@ const protein = computed(() => Math.round(p.value?.targetProtein ?? 0))
 const fat = computed(() => Math.round(p.value?.targetFat ?? 0))
 
 onShow(async () => {
+  trackPage('pages/body/result')
   loading.value = true
   try {
     await bodyStore.fetchProfile()

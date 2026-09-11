@@ -8,6 +8,7 @@ import { ref } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
 import { useFoodStore } from '@/store/food'
 import type { FoodVO } from '@/api/food'
+import { trackPage } from '@/utils/track'
 
 const foodStore = useFoodStore()
 
@@ -56,6 +57,7 @@ function handleDelete(food: FoodVO) {
 }
 
 onShow(() => {
+  trackPage('pages/food/custom-list')
   loadList()
 })
 </script>

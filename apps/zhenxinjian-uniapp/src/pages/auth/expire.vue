@@ -5,15 +5,20 @@
  * 作者: wanglx
  */
 import { ref } from 'vue'
-import { onBackPress } from '@dcloudio/uni-app'
+import { onBackPress, onShow } from '@dcloudio/uni-app'
 import { useUserStore } from '@/store/user'
 import { canSubmit } from '@/utils/throttle'
+import { track, trackPage } from '@/utils/track'
 
 const userStore = useUserStore()
 const loading = ref(false)
 
 // 拦截物理返回 / 手势返回，不允许回到功能页面
 onBackPress(() => true)
+
+onShow(() => {
+  trackPage('pages/auth/expire')
+})
 
 /** 立即授权：wx.login() 取新 code，携 guestKey 完成迁移（spec：游客期内登录并迁移） */
 async function handleAuth() {
@@ -29,15 +34,18 @@ async function handleAuth() {
     const loginRes = (Array.isArray(result) ? result[1] : result) as { code?: string }
     const code = loginRes?.code
     if (!code) {
+      track('login_fail')
       uni.showToast({ title: '获取登录凭证失败，请重试', icon: 'none' })
       return
     }
     await userStore.loginByWechat(code)
+    track('login_wechat')
     uni.showToast({ title: '授权成功，数据已保留', icon: 'success' })
     setTimeout(() => {
       uni.switchTab({ url: '/pages/home/index' })
     }, 400)
   } catch {
+    track('login_fail')
     uni.showToast({ title: '授权失败，请重试', icon: 'none' })
   } finally {
     loading.value = false

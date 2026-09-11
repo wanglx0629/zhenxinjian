@@ -11,6 +11,7 @@ import { RANGES } from '@/config/constants'
 import { ymd } from '@/utils/format'
 import { canSubmit } from '@/utils/throttle'
 import { getToken } from '@/utils/storage'
+import { track, trackPage } from '@/utils/track'
 
 const loading = ref(true)
 const saving = ref(false)
@@ -33,6 +34,7 @@ onShow(async () => {
     uni.reLaunch({ url: '/pages/auth/guide' })
     return
   }
+  trackPage('pages/menstrual/index')
   await load()
 })
 
@@ -96,6 +98,7 @@ async function handleSave() {
       periodDays: periodDays.value
     })
     vo.value = saved
+    track('menstrual_save')
     uni.showToast({ title: '已保存', icon: 'success' })
   } catch {
     // request.ts 已统一 toast

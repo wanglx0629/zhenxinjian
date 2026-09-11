@@ -11,6 +11,7 @@ import { useBodyStore } from '@/store/body'
 import { CYCLE, CYCLE_DAYS_RANGE } from '@/config/constants'
 import { md, week } from '@/utils/format'
 import { canSubmit } from '@/utils/throttle'
+import { trackPage } from '@/utils/track'
 
 const cycleStore = useCycleStore()
 const bodyStore = useBodyStore()
@@ -58,6 +59,7 @@ function toggleSport(dayIndex: number) {
 }
 
 onShow(async () => {
+  trackPage('pages/cycle/setting')
   if (!bodyStore.loaded) {
     try { await bodyStore.fetchProfile() } catch { /* request.ts 已 toast */ }
   }

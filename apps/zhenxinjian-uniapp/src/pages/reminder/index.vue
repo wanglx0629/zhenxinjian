@@ -12,6 +12,7 @@ import { getReminder, saveReminder, reportSubscribe } from '@/api/reminder'
 import type { ReminderVO } from '@/api/reminder'
 import { getToken } from '@/utils/storage'
 import { canSubmit } from '@/utils/throttle'
+import { track, trackPage } from '@/utils/track'
 
 const userStore = useUserStore()
 
@@ -50,6 +51,7 @@ onShow(async () => {
     uni.reLaunch({ url: '/pages/auth/guide' })
     return
   }
+  trackPage('pages/reminder/index')
   await load()
 })
 
@@ -122,6 +124,7 @@ async function handleSave() {
       if (accepted) {
         try {
           await reportSubscribe()
+          track('reminder_subscribe')
         } catch {
           // 上报失败不阻塞保存
         }
@@ -138,6 +141,7 @@ async function handleSave() {
       dinnerSwitch: dinnerSwitch.value,
       dinnerTime: dinnerTime.value
     })
+    track('reminder_save')
     uni.showToast({ title: '已保存', icon: 'success' })
     // 重新加载以同步额度/快照
     await load()
@@ -158,6 +162,7 @@ async function handleReAuth() {
   if (accepted) {
     try {
       await reportSubscribe()
+      track('reminder_subscribe')
       uni.showToast({ title: '已恢复推送额度', icon: 'success' })
       await load()
     } catch {

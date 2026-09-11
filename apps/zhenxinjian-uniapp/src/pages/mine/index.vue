@@ -16,6 +16,7 @@ import { DIET_MODES } from '@/config/constants'
 import { guestLeftText } from '@/utils/format'
 import { getToken } from '@/utils/storage'
 import { getReminder } from '@/api/reminder'
+import { trackPage } from '@/utils/track'
 
 const userStore = useUserStore()
 const dietStore = useDietStore()
@@ -70,6 +71,7 @@ onShow(() => {
     uni.reLaunch({ url: '/pages/auth/guide' })
     return
   }
+  trackPage('pages/mine/index')
   userStore.fetchUserInfo().catch(() => undefined)
   if (!bodyStore.loaded) {
     bodyStore.fetchProfile().catch(() => undefined)
