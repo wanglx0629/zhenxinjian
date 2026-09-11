@@ -45,6 +45,12 @@ export const useCycleStore = defineStore('cycle', () => {
     loaded.value = true
   }
 
+  /** 持久化脂肪系数选择（切换即持久化，创建失败不丢失） */
+  function setCfc(v: number) {
+    lastCfc.value = v
+    uni.setStorageSync(CFC_KEY, String(v))
+  }
+
   /** 创建周期（成功后覆盖本地并持久化 cfc 选择） */
   async function create(data: CyclePlanCreateRequest) {
     creating.value = true
@@ -52,8 +58,7 @@ export const useCycleStore = defineStore('cycle', () => {
       currentPlan.value = await createCyclePlan(data)
       loaded.value = true
       if (data.cfc) {
-        lastCfc.value = data.cfc
-        uni.setStorageSync(CFC_KEY, String(data.cfc))
+        setCfc(data.cfc)
       }
       return currentPlan.value
     } finally {
@@ -87,6 +92,7 @@ export const useCycleStore = defineStore('cycle', () => {
     fetchCurrent,
     create,
     terminate,
-    reset
+    reset,
+    setCfc
   }
 })

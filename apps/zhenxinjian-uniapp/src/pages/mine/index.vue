@@ -25,7 +25,7 @@ const cycleStore = useCycleStore()
 const weightStore = useWeightStore()
 const menstrualStore = useMenstrualStore()
 
-/** 提醒设置状态（onShow 同步；任一开启项视为已开启） */
+/** 提醒设置状态（onShow 同步；以总开关为准） */
 const reminderEnabled = ref(false)
 
 const displayName = computed(
@@ -86,13 +86,11 @@ function syncWeightAndMenstrual() {
   menstrualStore.fetch().catch(() => undefined)
 }
 
-/** 同步提醒设置副标题（失败静默不阻塞页面） */
+/** 同步提醒设置副标题（以总开关为准；失败静默不阻塞页面） */
 function syncReminderStatus() {
   getReminder()
     .then((vo) => {
-      reminderEnabled.value =
-        vo.masterSwitch === 1 &&
-        (vo.breakfastSwitch === 1 || vo.lunchSwitch === 1 || vo.dinnerSwitch === 1)
+      reminderEnabled.value = vo.masterSwitch === 1
     })
     .catch(() => undefined)
 }

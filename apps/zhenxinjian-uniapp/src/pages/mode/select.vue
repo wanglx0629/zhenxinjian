@@ -59,7 +59,12 @@ async function handleSelect(mode: number) {
     }
     return
   }
-  // 切回 532：有进行中周期需 P16 二次确认；无周期直接切
+  // 切回 532：周期状态未加载成功时阻断（避免绕过 P16 确认，F14）
+  if (!cycleStore.loaded) {
+    uni.showToast({ title: '周期状态加载中，请重试', icon: 'none' })
+    cycleStore.fetchCurrent().catch(() => undefined)
+    return
+  }
   if (cycleStore.currentPlan?.id) {
     showConfirm.value = true
   } else {
@@ -77,6 +82,7 @@ async function doSwitch532() {
     cycleStore.reset()
     await bodyStore.fetchProfile()
     uni.showToast({ title: '已切换为 532 模式', icon: 'none' })
+    uni.redirectTo({ url: '/pages/taper/plan' })
   } catch {
     // request.ts 已统一 toast
   } finally {

@@ -1,8 +1,8 @@
 <script setup lang="ts">
 /**
  * P13 提醒设置：总开关 + 早/午/晚三行（switch + time picker）
- * 保存统一 PUT；首次任一开关由关切开时先 wx.requestSubscribeMessage 引导授权，
- * 保存成功后再发起订阅补额度；拒绝授权不阻塞保存并 toast 降级提示
+ * 保存统一 PUT；每次保存成功后重新发起订阅补额度（规格 MUST），
+ * 拒绝授权不阻塞保存并 toast 降级提示
  * 作者: wanglx
  */
 import { computed, ref } from 'vue'
@@ -31,20 +31,10 @@ const templateId = ref('')
 const loading = ref(true)
 const saving = ref(false)
 
-/** 原始开关快照（用于检测「由关切开」的首次开启动作） */
-const initialSwitches = ref({ master: 0, breakfast: 0, lunch: 0, dinner: 0 })
-
-/** 当前是否存在任一开启项（含总开关+任一餐别） */
+/** 当前是否存在任一开启项（总开关开 + 任一餐别开） */
 const anyEnabled = computed(() =>
   masterSwitch.value === 1 && (breakfastSwitch.value === 1 || lunchSwitch.value === 1 || dinnerSwitch.value === 1)
 )
-
-/** 是否首次开启（当前开且加载时为关） */
-const isFirstEnable = computed(() => {
-  const init = initialSwitches.value
-  const wasOff = init.master === 0 || (init.breakfast === 0 && init.lunch === 0 && init.dinner === 0)
-  return wasOff && anyEnabled.value
-})
 
 onShow(async () => {
   if (!getToken()) {
@@ -69,12 +59,6 @@ async function load() {
     dinnerTime.value = vo.dinnerTime
     subscribeCredit.value = vo.subscribeCredit
     templateId.value = vo.templateId || ''
-    initialSwitches.value = {
-      master: vo.masterSwitch,
-      breakfast: vo.breakfastSwitch,
-      lunch: vo.lunchSwitch,
-      dinner: vo.dinnerSwitch
-    }
   } catch {
     // request.ts 已统一 toast
   } finally {
@@ -157,25 +141,11 @@ function requestSubscribe(): Promise<boolean> {
   })
 }
 
-/** 保存设置：首次开启先引导授权，授权成功先补额度再保存；拒绝授权不阻塞保存 */
+/** 保存设置：保存成功后重新发起订阅补额度（规格 MUST）；拒绝授权不阻塞保存 */
 async function handleSave() {
   if (saving.value || !canSubmit()) return
   saving.value = true
   try {
-    // 游客不引导授权（无 openid，即便授权也无法收到推送）
-    if (isFirstEnable.value && !userStore.isGuest && templateId.value) {
-      const accepted = await requestSubscribe()
-      if (accepted) {
-        try {
-          await reportSubscribe()
-          track('reminder_subscribe')
-        } catch {
-          // 上报失败不阻塞保存
-        }
-      } else {
-        uni.showToast({ title: '未授权将无法接收推送', icon: 'none' })
-      }
-    }
     await saveReminder({
       masterSwitch: masterSwitch.value,
       breakfastSwitch: breakfastSwitch.value,
@@ -187,6 +157,20 @@ async function handleSave() {
     })
     track('reminder_save')
     uni.showToast({ title: '已保存', icon: 'success' })
+    // 保存成功后补订阅额度（游客不引导：无 openid 收不到推送）
+    if (!userStore.isGuest && anyEnabled.value && templateId.value) {
+      const accepted = await requestSubscribe()
+      if (accepted) {
+        try {
+          await reportSubscribe()
+          track('reminder_subscribe')
+        } catch {
+          // 上报失败不阻塞
+        }
+      } else {
+        uni.showToast({ title: '未授权将无法接收推送', icon: 'none' })
+      }
+    }
     // 重新加载以同步额度/快照
     await load()
   } catch {

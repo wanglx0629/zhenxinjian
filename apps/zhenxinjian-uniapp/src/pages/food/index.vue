@@ -161,6 +161,8 @@ onReachBottom(() => {
       </view>
     </scroll-view>
 
+    <text class="scope-tip">营养值均为每 100g 可食部口径</text>
+
     <view v-if="foodStore.degraded" class="degrade-tip">网络不可用，已切换为本地食物库</view>
 
     <template v-if="showDiscovery">
@@ -251,6 +253,13 @@ onReachBottom(() => {
 .category-scroll {
   white-space: nowrap;
   margin-bottom: 20rpx;
+}
+
+.scope-tip {
+  display: block;
+  font-size: 22rpx;
+  color: $zhenxinjian-text-secondary;
+  margin: -8rpx 8rpx 16rpx;
 }
 
 .category-row {

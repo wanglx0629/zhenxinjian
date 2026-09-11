@@ -193,7 +193,7 @@ async function handleSubmit() {
         track('record_add', { mealType: mealType.value, source: food.value.source === 2 ? 2 : 1 })
         uni.showToast({ title: '记录成功', icon: 'success' })
       }
-      setTimeout(() => uni.navigateBack(), 800)
+      setTimeout(() => uni.switchTab({ url: '/pages/record/index' }), 800)
     } catch {
       // 错误已由 request.ts toast
     }
@@ -228,7 +228,7 @@ async function handleSubmit() {
         track('record_add', { mealType: mealType.value, source: 3 })
         uni.showToast({ title: '记录成功', icon: 'success' })
       }
-      setTimeout(() => uni.navigateBack(), 800)
+      setTimeout(() => uni.switchTab({ url: '/pages/record/index' }), 800)
     } catch {
       // 错误已由 request.ts toast
     }

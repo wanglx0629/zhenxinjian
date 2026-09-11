@@ -48,6 +48,12 @@ const dayOptions = computed(() => {
   })
 })
 
+/** 切换脂肪系数（切换即持久化，创建失败不丢失选择） */
+function selectCfc(opt: number) {
+  cfc.value = opt
+  cycleStore.setCfc(opt)
+}
+
 /** 切换运动日选中（≤ 天数） */
 function toggleSport(dayIndex: number) {
   const i = sportDays.value.indexOf(dayIndex)
@@ -101,7 +107,7 @@ async function handleSubmit() {
           :key="opt"
           class="seg-item"
           :class="{ active: cfc === opt }"
-          @click="cfc = opt"
+          @click="selectCfc(opt)"
         >{{ opt }}</view>
       </view>
       <text class="field-tip">0.8 标准档；1.0 脂肪略高更易执行，可按口味选择</text>

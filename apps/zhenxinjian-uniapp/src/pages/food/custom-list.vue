@@ -37,11 +37,11 @@ function goEdit(food: FoodVO) {
   uni.navigateTo({ url: `/pages/food/custom-edit?id=${food.id}` })
 }
 
-/** 删除：二次确认后软删，成功刷新列表 */
+/** 删除：二次确认后软删，成功刷新列表（既有饮食记录快照不受影响） */
 function handleDelete(food: FoodVO) {
   uni.showModal({
     title: '删除食物',
-    content: `确定删除「${food.name}」吗？删除后不可再使用该食物记录`,
+    content: `确定删除「${food.name}」吗？删除后不可再使用该食物记录，已有饮食记录不受影响`,
     confirmColor: '#f56c6c',
     success: async (res) => {
       if (!res.confirm) return

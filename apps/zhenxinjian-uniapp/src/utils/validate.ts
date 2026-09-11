@@ -10,6 +10,17 @@ export interface RangeCheckResult {
   value: number | null
 }
 
+/** 字段中文名（空值提示用） */
+const FIELD_LABELS: Record<string, string> = {
+  age: '年龄',
+  height: '身高',
+  weight: '体重',
+  targetWeight: '目标体重',
+  cycleLen: '周期长度',
+  periodDays: '经期天数',
+  cycleDays: '周期天数'
+}
+
 /**
  * @param value 待校验值
  * @param key   RANGES 中的键，如 'age'
@@ -19,7 +30,7 @@ export function checkRange(value: unknown, key: string): RangeCheckResult {
   if (!cfg) return { ok: true, msg: '', value: Number(value) }
   const n = Number(value)
   if (value === '' || value === null || value === undefined || isNaN(n)) {
-    return { ok: false, msg: `请输入${key}`, value: null }
+    return { ok: false, msg: `请输入${FIELD_LABELS[key] ?? key}`, value: null }
   }
   if (n < cfg.min || n > cfg.max) {
     return { ok: false, msg: `请输入 ${cfg.min} – ${cfg.max} ${cfg.unit} 之间的数值`, value: null }

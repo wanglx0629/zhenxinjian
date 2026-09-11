@@ -46,9 +46,9 @@ const isCycle = computed(() => summary.value?.mode === 2)
 const kcalTarget = computed(() => summary.value?.kcalTarget ?? 0)
 const kcalActual = computed(() => summary.value?.kcalActual ?? 0)
 const kcalRemain = computed(() => kcalTarget.value - kcalActual.value)
-/** 头卡进度条宽度（0–100） */
+/** 头卡进度条宽度（超标按 >100% 口径呈现，上限 150%，与三宏 displayRate 同口径） */
 const kcalBarRate = computed(() =>
-  Math.max(0, Math.min(summary.value?.kcalRate ?? 0, 100))
+  Math.max(0, Math.min(summary.value?.kcalRate ?? 0, 150))
 )
 
 /** 模式标签：532 碳水渐降 / 碳循环 · 今日X碳日 */

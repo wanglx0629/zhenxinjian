@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
  * 作者: wanglx
  *
  * 口径（spec body/weight + design D5）：
- * 平台判定 = 近 7 条体重记录（≥2 条）max − min < 0.3kg；
+ * 平台判定 = 近 7 天体重记录（≥2 条）max − min < 0.3kg；
  * 下调触发 = 未下调态且平台成立 → is_adjusted=1 + trigger_weight=当日体重 + 下调日志（单次门闩）；
  * 恢复触发 = 下调态且 trigger_weight − 当日体重 ≥ 0.3 → 清除下调态 + 恢复日志；
  * 目标碳/热实际 −20/−80 由 Taper532Service.todayTarget 应用，本服务只持久化状态与留痕
@@ -51,8 +51,8 @@ public class WeightService {
     /** 恢复下降阈值 kg（trigger − current ≥ 0.3） */
     private static final BigDecimal RESTORE_DELTA = new BigDecimal("0.3");
 
-    /** 平台判定取近 N 条记录 */
-    private static final int PLATEAU_WINDOW = 7;
+    /** 平台判定窗口天数（含今日的自然日窗口，口径「最近 7 天」） */
+    private static final int PLATEAU_WINDOW_DAYS = 7;
 
     private final WeightRecordMapper weightRecordMapper;
 
@@ -167,18 +167,20 @@ public class WeightService {
     }
 
     /**
-     * 平台判定：近 7 条记录（≥2 条）max − min < 0.3
+     * 平台判定：近 7 天（含今日）体重记录（≥2 条）max − min < 0.3
      *
      * @param userId 当前用户ID
-     * @return true=平台期；不足 2 条返回 false（不判定）
+     * @return true=平台期；窗口内不足 2 条返回 false（不判定）
      */
     public boolean isPlateau(Long userId) {
+        LocalDate today = LocalDate.now();
         List<WeightRecord> records = weightRecordMapper.selectList(
                 Wrappers.<WeightRecord>lambdaQuery()
                         .eq(WeightRecord::getUserId, userId)
+                        .ge(WeightRecord::getRecordDate, today.minusDays((long) PLATEAU_WINDOW_DAYS - 1))
+                        .le(WeightRecord::getRecordDate, today)
                         .orderByDesc(WeightRecord::getRecordDate)
-                        .orderByDesc(WeightRecord::getId)
-                        .last("LIMIT " + PLATEAU_WINDOW));
+                        .orderByDesc(WeightRecord::getId));
         if (records.size() < 2) {
             return false;
         }

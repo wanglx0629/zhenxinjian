@@ -1,6 +1,6 @@
 <script setup lang="ts">
 /**
- * P16 模式切换确认弹窗：碳循环切出时二次确认「终止周期并清空进度」
+ * P16 模式切换确认弹窗：碳循环切出时二次确认「终止周期并清空碳水池」
  * 作者: wanglx
  */
 
@@ -29,7 +29,7 @@ function onCancel() {
   <view v-if="visible" class="modal-mask" @click="onCancel">
     <view class="modal" @click.stop>
       <text class="modal-title">切换为 532 模式？</text>
-      <text class="modal-desc">切换将终止当前碳循环周期并清空进度，历史周期仍可在计划中查看。</text>
+      <text class="modal-desc">切换将终止当前碳循环周期并清空碳水池，历史周期仍可在计划中查看。</text>
       <view class="modal-actions">
         <view class="modal-btn cancel" @click="onCancel">再想想</view>
         <view class="modal-btn confirm" @click="onConfirm">确认切换</view>
