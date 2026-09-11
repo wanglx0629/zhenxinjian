@@ -130,6 +130,23 @@ public final class CommonConstant {
     /** 体重记录非法（越界/未来日期） */
     public static final int WEIGHT_INVALID_CODE = 40802;
 
+    // ==================== 管理后台/埋点错误码（409xx） ====================
+
+    /** 埋点事件非法（事件码不在白名单/单批超上限） */
+    public static final int TRACK_EVENT_INVALID_CODE = 40901;
+
+    /** 统计参数非法（日期/天数越界） */
+    public static final int STATS_PARAM_INVALID_CODE = 40902;
+
+    /** 食物维护冲突（同名/非内置写操作） */
+    public static final int ADMIN_FOOD_CONFLICT_CODE = 40903;
+
+    /** 埋点单批上报上限 */
+    public static final int TRACK_BATCH_MAX_SIZE = 50;
+
+    /** 埋点扩展字段最大长度 */
+    public static final int TRACK_EXTRA_MAX_LENGTH = 512;
+
     /** 食物搜索单页上限 */
     public static final long FOOD_SEARCH_MAX_SIZE = 50L;
 

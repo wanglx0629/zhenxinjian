@@ -135,6 +135,17 @@ public final class ExceptionConstant {
     /** 40802 体重记录非法 */
     public static final String WEIGHT_INVALID = "体重记录非法";
 
+    // ==================== 管理后台/埋点（409xx） ====================
+
+    /** 40901 埋点事件非法 */
+    public static final String TRACK_EVENT_INVALID = "埋点事件非法";
+
+    /** 40902 统计参数非法 */
+    public static final String STATS_PARAM_INVALID = "统计参数非法";
+
+    /** 40903 食物维护冲突 */
+    public static final String ADMIN_FOOD_CONFLICT = "食物名称已存在或维护冲突";
+
     // ==================== 用户业务 ====================
 
     /** 用户名已存在 */

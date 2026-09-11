@@ -52,6 +52,7 @@ class DietRecordServiceTest {
     private FoodMapper foodMapper;
     private UserBodyMapper userBodyMapper;
     private CyclePlanService cyclePlanService;
+    private Taper532Service taper532Service;
     private DietRecordService service;
 
     @BeforeEach
@@ -65,7 +66,8 @@ class DietRecordServiceTest {
         foodMapper = mock(FoodMapper.class);
         userBodyMapper = mock(UserBodyMapper.class);
         cyclePlanService = mock(CyclePlanService.class);
-        service = new DietRecordService(dietRecordMapper, foodMapper, userBodyMapper, cyclePlanService);
+        taper532Service = mock(Taper532Service.class);
+        service = new DietRecordService(dietRecordMapper, foodMapper, userBodyMapper, cyclePlanService, taper532Service);
     }
 
     /** 场景：150g 鸡胸肉（24.6/1.9/0.6/118 每100g）→ 摄入 36.9/2.9/0.9/177（±0.1g/±1kcal） */

@@ -140,6 +140,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         loginUser.setId(userId);
         loginUser.setUsername(username);
         loginUser.setRole(role);
+        loginUser.setUserType(user.getUserType());
         UserContext.set(loginUser);
 
         UsernamePasswordAuthenticationToken authentication =

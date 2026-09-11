@@ -90,6 +90,8 @@ zhenxinjian:
       # 小程序认证（微信登录 / 游客签发）
       - /auth/wechat/login
       - /auth/guest
+      # 埋点上报（登录态可选）
+      - /track/events
       - /ws/**
       # Swagger 文档（dev 基线开箱即通；生产禁用 springdoc 属后续运维 change）
       - /swagger-ui.html

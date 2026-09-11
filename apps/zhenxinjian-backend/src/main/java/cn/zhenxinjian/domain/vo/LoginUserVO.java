@@ -22,4 +22,7 @@ public class LoginUserVO {
 
     @Schema(description = "角色")
     private String role;
+
+    @Schema(description = "用户类型：WECHAT微信正式用户 GUEST游客")
+    private String userType;
 }
