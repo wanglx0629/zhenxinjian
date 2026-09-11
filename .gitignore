@@ -74,8 +74,9 @@ pnpm-debug.log*
 *.pid
 *.seed
 *.pid.lock
-# AI 会话临时脚本（tmp- 前缀）
+# AI 会话临时脚本（tmp- / .tmp- 前缀）
 tmp-*
+.tmp-*
 
 # ====================
 # 系统文件
