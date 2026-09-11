@@ -21,8 +21,8 @@ import cn.zhenxinjian.domain.vo.LoginResultVO;
 import cn.zhenxinjian.domain.vo.UserVO;
 import cn.zhenxinjian.mapper.UserMapper;
 import cn.zhenxinjian.service.GuestDataMigrator;
+import cn.zhenxinjian.service.SessionEvictor;
 import cn.zhenxinjian.service.WechatAuthService;
-import cn.zhenxinjian.websocket.WebSocketSessionRegistry;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
@@ -50,7 +50,7 @@ public class WechatAuthServiceImpl extends ServiceImpl<UserMapper, User> impleme
     private final JwtUtils jwtUtils;
     private final RedisUtils redisUtils;
     private final UserCacheService userCacheService;
-    private final WebSocketSessionRegistry webSocketSessionRegistry;
+    private final SessionEvictor sessionEvictor;
     private final PasswordEncoder passwordEncoder;
 
     @Override
@@ -73,7 +73,7 @@ public class WechatAuthServiceImpl extends ServiceImpl<UserMapper, User> impleme
         }
 
         // 4. 签发 token（复用既有单点登录体系）
-        webSocketSessionRegistry.kickUser(user.getId());
+        sessionEvictor.evict(user.getId());
         String role = CommonConstant.ROLE_ADMIN.equals(user.getRole())
                 ? CommonConstant.ROLE_ADMIN : CommonConstant.ROLE_USER;
         String token = jwtUtils.generateToken(user.getId(), user.getUsername(), role,
@@ -125,7 +125,7 @@ public class WechatAuthServiceImpl extends ServiceImpl<UserMapper, User> impleme
         }
 
         // 签发游客 token（带 userType/gexp claim）
-        webSocketSessionRegistry.kickUser(guest.getId());
+        sessionEvictor.evict(guest.getId());
         LocalDateTime expireAt = expireOf(guest);
         String token = jwtUtils.generateToken(guest.getId(), guest.getUsername(), CommonConstant.ROLE_USER,
                 CommonConstant.USER_TYPE_GUEST,
@@ -283,7 +283,7 @@ public class WechatAuthServiceImpl extends ServiceImpl<UserMapper, User> impleme
         userCacheService.evict(guest.getId());
         // 作废游客会话
         redisUtils.removeToken(guest.getId());
-        webSocketSessionRegistry.kickUser(guest.getId());
+        sessionEvictor.evict(guest.getId());
         log.info("游客迁移完成: guestId={} → formalId={}", guest.getId(), formalId);
     }
 

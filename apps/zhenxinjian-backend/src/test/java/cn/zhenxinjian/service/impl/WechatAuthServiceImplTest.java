@@ -17,7 +17,7 @@ import cn.zhenxinjian.domain.po.User;
 import cn.zhenxinjian.domain.vo.GuestLoginResultVO;
 import cn.zhenxinjian.domain.vo.LoginResultVO;
 import cn.zhenxinjian.mapper.UserMapper;
-import cn.zhenxinjian.websocket.WebSocketSessionRegistry;
+import cn.zhenxinjian.service.SessionEvictor;
 import com.baomidou.mybatisplus.core.MybatisConfiguration;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -90,12 +90,12 @@ class WechatAuthServiceImplTest {
 
         redisUtils = mock(RedisUtils.class);
         UserCacheService userCacheService = mock(UserCacheService.class);
-        WebSocketSessionRegistry registry = mock(WebSocketSessionRegistry.class);
+        SessionEvictor sessionEvictor = mock(SessionEvictor.class);
         PasswordEncoder encoder = mock(PasswordEncoder.class);
         when(encoder.encode(anyString())).thenReturn("hashed");
 
         service = new WechatAuthServiceImpl(provider, jwtUtils, redisUtils,
-                userCacheService, registry, encoder);
+                userCacheService, sessionEvictor, encoder);
         ReflectionTestUtils.setField(service, "baseMapper", userMapper);
     }
 

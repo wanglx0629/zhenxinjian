@@ -25,7 +25,7 @@ import cn.zhenxinjian.domain.vo.UserVO;
 import cn.zhenxinjian.mapper.UserMapper;
 import cn.zhenxinjian.service.UserService;
 import cn.zhenxinjian.config.ZhenxinjianProperties;
-import cn.zhenxinjian.websocket.WebSocketSessionRegistry;
+import cn.zhenxinjian.service.SessionEvictor;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -52,7 +52,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     private final JwtUtils jwtUtils;
     private final RedisUtils redisUtils;
     private final UserCacheService userCacheService;
-    private final WebSocketSessionRegistry webSocketSessionRegistry;
+    private final SessionEvictor sessionEvictor;
     private final ZhenxinjianProperties zhenxinjianProperties;
 
     @Override
@@ -83,8 +83,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             throw new BusinessException(ExceptionConstant.ACCOUNT_DISABLED);
         }
         redisUtils.clearLoginFail(dto.getUsername());
-        // 新登录先踢旧会话（含 WebSocket），再签发新 Token，保证单点登录闭环
-        webSocketSessionRegistry.kickUser(user.getId());
+        // 新登录先驱逐旧会话，再签发新 Token，保证单点登录闭环
+        sessionEvictor.evict(user.getId());
         String role = normalizeRole(user.getRole());
         String token = jwtUtils.generateToken(user.getId(), user.getUsername(), role);
         redisUtils.saveToken(user.getId(), token);
@@ -104,7 +104,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public void logout() {
         Long userId = UserContext.getUserId();
         if (userId != null) {
-            // 登出同时作废 HTTP Token 与 WebSocket 会话
+            // 登出同时作废 HTTP Token 并驱逐活跃会话
             invalidateUserSession(userId);
         }
     }
@@ -232,14 +232,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     /**
-     * 作废用户 HTTP Token 并踢掉全部 WebSocket 连接
+     * 作废用户 HTTP Token 并驱逐活跃长连接会话
      */
     private void invalidateUserSession(Long userId) {
         if (userId == null) {
             return;
         }
         redisUtils.removeToken(userId);
-        webSocketSessionRegistry.kickUser(userId);
+        sessionEvictor.evict(userId);
     }
 
     /**

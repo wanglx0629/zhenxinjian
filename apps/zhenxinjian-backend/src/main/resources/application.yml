@@ -67,21 +67,6 @@ zhenxinjian:
   cache:
     warmup-enabled: true
     max-value-bytes: 51200
-  websocket:
-    # 是否启用 WebSocket Demo（false 时不注册端点）
-    enabled: ${WS_ENABLED:true}
-    # 握手路径（相对 server.servlet.context-path，完整 URL 形如 /api/ws/demo）
-    path: ${WS_PATH:/ws/demo}
-    # Sec-WebSocket-Protocol 子协议名，须与前端 new WebSocket(url, [protocol, jwt]) 一致
-    protocol: ${WS_PROTOCOL:bearer}
-    # 允许的 Origin；留空则复用 security.cors-allowed-origins（禁止配置 *）
-    allowed-origins: []
-    # 单条消息最大字节（同时限制容器文本/二进制缓冲）
-    max-message-bytes: ${WS_MAX_MESSAGE_BYTES:4096}
-    # 全局最大在线会话，0=不限制
-    max-sessions: ${WS_MAX_SESSIONS:200}
-    # 单用户最大并发连接
-    max-sessions-per-user: ${WS_MAX_SESSIONS_PER_USER:3}
   security:
     permit-urls:
       - /auth/login
@@ -92,7 +77,6 @@ zhenxinjian:
       - /auth/guest
       # 埋点上报（登录态可选）
       - /track/events
-      - /ws/**
       # Swagger 文档（dev 基线开箱即通；生产禁用 springdoc 属后续运维 change）
       - /swagger-ui.html
       - /swagger-ui/**

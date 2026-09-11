@@ -20,7 +20,6 @@ public class ZhenxinjianProperties {
     private Cache cache = new Cache();
     private Security security = new Security();
     private Storage storage = new Storage();
-    private Websocket websocket = new Websocket();
 
     @Data
     public static class Jwt {
@@ -60,24 +59,6 @@ public class ZhenxinjianProperties {
         private List<String> permitUrls;
         /** CORS 允许来源（生产环境禁止 *） */
         private List<String> corsAllowedOrigins;
-    }
-
-    @Data
-    public static class Websocket {
-        /** 是否启用 WebSocket Demo */
-        private boolean enabled = true;
-        /** 握手路径（相对 context-path，如 /ws/demo） */
-        private String path = "/ws/demo";
-        /** 子协议名，前端 new WebSocket(url, [protocol, jwt]) */
-        private String protocol = "bearer";
-        /** 允许的 Origin；为空则复用 security.cors-allowed-origins */
-        private List<String> allowedOrigins;
-        /** 单条文本消息最大字节数（同时作为容器缓冲上限） */
-        private int maxMessageBytes = 4096;
-        /** 全局最大在线会话数，0 表示不限制 */
-        private int maxSessions = 200;
-        /** 单用户最大并发连接数 */
-        private int maxSessionsPerUser = 3;
     }
 
     @Data

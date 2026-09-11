@@ -6,7 +6,7 @@ import cn.zhenxinjian.common.utils.SpringUtils;
 import cn.zhenxinjian.domain.po.User;
 import cn.zhenxinjian.mapper.UserMapper;
 import cn.zhenxinjian.service.GuestDataMigrator;
-import cn.zhenxinjian.websocket.WebSocketSessionRegistry;
+import cn.zhenxinjian.service.SessionEvictor;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,7 +33,7 @@ public class GuestCleanupTask {
 
     private final UserMapper userMapper;
     private final RedisUtils redisUtils;
-    private final WebSocketSessionRegistry webSocketSessionRegistry;
+    private final SessionEvictor sessionEvictor;
 
     /**
      * 每日 03:00 执行；一期单实例部署，上多实例时换 ShedLock
@@ -62,7 +62,7 @@ public class GuestCleanupTask {
                 // 软删用户记录（@TableLogic）+ 作废会话
                 userMapper.deleteById(guest.getId());
                 redisUtils.removeToken(guest.getId());
-                webSocketSessionRegistry.kickUser(guest.getId());
+                sessionEvictor.evict(guest.getId());
                 log.info("过期游客已清理: guestId={}", guest.getId());
             }
             total += batch.size();
