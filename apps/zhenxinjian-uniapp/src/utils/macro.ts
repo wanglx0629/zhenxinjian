@@ -32,7 +32,7 @@ export function buildProgressItems(s: DietSummaryVO | null): ProgressItem[] {
   ] as const
   return base.map(item => {
     const rate = item.rate ?? 0
-    let color = PROGRESS_COLORS.yellow
+    let color: string = PROGRESS_COLORS.yellow
     if (rate > PROGRESS_THRESHOLD.red) color = PROGRESS_COLORS.red
     else if (rate >= PROGRESS_THRESHOLD.green) color = PROGRESS_COLORS.green
     const overAmount = rate > PROGRESS_THRESHOLD.red && item.target != null

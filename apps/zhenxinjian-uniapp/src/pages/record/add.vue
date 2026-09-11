@@ -164,7 +164,7 @@ function switchMode(m: 'food' | 'manual') {
 
 /** 提交 */
 async function handleSubmit() {
-  if (dietStore.submitting.value) return
+  if (dietStore.submitting) return
 
   if (mode.value === 'food') {
     if (!food.value || grams.value === null) {

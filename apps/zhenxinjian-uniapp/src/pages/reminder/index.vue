@@ -90,6 +90,49 @@ function onTimeChange(meal: 'breakfast' | 'lunch' | 'dinner', e: { detail: { val
   else dinnerTime.value = v
 }
 
+/** 开关变更统一处理（switch 布尔 → 0/1 落库口径） */
+function onSwitchChange(meal: 'master' | 'breakfast' | 'lunch' | 'dinner', e: { detail: { value: boolean } }) {
+  const v = e.detail.value ? 1 : 0
+  if (meal === 'master') masterSwitch.value = v
+  else if (meal === 'breakfast') breakfastSwitch.value = v
+  else if (meal === 'lunch') lunchSwitch.value = v
+  else dinnerSwitch.value = v
+}
+
+/** switch 的 change 事件：uni 类型声明为 Event，运行时 detail 需强转 */
+function switchEvent(e: Event): { detail: { value: boolean } } {
+  return e as unknown as { detail: { value: boolean } }
+}
+
+/** 模板绑定（模板内不支持类型标注的箭头函数，统一收敛到具名函数） */
+function onMasterChange(e: Event) {
+  onSwitchChange('master', switchEvent(e))
+}
+
+function onBreakfastSwitch(e: Event) {
+  onSwitchChange('breakfast', switchEvent(e))
+}
+
+function onLunchSwitch(e: Event) {
+  onSwitchChange('lunch', switchEvent(e))
+}
+
+function onDinnerSwitch(e: Event) {
+  onSwitchChange('dinner', switchEvent(e))
+}
+
+function onBreakfastTime(e: { detail: { value: string } }) {
+  onTimeChange('breakfast', e)
+}
+
+function onLunchTime(e: { detail: { value: string } }) {
+  onTimeChange('lunch', e)
+}
+
+function onDinnerTime(e: { detail: { value: string } }) {
+  onTimeChange('dinner', e)
+}
+
 /** 引导订阅授权（仅在微信小程序环境且有模板 ID 时有效）；返回是否成功获得授权 */
 function requestSubscribe(): Promise<boolean> {
   return new Promise((resolve) => {
@@ -101,7 +144,8 @@ function requestSubscribe(): Promise<boolean> {
     uni.requestSubscribeMessage({
       tmplIds: [templateId.value],
       success: (res) => {
-        const v = res[templateId.value]
+        // 回调结果按模板 ID 索引（accept/reject/ban），类型定义未含下标签名需强转
+        const v = (res as unknown as Record<string, string>)[templateId.value]
         resolve(v === 'accept')
       },
       fail: () => resolve(false)
@@ -202,7 +246,7 @@ async function handleReAuth() {
           <text class="row-title">饮食提醒总开关</text>
           <text class="row-sub">关闭后不再接收任何三餐提醒</text>
         </view>
-        <switch :checked="masterSwitch === 1" color="#0d9488" @change="(e: { detail: { value: boolean } }) => masterSwitch = e.detail.value ? 1 : 0" />
+        <switch :checked="masterSwitch === 1" color="#0d9488" @change="onMasterChange" />
       </view>
     </view>
 
@@ -217,7 +261,7 @@ async function handleReAuth() {
             mode="time"
             :value="breakfastTime"
             :disabled="masterSwitch === 0 || breakfastSwitch === 0"
-            @change="(e: { detail: { value: string } }) => onTimeChange('breakfast', e)"
+            @change="onBreakfastTime"
           >
             <view class="time-picker" :class="{ disabled: masterSwitch === 0 || breakfastSwitch === 0 }">
               {{ breakfastTime }}
@@ -228,7 +272,7 @@ async function handleReAuth() {
           :checked="breakfastSwitch === 1"
           :disabled="masterSwitch === 0"
           color="#0d9488"
-          @change="(e: { detail: { value: boolean } }) => breakfastSwitch = e.detail.value ? 1 : 0"
+          @change="onBreakfastSwitch"
         />
       </view>
 
@@ -239,7 +283,7 @@ async function handleReAuth() {
             mode="time"
             :value="lunchTime"
             :disabled="masterSwitch === 0 || lunchSwitch === 0"
-            @change="(e: { detail: { value: string } }) => onTimeChange('lunch', e)"
+            @change="onLunchTime"
           >
             <view class="time-picker" :class="{ disabled: masterSwitch === 0 || lunchSwitch === 0 }">
               {{ lunchTime }}
@@ -250,7 +294,7 @@ async function handleReAuth() {
           :checked="lunchSwitch === 1"
           :disabled="masterSwitch === 0"
           color="#0d9488"
-          @change="(e: { detail: { value: boolean } }) => lunchSwitch = e.detail.value ? 1 : 0"
+          @change="onLunchSwitch"
         />
       </view>
 
@@ -261,7 +305,7 @@ async function handleReAuth() {
             mode="time"
             :value="dinnerTime"
             :disabled="masterSwitch === 0 || dinnerSwitch === 0"
-            @change="(e: { detail: { value: string } }) => onTimeChange('dinner', e)"
+            @change="onDinnerTime"
           >
             <view class="time-picker" :class="{ disabled: masterSwitch === 0 || dinnerSwitch === 0 }">
               {{ dinnerTime }}
@@ -272,7 +316,7 @@ async function handleReAuth() {
           :checked="dinnerSwitch === 1"
           :disabled="masterSwitch === 0"
           color="#0d9488"
-          @change="(e: { detail: { value: boolean } }) => dinnerSwitch = e.detail.value ? 1 : 0"
+          @change="onDinnerSwitch"
         />
       </view>
 

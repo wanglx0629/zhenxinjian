@@ -77,9 +77,10 @@ function onDateChange(e: { detail: { value: string } }) {
   periodStartDate.value = e.detail.value
 }
 
-/** 开关切换 */
-function onEnabledChange(e: { detail: { value: boolean } }) {
-  enabled.value = e.detail.value ? 1 : 0
+/** 开关切换（switch 的 change 事件 uni 类型声明为 Event，运行时 detail 需强转） */
+function onEnabledChange(e: Event) {
+  const detail = (e as unknown as { detail: { value: boolean } }).detail
+  enabled.value = detail.value ? 1 : 0
 }
 
 /** 保存：开启时校验起始日 */
