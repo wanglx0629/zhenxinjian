@@ -48,4 +48,7 @@ public class FoodVO {
 
     @Schema(description = "来源：1内置 2自定义")
     private Integer source;
+
+    @Schema(description = "状态:0停用 1有效")
+    private Integer status;
 }
