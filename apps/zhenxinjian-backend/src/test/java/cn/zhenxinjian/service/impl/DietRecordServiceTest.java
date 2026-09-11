@@ -234,6 +234,13 @@ class DietRecordServiceTest {
         body.setTargetFat(33.8);
         body.setTargetKcal(1521);
         when(userBodyMapper.selectOne(any(Wrapper.class))).thenReturn(body);
+        // 532 目标由 Taper532Service 推进口径提供
+        cn.zhenxinjian.domain.vo.Taper532VO.TodayTarget todayTarget = new cn.zhenxinjian.domain.vo.Taper532VO.TodayTarget();
+        todayTarget.setCarb(190.1);
+        todayTarget.setProtein(114.1);
+        todayTarget.setFat(33.8);
+        todayTarget.setKcal(1521);
+        when(taper532Service.todayTarget(1L)).thenReturn(todayTarget);
 
         DietSummaryVO vo = service.summary(1L, LocalDate.now().minusDays(7));
 

@@ -293,8 +293,8 @@ class WechatAuthServiceImplTest {
         User guest = guestUser(401L, GUEST_KEY, LocalDateTime.now().plusDays(1));
         stubSelectBy(openid -> formal, guestKey -> guest);
         when(userMapper.updateById(any(User.class))).thenReturn(1);
-        // MP 3.5.6 removeById 走 deleteById(T entity) 重载（软删填充）
-        when(userMapper.deleteById(any(User.class))).thenReturn(1);
+        // MP 3.5.7 removeById 走 deleteById(Serializable id) 重载
+        when(userMapper.deleteById(any(Long.class))).thenReturn(1);
 
         LoginResultVO result = service.wechatLogin(dto("good-code", GUEST_KEY), "127.0.0.1");
 
@@ -304,9 +304,9 @@ class WechatAuthServiceImplTest {
         ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
         verify(userMapper, org.mockito.Mockito.times(2)).updateById(captor.capture());
         assertTrue(captor.getAllValues().stream().anyMatch(u -> Long.valueOf(400L).equals(u.getMergedInto())));
-        ArgumentCaptor<User> deleteCaptor = ArgumentCaptor.forClass(User.class);
+        ArgumentCaptor<Long> deleteCaptor = ArgumentCaptor.forClass(Long.class);
         verify(userMapper).deleteById(deleteCaptor.capture());
-        assertEquals(401L, deleteCaptor.getValue().getId());
+        assertEquals(401L, deleteCaptor.getValue());
         verify(redisUtils).removeToken(401L);
     }
 
@@ -321,7 +321,7 @@ class WechatAuthServiceImplTest {
         service.wechatLogin(dto("good-code", GUEST_KEY), "127.0.0.1");
 
         // 幂等：不再重复迁移
-        verify(userMapper, never()).deleteById(any(User.class));
+        verify(userMapper, never()).deleteById(any(Long.class));
         verify(redisUtils, never()).removeToken(401L);
     }
 
@@ -334,7 +334,7 @@ class WechatAuthServiceImplTest {
         LoginResultVO result = service.wechatLogin(dto("good-code", "guest_unknown"), "127.0.0.1");
 
         assertNotNull(result.getToken());
-        verify(userMapper, never()).deleteById(any(User.class));
+        verify(userMapper, never()).deleteById(any(Long.class));
     }
 
     // ==================== 辅助 ====================
