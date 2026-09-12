@@ -12,13 +12,21 @@
 | ---- | ---- | ---- |
 | 本工具（推荐） | `tools\db\run-sql.cmd sql\change3_user_body.sql` | 迁移脚本/验证查询，输出整洁，无需客户端 |
 | 原生客户端 | `D:\App\MySQL\MySQLServer8\bin\mysql.exe -h127.0.0.1 -uroot -p zhenxinjian` | 交互式探查 |
-| 容错执行 | `tools\db\run-sql.cmd xxx.sql --allow-error` | 验证约束（预期某条报错，如唯一键冲突） |
+| 容错执行 | ~~`--allow-error`~~（已移除） | 失败即终止（exit 2）；需容忍报错的验证请改用幂等守卫或信息查询 |
 
 ## SqlRunner 特性
 
 - 按 `;` 切分语句、剥离 `--` 注释；DDL/DQL 通吃；SELECT 结果以 `|` 分隔打印
 - 中文乱码防护：脚本已带 `-Dfile.encoding=UTF-8`；SQL 文件须 UTF-8 保存
 - 凭据解析：`db.local.properties` → 环境变量 `MYSQL_URL/MYSQL_USERNAME/MYSQL_PASSWORD`
+- **版本记账**：`change<N>_*.sql` 自动纳入 `schema_migrations` 版本表——执行前查账，已应用整体跳过（SKIP）；全部语句成功后回写记账（RECORDED）；任何报错立即终止且**不记账**
+- **幂等守卫**：迁移脚本自带 `IF NOT EXISTS` / information_schema 条件守卫，手工重复执行安全（change2 为逐步前置状态守卫，支持断点续跑）
+- 每次运行都重新编译 SqlRunner.java，改动即时生效
+
+## 迁移执行顺序
+
+1. 全新环境：依次执行 `change0_schema_migrations.sql`（可选，runner 会自建）→ `change1` ~ `change9`，重复执行自动跳过
+2. 存量环境（历史上手工跑过 change1~9、版本表无账）：先执行 `sql/change_backfill_migrations.sql` 回填账目，再正常执行后续 change
 
 ## 坑（实证）
 
