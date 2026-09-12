@@ -132,9 +132,6 @@ public final class CommonConstant {
 
     // ==================== 管理后台/埋点错误码（409xx） ====================
 
-    /** 埋点事件非法（事件码不在白名单/单批超上限） */
-    public static final int TRACK_EVENT_INVALID_CODE = 40901;
-
     /** 统计参数非法（日期/天数越界） */
     public static final int STATS_PARAM_INVALID_CODE = 40902;
 

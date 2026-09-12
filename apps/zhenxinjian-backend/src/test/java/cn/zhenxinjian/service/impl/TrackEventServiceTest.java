@@ -1,7 +1,6 @@
 package cn.zhenxinjian.service.impl;
 
 import cn.zhenxinjian.common.constant.CommonConstant;
-import cn.zhenxinjian.common.exception.BusinessException;
 import cn.zhenxinjian.domain.dto.TrackEventBatchDTO;
 import cn.zhenxinjian.domain.dto.TrackEventItemDTO;
 import cn.zhenxinjian.domain.po.TrackEvent;
@@ -11,16 +10,15 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 /**
- * 埋点事件服务单元测试（白名单整批校验 40901 / 未登录允许 / 合法批量落库）
+ * 埋点事件服务单元测试（毒性隔离：非法码剔除返回、合法码落库；未登录允许；extra 截断）
  * 作者: wanglx
  */
 class TrackEventServiceTest {
@@ -40,27 +38,40 @@ class TrackEventServiceTest {
         return dto;
     }
 
-    /** 场景：合法事件批量落库，event_name 取枚举 desc */
+    /** 场景：合法事件批量落库，event_name 取枚举 desc，无剔除码 */
     @Test
     void saveBatch_validEvents_insertWithEnumName() {
         TrackEventBatchDTO batch = new TrackEventBatchDTO();
         batch.setEvents(List.of(item("record_add"), item("page_view")));
 
-        trackEventService.saveBatch(1L, "WECHAT", batch);
+        List<String> rejected = trackEventService.saveBatch(1L, "WECHAT", batch);
 
+        assertTrue(rejected.isEmpty());
         verify(trackEventMapper).insert(anyList());
     }
 
-    /** 场景：任一事件码非法 → 整批拒收 40901，一条都不落库 */
+    /** 场景：混批（合法+非法）→ 毒性隔离：合法落库、非法码返回，不再整批拒收 */
     @Test
-    void saveBatch_invalidCode_rejectWholeBatch40901() {
+    void saveBatch_mixedBatch_poisonIsolated() {
         TrackEventBatchDTO batch = new TrackEventBatchDTO();
         batch.setEvents(List.of(item("record_add"), item("hack_event")));
 
-        BusinessException ex = assertThrows(BusinessException.class,
-                () -> trackEventService.saveBatch(1L, "WECHAT", batch));
+        List<String> rejected = trackEventService.saveBatch(1L, "WECHAT", batch);
 
-        assertEquals(CommonConstant.TRACK_EVENT_INVALID_CODE, ex.getCode());
+        assertEquals(List.of("hack_event"), rejected);
+        verify(trackEventMapper).insert(org.mockito.ArgumentMatchers.<List<TrackEvent>>argThat(
+                list -> list.size() == 1 && "record_add".equals(list.get(0).getEventCode())));
+    }
+
+    /** 场景：全部非法 → 一条不落库，剔除码去重保序返回 */
+    @Test
+    void saveBatch_allInvalid_skipInsertAndReturnCodes() {
+        TrackEventBatchDTO batch = new TrackEventBatchDTO();
+        batch.setEvents(List.of(item("hack_a"), item("hack_b"), item("hack_a")));
+
+        List<String> rejected = trackEventService.saveBatch(1L, "WECHAT", batch);
+
+        assertEquals(List.of("hack_a", "hack_b"), rejected);
         verify(trackEventMapper, never()).insert(anyList());
     }
 
@@ -70,8 +81,9 @@ class TrackEventServiceTest {
         TrackEventBatchDTO batch = new TrackEventBatchDTO();
         batch.setEvents(List.of(item("login_guest")));
 
-        assertDoesNotThrow(() -> trackEventService.saveBatch(null, null, batch));
+        List<String> rejected = trackEventService.saveBatch(null, null, batch);
 
+        assertTrue(rejected.isEmpty());
         verify(trackEventMapper).insert(anyList());
     }
 

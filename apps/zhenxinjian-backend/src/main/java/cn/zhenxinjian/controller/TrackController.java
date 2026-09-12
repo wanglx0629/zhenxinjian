@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 /**
  * 埋点上报控制器（登录态可选：游客/未登录引导页也可上报）
  * 作者: wanglx
@@ -26,14 +28,15 @@ public class TrackController {
 
     private final TrackEventService trackEventService;
 
-    @Operation(summary = "批量上报埋点事件", description = "单批≤50条；事件码白名单校验，任一非法整批拒收")
+    @Operation(summary = "批量上报埋点事件",
+            description = "单批≤50条；事件码白名单逐条校验，非法条目毒性隔离不入库，返回值携带被剔除的非法事件码（端上永久剔除）")
     @PostMapping("/events")
-    public Result<Void> events(@Valid @RequestBody TrackEventBatchDTO dto) {
+    public Result<List<String>> events(@Valid @RequestBody TrackEventBatchDTO dto) {
         LoginUserVO current = UserContext.get();
-        trackEventService.saveBatch(
+        List<String> rejected = trackEventService.saveBatch(
                 current != null ? current.getId() : null,
                 current != null ? current.getUserType() : null,
                 dto);
-        return Result.ok();
+        return Result.ok(rejected);
     }
 }

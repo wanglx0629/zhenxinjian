@@ -67,7 +67,10 @@ public enum TrackEventEnum {
     FOOD_HOT_CLICK("food_hot_click", "热门食物点击"),
 
     /** 历史搜索点击 */
-    FOOD_HISTORY_CLICK("food_history_click", "历史搜索点击");
+    FOOD_HISTORY_CLICK("food_history_click", "历史搜索点击"),
+
+    /** 埋点队列饱和告警（端上自监控：本地队列 ≥80% 时上报一次） */
+    TRACK_QUEUE_SATURATED("track_queue_saturated", "埋点队列饱和告警");
 
     /** 事件码（对应 track_event.event_code 列） */
     private final String code;
