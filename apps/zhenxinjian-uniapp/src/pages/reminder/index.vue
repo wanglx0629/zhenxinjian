@@ -8,13 +8,13 @@
 import { computed, ref } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
 import { useUserStore } from '@/store/user'
-import { getReminder, saveReminder, reportSubscribe } from '@/api/reminder'
-import type { ReminderVO } from '@/api/reminder'
+import { useReminderStore } from '@/store/reminder'
 import { getToken } from '@/utils/storage'
 import { canSubmit } from '@/utils/throttle'
 import { track, trackPage } from '@/utils/track'
 
 const userStore = useUserStore()
+const reminderStore = useReminderStore()
 
 /** 表单状态 */
 const masterSwitch = ref(0)
@@ -49,7 +49,7 @@ onShow(async () => {
 async function load() {
   loading.value = true
   try {
-    const vo: ReminderVO = await getReminder()
+    const vo = await reminderStore.fetch()
     masterSwitch.value = vo.masterSwitch
     breakfastSwitch.value = vo.breakfastSwitch
     breakfastTime.value = vo.breakfastTime
@@ -146,7 +146,7 @@ async function handleSave() {
   if (saving.value || !canSubmit()) return
   saving.value = true
   try {
-    await saveReminder({
+    await reminderStore.save({
       masterSwitch: masterSwitch.value,
       breakfastSwitch: breakfastSwitch.value,
       breakfastTime: breakfastTime.value,
@@ -162,7 +162,7 @@ async function handleSave() {
       const accepted = await requestSubscribe()
       if (accepted) {
         try {
-          await reportSubscribe()
+          await reminderStore.report()
           track('reminder_subscribe')
         } catch {
           // 上报失败不阻塞
@@ -189,7 +189,7 @@ async function handleReAuth() {
   const accepted = await requestSubscribe()
   if (accepted) {
     try {
-      await reportSubscribe()
+      await reminderStore.report()
       track('reminder_subscribe')
       uni.showToast({ title: '已恢复推送额度', icon: 'success' })
       await load()

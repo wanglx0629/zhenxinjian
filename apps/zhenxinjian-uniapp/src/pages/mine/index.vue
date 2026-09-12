@@ -4,7 +4,7 @@
  * 作者: wanglx
  */
 import { onShow } from '@dcloudio/uni-app'
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 import TeLogo from '@/components/TeLogo.vue'
 import { useUserStore } from '@/store/user'
 import { useDietStore } from '@/store/diet'
@@ -12,10 +12,10 @@ import { useBodyStore } from '@/store/body'
 import { useCycleStore } from '@/store/cycle'
 import { useWeightStore } from '@/store/weight'
 import { useMenstrualStore } from '@/store/menstrual'
+import { useReminderStore } from '@/store/reminder'
 import { DIET_MODES } from '@/config/constants'
 import { guestLeftText } from '@/utils/format'
 import { getToken } from '@/utils/storage'
-import { getReminder } from '@/api/reminder'
 import { trackPage } from '@/utils/track'
 
 const userStore = useUserStore()
@@ -24,9 +24,10 @@ const bodyStore = useBodyStore()
 const cycleStore = useCycleStore()
 const weightStore = useWeightStore()
 const menstrualStore = useMenstrualStore()
+const reminderStore = useReminderStore()
 
 /** 提醒设置状态（onShow 同步；以总开关为准） */
-const reminderEnabled = ref(false)
+const reminderEnabled = computed(() => reminderStore.masterEnabled)
 
 const displayName = computed(
   () => userStore.userInfo?.nickname || userStore.userInfo?.username || '用户'
@@ -88,11 +89,7 @@ function syncWeightAndMenstrual() {
 
 /** 同步提醒设置副标题（以总开关为准；失败静默不阻塞页面） */
 function syncReminderStatus() {
-  getReminder()
-    .then((vo) => {
-      reminderEnabled.value = vo.masterSwitch === 1
-    })
-    .catch(() => undefined)
+  reminderStore.fetch().catch(() => undefined)
 }
 
 /** 授权登录（游客 → 复用引导页完整授权流程） */
