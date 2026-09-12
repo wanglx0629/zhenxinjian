@@ -18,7 +18,7 @@
 | B-T04 | ARCH-内聚-002 | 三宏进度展示收敛到 utils/macro.ts | 高 | 已完成 |
 | B-T05 | ARCH-内聚-003 | AI skills 资产单一真源、冗余副本退库 | 高 | 已完成 |
 | B-T06 | ARCH-层次-001 | 小程序 pages→store→api 分层收敛并补 taper store | 高 | 已完成 |
-| B-T07 | ARCH-层次-003 | 游客清理任务改批级独立事务 | 高 | 未开始 |
+| B-T07 | ARCH-层次-003 | 游客清理任务改批级独立事务 | 高 | 已完成 |
 | B-T08 | ARCH-演进-001 | SQL 迁移版本化（版本表 + 幂等守卫） | 高 | 未开始 |
 | B-T09 | ARCH-演进-002 | 删除前端影子算法库（isPlateau 优先） | 高 | 未开始 |
 | B-T10 | ARCH-演进-007 | data.sql 基线整改 + 弱口令哈希出库 | 高 | 未开始 |
@@ -187,7 +187,7 @@
 | --- | --- |
 | 追溯 | ARCH-层次-003（层次，高） |
 | 目标 | `GuestCleanupTask` 的 `while(true)` 分批改为每批独立事务，事务长度有上界 |
-| 状态 | 未开始 |
+| 状态 | 已完成 |
 
 步骤：
 
@@ -199,6 +199,12 @@
 6. 增量执行：改造 + 日志（每批耗时/条数）同批提交。
 7. 回归测绿：后端 `mvn -q test` 全绿。
 8. 用户确认：展示事务边界改造 diff，获确认后收尾（写操作门禁）。
+
+执行记录（2026-09-12，a19ad60）：
+
+1. 拆出 `GuestCleanupBatchExecutor` 独立 Bean 承载 `@Transactional purgeOneBatch`（选批 + 批内清理一事务），规避同类自调用事务失效；软删经 @TableLogic 自动排除已清理行，批间无依赖。
+2. `GuestCleanupTask.purgeExpiredGuests` 去除方法级 `@Transactional`，只编排批次循环；新增每批 `size/costMs` 日志；单批失败仅回滚本批，已提交批次不回吐，次日任务自然续扫。
+3. 补 `GuestCleanupTaskTest` 5 用例（空批零写 / 批内全链路清理 / 首空批即停 / 满批继续+不满批终止 / 恰好满批再探一次），`mvn test` 123 用例全绿。
 
 ### B-T08 — SQL 迁移版本化（版本表 + 幂等守卫）
 
@@ -764,3 +770,4 @@
 | v1.4 | 2026-09-12 | —（未提交） | B-T04 执行完成：record/index.vue 本地 38 行 progressItems 与 adviceList 手写副本替换为 buildProgressItems/buildAdviceList 单一真源调用，删除 PROGRESS_THRESHOLD/PROGRESS_COLORS 直引；vue-tsc 全绿，状态置已完成 |
 | v1.5 | 2026-09-12 | —（未提交） | B-T05 执行完成：全量哈希比对裁定"漂移"仅为 per-IDE 包装差异（/opsx-X↔$openspec-X 占位符 + opsx front-matter name 行），内容零漂移；ui-ux-pro-max 归入 .trae SoT；新增 scripts/sync-ide-skills.ps1 分发脚本（拷贝 + 两类机械变换）；五副本目录入 .gitignore 并 git rm --cached 退库 120 文件；再生字节级回归比对 0 差异，状态置已完成 |
 | v1.6 | 2026-09-12 | —（未提交） | B-T06 执行完成：新建 store/taper.ts、store/reminder.ts；taper/plan、reminder/index、mine/index、home/index、menstrual/index 五处页面直调全部改经 store；userStore.logout/abandonGuest 统一编排七大业务 store reset；cycleStore 新增 switchMode 收敛 mode/select.vue 直调 switchDietMode；vue-tsc 每步全绿，pages/components 对 @/api/* 仅剩 type-only import，状态置已完成 |
+| v1.7 | 2026-09-12 | —（未提交） | B-T07 执行完成：拆出 GuestCleanupBatchExecutor 独立 Bean 承载 @Transactional 批方法（规避同类自调用事务失效），任务方法只编排批次不再持大事务，新增每批 size/costMs 日志；补 GuestCleanupTaskTest 5 用例，123 测试全绿，状态置已完成 |

@@ -18,7 +18,7 @@
 | ARCH-内聚-002 | 内聚 | 高 | 已消除 |
 | ARCH-内聚-003 | 内聚 | 高 | 已消除 |
 | ARCH-层次-001 | 层次 | 高 | 已消除 |
-| ARCH-层次-003 | 层次 | 高 | 未清除 |
+| ARCH-层次-003 | 层次 | 高 | 已消除 |
 | ARCH-演进-001 | 演进 | 高 | 未清除 |
 | ARCH-演进-002 | 演进 | 高 | 未清除 |
 | ARCH-演进-007 | 演进 | 高 | 未清除 |
@@ -151,7 +151,7 @@
 | 根因 | 批处理与事务边界未分离 |
 | 影响 | 锁与 undo log 无上界；高峰期清理任务可拖垮库 |
 | 修复建议 | 改为每批独立事务（拆出带 `@Transactional` 的批方法或用编程式事务） |
-| 状态 | 未清除 |
+| 状态 | 已消除（B-T07 于 2026-09-12 完成：拆出 `GuestCleanupBatchExecutor` 独立 Bean 承载 `@Transactional purgeOneBatch`（选批 + 批内清理一事务，经 Spring 代理调用，规避同类自调用事务失效）；任务方法去除大 `@Transactional` 只编排批次循环，单事务长度以 BATCH_SIZE=200 为上界；新增每批 size/costMs 日志；软删经 @TableLogic 自动排除已清理行保证批间幂等推进；补 `GuestCleanupTaskTest` 5 用例，123 测试全绿） |
 
 ### ARCH-演进-001 — SQL 迁移无版本管理、无回滚、无幂等
 
@@ -573,3 +573,4 @@
 | v1.5 | 2026-09-12 | —（未提交） | B-T04 完成，ARCH-内聚-002 置"已消除"（record/index.vue 手写副本替换为 utils/macro.ts 单一真源调用）。余 32 条未清除 |
 | v1.6 | 2026-09-12 | —（未提交） | B-T05 完成，ARCH-内聚-003 置"已消除"（.trae/ 单一真源 + sync-ide-skills.ps1 分发脚本 + 五副本目录退库 120 文件，字节级回归 0 差异）。余 31 条未清除 |
 | v1.7 | 2026-09-12 | —（未提交） | B-T06 完成，ARCH-层次-001 置"已消除"（补 store/taper、store/reminder 两 store，五处页面直调改经 store，登出清理收敛 userStore 统一编排七大 store，cycleStore.switchMode 收敛模式切换；pages/components 对 @/api/* 仅剩 type-only import）。余 30 条未清除 |
+| v1.8 | 2026-09-12 | —（未提交） | B-T07 完成，ARCH-层次-003 置"已消除"（GuestCleanupBatchExecutor 独立 Bean 批级独立事务，任务方法不再持大事务，批级 size/costMs 日志，补 5 测试用例）。余 29 条未清除 |
