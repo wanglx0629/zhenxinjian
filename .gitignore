@@ -129,3 +129,12 @@ zhenxinjian.wiki/
 # Machine-local OpenMole plugin symlinks (absolute paths differ per developer)
 /.gemini/extensions/openmole
 # <<< openmole <<<
+
+# ====================
+# IDE skills 副本目录（单一真源 .trae/，由 scripts/sync-ide-skills.ps1 生成，勿手工编辑）
+# ====================
+/.agent/
+/.agents/
+/.claude/
+/.codex/
+/.opencode/
