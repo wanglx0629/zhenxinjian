@@ -31,6 +31,20 @@
    - 依次执行 `change0_schema_migrations.sql`（可选，runner 会自建）→ `change1` ~ `change9`，重复执行自动跳过
 2. 存量环境（历史上手工跑过 change1~9、版本表无账）：先执行 `sql/change_backfill_migrations.sql` 回填账目，再正常执行后续 change
 
+## 管理员初始化
+
+`data.sql` 不含初始账号（弱口令哈希已出库，B-T10）。首个管理员由部署者手工创建：
+
+1. 生成 BCrypt 哈希（任选其一， cost=10）：
+   - 后端任一环境执行 `new org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder().encode("你的口令")`（如 jshell / 单测临时打印）
+   - 或 `htpasswd -bnBC 10 "" 你的口令 | tr -d ':\n'`
+2. 执行（替换 `<HASH>`；口令明文不出现在任何入库文件）：
+
+```sql
+INSERT INTO users (username, password, nickname, role, status, create_by)
+VALUES ('admin', '<HASH>', '管理员', 'ADMIN', 1, 'system');
+```
+
 ## 坑（实证）
 
 1. **带引号的路径参数在本 shell 会被吞**：`java -cp "D:\...jar;C:\..."` 报 ClassNotFoundException——路径无空格就去引号（run-sql.cmd 内已处理）

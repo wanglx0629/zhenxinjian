@@ -30,4 +30,4 @@ src/
 
 ## 默认账号
 
-与后端 `data.sql` 一致：`admin` / `admin123`
+后端 `data.sql` 不含初始账号：首个管理员由部署者自行生成 BCrypt 哈希手工 INSERT（见 `tools/db/README`「管理员初始化」）。

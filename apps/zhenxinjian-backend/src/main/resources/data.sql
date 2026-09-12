@@ -1,6 +1,8 @@
 -- 数据库初始化脚本
 -- 作者: wanglx
--- 说明: 首次部署前在 MySQL 中执行本脚本，创建库表并写入默认管理员
+-- 说明: 首次部署前在 MySQL 中执行本脚本，创建库表
+-- 管理员初始化: 本脚本不含初始账号——首个管理员由部署者自行生成 BCrypt 哈希后手工 INSERT，
+--       口令哈希不进版本库（见 tools/db/README「管理员初始化」）
 
 CREATE DATABASE IF NOT EXISTS zhenxinjian DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -84,9 +86,3 @@ CREATE TABLE users (
 -- idx_wechat_bind_status：微信绑定状态索引，用于查询已绑定用户
 -- idx_status：账号状态索引，用于查询正常用户
 -- idx_create_time：创建时间索引，用于查询用户创建时间
-
--- 初始化管理员账号（仅本地演示，上线必须立即修改密码）
--- 用户名: admin
--- 密码: admin123（下方为 BCrypt 哈希，登录时由 PasswordEncoder 校验）
-INSERT INTO users (username, password, nickname, email, role, status, create_by)
-VALUES ('admin', '$2b$10$xDtKBGBkkmC.Kbkm.rwo2eHNxrp7WaAK18tr6tnEPBSU9FrMdndE6', '管理员', 'wanglx@zhenxinjian.cn', 'ADMIN', 1, 'system');
