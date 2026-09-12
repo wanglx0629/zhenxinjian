@@ -6,17 +6,19 @@
  */
 import { computed, ref } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
-import { getMenstrual, saveMenstrual, type MenstrualVO } from '@/api/menstrual'
+import { useMenstrualStore } from '@/store/menstrual'
 import { RANGES } from '@/config/constants'
 import { ymd } from '@/utils/format'
 import { canSubmit } from '@/utils/throttle'
 import { getToken } from '@/utils/storage'
 import { track, trackPage } from '@/utils/track'
 
+const menstrualStore = useMenstrualStore()
+
 const loading = ref(true)
 const saving = ref(false)
-/** 经期设置视图（applicable=false 男性不适用） */
-const vo = ref<MenstrualVO | null>(null)
+/** 经期设置视图（applicable=false 男性不适用，经 menstrualStore 收敛） */
+const vo = computed(() => menstrualStore.vo)
 
 /** 表单状态 */
 const enabled = ref(0)
@@ -41,9 +43,8 @@ onShow(async () => {
 async function load() {
   loading.value = true
   try {
-    const v = await getMenstrual()
-    vo.value = v
-    if (v.applicable) {
+    const v = await menstrualStore.fetch()
+    if (v?.applicable) {
       enabled.value = v.enabled ?? 0
       periodStartDate.value = v.periodStartDate || ''
       cycleLen.value = v.cycleLen ?? RANGES.cycleLen.default ?? 28
@@ -92,13 +93,12 @@ async function handleSave() {
   if (saving.value || !canSubmit()) return
   saving.value = true
   try {
-    const saved = await saveMenstrual({
+    await menstrualStore.save({
       enabled: enabled.value,
       periodStartDate: enabled.value === 1 ? periodStartDate.value : null,
       cycleLen: cycleLen.value,
       periodDays: periodDays.value
     })
-    vo.value = saved
     track('menstrual_save')
     uni.showToast({ title: '已保存', icon: 'success' })
   } catch {
