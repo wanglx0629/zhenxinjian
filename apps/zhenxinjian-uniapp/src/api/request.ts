@@ -12,7 +12,7 @@ const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api
 const GUEST_EXPIRED_CODE = 40201
 
 /** 登录相关接口不附带 Authorization */
-const AUTH_SKIP_URLS = ['/auth/login', '/auth/register', '/auth/captcha', '/auth/wechat/login', '/auth/guest']
+const AUTH_SKIP_URLS = ['/auth/wechat/login', '/auth/guest']
 
 interface RequestOptions {
   url: string

@@ -14,7 +14,7 @@ const instance = axios.create({
 })
 
 /** 登录相关接口不附带 Authorization，避免过期 Token 干扰白名单 */
-const AUTH_SKIP_URLS = ['/auth/login', '/auth/register', '/auth/captcha']
+const AUTH_SKIP_URLS = ['/auth/login', '/auth/captcha']
 
 /**
  * 清会话并跳转登录
@@ -51,7 +51,7 @@ instance.interceptors.response.use(
     const newToken = response.headers['x-refresh-token']
     if (newToken) {
       localStorage.setItem('token', newToken)
-      // 同步 Pinia，避免 WebSocket 等仍使用旧 token
+      // 同步 Pinia，避免其他模块仍使用旧 token
       try {
         const userStore = useUserStore()
         userStore.token = newToken

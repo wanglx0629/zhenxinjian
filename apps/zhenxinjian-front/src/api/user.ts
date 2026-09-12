@@ -18,11 +18,6 @@ export function getUserPage(query: UserQuery = {}) {
   })
 }
 
-/** 获取用户详情 */
-export function getUserById(id: number) {
-  return request.get<UserInfo>(`/users/${id}`)
-}
-
 /** 新增用户 */
 export function addUser(data: Partial<UserInfo> & { password?: string }) {
   return request.post('/users', data)

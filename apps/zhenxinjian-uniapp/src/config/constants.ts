@@ -77,18 +77,6 @@ export const MEAL_TYPES: MealTypeCfg[] = [
   { code: 4, name: '加餐' }
 ]
 
-/**
- * 按当前时段取默认餐别（05–10 早 / 10–15 午 / 15–20:30 晚 / 其余加餐）
- * @param hour 当前小时（0–23），可含小数表示分钟
- */
-export function defaultMealType(hour?: number): number {
-  const h = hour ?? new Date().getHours() + new Date().getMinutes() / 60
-  if (h >= 5 && h < 10) return 1
-  if (h >= 10 && h < 15) return 2
-  if (h >= 15 && h < 20.5) return 3
-  return 4
-}
-
 /** 三色进度阈值（达成率 %）：80–100 绿 / <80 黄 / >100 红 */
 export const PROGRESS_THRESHOLD = { green: 80, red: 100 } as const
 

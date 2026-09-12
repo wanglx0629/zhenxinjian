@@ -31,16 +31,6 @@ export interface LoginRequest {
   captchaUuid: string
 }
 
-/** 注册请求 */
-export interface RegisterRequest {
-  username: string
-  password: string
-  nickname?: string
-  email?: string
-  captcha: string
-  captchaUuid: string
-}
-
 /** 用户信息 */
 export interface UserInfo {
   id: number

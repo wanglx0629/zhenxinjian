@@ -229,9 +229,4 @@ public final class CommonConstant {
 
     /** 验证码UUID格式（32位十六进制） */
     public static final String CAPTCHA_UUID_PATTERN = "^[a-f0-9]{32}$";
-
-    /**
-     * 登录失败锁定阈值默认值（实际以 zhenxinjian.redis.login-fail-max 为准，默认 10）
-     */
-    public static final int LOGIN_FAIL_MAX = 10;
 }

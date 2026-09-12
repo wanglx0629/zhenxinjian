@@ -232,22 +232,3 @@ export const FOODS: FoodItem[] = [
   { id: 'F199', category: '10 油脂·调味·饮品', name: '全糖奶茶', alias: '', carb: 12.0, protein: 1.2, fat: 3.5, kcal: 84, serving: 500 },
   { id: 'F200', category: '10 油脂·调味·饮品', name: '生抽（酱油）', alias: '', carb: 10.1, protein: 5.6, fat: 0.1, kcal: 64, serving: 10 },
 ]
-
-/** 按关键词搜索（名称 / 别名 / 分类，不区分大小写） */
-export function searchFoods(keyword: string): FoodItem[] {
-  const kw = keyword.trim().toLowerCase()
-  if (!kw) return []
-  return FOODS.filter((f) => {
-    const hay = `${f.name} ${f.alias} ${f.category}`.toLowerCase()
-    return hay.includes(kw)
-  })
-}
-
-/** 按分类分组 */
-export function groupByCategory(): Record<string, FoodItem[]> {
-  const map: Record<string, FoodItem[]> = {}
-  FOODS.forEach((f) => {
-    ;(map[f.category] = map[f.category] || []).push(f)
-  })
-  return map
-}

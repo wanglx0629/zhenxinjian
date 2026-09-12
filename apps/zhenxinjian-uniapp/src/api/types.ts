@@ -10,24 +10,6 @@ export interface Result<T = unknown> {
   data: T
 }
 
-/** 登录请求 */
-export interface LoginRequest {
-  username: string
-  password: string
-  captcha: string
-  captchaUuid: string
-}
-
-/** 注册请求 */
-export interface RegisterRequest {
-  username: string
-  password: string
-  nickname?: string
-  email?: string
-  captcha: string
-  captchaUuid: string
-}
-
 /** 用户信息 */
 export interface UserInfo {
   id: number
@@ -60,10 +42,4 @@ export interface GuestLoginResult extends LoginResult {
 export interface WechatLoginRequest {
   code: string
   guestKey?: string
-}
-
-/** 验证码响应 */
-export interface CaptchaResult {
-  uuid: string
-  image: string
 }

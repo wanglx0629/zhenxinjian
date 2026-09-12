@@ -3,7 +3,7 @@
  * 作者: wanglx
  */
 import request from './request'
-import type { CaptchaResult, LoginRequest, LoginResult, RegisterRequest, UserInfo } from './types'
+import type { CaptchaResult, LoginRequest, LoginResult, UserInfo } from './types'
 
 /** 获取图形验证码 */
 export function getCaptcha() {
@@ -13,11 +13,6 @@ export function getCaptcha() {
 /** 用户登录 */
 export function login(data: LoginRequest) {
   return request.post<LoginResult>('/auth/login', data)
-}
-
-/** 用户注册 */
-export function register(data: RegisterRequest) {
-  return request.post<void>('/auth/register', data)
 }
 
 /** 用户登出 */

@@ -7,7 +7,7 @@ import { computed, ref } from 'vue'
 import { onLoad, onShow } from '@dcloudio/uni-app'
 import { useDietStore } from '@/store/diet'
 import { useFoodStore } from '@/store/food'
-import { MEAL_TYPES, defaultMealType } from '@/config/constants'
+import { MEAL_TYPES } from '@/config/constants'
 import type { FoodVO } from '@/api/food'
 import { ymd } from '@/utils/format'
 import { checkKcalConsistency } from '@/utils/validate'
@@ -24,6 +24,17 @@ const GRAMS_MAX = 5000
 const MACRO_MAX = 2000
 /** 手动输入能量上限 kcal */
 const KCAL_MAX = 20000
+
+/**
+ * 按当前时段取默认餐别（05–10 早 / 10–15 午 / 15–20:30 晚 / 其余加餐）
+ */
+function defaultMealType(): number {
+  const h = new Date().getHours() + new Date().getMinutes() / 60
+  if (h >= 5 && h < 10) return 1
+  if (h >= 10 && h < 15) return 2
+  if (h >= 15 && h < 20.5) return 3
+  return 4
+}
 
 /** 模式：food 食物来源 / manual 手动输入 */
 const mode = ref<'food' | 'manual'>('food')

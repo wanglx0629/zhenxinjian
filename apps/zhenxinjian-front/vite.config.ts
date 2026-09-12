@@ -23,9 +23,7 @@ export default defineConfig(({ mode }) => {
       proxy: {
         '/api': {
           target: proxyTarget,
-          changeOrigin: true,
-          // 代理 WebSocket（/api/ws/demo）
-          ws: true
+          changeOrigin: true
         }
       }
     }
