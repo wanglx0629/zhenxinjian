@@ -24,7 +24,7 @@
 | B-T10 | ARCH-演进-007 | data.sql 基线整改 + 弱口令哈希出库 | 高 | 已完成 |
 | B-T11 | ARCH-边界-004 | 定时任务线程池配置 + 推送外呼批量化 | 高 | 已完成 |
 | B-T12 | ARCH-边界-005 | 埋点毒批次毒性隔离与饱和告警 | 高 | 已完成 |
-| B-T13 | ARCH-演进-003 | 业务常量单一真源 + Redis 连接配置收敛 | 中 | 未开始 |
+| B-T13 | ARCH-演进-003 | 业务常量单一真源 + Redis 连接配置收敛 | 中 | 已完成 |
 | B-T14 | ARCH-演进-004 | 双端演示残留清单式清理 | 中 | 未开始 |
 | B-T15 | ARCH-演进-005 | 构建配置版本治理（BOM 回归 + TS 工具链对齐） | 中 | 未开始 |
 | B-T16 | ARCH-演进-008 | 埋点事件码前端常量表 + track() 类型收窄 | 中 | 未开始 |
@@ -348,7 +348,7 @@
 | --- | --- |
 | 追溯 | ARCH-演进-003（演进，中） |
 | 目标 | 以后端枚举 + openspec/specs 为唯一真源；前端常量加对照锚点；删除原型副本；JetCache 与 spring.data.redis 连接配置收敛 |
-| 状态 | 未开始 |
+| 状态 | 已完成 |
 
 步骤：
 
@@ -360,6 +360,14 @@
 6. 增量执行：按端分批提交。
 7. 回归测绿：后端 `mvn -q test` + 小程序 `npm run check`；开发环境启动验证 JetCache 与 Redis 连接正常。
 8. 用户确认：展示漂移裁定与收敛 diff，获确认后收尾（写操作门禁）。
+
+执行记录（2026-09-12，8e193f8 单提交）：
+
+1. 全量比对裁定零漂移：ACTIVITY 系数 1.2/1.375/1.55/1.725 = ActivityLevelEnum.factor（数组序即 code 1-4，`form.activityLevel` 直接索引）；DEFICIT_OPTIONS [200,300,400,500] = DeficitOptionEnum 四档；CYCLE carbCoef 2.5/fatCoef 0.8·1.0/proteinCoef 1.5/ratio/template = CycleCalcService（CARB_POOL_FACTOR、DEFAULT_CFC、CFC_OPTIONS、DayTypeParam、TEMPLATE）；RANGES = BodyProfileSaveDTO @Min/@Max（12-80）、WeightService WEIGHT_MIN/MAX（25-200）、MenstrualService CYCLE_LEN/PERIOD_DAYS（21-35/3-10）、CyclePlanService（7-14）；经期上浮前端无副本（MenstrualPhaseEnum 经 VO 下发 carbUplift/kcalUplift）；store/food.ts LOCAL_HOT_CODES 与 FoodHotConstant 同序同编号（注释锚点已在）。
+2. 前端锚点：constants.ts 四块（ACTIVITY/DEFICIT_OPTIONS/CYCLE/RANGES）加后端对照锚点注释（前端无测试基建，采注释锚点而非断言用例）； MenstrualPhaseEnum 清理 B-T09 退库 PERIOD_PHASES 的失效注释引用，改为「经期 VO 下发键」。
+3. Redis 收敛：application-dev.yml.example jetcache uri 改 `redis://:${spring.data.redis.password}@${host}:${port}/${database}` 单一属性源拼接（改连接只改 spring.data.redis 一处），特殊字符密码需 URL 编码场景注释指引改显式写死；本机 dev.yml 同步拼接验证空密码边界。
+4. 原型副本：MRD-PRD 原型 constants.js（PERIOD_PHASES/ACTIVITY 等副本）删除并入 B-T30（原型工程整体移出版本库）协同，本任务不单独删。
+5. 回归：mvn test 132 全绿；vue-tsc 通过；dev 冒烟启动 3.072s 成功、Tomcat 8080、JetCache 统计日志正常、空密码拼接 uri（redis://:@host）Lettuce 可用零异常（冒烟中发现并清理 B-T11 残留 8080 实例 10152）。
 
 ### B-T14 — 双端演示残留清单式清理
 
@@ -817,3 +825,4 @@
 | v1.10 | 2026-09-12 | —（未提交） | B-T10 执行完成：裁定完整基线 — data.sql 重写为全量基线（建库 + 15 张业务表终态与 change0~9 链一致，全 CREATE IF NOT EXISTS 幂等）；步骤一 admin/admin123 哈希出库 + 管理员初始化成文（10dad43），步骤二全量基线与三处文档同步；演练库全链 RECORDED 0~9/重跑 SKIP/账 10 条/表 16 张，123 测试全绿，状态置已完成 |
 | v1.11 | 2026-09-12 | —（未提交） | B-T11 执行完成：ScheduleConfig 多线程调度池（taskScheduler 池 4 线程）+ reminderPushExecutor 外呼执行器（core2/max4/queue200）；微信订阅消息无批量 API 裁定限并发异步——ReminderPushTask 扫描循环改投递执行器，Executor 按构造参数名注入（javap 验证）；补 ReminderPushTaskTest 8 用例 D4 全分支，131 测试全绿；dev 冒烟启动成功，状态置已完成 |
 | v1.12 | 2026-09-12 | —（未提交） | B-T12 执行完成：裁定「恒 200 + 响应 data 携带剔除码列表」契约替代 40901 整批拒收——TrackEventService 逐条白名单校验毒条目剔除/合法落库/去重保序返回，TRACK_EVENT_INVALID_CODE 常量删除；TrackEventEnum 新增 track_queue_saturated；前端成功整批移除毒条目不再无限重试 + 队列 ≥80% 饱和告警一次回落复位；TrackEventServiceTest 5 用例新契约，132 测试全绿、vue-tsc 通过；openspec spec 同步，状态置已完成 |
+| v1.13 | 2026-09-12 | —（未提交） | B-T13 执行完成：全量比对裁定零漂移（活动系数/缺口档/碳循环系数/录入区间前后端一致、经期上浮 VO 下发无前端副本、热门清单同序）；constants.ts 四块锚点注释 + MenstrualPhaseEnum 失效引用清理；application-dev.yml.example jetcache uri 改 ${spring.data.redis.*} 单一属性源拼接；原型副本删除并入 B-T30 协同；132 测试全绿、vue-tsc 通过、dev 冒烟验证空密码拼接 uri 零异常，状态置已完成 |
