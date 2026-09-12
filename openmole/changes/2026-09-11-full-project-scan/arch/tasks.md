@@ -16,7 +16,7 @@
 | B-T02 | ARCH-耦合-006 | 引入 GuestMigrationOrchestrator 编排族并后置缓存失效 | 高 | 已完成 |
 | B-T03 | ARCH-内聚-001 | 能量守恒 ±10% 校验跨端收敛单一真源 | 高 | 已完成 |
 | B-T04 | ARCH-内聚-002 | 三宏进度展示收敛到 utils/macro.ts | 高 | 已完成 |
-| B-T05 | ARCH-内聚-003 | AI skills 资产单一真源、冗余副本退库 | 高 | 未开始 |
+| B-T05 | ARCH-内聚-003 | AI skills 资产单一真源、冗余副本退库 | 高 | 已完成 |
 | B-T06 | ARCH-层次-001 | 小程序 pages→store→api 分层收敛并补 taper store | 高 | 未开始 |
 | B-T07 | ARCH-层次-003 | 游客清理任务改批级独立事务 | 高 | 未开始 |
 | B-T08 | ARCH-演进-001 | SQL 迁移版本化（版本表 + 幂等守卫） | 高 | 未开始 |
@@ -140,7 +140,7 @@
 | --- | --- |
 | 追溯 | ARCH-内聚-003（内聚，高） |
 | 目标 | 保留单一真源目录（建议 `.trae/` 全集），其余 5 个 IDE 副本目录移出版本库或改为安装脚本生成 |
-| 状态 | 未开始 |
+| 状态 | 已完成 |
 
 步骤：
 
@@ -753,3 +753,4 @@
 | v1.2 | 2026-09-12 | —（未提交） | B-T02 执行完成：GuestMigrationOrchestrator 编排入口 + Ordered 契约 + UserRecordMigrator 缓存失效改 afterCommit + 双调用点收敛，后端回归全绿，状态置已完成 |
 | v1.3 | 2026-09-12 | —（未提交） | B-T03 执行完成：后端 MacroConsistencyValidator 单一真源替换三处副本；前端 utils/validate.ts 新增 checkKcalConsistency/kcalFromMacros 替换两页面私有副本；裁定 5000/10000 为不同场景各自与后端一致（非漂移），detail.vue 加锚点注释；后端测试 + vue-tsc 全绿 |
 | v1.4 | 2026-09-12 | —（未提交） | B-T04 执行完成：record/index.vue 本地 38 行 progressItems 与 adviceList 手写副本替换为 buildProgressItems/buildAdviceList 单一真源调用，删除 PROGRESS_THRESHOLD/PROGRESS_COLORS 直引；vue-tsc 全绿，状态置已完成 |
+| v1.5 | 2026-09-12 | —（未提交） | B-T05 执行完成：全量哈希比对裁定"漂移"仅为 per-IDE 包装差异（/opsx-X↔$openspec-X 占位符 + opsx front-matter name 行），内容零漂移；ui-ux-pro-max 归入 .trae SoT；新增 scripts/sync-ide-skills.ps1 分发脚本（拷贝 + 两类机械变换）；五副本目录入 .gitignore 并 git rm --cached 退库 120 文件；再生字节级回归比对 0 差异，状态置已完成 |

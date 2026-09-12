@@ -16,7 +16,7 @@
 | ARCH-耦合-006 | 耦合 | 高 | 已消除 |
 | ARCH-内聚-001 | 内聚 | 高 | 已消除 |
 | ARCH-内聚-002 | 内聚 | 高 | 已消除 |
-| ARCH-内聚-003 | 内聚 | 高 | 未清除 |
+| ARCH-内聚-003 | 内聚 | 高 | 已消除 |
 | ARCH-层次-001 | 层次 | 高 | 未清除 |
 | ARCH-层次-003 | 层次 | 高 | 未清除 |
 | ARCH-演进-001 | 演进 | 高 | 未清除 |
@@ -123,7 +123,7 @@
 | 根因 | 各 IDE 约定目录各拷一份，无链接/引用机制 |
 | 影响 | 更新必然漂移；仓库体积膨胀 |
 | 修复建议 | 保留单一真源目录，其余改为安装脚本软链/复制生成；或仅保留 `.trae/` 全集 |
-| 状态 | 未清除 |
+| 状态 | 已消除（B-T05 于 2026-09-12 完成：全量 MD5 比对裁定重复样本内容完全一致，"漂移样本"实为 per-IDE 包装差异（.agents 用 `$openspec-X (Codex) or /openspec-X (other agents)` 占位符、.opencode opsx 命令无 front-matter `name:` 行），非内容分叉；`.trae/` 定为单一真源，独有资产 `.agent/skills/ui-ux-pro-max`（28 文件）git mv 归入；新增 `scripts/sync-ide-skills.ps1` 分发脚本（5 IDE 目录 = 纯拷贝 + name 行剔除 + 占位符反向映射三类机械生成）；`.agent/.agents/.claude/.codex/.opencode` 入 .gitignore 并 `git rm --cached` 退库 120 文件（24703 行删除）；脚本再生后与原状字节级比对 0 差异，本地 IDE 加载不受影响） |
 
 ### ARCH-层次-001 — 小程序页面绕过 store 直调 api
 
@@ -571,3 +571,4 @@
 | v1.3 | 2026-09-12 | —（未提交） | B-T02 完成，ARCH-耦合-006 置"已消除"（GuestMigrationOrchestrator 编排 + Ordered 契约 + 缓存失效 afterCommit 后置）。余 34 条未清除 |
 | v1.4 | 2026-09-12 | —（未提交） | B-T03 完成，ARCH-内聚-001 置"已消除"（MacroConsistencyValidator 后端单一真源 + 前端 utils/validate.ts 收敛；5000/10000 裁定为不同场景口径）。余 33 条未清除 |
 | v1.5 | 2026-09-12 | —（未提交） | B-T04 完成，ARCH-内聚-002 置"已消除"（record/index.vue 手写副本替换为 utils/macro.ts 单一真源调用）。余 32 条未清除 |
+| v1.6 | 2026-09-12 | —（未提交） | B-T05 完成，ARCH-内聚-003 置"已消除"（.trae/ 单一真源 + sync-ide-skills.ps1 分发脚本 + 五副本目录退库 120 文件，字节级回归 0 差异）。余 31 条未清除 |
