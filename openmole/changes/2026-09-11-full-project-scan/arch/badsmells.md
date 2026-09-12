@@ -25,7 +25,7 @@
 | ARCH-边界-004 | 边界 | 高 | 已消除 |
 | ARCH-边界-005 | 边界 | 高 | 已消除 |
 | ARCH-演进-003 | 演进 | 中 | 已消除 |
-| ARCH-演进-004 | 演进 | 中 | 未清除 |
+| ARCH-演进-004 | 演进 | 中 | 已消除 |
 | ARCH-演进-005 | 演进 | 中 | 未清除 |
 | ARCH-演进-008 | 演进 | 中 | 未清除 |
 | ARCH-耦合-002 | 耦合 | 中 | 未清除 |
@@ -249,7 +249,7 @@
 | 根因 | 转型时按页面删除，未做全链路残留清理 |
 | 影响 | 误导新成员；白名单含死路由 |
 | 修复建议 | 一次性清单式清理（均为纯删除，风险低） |
-| 状态 | 未清除 |
+| 状态 | 已消除（B:09-13 完成：逐项全库检索裁定零引用后纯删除——小程序删 getCaptcha/login/register/guestRenew 四死函数 + LoginRequest/RegisterRequest/CaptchaResult 三死类型 + 白名单三死路由 + data/foods.ts searchFoods/groupByCategory 死函数，defaultMealType 下移唯一消费方 record/add.vue 常量文件回归纯数据；管理后台删 register/RegisterRequest/getUserById + 白名单 /auth/register + VITE_WS_* 死声明 + ws:true 死代理 + notify.wav 死资源 + ws 注释；后端删零引用 LOGIN_FAIL_MAX；三端安全网全绿——uniapp vue-tsc、front vue-tsc+vite build、后端 mvn test 132） |
 
 ### ARCH-演进-005 — 构建配置版本错位与 BOM 失效
 
@@ -580,3 +580,4 @@
 | v1.12 | 2026-09-12 | —（未提交） | B-T11 完成，ARCH-边界-004 置"已消除"（ScheduleConfig 多线程调度池池 4 线程 + reminderPushExecutor 限并发异步外呼；微信订阅消息无批量 API 裁定异步化；ReminderPushTaskTest 8 用例 D4 全分支，131 测试全绿，dev 冒烟启动成功）。余 25 条未清除 |
 | v1.13 | 2026-09-12 | —（未提交） | B-T12 完成，ARCH-边界-005 置"已消除"（裁定「恒 200 + 响应 data 携带剔除码列表」契约替代 40901 整批拒收：TrackEventService 逐条白名单校验毒条目剔除/合法落库/去重保序返回；TrackEventEnum 新增 track_queue_saturated；前端成功整批移除毒条目不再无限重试 + 队列 ≥80% 饱和告警一次回落复位；TrackEventServiceTest 5 用例新契约，132 测试全绿、vue-tsc 通过；openspec spec 同步）。余 24 条未清除 |
 | v1.14 | 2026-09-12 | —（未提交） | B-T13 完成，ARCH-演进-003 置"已消除"（全量比对裁定零漂移；constants.ts 四块锚点注释 + MenstrualPhaseEnum 失效引用清理；application-dev.yml.example jetcache uri 改 ${spring.data.redis.*} 单一属性源拼接；原型副本删除并入 B-T30 协同；132 测试全绿、vue-tsc 通过、dev 冒烟验证空密码拼接 uri 零异常）。余 23 条未清除 |
+| v1.15 | 2026-09-13 | —（未提交） | B-T14 完成，ARCH-演进-004 置"已消除"（逐项全库检索裁定零引用后纯删除：小程序四死函数/三死类型/白名单三死路由/foods.ts 死函数/defaultMealType 下移消费方；管理后台 register/RegisterRequest/getUserById/白名单死路由/VITE_WS_*/ws:true/notify.wav/ws 注释；后端 LOGIN_FAIL_MAX；三端安全网全绿——uniapp vue-tsc、front vue-tsc+vite build、mvn test 132）。余 22 条未清除 |

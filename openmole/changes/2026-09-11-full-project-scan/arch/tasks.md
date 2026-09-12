@@ -25,7 +25,7 @@
 | B-T11 | ARCH-边界-004 | 定时任务线程池配置 + 推送外呼批量化 | 高 | 已完成 |
 | B-T12 | ARCH-边界-005 | 埋点毒批次毒性隔离与饱和告警 | 高 | 已完成 |
 | B-T13 | ARCH-演进-003 | 业务常量单一真源 + Redis 连接配置收敛 | 中 | 已完成 |
-| B-T14 | ARCH-演进-004 | 双端演示残留清单式清理 | 中 | 未开始 |
+| B-T14 | ARCH-演进-004 | 双端演示残留清单式清理 | 中 | 已完成 |
 | B-T15 | ARCH-演进-005 | 构建配置版本治理（BOM 回归 + TS 工具链对齐） | 中 | 未开始 |
 | B-T16 | ARCH-演进-008 | 埋点事件码前端常量表 + track() 类型收窄 | 中 | 未开始 |
 | B-T17 | ARCH-耦合-002 | 小程序 api 层去 store 依赖（事件化 401 处理） | 中 | 未开始 |
@@ -375,7 +375,7 @@
 | --- | --- |
 | 追溯 | ARCH-演进-004（演进，中） |
 | 目标 | 按清单删除小程序/管理后台/后端三处演示残留（死 API、死类型、白名单死路由、死常量、静态资源） |
-| 状态 | 未开始 |
+| 状态 | 已完成 |
 
 步骤：
 
@@ -387,6 +387,14 @@
 6. 增量执行：每批删除后立即跑对应检查。
 7. 回归测绿：小程序 `npm run check`、后台 `npm run build`、后端 `mvn -q test` 全绿。
 8. 用户确认：展示删除清单与 diff，获确认后收尾（写操作门禁）。
+
+执行记录（2026-09-13，99e72a1 单提交）：
+
+1. 影响分析逐项裁定：getCaptcha/login/register/guestRenew 全库零调用；LoginRequest/RegisterRequest/CaptchaResult 仅被死函数引用；store/food.ts 的 searchFoods 来自 `@/api/food`（data/foods.ts 本地同名死函数无引用）；groupByCategory 零调用；defaultMealType 非死码而是「行为函数混入常量文件」，唯一消费方 pages/record/add.vue；管理后台 register/RegisterRequest/getUserById 零调用、VITE_WS_* 仅 vite-env.d.ts 自声明、notify.wav 零引用；后端 LOGIN_FAIL_MAX 零引用（实际口径以 zhenxinjian.redis.login-fail-max 配置为准，注释自证）。
+2. 小程序批次：api/auth.ts 删四死函数（连带类型 import 收窄）；api/types.ts 删三死类型；request.ts AUTH_SKIP_URLS 5→2（仅留 /auth/wechat/login、/auth/guest）；data/foods.ts 删 searchFoods/groupByCategory；constants.ts defaultMealType 下移 record/add.vue（hour 参数无人使用一并收窄）；`npm run type-check`（实际脚本名，tasks 基线 `npm run check` 笔误同 B-T12 记录）vue-tsc 通过。
+3. 管理后台批次：api/auth.ts 删 register；api/types.ts 删 RegisterRequest；api/user.ts 删 getUserById；request.ts AUTH_SKIP_URLS 剔 /auth/register + ws 注释改「其他模块」；vite-env.d.ts 删 VITE_WS_PATH/VITE_WS_PROTOCOL；vite.config.ts 删 ws:true + 注释；public/notify.wav 删除；`npm run build`（vue-tsc + vite）通过。
+4. 后端批次：CommonConstant.java 删 LOGIN_FAIL_MAX；`mvn -q test` BUILD SUCCESS，surefire 23 类 132 用例 0 失败 0 错误。
+5. 用户确认：删除清单 + diff stat（14 文件 +18/-119）展示并获「执行完提交」指令后提交，写操作门禁通过。
 
 ### B-T15 — 构建配置版本治理（BOM 回归 + TS 工具链对齐）
 
@@ -826,3 +834,4 @@
 | v1.11 | 2026-09-12 | —（未提交） | B-T11 执行完成：ScheduleConfig 多线程调度池（taskScheduler 池 4 线程）+ reminderPushExecutor 外呼执行器（core2/max4/queue200）；微信订阅消息无批量 API 裁定限并发异步——ReminderPushTask 扫描循环改投递执行器，Executor 按构造参数名注入（javap 验证）；补 ReminderPushTaskTest 8 用例 D4 全分支，131 测试全绿；dev 冒烟启动成功，状态置已完成 |
 | v1.12 | 2026-09-12 | —（未提交） | B-T12 执行完成：裁定「恒 200 + 响应 data 携带剔除码列表」契约替代 40901 整批拒收——TrackEventService 逐条白名单校验毒条目剔除/合法落库/去重保序返回，TRACK_EVENT_INVALID_CODE 常量删除；TrackEventEnum 新增 track_queue_saturated；前端成功整批移除毒条目不再无限重试 + 队列 ≥80% 饱和告警一次回落复位；TrackEventServiceTest 5 用例新契约，132 测试全绿、vue-tsc 通过；openspec spec 同步，状态置已完成 |
 | v1.13 | 2026-09-12 | —（未提交） | B-T13 执行完成：全量比对裁定零漂移（活动系数/缺口档/碳循环系数/录入区间前后端一致、经期上浮 VO 下发无前端副本、热门清单同序）；constants.ts 四块锚点注释 + MenstrualPhaseEnum 失效引用清理；application-dev.yml.example jetcache uri 改 ${spring.data.redis.*} 单一属性源拼接；原型副本删除并入 B-T30 协同；132 测试全绿、vue-tsc 通过、dev 冒烟验证空密码拼接 uri 零异常，状态置已完成 |
+| v1.14 | 2026-09-13 | —（未提交） | B-T14 执行完成：逐项全库检索裁定零引用后纯删除——小程序四死函数（getCaptcha/login/register/guestRenew）+ 三死类型 + 白名单三死路由 + foods.ts searchFoods/groupByCategory 死函数 + defaultMealType 下移唯一消费方 record/add.vue；管理后台 register/RegisterRequest/getUserById + 白名单 /auth/register + VITE_WS_* + ws:true + notify.wav + ws 注释；后端 LOGIN_FAIL_MAX；三端安全网全绿（uniapp vue-tsc、front vue-tsc+vite build、mvn test 132），14 文件 +18/-119，状态置已完成 |
