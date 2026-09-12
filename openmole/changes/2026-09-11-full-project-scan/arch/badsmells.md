@@ -19,7 +19,7 @@
 | ARCH-内聚-003 | 内聚 | 高 | 已消除 |
 | ARCH-层次-001 | 层次 | 高 | 已消除 |
 | ARCH-层次-003 | 层次 | 高 | 已消除 |
-| ARCH-演进-001 | 演进 | 高 | 未清除 |
+| ARCH-演进-001 | 演进 | 高 | 已消除 |
 | ARCH-演进-002 | 演进 | 高 | 未清除 |
 | ARCH-演进-007 | 演进 | 高 | 未清除 |
 | ARCH-边界-004 | 边界 | 高 | 未清除 |
@@ -165,7 +165,7 @@
 | 根因 | 单人快速迭代未建迁移基建 |
 | 影响 | 环境间状态不可追溯；新环境搭建高风险 |
 | 修复建议 | 引入版本表（最小方案 `schema_migrations` + 脚本幂等守卫）或 Flyway；补回滚说明 |
-| 状态 | 未清除 |
+| 状态 | 已消除（B-T08 于 2026-09-12 完成：`schema_migrations` 版本表 + `SqlRunner` change<N> 自动建表/查账/SKIP/记账、`--allow-error` 移除失败即终止且不记账；9 个 change 脚本补幂等守卫（ALTER 段 information_schema 条件守卫 + CREATE IF NOT EXISTS + change2 破坏性三步断点续跑）；存量环境 `change_backfill_migrations.sql` 回填；全新环境引导成文（建库→data.sql 基线→change 链）；五场景演练全绿：全链/重跑全 SKIP/守卫零重复重建/失败 exit 2 不记账/回填后全 SKIP；123 测试全绿） |
 
 ### ARCH-演进-002 — 前端影子算法库残留且口径已漂移
 
@@ -574,3 +574,4 @@
 | v1.6 | 2026-09-12 | —（未提交） | B-T05 完成，ARCH-内聚-003 置"已消除"（.trae/ 单一真源 + sync-ide-skills.ps1 分发脚本 + 五副本目录退库 120 文件，字节级回归 0 差异）。余 31 条未清除 |
 | v1.7 | 2026-09-12 | —（未提交） | B-T06 完成，ARCH-层次-001 置"已消除"（补 store/taper、store/reminder 两 store，五处页面直调改经 store，登出清理收敛 userStore 统一编排七大 store，cycleStore.switchMode 收敛模式切换；pages/components 对 @/api/* 仅剩 type-only import）。余 30 条未清除 |
 | v1.8 | 2026-09-12 | —（未提交） | B-T07 完成，ARCH-层次-003 置"已消除"（GuestCleanupBatchExecutor 独立 Bean 批级独立事务，任务方法不再持大事务，批级 size/costMs 日志，补 5 测试用例）。余 29 条未清除 |
+| v1.9 | 2026-09-12 | —（未提交） | B-T08 完成，ARCH-演进-001 置"已消除"（schema_migrations 版本表 + SqlRunner 自动记账/SKIP/失败即终止 + 9 脚本幂等守卫 + 存量回填脚本 + 全新环境引导成文，五场景演练全绿）。余 28 条未清除 |

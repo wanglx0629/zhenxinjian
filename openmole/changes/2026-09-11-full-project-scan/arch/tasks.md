@@ -19,7 +19,7 @@
 | B-T05 | ARCH-内聚-003 | AI skills 资产单一真源、冗余副本退库 | 高 | 已完成 |
 | B-T06 | ARCH-层次-001 | 小程序 pages→store→api 分层收敛并补 taper store | 高 | 已完成 |
 | B-T07 | ARCH-层次-003 | 游客清理任务改批级独立事务 | 高 | 已完成 |
-| B-T08 | ARCH-演进-001 | SQL 迁移版本化（版本表 + 幂等守卫） | 高 | 未开始 |
+| B-T08 | ARCH-演进-001 | SQL 迁移版本化（版本表 + 幂等守卫） | 高 | 已完成 |
 | B-T09 | ARCH-演进-002 | 删除前端影子算法库（isPlateau 优先） | 高 | 未开始 |
 | B-T10 | ARCH-演进-007 | data.sql 基线整改 + 弱口令哈希出库 | 高 | 未开始 |
 | B-T11 | ARCH-边界-004 | 定时任务线程池配置 + 推送外呼批量化 | 高 | 未开始 |
@@ -212,7 +212,7 @@
 | --- | --- |
 | 追溯 | ARCH-演进-001（演进，高） |
 | 目标 | 建立 `schema_migrations` 版本记账，9 个 change 脚本补幂等守卫，`SqlRunner` 去除 `--allow-error` 吞错 |
-| 状态 | 未开始 |
+| 状态 | 已完成 |
 
 步骤：
 
@@ -224,6 +224,14 @@
 6. 增量执行：先合入基建，再逐脚本补守卫，最后出回填说明。
 7. 回归测绿：测试库双场景（新库/旧库）全链跑通；`SqlRunner` 无 `--allow-error` 且失败即终止。
 8. 用户确认：展示版本表 DDL 与守卫改造清单，获确认后收尾（写操作门禁）。
+
+执行记录（2026-09-12，09d9c44 + 3e9c4ff 两提交）：
+
+1. 步骤一基建（09d9c44）：`schema_migrations` 版本表（change0 脚本 + runner 内嵌 DDL）；`SqlRunner` change<N> 命名自动建表/查账/SKIP/记账，`--allow-error` 移除失败即终止（exit 2）且不记账；`change_backfill_migrations.sql` 存量回填（INSERT IGNORE 幂等）。
+2. 步骤二守卫（3e9c4ff）：9 个 change 脚本补幂等守卫——change1/6/8 ALTER 段改 information_schema 实时条件守卫（DO 0 占位），change2 破坏性三步各自前置状态守卫支持断点续跑，change3/4/5/7/9 CREATE 补 IF NOT EXISTS；脚本头补 `-- 幂等:` 注释。
+3. 演练暴露并修复：`run-sql.cmd` 硬编码路径失效（javac 改 PATH 解析、connector jar 改 maven 3.9.15）；README 同步并成文全新环境引导（建库→data.sql 基线→change 链；MYSQL_URL 必须带默认库，否则版本表 DDL 报 No database selected）。
+4. 五场景演练全绿：A 全新库全链（data.sql 基线→change0~9，账 10 条/16 表/守卫列齐）/ B 重跑全 SKIP / C 删账重跑 change1/2/9 守卫零重复重建账自动补回 / D 错误脚本 exit 2 后续不执行且不记账 / E 清账→回填→全 SKIP。
+5. 回归：`mvn test` 123 用例全绿；演练发现 data.sql 为 users 基线（change 链守卫前置），现状输入移交 B-T10。
 
 ### B-T09 — 删除前端影子算法库（isPlateau 优先）
 
@@ -771,3 +779,4 @@
 | v1.5 | 2026-09-12 | —（未提交） | B-T05 执行完成：全量哈希比对裁定"漂移"仅为 per-IDE 包装差异（/opsx-X↔$openspec-X 占位符 + opsx front-matter name 行），内容零漂移；ui-ux-pro-max 归入 .trae SoT；新增 scripts/sync-ide-skills.ps1 分发脚本（拷贝 + 两类机械变换）；五副本目录入 .gitignore 并 git rm --cached 退库 120 文件；再生字节级回归比对 0 差异，状态置已完成 |
 | v1.6 | 2026-09-12 | —（未提交） | B-T06 执行完成：新建 store/taper.ts、store/reminder.ts；taper/plan、reminder/index、mine/index、home/index、menstrual/index 五处页面直调全部改经 store；userStore.logout/abandonGuest 统一编排七大业务 store reset；cycleStore 新增 switchMode 收敛 mode/select.vue 直调 switchDietMode；vue-tsc 每步全绿，pages/components 对 @/api/* 仅剩 type-only import，状态置已完成 |
 | v1.7 | 2026-09-12 | —（未提交） | B-T07 执行完成：拆出 GuestCleanupBatchExecutor 独立 Bean 承载 @Transactional 批方法（规避同类自调用事务失效），任务方法只编排批次不再持大事务，新增每批 size/costMs 日志；补 GuestCleanupTaskTest 5 用例，123 测试全绿，状态置已完成 |
+| v1.8 | 2026-09-12 | —（未提交） | B-T08 执行完成：schema_migrations 版本表 + SqlRunner 自动建表/查账/SKIP/记账 + --allow-error 移除失败即终止不记账 + 9 脚本幂等守卫（information_schema 条件守卫/IF NOT EXISTS/change2 断点续跑）+ 存量回填脚本 + run-sql.cmd/README 本机路径修正与全新环境引导成文；五场景演练全绿（全链/SKIP/守卫/失败终止/回填），123 测试全绿，状态置已完成 |
