@@ -9,6 +9,7 @@ import { onLoad, onShow } from '@dcloudio/uni-app'
 import { useFoodStore } from '@/store/food'
 import type { FoodCalcVO, FoodVO } from '@/api/food'
 import { track, trackPage } from '@/utils/track'
+import { TRACK_EVENT } from '@/config/track-events'
 
 const foodStore = useFoodStore()
 
@@ -39,7 +40,7 @@ onLoad(async (options) => {
   }
   try {
     food.value = await foodStore.detail(id)
-    track('food_detail', { foodId: id })
+    track(TRACK_EVENT.FOOD_DETAIL, { foodId: id })
     gramsInput.value = String(Math.round(food.value.serving))
     await runCalc()
   } catch {

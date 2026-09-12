@@ -13,6 +13,7 @@ import { ymd, md, week } from '@/utils/format'
 import { buildProgressItems, buildAdviceList } from '@/utils/macro'
 import type { DietRecordVO } from '@/api/diet'
 import { track, trackPage } from '@/utils/track'
+import { TRACK_EVENT } from '@/config/track-events'
 
 const dietStore = useDietStore()
 const bodyStore = useBodyStore()
@@ -127,7 +128,7 @@ async function confirmDelete() {
   showDeleteConfirm.value = false
   try {
     await dietStore.removeRecord(deleteTargetId.value)
-    track('record_delete')
+    track(TRACK_EVENT.RECORD_DELETE)
     uni.showToast({ title: '已删除', icon: 'success' })
   } catch {
     // 错误已由 request.ts toast

@@ -10,6 +10,7 @@ import { useWeightStore } from '@/store/weight'
 import { ymd } from '@/utils/format'
 import { canSubmit } from '@/utils/throttle'
 import { track, trackPage } from '@/utils/track'
+import { TRACK_EVENT } from '@/config/track-events'
 
 const weightStore = useWeightStore()
 
@@ -68,7 +69,7 @@ async function handleSave() {
   if (weightStore.submitting || !canSubmit()) return
   try {
     await weightStore.save({ recordDate: recordDate.value, weight: Math.round(kg * 10) / 10 })
-    track('weight_add')
+    track(TRACK_EVENT.WEIGHT_ADD)
     weight.value = ''
     uni.showToast({ title: '已记录', icon: 'success' })
   } catch {

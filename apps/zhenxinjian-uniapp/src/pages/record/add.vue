@@ -12,6 +12,7 @@ import type { FoodVO } from '@/api/food'
 import { ymd } from '@/utils/format'
 import { checkKcalConsistency } from '@/utils/validate'
 import { track, trackPage } from '@/utils/track'
+import { TRACK_EVENT } from '@/config/track-events'
 
 const dietStore = useDietStore()
 const foodStore = useFoodStore()
@@ -189,7 +190,7 @@ async function handleSubmit() {
           amountG: grams.value,
           remark: remark.value || undefined
         })
-        track('record_edit', { mealType: mealType.value })
+        track(TRACK_EVENT.RECORD_EDIT, { mealType: mealType.value })
         uni.showToast({ title: '已更新', icon: 'success' })
       } else {
         await dietStore.addRecord({
@@ -200,7 +201,7 @@ async function handleSubmit() {
           recordDate: recordDate.value,
           remark: remark.value || undefined
         })
-        track('record_add', { mealType: mealType.value, source: food.value.source === 2 ? 2 : 1 })
+        track(TRACK_EVENT.RECORD_ADD, { mealType: mealType.value, source: food.value.source === 2 ? 2 : 1 })
         uni.showToast({ title: '记录成功', icon: 'success' })
       }
       setTimeout(() => uni.switchTab({ url: '/pages/record/index' }), 800)
@@ -221,7 +222,7 @@ async function handleSubmit() {
           kcal: Number(manualKcal.value),
           remark: remark.value || undefined
         })
-        track('record_edit', { mealType: mealType.value })
+        track(TRACK_EVENT.RECORD_EDIT, { mealType: mealType.value })
         uni.showToast({ title: '已更新', icon: 'success' })
       } else {
         await dietStore.addRecord({
@@ -235,7 +236,7 @@ async function handleSubmit() {
           recordDate: recordDate.value,
           remark: remark.value || undefined
         })
-        track('record_add', { mealType: mealType.value, source: 3 })
+        track(TRACK_EVENT.RECORD_ADD, { mealType: mealType.value, source: 3 })
         uni.showToast({ title: '记录成功', icon: 'success' })
       }
       setTimeout(() => uni.switchTab({ url: '/pages/record/index' }), 800)

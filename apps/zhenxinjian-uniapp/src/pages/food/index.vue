@@ -9,6 +9,7 @@ import { onLoad, onReachBottom, onShow } from '@dcloudio/uni-app'
 import { useFoodStore } from '@/store/food'
 import type { FoodCategoryVO, FoodVO } from '@/api/food'
 import { track, trackPage } from '@/utils/track'
+import { TRACK_EVENT } from '@/config/track-events'
 
 const foodStore = useFoodStore()
 
@@ -53,7 +54,7 @@ function clearHistory() {
 /** 执行搜索：重置到第 1 页并请求 */
 async function doSearch(targetPage = 1) {
   const kw = keyword.value.trim()
-  track('food_search', { keyword: kw })
+  track(TRACK_EVENT.FOOD_SEARCH, { keyword: kw })
   if (!kw && !categoryCode.value) {
     records.value = []
     total.value = 0
@@ -95,13 +96,13 @@ function selectCategory(code: string) {
 
 function tapHistory(kw: string) {
   keyword.value = kw
-  track('food_history_click', { keyword: kw })
+  track(TRACK_EVENT.FOOD_HISTORY_CLICK, { keyword: kw })
   doSearch(1)
 }
 
 function tapHot(food: FoodVO) {
   keyword.value = food.name
-  track('food_hot_click', { foodId: food.id })
+  track(TRACK_EVENT.FOOD_HOT_CLICK, { foodId: food.id })
   doSearch(1)
 }
 

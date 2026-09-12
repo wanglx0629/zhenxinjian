@@ -12,6 +12,7 @@ import { ymd } from '@/utils/format'
 import { canSubmit } from '@/utils/throttle'
 import { getToken } from '@/utils/storage'
 import { track, trackPage } from '@/utils/track'
+import { TRACK_EVENT } from '@/config/track-events'
 
 const menstrualStore = useMenstrualStore()
 
@@ -99,7 +100,7 @@ async function handleSave() {
       cycleLen: cycleLen.value,
       periodDays: periodDays.value
     })
-    track('menstrual_save')
+    track(TRACK_EVENT.MENSTRUAL_SAVE)
     uni.showToast({ title: '已保存', icon: 'success' })
   } catch {
     // request.ts 已统一 toast

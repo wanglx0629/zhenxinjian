@@ -12,6 +12,7 @@ import { bmr, tdee, macro532Base, type CalcProfile } from '@/utils/calculator'
 import { checkAll, checkTargetWeight } from '@/utils/validate'
 import { canSubmit } from '@/utils/throttle'
 import { track, trackPage } from '@/utils/track'
+import { TRACK_EVENT } from '@/config/track-events'
 
 const bodyStore = useBodyStore()
 
@@ -115,7 +116,7 @@ async function handleSubmit() {
       activityLevel: form.activityLevel,
       deficit: form.deficit
     })
-    track('body_save')
+    track(TRACK_EVENT.BODY_SAVE)
     uni.redirectTo({ url: '/pages/body/result' })
   } catch {
     // request.ts 已统一 toast；此处仅保持表单可重试

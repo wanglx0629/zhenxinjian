@@ -12,6 +12,7 @@ import { useReminderStore } from '@/store/reminder'
 import { getToken } from '@/utils/storage'
 import { canSubmit } from '@/utils/throttle'
 import { track, trackPage } from '@/utils/track'
+import { TRACK_EVENT } from '@/config/track-events'
 
 const userStore = useUserStore()
 const reminderStore = useReminderStore()
@@ -155,7 +156,7 @@ async function handleSave() {
       dinnerSwitch: dinnerSwitch.value,
       dinnerTime: dinnerTime.value
     })
-    track('reminder_save')
+    track(TRACK_EVENT.REMINDER_SAVE)
     uni.showToast({ title: '已保存', icon: 'success' })
     // 保存成功后补订阅额度（游客不引导：无 openid 收不到推送）
     if (!userStore.isGuest && anyEnabled.value && templateId.value) {
@@ -163,7 +164,7 @@ async function handleSave() {
       if (accepted) {
         try {
           await reminderStore.report()
-          track('reminder_subscribe')
+          track(TRACK_EVENT.REMINDER_SUBSCRIBE)
         } catch {
           // 上报失败不阻塞
         }
@@ -190,7 +191,7 @@ async function handleReAuth() {
   if (accepted) {
     try {
       await reminderStore.report()
-      track('reminder_subscribe')
+      track(TRACK_EVENT.REMINDER_SUBSCRIBE)
       uni.showToast({ title: '已恢复推送额度', icon: 'success' })
       await load()
     } catch {

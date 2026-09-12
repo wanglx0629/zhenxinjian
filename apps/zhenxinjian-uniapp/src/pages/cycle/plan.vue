@@ -10,6 +10,7 @@ import { useCycleStore } from '@/store/cycle'
 import { CYCLE_DAY_TYPES } from '@/config/constants'
 import { md, week } from '@/utils/format'
 import { track, trackPage } from '@/utils/track'
+import { TRACK_EVENT } from '@/config/track-events'
 import type { CycleDayVO } from '@/api/cycle'
 
 const cycleStore = useCycleStore()
@@ -24,7 +25,7 @@ onShow(async () => {
   loading.value = true
   try {
     await cycleStore.fetchCurrent()
-    track('plan_view', { mode: 2 })
+    track(TRACK_EVENT.PLAN_VIEW, { mode: 2 })
   } catch {
     // request.ts 已统一 toast
   } finally {

@@ -10,6 +10,7 @@ import { useUserStore } from '@/store/user'
 import { getToken } from '@/utils/storage'
 import { canSubmit } from '@/utils/throttle'
 import { track, trackPage } from '@/utils/track'
+import { TRACK_EVENT } from '@/config/track-events'
 
 const userStore = useUserStore()
 const loading = ref(false)
@@ -36,19 +37,19 @@ async function handleWechatLogin() {
     const loginRes = (Array.isArray(result) ? result[1] : result) as { code?: string }
     const code = loginRes?.code
     if (!code) {
-      track('login_fail')
+      track(TRACK_EVENT.LOGIN_FAIL)
       uni.showToast({ title: '获取登录凭证失败，请重试', icon: 'none' })
       return
     }
     await userStore.loginByWechat(code)
-    track('login_wechat')
+    track(TRACK_EVENT.LOGIN_WECHAT)
     uni.showToast({ title: '登录成功', icon: 'success' })
     setTimeout(() => {
       uni.switchTab({ url: '/pages/home/index' })
     }, 400)
   } catch {
     // 失败可重试：下次点击重新 wx.login() 取新 code
-    track('login_fail')
+    track(TRACK_EVENT.LOGIN_FAIL)
     uni.showToast({ title: '登录失败，请重试', icon: 'none' })
   } finally {
     loading.value = false
@@ -65,7 +66,7 @@ async function handleGuest() {
   loading.value = true
   try {
     await userStore.loginAsGuest()
-    track('login_guest')
+    track(TRACK_EVENT.LOGIN_GUEST)
     uni.switchTab({ url: '/pages/home/index' })
   } catch {
     uni.showToast({ title: '进入失败，请重试', icon: 'none' })

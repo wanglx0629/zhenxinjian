@@ -7,6 +7,7 @@ import { computed, ref } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
 import { useTaperStore } from '@/store/taper'
 import { track, trackPage } from '@/utils/track'
+import { TRACK_EVENT } from '@/config/track-events'
 import { getToken } from '@/utils/storage'
 
 const taperStore = useTaperStore()
@@ -27,7 +28,7 @@ onShow(async () => {
   loading.value = true
   try {
     await taperStore.fetch()
-    track('plan_view', { mode: 1 })
+    track(TRACK_EVENT.PLAN_VIEW, { mode: 1 })
   } catch {
     // request.ts 已统一 toast
   } finally {

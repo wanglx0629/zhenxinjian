@@ -9,6 +9,7 @@ import { onBackPress, onShow } from '@dcloudio/uni-app'
 import { useUserStore } from '@/store/user'
 import { canSubmit } from '@/utils/throttle'
 import { track, trackPage } from '@/utils/track'
+import { TRACK_EVENT } from '@/config/track-events'
 
 const userStore = useUserStore()
 const loading = ref(false)
@@ -34,18 +35,18 @@ async function handleAuth() {
     const loginRes = (Array.isArray(result) ? result[1] : result) as { code?: string }
     const code = loginRes?.code
     if (!code) {
-      track('login_fail')
+      track(TRACK_EVENT.LOGIN_FAIL)
       uni.showToast({ title: '获取登录凭证失败，请重试', icon: 'none' })
       return
     }
     await userStore.loginByWechat(code)
-    track('login_wechat')
+    track(TRACK_EVENT.LOGIN_WECHAT)
     uni.showToast({ title: '授权成功，数据已保留', icon: 'success' })
     setTimeout(() => {
       uni.switchTab({ url: '/pages/home/index' })
     }, 400)
   } catch {
-    track('login_fail')
+    track(TRACK_EVENT.LOGIN_FAIL)
     uni.showToast({ title: '授权失败，请重试', icon: 'none' })
   } finally {
     loading.value = false

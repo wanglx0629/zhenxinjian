@@ -12,6 +12,7 @@ import { useCycleStore } from '@/store/cycle'
 import { DIET_MODES } from '@/config/constants'
 import ModeSwitchConfirm from '@/components/ModeSwitchConfirm.vue'
 import { track, trackPage } from '@/utils/track'
+import { TRACK_EVENT } from '@/config/track-events'
 
 const bodyStore = useBodyStore()
 const cycleStore = useCycleStore()
@@ -44,7 +45,7 @@ async function handleSelect(mode: number) {
     switching.value = true
     try {
       await cycleStore.switchMode(2)
-      track('mode_switch', { mode: 2 })
+      track(TRACK_EVENT.MODE_SWITCH, { mode: 2 })
       await bodyStore.fetchProfile()
       if (cycleStore.currentPlan?.id) {
         uni.redirectTo({ url: '/pages/cycle/plan' })
@@ -77,7 +78,7 @@ async function doSwitch532() {
   switching.value = true
   try {
     await cycleStore.switchMode(1)
-    track('mode_switch', { mode: 1 })
+    track(TRACK_EVENT.MODE_SWITCH, { mode: 1 })
     await bodyStore.fetchProfile()
     uni.showToast({ title: '已切换为 532 模式', icon: 'none' })
     uni.redirectTo({ url: '/pages/taper/plan' })

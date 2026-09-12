@@ -10,6 +10,7 @@ import { useFoodStore } from '@/store/food'
 import type { FoodCategoryVO } from '@/api/food'
 import { canSubmit } from '@/utils/throttle'
 import { track, trackPage } from '@/utils/track'
+import { TRACK_EVENT } from '@/config/track-events'
 import { checkKcalConsistency, kcalFromMacros } from '@/utils/validate'
 
 const foodStore = useFoodStore()
@@ -145,7 +146,7 @@ async function handleSubmit() {
       kcal: num(form.kcal)!,
       serving: form.serving.trim() ? num(form.serving)! : undefined
     })
-    if (!editId.value) track('food_custom_add')
+    if (!editId.value) track(TRACK_EVENT.FOOD_CUSTOM_ADD)
     uni.showToast({ title: editId.value ? '保存成功' : '新增成功', icon: 'success' })
     setTimeout(() => uni.navigateBack(), 600)
   } catch {

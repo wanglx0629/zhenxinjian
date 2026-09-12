@@ -9,6 +9,7 @@
  * 上报静默失败不弹提示、不阻塞业务
  */
 import { reportEvents, type TrackEventItem } from '@/api/track'
+import { TRACK_EVENT, type TrackEventCode } from '@/config/track-events'
 
 const QUEUE_KEY = 'zxj_track_queue'
 const QUEUE_MAX = 200
@@ -53,7 +54,7 @@ function checkSaturation() {
     if (!saturatedAlerted) {
       saturatedAlerted = true
       queue.push({
-        eventCode: 'track_queue_saturated',
+        eventCode: TRACK_EVENT.TRACK_QUEUE_SATURATED,
         extra: { queueSize: queue.length, queueMax: QUEUE_MAX },
         clientTime: now()
       })
@@ -67,7 +68,7 @@ function checkSaturation() {
 /**
  * 上报一个埋点事件（入队，由 flush 批量发送；队列满则丢弃）
  */
-export function track(eventCode: string, extra?: Record<string, unknown>, page?: string) {
+export function track(eventCode: TrackEventCode, extra?: Record<string, unknown>, page?: string) {
   if (queue.length === 0) {
     loadQueue()
   }
@@ -84,7 +85,7 @@ export function track(eventCode: string, extra?: Record<string, unknown>, page?:
 
 /** 页面访问埋点（PV） */
 export function trackPage(pagePath: string) {
-  track('page_view', undefined, pagePath)
+  track(TRACK_EVENT.PAGE_VIEW, undefined, pagePath)
 }
 
 /**

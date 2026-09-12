@@ -16,6 +16,7 @@ import { CYCLE_DAY_TYPES, MEAL_TYPES } from '@/config/constants'
 import { greeting, guestLeftText, mdWeek, ymd } from '@/utils/format'
 import { getToken } from '@/utils/storage'
 import { track, trackPage } from '@/utils/track'
+import { TRACK_EVENT } from '@/config/track-events'
 
 const userStore = useUserStore()
 const dietStore = useDietStore()
@@ -153,13 +154,13 @@ function goCycleSetting() {
 
 /** 记饮食（记录 tab） */
 function goRecord() {
-  track('home_quick_entry', { target: 'record' })
+  track(TRACK_EVENT.HOME_QUICK_ENTRY, { target: 'record' })
   uni.switchTab({ url: '/pages/record/index' })
 }
 
 /** 看计划：碳循环 → P07；532 → P08 四阶段计划卡 */
 function goPlan() {
-  track('home_quick_entry', { target: 'plan' })
+  track(TRACK_EVENT.HOME_QUICK_ENTRY, { target: 'plan' })
   if (isCycle.value) {
     uni.navigateTo({ url: '/pages/cycle/plan' })
   } else {
