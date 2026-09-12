@@ -17,7 +17,7 @@
 | B-T03 | ARCH-内聚-001 | 能量守恒 ±10% 校验跨端收敛单一真源 | 高 | 已完成 |
 | B-T04 | ARCH-内聚-002 | 三宏进度展示收敛到 utils/macro.ts | 高 | 已完成 |
 | B-T05 | ARCH-内聚-003 | AI skills 资产单一真源、冗余副本退库 | 高 | 已完成 |
-| B-T06 | ARCH-层次-001 | 小程序 pages→store→api 分层收敛并补 taper store | 高 | 未开始 |
+| B-T06 | ARCH-层次-001 | 小程序 pages→store→api 分层收敛并补 taper store | 高 | 已完成 |
 | B-T07 | ARCH-层次-003 | 游客清理任务改批级独立事务 | 高 | 未开始 |
 | B-T08 | ARCH-演进-001 | SQL 迁移版本化（版本表 + 幂等守卫） | 高 | 未开始 |
 | B-T09 | ARCH-演进-002 | 删除前端影子算法库（isPlateau 优先） | 高 | 未开始 |
@@ -159,7 +159,7 @@
 | --- | --- |
 | 追溯 | ARCH-层次-001（层次，高） |
 | 目标 | 四处页面直调 api 改经 store；新建 `store/taper.ts`；登出清理收敛到 user store 统一编排 |
-| 状态 | 未开始 |
+| 状态 | 已完成 |
 
 步骤：
 
@@ -171,6 +171,15 @@
 6. 增量执行：按页面粒度小步提交，保持每步可回退。
 7. 回归测绿：`npm run check` 绿；按回归清单逐页验证数据加载与登出后状态清空。
 8. 用户确认：展示分层收敛 diff，获确认后收尾（写操作门禁）。
+
+执行记录（2026-09-12，五步五提交 + 文档收尾）：
+
+1. 新建 `store/taper.ts` 收敛 532 计划状态，`taper/plan.vue` 直调 `getTaper532Plan` 改经 `taperStore.fetch`（0ca09b5）。
+2. 新建 `store/reminder.ts` 收敛提醒状态（含 masterEnabled computed 与 submitting 态），`reminder/index.vue` 直调 `getReminder/saveReminder/reportSubscribe` 与 `mine/index.vue` 直调 `getReminder` 改经 reminderStore（c4f3e6b）。
+3. `home/index.vue` 直调 `getMenstrual` 改经已有 `menstrualStore.fetch`，periodPhase 徽标收敛为 store computed（df66795）。
+4. `menstrual/index.vue` 直调 `getMenstrual/saveMenstrual` 改经 `menstrualStore.fetch/save`，vo 收敛为 store computed（2e2cd78）。
+5. 登出清理与模式切换编排收敛：`userStore.logout()/abandonGuest()` 统一 reset 七大业务 store（原 mine/index.vue 手工 reset 5 个且漏 taper/reminder）；`cycleStore.switchMode` 收敛 `mode/select.vue` 直调 `switchDietMode` 与切回 532 本地清空（1e94ae1）。
+6. 回归：`vue-tsc --noEmit` 每步全绿；全量 grep 核验 pages/components 对 `@/api/*` 仅剩 type-only import，运行时分层单向闭环。
 
 ### B-T07 — 游客清理任务改批级独立事务
 
@@ -754,3 +763,4 @@
 | v1.3 | 2026-09-12 | —（未提交） | B-T03 执行完成：后端 MacroConsistencyValidator 单一真源替换三处副本；前端 utils/validate.ts 新增 checkKcalConsistency/kcalFromMacros 替换两页面私有副本；裁定 5000/10000 为不同场景各自与后端一致（非漂移），detail.vue 加锚点注释；后端测试 + vue-tsc 全绿 |
 | v1.4 | 2026-09-12 | —（未提交） | B-T04 执行完成：record/index.vue 本地 38 行 progressItems 与 adviceList 手写副本替换为 buildProgressItems/buildAdviceList 单一真源调用，删除 PROGRESS_THRESHOLD/PROGRESS_COLORS 直引；vue-tsc 全绿，状态置已完成 |
 | v1.5 | 2026-09-12 | —（未提交） | B-T05 执行完成：全量哈希比对裁定"漂移"仅为 per-IDE 包装差异（/opsx-X↔$openspec-X 占位符 + opsx front-matter name 行），内容零漂移；ui-ux-pro-max 归入 .trae SoT；新增 scripts/sync-ide-skills.ps1 分发脚本（拷贝 + 两类机械变换）；五副本目录入 .gitignore 并 git rm --cached 退库 120 文件；再生字节级回归比对 0 差异，状态置已完成 |
+| v1.6 | 2026-09-12 | —（未提交） | B-T06 执行完成：新建 store/taper.ts、store/reminder.ts；taper/plan、reminder/index、mine/index、home/index、menstrual/index 五处页面直调全部改经 store；userStore.logout/abandonGuest 统一编排七大业务 store reset；cycleStore 新增 switchMode 收敛 mode/select.vue 直调 switchDietMode；vue-tsc 每步全绿，pages/components 对 @/api/* 仅剩 type-only import，状态置已完成 |

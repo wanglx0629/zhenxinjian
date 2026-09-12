@@ -17,7 +17,7 @@
 | ARCH-内聚-001 | 内聚 | 高 | 已消除 |
 | ARCH-内聚-002 | 内聚 | 高 | 已消除 |
 | ARCH-内聚-003 | 内聚 | 高 | 已消除 |
-| ARCH-层次-001 | 层次 | 高 | 未清除 |
+| ARCH-层次-001 | 层次 | 高 | 已消除 |
 | ARCH-层次-003 | 层次 | 高 | 未清除 |
 | ARCH-演进-001 | 演进 | 高 | 未清除 |
 | ARCH-演进-002 | 演进 | 高 | 未清除 |
@@ -137,7 +137,7 @@
 | 根因 | 逐页增量开发未回补状态层 |
 | 影响 | 状态真源分裂；新增 store 时登出清理必漏 |
 | 修复建议 | 补 `store/taper.ts`；四处直调改经 store；登出清理收敛到 user store 统一编排 |
-| 状态 | 未清除 |
+| 状态 | 已消除（B-T06 于 2026-09-12 完成：新建 `store/taper.ts` 收敛 532 计划状态、`store/reminder.ts` 收敛提醒状态；taper/plan、reminder/index、mine/index、home/index、menstrual/index 五处页面直调全部改经对应 store；`userStore.logout()/abandonGuest()` 统一编排七大业务 store reset（原 mine/index.vue 手工 reset 5 个且漏 taper/reminder）；`cycleStore.switchMode` 收敛 mode/select.vue 直调 `switchDietMode` 与切回 532 的本地清空；pages/components 对 `@/api/*` 仅剩 type-only import，vue-tsc 全绿） |
 
 ### ARCH-层次-003 — 游客清理任务巨型事务
 
@@ -572,3 +572,4 @@
 | v1.4 | 2026-09-12 | —（未提交） | B-T03 完成，ARCH-内聚-001 置"已消除"（MacroConsistencyValidator 后端单一真源 + 前端 utils/validate.ts 收敛；5000/10000 裁定为不同场景口径）。余 33 条未清除 |
 | v1.5 | 2026-09-12 | —（未提交） | B-T04 完成，ARCH-内聚-002 置"已消除"（record/index.vue 手写副本替换为 utils/macro.ts 单一真源调用）。余 32 条未清除 |
 | v1.6 | 2026-09-12 | —（未提交） | B-T05 完成，ARCH-内聚-003 置"已消除"（.trae/ 单一真源 + sync-ide-skills.ps1 分发脚本 + 五副本目录退库 120 文件，字节级回归 0 差异）。余 31 条未清除 |
+| v1.7 | 2026-09-12 | —（未提交） | B-T06 完成，ARCH-层次-001 置"已消除"（补 store/taper、store/reminder 两 store，五处页面直调改经 store，登出清理收敛 userStore 统一编排七大 store，cycleStore.switchMode 收敛模式切换；pages/components 对 @/api/* 仅剩 type-only import）。余 30 条未清除 |
