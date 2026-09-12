@@ -5,12 +5,14 @@
  */
 import { computed, ref } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
-import { getTaper532Plan, type Taper532Plan } from '@/api/taper'
+import { useTaperStore } from '@/store/taper'
 import { track, trackPage } from '@/utils/track'
 import { getToken } from '@/utils/storage'
 
+const taperStore = useTaperStore()
+
 const loading = ref(true)
-const plan = ref<Taper532Plan | null>(null)
+const plan = computed(() => taperStore.plan)
 
 const stages = computed(() => plan.value?.stages ?? [])
 const today = computed(() => plan.value?.today ?? null)
@@ -24,7 +26,7 @@ onShow(async () => {
   trackPage('pages/taper/plan')
   loading.value = true
   try {
-    plan.value = await getTaper532Plan()
+    await taperStore.fetch()
     track('plan_view', { mode: 1 })
   } catch {
     // request.ts 已统一 toast
