@@ -18,7 +18,7 @@ public enum MenstrualPhaseEnum {
     /** 黄体期：碳水 +10g / 热量 +120kcal */
     LUTEAL("luteal", "黄体期", 10, 120);
 
-    /** 阶段键（与前端 PERIOD_PHASES key 对齐） */
+    /** 阶段键（经期 VO 下发键，端上按键匹配展示） */
     private final String key;
 
     /** 阶段名称 */

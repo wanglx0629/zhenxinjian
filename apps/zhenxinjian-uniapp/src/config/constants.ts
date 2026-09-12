@@ -3,7 +3,7 @@
  * 作者: wanglx
  */
 
-/** 活动系数（PRD §2.2） */
+/** 活动系数（PRD §2.2；对照后端 ActivityLevelEnum：数组顺序即后端 code 1-4，value 与 factor 一一对应，改动须同步后端枚举） */
 export const ACTIVITY = [
   { key: 'sedentary', label: '久坐（几乎不运动）', value: 1.2 },
   { key: 'light', label: '轻度活动（每周 1-3 次）', value: 1.375 },
@@ -14,7 +14,7 @@ export const ACTIVITY = [
 /** 活动系数键 */
 export type ActivityKey = (typeof ACTIVITY)[number]['key']
 
-/** 热量缺口档位（PRD §2.3，用户自选 X；默认 200 温和档） */
+/** 热量缺口档位（PRD §2.3，用户自选 X；默认 200 温和档；对照后端 DeficitOptionEnum 四档 code，改动须同步后端枚举） */
 export const DEFICIT_OPTIONS = [200, 300, 400, 500] as const
 
 /** 532 模式宏量配比（PRD §2.4，硬性写死） */
@@ -23,7 +23,7 @@ export const MACRO_532 = { carb: 0.5, protein: 0.3, fat: 0.2 } as const
 /** 每克宏量产能（kcal） */
 export const KCAL_PER_G = { carb: 4, protein: 4, fat: 9 } as const
 
-/** 碳循环：碳水池系数 / 脂肪池系数（PRD §2.5 图片公式） */
+/** 碳循环：碳水池系数 / 脂肪池系数（PRD §2.5 图片公式；对照后端 CycleCalcService：CARB_POOL_FACTOR=2.5 / DEFAULT_CFC=0.8 / CFC_OPTIONS={0.8,1.0} / 蛋白 1.5 / DayTypeParam 占比与天数 / TEMPLATE 日序，改动须同步后端） */
 export const CYCLE = {
   /** 7 天总碳水 = 目标体重 × 2.5 × 周期天数 */
   carbCoef: 2.5,
@@ -42,7 +42,7 @@ export const CYCLE = {
   template: ['high', 'mid', 'low', 'low', 'mid', 'high', 'low']
 } as const
 
-/** 录入区间校验（PRD §2.2 / §8.1，越界前端拒绝并兜底；后端二次兜底） */
+/** 录入区间校验（PRD §2.2 / §8.1，越界前端拒绝并兜底；后端二次兜底。对照：年龄 12-80 = 后端 BodyProfileSaveDTO @Min/@Max；体重 25-200 = 后端 WeightService WEIGHT_MIN/MAX；经期 cycleLen 21-35 / periodDays 3-10 = 后端 MenstrualService CYCLE_LEN/PERIOD_DAYS_MIN/MAX；碳循环天数 7-14 = 后端 CyclePlanService，改动须同步后端） */
 export interface RangeCfg {
   min: number
   max: number

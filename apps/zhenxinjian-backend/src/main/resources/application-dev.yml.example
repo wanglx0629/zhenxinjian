@@ -25,11 +25,13 @@ mybatis-plus:
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 
-# JetCache 远程缓存连接串（密码中的 @ 需 URL 编码为 %40）
+# JetCache 远程缓存连接串（单一属性源：复用上方 spring.data.redis 四项拼接，改连接只改一处；
+# Lettuce 必须 uri 不会自动读 spring.data.redis；密码含 @ 等特殊字符时需 URL 编码（@ → %40），
+# 编码场景占位拼接不适用，改为显式写死 uri）
 jetcache:
   remote:
     default:
-      uri: redis://:change-me@127.0.0.1:6379/0
+      uri: redis://:${spring.data.redis.password}@${spring.data.redis.host}:${spring.data.redis.port}/${spring.data.redis.database}
 
 # 微信小程序（appid/secret 仅本地，禁止提交）
 zhenxinjian:
