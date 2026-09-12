@@ -9,25 +9,26 @@ import { useUserStore } from '@/store/user'
 import { useDietStore } from '@/store/diet'
 import { useBodyStore } from '@/store/body'
 import { useCycleStore } from '@/store/cycle'
+import { useMenstrualStore } from '@/store/menstrual'
 import MacroProgress from '@/components/MacroProgress.vue'
 import OverLimitCard from '@/components/OverLimitCard.vue'
 import { CYCLE_DAY_TYPES, MEAL_TYPES } from '@/config/constants'
 import { greeting, guestLeftText, mdWeek, ymd } from '@/utils/format'
 import { getToken } from '@/utils/storage'
-import { getMenstrual } from '@/api/menstrual'
 import { track, trackPage } from '@/utils/track'
 
 const userStore = useUserStore()
 const dietStore = useDietStore()
 const bodyStore = useBodyStore()
 const cycleStore = useCycleStore()
+const menstrualStore = useMenstrualStore()
 
 /** 页面加载态 / 错误态 */
 const loading = ref(true)
 const loadError = ref(false)
 
-/** 经期阶段徽标（仅女性且已开启时非空） */
-const periodPhase = ref('')
+/** 经期阶段徽标（仅女性且已开启时非空，经 menstrualStore 收敛） */
+const periodPhase = computed(() => menstrualStore.phaseName)
 
 const displayName = computed(
   () => userStore.userInfo?.nickname || userStore.userInfo?.username || '用户'
@@ -122,11 +123,7 @@ async function loadAll() {
       }
     }
     // 经期阶段徽标（仅女性且已开启时返回阶段；失败静默不阻塞首页）
-    getMenstrual()
-      .then((vo) => {
-        periodPhase.value = vo.applicable && vo.enabled === 1 ? vo.phaseName || '' : ''
-      })
-      .catch(() => undefined)
+    menstrualStore.fetch().catch(() => undefined)
   } catch {
     loadError.value = true
   } finally {
