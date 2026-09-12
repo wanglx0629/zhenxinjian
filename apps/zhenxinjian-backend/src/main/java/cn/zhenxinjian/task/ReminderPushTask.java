@@ -27,6 +27,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 /**
  * 三餐提醒定时推送任务
@@ -35,6 +36,7 @@ import java.util.List;
  *
  * 口径：同用户同日同餐别至多一条成功推送（I12）；已记录该餐跳过；游客（无 openid）不推送；
  * 额度 0 / 模板未配置 / 微信服务不可用静默空转（PRD §2.9 已知限制，不打扰）；失败仅写日志不重试。
+ * 外呼经 reminderPushExecutor 限并发异步下发（调度池见 ScheduleConfig），微信侧变慢不阻塞统计/清理任务。
  * 一期单实例部署，多实例时需 ShedLock
  */
 @Slf4j
@@ -70,6 +72,9 @@ public class ReminderPushTask {
     private final WxMaConfiguration.WxMaProperties wxMaProperties;
 
     private final ObjectProvider<WxMaService> wxMaServiceProvider;
+
+    /** 推送外呼执行器（ScheduleConfig 同名 Bean，按构造参数名注入；异步下发避免阻塞调度线程） */
+    private final Executor reminderPushExecutor;
 
     /**
      * 分钟级扫描（fixedDelay 对齐分钟边界不敏感，匹配以 HH:mm 字符串为准）
@@ -107,12 +112,15 @@ public class ReminderPushTask {
             if (mealType == null) {
                 continue;
             }
-            try {
-                processOne(reminder, mealType, today, templateId, wxMaService);
-            } catch (Exception e) {
-                log.error("[ReminderPushTask] 单条推送处理异常: userId={}, mealType={}",
-                        reminder.getUserId(), mealType, e);
-            }
+            // 异步限并发外呼：调度线程只编排，微信接口耗时不阻塞同池其他任务
+            reminderPushExecutor.execute(() -> {
+                try {
+                    processOne(reminder, mealType, today, templateId, wxMaService);
+                } catch (Exception e) {
+                    log.error("[ReminderPushTask] 单条推送处理异常: userId={}, mealType={}",
+                            reminder.getUserId(), mealType, e);
+                }
+            });
         }
     }
 
