@@ -283,7 +283,7 @@ cn.zhenxinjian
 ### 2.4 环境要求与启动
 
 - JDK 25+、Maven 3.9+、MySQL 8、Redis 5+。
-- 初始化：执行 `src/main/resources/data.sql`（建库、建表、演示数据）。
+- 初始化：执行 `src/main/resources/data.sql`（全量基线：建库 + 15 张业务表终态，CREATE IF NOT EXISTS 幂等；随后 `sql/change0~9` 自动守卫跳过并记账）。
 
 ```bash
 cd apps/zhenxinjian-backend
@@ -544,7 +544,7 @@ UNIQUE KEY uk_xxx_username_active (username_active)
 - 更新实体后若有 JetCache 缓存，记得清缓存。
 
 ### 4.7 初始化与迁移
-- 本地初始化执行 `data.sql`（建库 / 建表 / 演示数据）。
+- 本地初始化执行 `data.sql`（全量基线：建库 + 15 张业务表终态，CREATE IF NOT EXISTS 幂等）。
 - 生产**禁止**依赖带 `DROP TABLE` 的全量脚本；用变更脚本或 Flyway/Liquibase。
 - 首个管理员：部署时自行生成 BCrypt 哈希手工 INSERT（见 `tools/db/README`「管理员初始化」），口令哈希不进版本库。
 
