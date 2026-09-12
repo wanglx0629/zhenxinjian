@@ -20,7 +20,7 @@
 | B-T06 | ARCH-层次-001 | 小程序 pages→store→api 分层收敛并补 taper store | 高 | 已完成 |
 | B-T07 | ARCH-层次-003 | 游客清理任务改批级独立事务 | 高 | 已完成 |
 | B-T08 | ARCH-演进-001 | SQL 迁移版本化（版本表 + 幂等守卫） | 高 | 已完成 |
-| B-T09 | ARCH-演进-002 | 删除前端影子算法库（isPlateau 优先） | 高 | 未开始 |
+| B-T09 | ARCH-演进-002 | 删除前端影子算法库（isPlateau 优先） | 高 | 已完成 |
 | B-T10 | ARCH-演进-007 | data.sql 基线整改 + 弱口令哈希出库 | 高 | 未开始 |
 | B-T11 | ARCH-边界-004 | 定时任务线程池配置 + 推送外呼批量化 | 高 | 未开始 |
 | B-T12 | ARCH-边界-005 | 埋点毒批次毒性隔离与饱和告警 | 高 | 未开始 |
@@ -239,7 +239,7 @@
 | --- | --- |
 | 追溯 | ARCH-演进-002（演进，高） |
 | 目标 | 删除 `calculator.ts` 死函数（含口径分叉的 `isPlateau` 与零调用的 `overCheck`），保留函数标注"仅展示兜底"，解除 `format.ts` 反向 import |
-| 状态 | 未开始 |
+| 状态 | 已完成 |
 
 步骤：
 
@@ -251,6 +251,14 @@
 6. 增量执行：删除与迁移分步提交。
 7. 回归测绿：`npm run check` 绿；身体档案页与体重页手工回归。
 8. 用户确认：展示删除清单 diff，获确认后收尾（写操作门禁）。
+
+执行记录（2026-09-12，0dbac67）：
+
+1. 删除清单（calculator.ts 443→66 行）：`isPlateau`（按条数 slice(-7) 与后端 7 天窗口口径分叉的潜伏雷）、`overCheck`（零调用）、`menstrualPhase`/`plan532Stages`/`macro532`/`carbonConst`/`cycleAlloc`/`targetKcal` 导出/`parseDate`/`todayStart`/`clamp` 及全部影子类型（PhaseInfo/Plan532Item/CycleDay/CarbonConst/CycleAlloc/OverResult 等）全删。
+2. 保留函数：`bmr`/`tdee`/`macro532Base`（录入页 profile.vue 实时预览唯一消费方）+ 精简版 `CalcProfile`/`MacroResult`，文件头与逐函数标注「仅展示兜底，权威口径在后端」；`round` 收为模块私有。
+3. `format.ts` 反向 import 解除：删除 `import { round } from './calculator'` 与 `export { round }` 再导出（全库无 round 消费方）。
+4. 连带退库：`constants.ts` 中仅影子算法消费的 `PERIOD_PHASES`/`PeriodPhaseCfg`（经期四阶段）、`STAGE_532`/`Stage532`（532 四阶段）、`DayType` 一并删除；`MACRO_532`/`KCAL_PER_G`/`CYCLE`/`RANGES` 仍有页面与预览消费，保留。
+5. 回归：全量 grep 核验无悬空引用（含字符串/动态引用），`npm run type-check`（vue-tsc --noEmit）全绿；共删 456 行（3 文件 +12 −456）。
 
 ### B-T10 — data.sql 基线整改 + 弱口令哈希出库
 
@@ -780,3 +788,4 @@
 | v1.6 | 2026-09-12 | —（未提交） | B-T06 执行完成：新建 store/taper.ts、store/reminder.ts；taper/plan、reminder/index、mine/index、home/index、menstrual/index 五处页面直调全部改经 store；userStore.logout/abandonGuest 统一编排七大业务 store reset；cycleStore 新增 switchMode 收敛 mode/select.vue 直调 switchDietMode；vue-tsc 每步全绿，pages/components 对 @/api/* 仅剩 type-only import，状态置已完成 |
 | v1.7 | 2026-09-12 | —（未提交） | B-T07 执行完成：拆出 GuestCleanupBatchExecutor 独立 Bean 承载 @Transactional 批方法（规避同类自调用事务失效），任务方法只编排批次不再持大事务，新增每批 size/costMs 日志；补 GuestCleanupTaskTest 5 用例，123 测试全绿，状态置已完成 |
 | v1.8 | 2026-09-12 | —（未提交） | B-T08 执行完成：schema_migrations 版本表 + SqlRunner 自动建表/查账/SKIP/记账 + --allow-error 移除失败即终止不记账 + 9 脚本幂等守卫（information_schema 条件守卫/IF NOT EXISTS/change2 断点续跑）+ 存量回填脚本 + run-sql.cmd/README 本机路径修正与全新环境引导成文；五场景演练全绿（全链/SKIP/守卫/失败终止/回填），123 测试全绿，状态置已完成 |
+| v1.9 | 2026-09-12 | —（未提交） | B-T09 执行完成：calculator.ts 443→66 行，isPlateau 口径分叉雷与 overCheck 等零调用死函数全删，保留 bmr/tdee/macro532Base 标注「仅展示兜底」；format.ts 反向 import 解除；影子专用配置 PERIOD_PHASES/STAGE_532/DayType 一并退库；vue-tsc 全绿，状态置已完成 |

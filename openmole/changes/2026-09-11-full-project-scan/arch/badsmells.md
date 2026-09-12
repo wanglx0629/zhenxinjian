@@ -20,7 +20,7 @@
 | ARCH-层次-001 | 层次 | 高 | 已消除 |
 | ARCH-层次-003 | 层次 | 高 | 已消除 |
 | ARCH-演进-001 | 演进 | 高 | 已消除 |
-| ARCH-演进-002 | 演进 | 高 | 未清除 |
+| ARCH-演进-002 | 演进 | 高 | 已消除 |
 | ARCH-演进-007 | 演进 | 高 | 未清除 |
 | ARCH-边界-004 | 边界 | 高 | 未清除 |
 | ARCH-边界-005 | 边界 | 高 | 未清除 |
@@ -179,7 +179,7 @@
 | 根因 | 离线兜底策略未随"后端真源"落地而清理 |
 | 影响 | 影子实现随时可能被误启用，口径与后端分叉 |
 | 修复建议 | 删除死函数；保留的预览函数标注"仅展示兜底"；isPlateau 立即删除 |
-| 状态 | 未清除 |
+| 状态 | 已消除（B-T09 于 2026-09-12 完成：calculator.ts 443→66 行，isPlateau 口径分叉雷与 overCheck/menstrualPhase/plan532Stages/cycleAlloc/carbonConst 等零调用死函数及全部影子类型全删，仅留录入页预览 bmr/tdee/macro532Base 并标注「仅展示兜底，权威口径在后端」；format.ts 反向 import 解除（round 收为私有）；影子专用配置 PERIOD_PHASES/STAGE_532/DayType 自 constants.ts 连带退库；全量 grep 无悬空引用，vue-tsc 全绿，3 文件 +12 −456） |
 
 ### ARCH-演进-007 — data.sql 建库基线半追平且含弱口令哈希
 
@@ -575,3 +575,4 @@
 | v1.7 | 2026-09-12 | —（未提交） | B-T06 完成，ARCH-层次-001 置"已消除"（补 store/taper、store/reminder 两 store，五处页面直调改经 store，登出清理收敛 userStore 统一编排七大 store，cycleStore.switchMode 收敛模式切换；pages/components 对 @/api/* 仅剩 type-only import）。余 30 条未清除 |
 | v1.8 | 2026-09-12 | —（未提交） | B-T07 完成，ARCH-层次-003 置"已消除"（GuestCleanupBatchExecutor 独立 Bean 批级独立事务，任务方法不再持大事务，批级 size/costMs 日志，补 5 测试用例）。余 29 条未清除 |
 | v1.9 | 2026-09-12 | —（未提交） | B-T08 完成，ARCH-演进-001 置"已消除"（schema_migrations 版本表 + SqlRunner 自动记账/SKIP/失败即终止 + 9 脚本幂等守卫 + 存量回填脚本 + 全新环境引导成文，五场景演练全绿）。余 28 条未清除 |
+| v1.10 | 2026-09-12 | —（未提交） | B-T09 完成，ARCH-演进-002 置"已消除"（calculator.ts 443→66 行仅留录入页预览三函数并标注「仅展示兜底」，isPlateau 口径分叉雷清除，format.ts 反向 import 解除，影子专用配置 PERIOD_PHASES/STAGE_532/DayType 连带退库，vue-tsc 全绿）。余 27 条未清除 |
