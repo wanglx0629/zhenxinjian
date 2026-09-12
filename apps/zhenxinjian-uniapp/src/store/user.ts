@@ -6,6 +6,13 @@ import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import type { UserInfo } from '@/api/types'
 import { createGuest, getCurrentUser, logout as logoutApi, wechatLogin } from '@/api/auth'
+import { useBodyStore } from '@/store/body'
+import { useCycleStore } from '@/store/cycle'
+import { useDietStore } from '@/store/diet'
+import { useMenstrualStore } from '@/store/menstrual'
+import { useReminderStore } from '@/store/reminder'
+import { useTaperStore } from '@/store/taper'
+import { useWeightStore } from '@/store/weight'
 import {
   getGuestKey,
   getToken,
@@ -57,6 +64,7 @@ export const useUserStore = defineStore('user', () => {
    * （服务端数据保留至 7 天清空期限，期间重新授权仍可找回）
    */
   function abandonGuest() {
+    resetBusinessStores()
     token.value = ''
     userInfo.value = null
     removeToken()
@@ -76,11 +84,23 @@ export const useUserStore = defineStore('user', () => {
         // 接口失败也继续清本地态
       }
     }
+    resetBusinessStores()
     token.value = ''
     userInfo.value = null
     removeToken()
     removeGuestKey()
     uni.reLaunch({ url: '/pages/auth/guide' })
+  }
+
+  /** 清空全部业务 store 本地态（登出/放弃游客统一编排，页面不再逐个 reset） */
+  function resetBusinessStores() {
+    useDietStore().reset()
+    useBodyStore().reset()
+    useCycleStore().reset()
+    useWeightStore().reset()
+    useMenstrualStore().reset()
+    useReminderStore().reset()
+    useTaperStore().reset()
   }
 
   /** 拉取当前用户 */

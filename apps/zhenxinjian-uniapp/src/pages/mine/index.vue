@@ -7,9 +7,7 @@ import { onShow } from '@dcloudio/uni-app'
 import { computed } from 'vue'
 import TeLogo from '@/components/TeLogo.vue'
 import { useUserStore } from '@/store/user'
-import { useDietStore } from '@/store/diet'
 import { useBodyStore } from '@/store/body'
-import { useCycleStore } from '@/store/cycle'
 import { useWeightStore } from '@/store/weight'
 import { useMenstrualStore } from '@/store/menstrual'
 import { useReminderStore } from '@/store/reminder'
@@ -19,9 +17,7 @@ import { getToken } from '@/utils/storage'
 import { trackPage } from '@/utils/track'
 
 const userStore = useUserStore()
-const dietStore = useDietStore()
 const bodyStore = useBodyStore()
-const cycleStore = useCycleStore()
 const weightStore = useWeightStore()
 const menstrualStore = useMenstrualStore()
 const reminderStore = useReminderStore()
@@ -127,18 +123,13 @@ function showPrivacy() {
   uni.showToast({ title: '数据已加密存储，禁止明文传输', icon: 'none' })
 }
 
-/** 退出登录（二次确认；清理全部业务 store 后登出回引导页） */
+/** 退出登录（二次确认；业务 store 清理由 userStore.logout 统一编排） */
 function handleLogout() {
   uni.showModal({
     title: '提示',
     content: '确认退出登录？',
     success: async (res) => {
       if (!res.confirm) return
-      dietStore.reset()
-      bodyStore.reset()
-      cycleStore.reset()
-      weightStore.reset()
-      menstrualStore.reset()
       await userStore.logout()
     }
   })

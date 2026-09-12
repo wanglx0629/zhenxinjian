@@ -9,7 +9,6 @@ import { computed, ref } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
 import { useBodyStore } from '@/store/body'
 import { useCycleStore } from '@/store/cycle'
-import { switchDietMode } from '@/api/cycle'
 import { DIET_MODES } from '@/config/constants'
 import ModeSwitchConfirm from '@/components/ModeSwitchConfirm.vue'
 import { track, trackPage } from '@/utils/track'
@@ -44,7 +43,7 @@ async function handleSelect(mode: number) {
     // 切碳循环：有进行中周期直达 P07，否则切模式后引导 P06
     switching.value = true
     try {
-      await switchDietMode(2)
+      await cycleStore.switchMode(2)
       track('mode_switch', { mode: 2 })
       await bodyStore.fetchProfile()
       if (cycleStore.currentPlan?.id) {
@@ -72,14 +71,13 @@ async function handleSelect(mode: number) {
   }
 }
 
-/** 执行切回 532（后端自动终止进行中周期） */
+/** 执行切回 532（后端自动终止进行中周期，store 内同步清空本地周期态） */
 async function doSwitch532() {
   if (switching.value) return
   switching.value = true
   try {
-    await switchDietMode(1)
+    await cycleStore.switchMode(1)
     track('mode_switch', { mode: 1 })
-    cycleStore.reset()
     await bodyStore.fetchProfile()
     uni.showToast({ title: '已切换为 532 模式', icon: 'none' })
     uni.redirectTo({ url: '/pages/taper/plan' })

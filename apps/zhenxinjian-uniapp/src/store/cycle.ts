@@ -7,6 +7,7 @@ import { computed, ref } from 'vue'
 import {
   createCyclePlan,
   getCurrentCyclePlan,
+  switchDietMode,
   terminateCurrentCyclePlan,
   type CyclePlanCreateRequest,
   type CyclePlanVO
@@ -73,6 +74,14 @@ export const useCycleStore = defineStore('cycle', () => {
     loaded.value = true
   }
 
+  /** 切换减脂模式（1=532 2=碳循环；切出碳循环后端自动终止进行中周期，本地同步清空） */
+  async function switchMode(mode: number) {
+    await switchDietMode(mode)
+    if (mode === 1) {
+      reset()
+    }
+  }
+
   /** 清空本地状态（退出登录/切换身份时调用；cfc 选择保留） */
   function reset() {
     currentPlan.value = null
@@ -92,6 +101,7 @@ export const useCycleStore = defineStore('cycle', () => {
     fetchCurrent,
     create,
     terminate,
+    switchMode,
     reset,
     setCfc
   }
