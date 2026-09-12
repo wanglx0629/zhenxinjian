@@ -24,8 +24,5 @@
     "typescript": "^5.4.5",
     "vite": "^5.4.21",
     "vue-tsc": "^2.0.19"
-  },
-  "overrides": {
-    "brace-expansion": "5.0.8"
   }
 }
