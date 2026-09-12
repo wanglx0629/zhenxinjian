@@ -17,6 +17,7 @@ import cn.zhenxinjian.domain.po.User;
 import cn.zhenxinjian.domain.vo.GuestLoginResultVO;
 import cn.zhenxinjian.domain.vo.LoginResultVO;
 import cn.zhenxinjian.mapper.UserMapper;
+import cn.zhenxinjian.service.GuestMigrationOrchestrator;
 import cn.zhenxinjian.service.SessionEvictor;
 import com.baomidou.mybatisplus.core.MybatisConfiguration;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
@@ -65,6 +66,7 @@ class WechatAuthServiceImplTest {
     private WxMaUserService wxMaUserService;
     private RedisUtils redisUtils;
     private JwtUtils jwtUtils;
+    private GuestMigrationOrchestrator guestMigrationOrchestrator;
     private WechatAuthServiceImpl service;
 
     @BeforeEach
@@ -94,8 +96,9 @@ class WechatAuthServiceImplTest {
         PasswordEncoder encoder = mock(PasswordEncoder.class);
         when(encoder.encode(anyString())).thenReturn("hashed");
 
+        guestMigrationOrchestrator = mock(GuestMigrationOrchestrator.class);
         service = new WechatAuthServiceImpl(provider, jwtUtils, redisUtils,
-                userCacheService, sessionEvictor, encoder);
+                userCacheService, sessionEvictor, encoder, guestMigrationOrchestrator);
         ReflectionTestUtils.setField(service, "baseMapper", userMapper);
     }
 
@@ -299,6 +302,8 @@ class WechatAuthServiceImplTest {
         LoginResultVO result = service.wechatLogin(dto("good-code", GUEST_KEY), "127.0.0.1");
 
         assertEquals("400", jwtUtils.parseToken(result.getToken()).getSubject());
+        // 业务数据迁移经编排者统一驱动
+        verify(guestMigrationOrchestrator).migrateAll(401L, 400L);
         // 用户记录层迁移：merged_into 标记 + 软删游客 + 作废会话
         // （updateById 调用两次：游客 merged_into 标记 + 正式用户登录信息更新，均属正常）
         ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);

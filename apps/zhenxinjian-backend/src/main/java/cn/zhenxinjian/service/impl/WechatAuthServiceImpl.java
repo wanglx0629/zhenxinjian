@@ -12,7 +12,6 @@ import cn.zhenxinjian.common.enums.UserStatusEnum;
 import cn.zhenxinjian.common.exception.BusinessException;
 import cn.zhenxinjian.common.utils.JwtUtils;
 import cn.zhenxinjian.common.utils.RedisUtils;
-import cn.zhenxinjian.common.utils.SpringUtils;
 import cn.zhenxinjian.domain.dto.GuestLoginDTO;
 import cn.zhenxinjian.domain.dto.WechatLoginDTO;
 import cn.zhenxinjian.domain.po.User;
@@ -20,7 +19,7 @@ import cn.zhenxinjian.domain.vo.GuestLoginResultVO;
 import cn.zhenxinjian.domain.vo.LoginResultVO;
 import cn.zhenxinjian.domain.vo.UserVO;
 import cn.zhenxinjian.mapper.UserMapper;
-import cn.zhenxinjian.service.GuestDataMigrator;
+import cn.zhenxinjian.service.GuestMigrationOrchestrator;
 import cn.zhenxinjian.service.SessionEvictor;
 import cn.zhenxinjian.service.WechatAuthService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -35,7 +34,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Date;
-import java.util.Map;
 
 /**
  * 微信/游客认证 Service 实现
@@ -52,6 +50,7 @@ public class WechatAuthServiceImpl extends ServiceImpl<UserMapper, User> impleme
     private final UserCacheService userCacheService;
     private final SessionEvictor sessionEvictor;
     private final PasswordEncoder passwordEncoder;
+    private final GuestMigrationOrchestrator guestMigrationOrchestrator;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -271,11 +270,8 @@ public class WechatAuthServiceImpl extends ServiceImpl<UserMapper, User> impleme
             log.info("迁移跳过：游客已超 7 天宽限期, guestId={}", guest.getId());
             return;
         }
-        // 调用全部业务 Migrator（当前阶段仅用户记录层；Change 2/5 各自补齐）
-        Map<String, GuestDataMigrator> migrators = SpringUtils.getBeansOfType(GuestDataMigrator.class);
-        for (GuestDataMigrator migrator : migrators.values()) {
-            migrator.migrate(guest.getId(), formalId);
-        }
+        // 编排全部业务 Migrator（顺序经 Ordered 契约化，由编排者统一驱动）
+        guestMigrationOrchestrator.migrateAll(guest.getId(), formalId);
         // 用户记录层迁移：merged_into 标记 + 软删（幂等判空由上方 mergedInto 保证）
         guest.setMergedInto(formalId);
         updateById(guest);
