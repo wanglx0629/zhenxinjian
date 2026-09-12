@@ -4,11 +4,12 @@
 --       doscFile/03-开发规范.md §4（逻辑删除 delete_flag、业务表必备 status、生成列活跃唯一）
 --       doscFile/projectFile/04-食物库数据字典.md（每 100g 可食部口径、DECIMAL(5,1) 营养值）
 -- 口径: 碳水/蛋白/脂肪/单份克数 DECIMAL(5,1)（静态权威值防浮点漂移）；能量 INT；serving 默认 100
+-- 幂等: CREATE IF NOT EXISTS（已存在即跳过）；版本账见 schema_migrations。
 
 USE zhenxinjian;
 
 -- 食物库表：内置（source=1，全局只读，编号 F001–F200）+ 自定义（source=2，归属 user_id）
-CREATE TABLE foods (
+CREATE TABLE IF NOT EXISTS foods (
     id              BIGINT          NOT NULL AUTO_INCREMENT COMMENT '主键ID',
     code            VARCHAR(8)      DEFAULT NULL COMMENT '食物编号（内置 F001–F200；自定义为空）',
     category_code   VARCHAR(2)      NOT NULL COMMENT '分类编号：01-10（见 FoodCategoryEnum）',

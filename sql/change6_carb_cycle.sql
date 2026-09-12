@@ -4,15 +4,22 @@
 --       doscFile/03-开发规范.md §4（逻辑删除 delete_flag、业务表必备 status、软删表不建唯一索引）
 -- 口径: 周期每日目标创建时固化（D1 快照不回改）；克数 DECIMAL(5,1) 与 foods/diet_records 一致；
 --       池总量 DECIMAL(7,1)（目标体重≤200kg × 2.5 × 14 = 7000g 上限内）；热量 INT 取整
+-- 幂等: mode 列已存在（本变更已应用）则 ALTER 跳过；两表 CREATE IF NOT EXISTS；版本账见 schema_migrations。
 
 USE zhenxinjian;
 
 -- 减脂模式：1=532 / 2=碳循环（见 DietModeEnum），存量默认 532
-ALTER TABLE user_body
-    ADD COLUMN mode TINYINT NOT NULL DEFAULT 1 COMMENT '减脂模式：1=532 2=碳循环（见 DietModeEnum）' AFTER cfc;
+SET @c6_sql := IF((SELECT COUNT(*) FROM information_schema.COLUMNS
+    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'user_body' AND COLUMN_NAME = 'mode') = 0,
+    'ALTER TABLE user_body
+        ADD COLUMN mode TINYINT NOT NULL DEFAULT 1 COMMENT ''减脂模式：1=532 2=碳循环（见 DietModeEnum）'' AFTER cfc',
+    'DO 0');
+PREPARE stmt FROM @c6_sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
 
 -- 碳循环周期计划：每用户至多一个进行中周期（服务层保证，软删表不建唯一索引）
-CREATE TABLE carb_cycle_plan (
+CREATE TABLE IF NOT EXISTS carb_cycle_plan (
     id                      BIGINT          NOT NULL AUTO_INCREMENT COMMENT '主键ID',
     user_id                 BIGINT          NOT NULL COMMENT '归属用户ID（关联 users.id，含游客）',
     cycle_days              INT             NOT NULL COMMENT '周期天数（7-14）',
@@ -37,7 +44,7 @@ CREATE TABLE carb_cycle_plan (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='碳循环周期计划：图片公式三大池快照，进行中唯一（服务层保证）';
 
 -- 碳循环每日日型计划：日型目标创建时固化，档案变更不回改（D1）
-CREATE TABLE carb_cycle_day (
+CREATE TABLE IF NOT EXISTS carb_cycle_day (
     id              BIGINT          NOT NULL AUTO_INCREMENT COMMENT '主键ID',
     plan_id         BIGINT          NOT NULL COMMENT '所属周期（关联 carb_cycle_plan.id）',
     user_id         BIGINT          NOT NULL COMMENT '归属用户ID（冗余，迁移/清理直改）',

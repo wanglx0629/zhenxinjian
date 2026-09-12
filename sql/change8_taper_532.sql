@@ -4,11 +4,12 @@
 --       doscFile/03-开发规范.md §4（逻辑删除 delete_flag、业务表必备 status、生成列活跃唯一、软删表不建唯一索引）
 -- 口径: 经期设置每用户活跃唯一（生成列兜底）；体重永久留存按日多版本（业务同日幂等由服务层软删再插实现）；
 --       调碳日志仅追加写留痕；下调态存 user_body（is_adjusted + trigger_weight），克数 DOUBLE 与 user_body 体重列一致
+-- 幂等: 三表 CREATE IF NOT EXISTS；is_adjusted 列已存在（本变更已应用）则 ALTER 跳过；版本账见 schema_migrations。
 
 USE zhenxinjian;
 
 -- 用户经期设置：每用户至多一条活跃记录（生成列兜底）
-CREATE TABLE user_menstrual (
+CREATE TABLE IF NOT EXISTS user_menstrual (
     id                  BIGINT      NOT NULL AUTO_INCREMENT COMMENT '主键ID',
     user_id             BIGINT      NOT NULL COMMENT '归属用户ID（关联 users.id，含游客）',
     enabled             TINYINT     NOT NULL DEFAULT 0 COMMENT '是否开启经期管理：0关 1开',
@@ -31,7 +32,7 @@ CREATE TABLE user_menstrual (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户经期设置：开启/起始日/周期长度/经期天数，每用户活跃唯一';
 
 -- 体重记录：永久留存按日多版本，业务同日幂等由服务层软删再插实现
-CREATE TABLE weight_record (
+CREATE TABLE IF NOT EXISTS weight_record (
     id              BIGINT      NOT NULL AUTO_INCREMENT COMMENT '主键ID',
     user_id         BIGINT      NOT NULL COMMENT '归属用户ID（关联 users.id，含游客）',
     record_date     DATE        NOT NULL COMMENT '记录日期',
@@ -49,7 +50,7 @@ CREATE TABLE weight_record (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='体重记录：按日永久留存，平台期判定数据源';
 
 -- 调碳日志：仅追加写下调/恢复动作留痕，软删保历史，无唯一约束
-CREATE TABLE adjust_log (
+CREATE TABLE IF NOT EXISTS adjust_log (
     id              BIGINT      NOT NULL AUTO_INCREMENT COMMENT '主键ID',
     user_id         BIGINT      NOT NULL COMMENT '归属用户ID（关联 users.id，含游客）',
     action          TINYINT     NOT NULL COMMENT '动作：1下调 2恢复（见 AdjustActionEnum）',
@@ -67,6 +68,12 @@ CREATE TABLE adjust_log (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='调碳日志：下调/恢复动作留痕（追溯 F21/F22）';
 
 -- user_body 增加平台下调态：is_adjusted（下调状态）+ trigger_weight（触发参考体重）
-ALTER TABLE user_body
-    ADD COLUMN is_adjusted   TINYINT NOT NULL DEFAULT 0 COMMENT '平台下调态：0未下调 1已下调' AFTER target_fat,
-    ADD COLUMN trigger_weight DOUBLE  DEFAULT NULL COMMENT '触发下调的参考体重kg（下调生效时记录，恢复解除清零）' AFTER is_adjusted;
+SET @c8_sql := IF((SELECT COUNT(*) FROM information_schema.COLUMNS
+    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'user_body' AND COLUMN_NAME = 'is_adjusted') = 0,
+    'ALTER TABLE user_body
+        ADD COLUMN is_adjusted   TINYINT NOT NULL DEFAULT 0 COMMENT ''平台下调态：0未下调 1已下调'' AFTER target_fat,
+        ADD COLUMN trigger_weight DOUBLE  DEFAULT NULL COMMENT ''触发下调的参考体重kg（下调生效时记录，恢复解除清零）'' AFTER is_adjusted',
+    'DO 0');
+PREPARE stmt FROM @c8_sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;

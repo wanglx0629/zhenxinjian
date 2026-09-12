@@ -3,11 +3,12 @@
 -- 依据: openspec/changes/body-data-core-calc（design D1/D2/D3）；ADR-0002（覆盖当前值并留存历史版本）
 --       doscFile/03-开发规范.md §4（逻辑删除 delete_flag、业务表必备 status、生成列活跃唯一、DOUBLE 存克数）
 -- 口径: BMR/TDEE/基准热量四舍五入取整 kcal（INT 存）；三宏克数保留 1 位小数（DOUBLE 存）
+-- 幂等: 两表 CREATE IF NOT EXISTS（已存在即跳过）；版本账见 schema_migrations。
 
 USE zhenxinjian;
 
 -- 身体档案表：每用户仅一条活跃记录（修改即覆盖），计算结果快照同表冗余
-CREATE TABLE user_body (
+CREATE TABLE IF NOT EXISTS user_body (
     id              BIGINT          NOT NULL AUTO_INCREMENT COMMENT '主键ID',
     user_id         BIGINT          NOT NULL COMMENT '用户ID（关联 users.id，含游客）',
     -- 档案输入项
@@ -44,7 +45,7 @@ CREATE TABLE user_body (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='身体档案表：当前档案+计算结果快照，每用户活跃唯一';
 
 -- 身体档案历史表：修改前的完整档案整体归档（追加写，不参与计算）
-CREATE TABLE user_body_history (
+CREATE TABLE IF NOT EXISTS user_body_history (
     id              BIGINT          NOT NULL AUTO_INCREMENT COMMENT '主键ID',
     user_body_id    BIGINT          DEFAULT NULL COMMENT '来源档案ID（user_body.id，游客迁移冲突降级归档时可为空语义同原行）',
     user_id         BIGINT          NOT NULL COMMENT '用户ID（归档时归属）',

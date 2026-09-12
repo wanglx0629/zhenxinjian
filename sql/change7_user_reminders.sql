@@ -4,11 +4,12 @@
 --       doscFile/03-开发规范.md §4（逻辑删除 delete_flag、业务表必备 status、生成列活跃唯一）
 -- 口径: 默认全开 08:30/12:00/18:30（MVP v1 §提醒，骨架 07:30 不采纳）；
 --       时间 CHAR(5) 存 HH:mm；订阅额度 INT 默认 0（授权上报 +1、推送成功 -1）
+-- 幂等: 两表 CREATE IF NOT EXISTS（已存在即跳过）；版本账见 schema_migrations。
 
 USE zhenxinjian;
 
 -- 用户提醒设置：每用户至多一条活跃记录（生成列兜底）
-CREATE TABLE user_reminders (
+CREATE TABLE IF NOT EXISTS user_reminders (
     id                  BIGINT      NOT NULL AUTO_INCREMENT COMMENT '主键ID',
     user_id             BIGINT      NOT NULL COMMENT '归属用户ID（关联 users.id，含游客）',
     master_switch       TINYINT     NOT NULL DEFAULT 1 COMMENT '总开关：0关 1开',
@@ -35,7 +36,7 @@ CREATE TABLE user_reminders (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户三餐提醒设置：总开关+三餐开关/时间+订阅额度，每用户活跃唯一';
 
 -- 提醒推送日志：仅记录真实下发尝试（成功/失败），跳过不写日志；支撑每日单次去重与失败追溯
-CREATE TABLE reminder_send_log (
+CREATE TABLE IF NOT EXISTS reminder_send_log (
     id              BIGINT       NOT NULL AUTO_INCREMENT COMMENT '主键ID',
     user_id         BIGINT       NOT NULL COMMENT '归属用户ID（关联 users.id）',
     remind_date     DATE         NOT NULL COMMENT '提醒日期',

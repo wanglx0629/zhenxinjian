@@ -4,11 +4,12 @@
 --       doscFile/03-开发规范.md §4（逻辑删除 delete_flag、业务表必备 status、DOUBLE 存克数）
 -- 口径: 实际摄入克数 DOUBLE（随记录累计防漂移）；每 100g 快照 DECIMAL(5,1) 与 foods 表一致；
 --       热量 INT 取整；手动输入快照列 NULL、amount_g 占位 1
+-- 幂等: CREATE IF NOT EXISTS（已存在即跳过）；版本账见 schema_migrations。
 
 USE zhenxinjian;
 
 -- 饮食记录表：按用户+日期记录各餐别摄入，食物快照冗余（食物改/删不影响历史，不变量 I8）
-CREATE TABLE diet_records (
+CREATE TABLE IF NOT EXISTS diet_records (
     id              BIGINT          NOT NULL AUTO_INCREMENT COMMENT '主键ID',
     user_id         BIGINT          NOT NULL COMMENT '归属用户ID（关联 users.id，含游客）',
     record_date     DATE            NOT NULL COMMENT '记录日期（不允许未来日期）',

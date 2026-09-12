@@ -4,11 +4,12 @@
 --       doscFile/03-开发规范.md §4（逻辑删除 delete_flag、业务表必备 status、软删表不建唯一索引）
 -- 口径: 活跃统计以 create_time 为准（client_time 仅记录防端上篡改）；user_type 冗余聚合免 JOIN；
 --       聚合幂等由服务层软删当日旧行再插新行实现，故聚合表不建 UNIQUE
+-- 幂等: 三表 CREATE IF NOT EXISTS（已存在即跳过）；版本账见 schema_migrations。
 
 USE zhenxinjian;
 
 -- 埋点明细表：小程序批量上报（单批≤50），事件码白名单 TrackEventEnum
-CREATE TABLE track_event (
+CREATE TABLE IF NOT EXISTS track_event (
     id          BIGINT       NOT NULL AUTO_INCREMENT COMMENT '主键ID',
     user_id     BIGINT       DEFAULT NULL COMMENT '用户ID（未登录引导页上报为空）',
     user_type   VARCHAR(16)  DEFAULT NULL COMMENT '用户类型 WECHAT/GUEST（冗余，聚合免JOIN，游客清理后仍可统计）',
@@ -32,7 +33,7 @@ CREATE TABLE track_event (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='埋点明细表：行为事件批量上报，活跃/功能统计数据源';
 
 -- 每日活跃聚合表：每日 01:00 定时聚合昨日，软删重插幂等
-CREATE TABLE stat_daily_active (
+CREATE TABLE IF NOT EXISTS stat_daily_active (
     id          BIGINT   NOT NULL AUTO_INCREMENT COMMENT '主键ID',
     stat_date   DATE     NOT NULL COMMENT '统计日期',
     dau         INT      NOT NULL DEFAULT 0 COMMENT '当日去重活跃用户（track_event user_id 非NULL去重）',
@@ -51,7 +52,7 @@ CREATE TABLE stat_daily_active (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='每日活跃聚合表：DAU/游客DAU/新增，软删重插幂等';
 
 -- 事件日聚合表：按事件码分组 pv/uv
-CREATE TABLE stat_event_daily (
+CREATE TABLE IF NOT EXISTS stat_event_daily (
     id          BIGINT      NOT NULL AUTO_INCREMENT COMMENT '主键ID',
     stat_date   DATE        NOT NULL COMMENT '统计日期',
     event_code  VARCHAR(64) NOT NULL COMMENT '事件码',
