@@ -21,7 +21,7 @@
 | B-T07 | ARCH-层次-003 | 游客清理任务改批级独立事务 | 高 | 已完成 |
 | B-T08 | ARCH-演进-001 | SQL 迁移版本化（版本表 + 幂等守卫） | 高 | 已完成 |
 | B-T09 | ARCH-演进-002 | 删除前端影子算法库（isPlateau 优先） | 高 | 已完成 |
-| B-T10 | ARCH-演进-007 | data.sql 基线整改 + 弱口令哈希出库 | 高 | 未开始 |
+| B-T10 | ARCH-演进-007 | data.sql 基线整改 + 弱口令哈希出库 | 高 | 已完成 |
 | B-T11 | ARCH-边界-004 | 定时任务线程池配置 + 推送外呼批量化 | 高 | 未开始 |
 | B-T12 | ARCH-边界-005 | 埋点毒批次毒性隔离与饱和告警 | 高 | 未开始 |
 | B-T13 | ARCH-演进-003 | 业务常量单一真源 + Redis 连接配置收敛 | 中 | 未开始 |
@@ -266,7 +266,7 @@
 | --- | --- |
 | 追溯 | ARCH-演进-007（演进，高） |
 | 目标 | data.sql 二选一整改（重生成完整基线或删除），弱口令哈希移出仓库，新环境搭建路径成文 |
-| 状态 | 未开始 |
+| 状态 | 已完成 |
 
 步骤：
 
@@ -278,6 +278,15 @@
 6. 增量执行：哈希出库与基线整改分开提交。
 7. 回归测绿：后端 `mvn -q test` 绿（确认无测试依赖 data.sql）；新库搭建演练通过。
 8. 用户确认：展示裁定结论与整改 diff，获确认后收尾（写操作门禁）。
+
+执行记录（2026-09-12，10dad43 + 步骤二提交）：
+
+1. 裁定：完整基线 — data.sql 重写为全量基线（建库 + 15 张业务表终态，与 change0~9 链终态一致），全部 `CREATE TABLE IF NOT EXISTS` 幂等，重复执行安全；不采用"删除 data.sql 仅走 change 链"（保留全新环境一步到位引导）。
+2. 步骤一（10dad43）：admin/admin123 BCrypt 哈希 INSERT 出库；tools/db/README 新增「管理员初始化」小节（部署者自生成 BCrypt 哈希手工 INSERT，口令哈希不进版本库）；根 README/03-开发规范/uniapp README 三处 admin123 表述同步改指引。
+3. 步骤二：data.sql users 主表基线 → 全量基线（+user_body/user_body_history/foods/diet_records/carb_cycle_plan/carb_cycle_day/user_reminders/reminder_send_log/user_menstrual/weight_record/adjust_log/track_event/stat_daily_active/stat_event_daily，含 change1 游客三列、change2 软删 + username_active 等生成列唯一键、change6/8 全量列）；根 README §2.4/§4.7、03-开发规范 §4.7、tools/db/README 全新环境引导同步改「全量基线」表述。
+4. 演练（演练库 zhenxinjian_bt10，已 DROP）：data.sql 建库 + 15 表全 OK → change0~9 全链执行 RECORDED version 0~9（守卫零变更）→ 重跑 change1/9 全 SKIP → schema_migrations 账 10 条、表 16 张（15 业务 + 版本表）。
+5. 回归：`mvn test` 123 用例全绿（0 失败 0 错误，确认无测试依赖 data.sql 初始数据）。
+6. 演练中发现的工具链问题（非本任务代码问题，仅记录）：run-sql.cmd 会追加传入 db.local.properties 覆盖命令行 properties（SqlRunner 取最后一个），演练须直接调 java 绕开；本机 JDK 实际路径 D:\App\java\jdk-25.0.4.1。
 
 ### B-T11 — 定时任务线程池配置 + 推送外呼批量化
 
@@ -789,3 +798,4 @@
 | v1.7 | 2026-09-12 | —（未提交） | B-T07 执行完成：拆出 GuestCleanupBatchExecutor 独立 Bean 承载 @Transactional 批方法（规避同类自调用事务失效），任务方法只编排批次不再持大事务，新增每批 size/costMs 日志；补 GuestCleanupTaskTest 5 用例，123 测试全绿，状态置已完成 |
 | v1.8 | 2026-09-12 | —（未提交） | B-T08 执行完成：schema_migrations 版本表 + SqlRunner 自动建表/查账/SKIP/记账 + --allow-error 移除失败即终止不记账 + 9 脚本幂等守卫（information_schema 条件守卫/IF NOT EXISTS/change2 断点续跑）+ 存量回填脚本 + run-sql.cmd/README 本机路径修正与全新环境引导成文；五场景演练全绿（全链/SKIP/守卫/失败终止/回填），123 测试全绿，状态置已完成 |
 | v1.9 | 2026-09-12 | —（未提交） | B-T09 执行完成：calculator.ts 443→66 行，isPlateau 口径分叉雷与 overCheck 等零调用死函数全删，保留 bmr/tdee/macro532Base 标注「仅展示兜底」；format.ts 反向 import 解除；影子专用配置 PERIOD_PHASES/STAGE_532/DayType 一并退库；vue-tsc 全绿，状态置已完成 |
+| v1.10 | 2026-09-12 | —（未提交） | B-T10 执行完成：裁定完整基线 — data.sql 重写为全量基线（建库 + 15 张业务表终态与 change0~9 链一致，全 CREATE IF NOT EXISTS 幂等）；步骤一 admin/admin123 哈希出库 + 管理员初始化成文（10dad43），步骤二全量基线与三处文档同步；演练库全链 RECORDED 0~9/重跑 SKIP/账 10 条/表 16 张，123 测试全绿，状态置已完成 |
