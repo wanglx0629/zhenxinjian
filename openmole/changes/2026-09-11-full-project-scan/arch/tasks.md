@@ -14,7 +14,7 @@
 | --- | --- | --- | --- | --- |
 | B-T01 | ARCH-耦合-001 | 剥离 WebSocket 演示板（先抽象 SessionEvictor 再删包） | 高 | 已完成 |
 | B-T02 | ARCH-耦合-006 | 引入 GuestMigrationOrchestrator 编排族并后置缓存失效 | 高 | 已完成 |
-| B-T03 | ARCH-内聚-001 | 能量守恒 ±10% 校验跨端收敛单一真源 | 高 | 未开始 |
+| B-T03 | ARCH-内聚-001 | 能量守恒 ±10% 校验跨端收敛单一真源 | 高 | 已完成 |
 | B-T04 | ARCH-内聚-002 | 三宏进度展示收敛到 utils/macro.ts | 高 | 未开始 |
 | B-T05 | ARCH-内聚-003 | AI skills 资产单一真源、冗余副本退库 | 高 | 未开始 |
 | B-T06 | ARCH-层次-001 | 小程序 pages→store→api 分层收敛并补 taper store | 高 | 未开始 |
@@ -102,7 +102,7 @@
 | --- | --- |
 | 追溯 | ARCH-内聚-001（内聚，高） |
 | 目标 | 4/4/9 ±10% 校验后端收敛为共享校验器；前端收敛到 `utils/validate.ts` 并以后端为准，消除上限值分裂（5000 vs 10000） |
-| 状态 | 未开始 |
+| 状态 | 已完成 |
 
 步骤：
 
@@ -751,3 +751,4 @@
 | v1.0 | 2026-09-11 | —（未提交） | 初版：依据 badsmells.md v1.1 生成 36 个任务（高 12 / 中 16 / 低 8），ARCH 8 步模板 |
 | v1.1 | 2026-09-11 | —（未提交） | B-T01 执行完成：SessionEvictor 抽象 + ws 包/配置/依赖删除，后端回归全绿，状态置已完成 |
 | v1.2 | 2026-09-12 | —（未提交） | B-T02 执行完成：GuestMigrationOrchestrator 编排入口 + Ordered 契约 + UserRecordMigrator 缓存失效改 afterCommit + 双调用点收敛，后端回归全绿，状态置已完成 |
+| v1.3 | 2026-09-12 | —（未提交） | B-T03 执行完成：后端 MacroConsistencyValidator 单一真源替换三处副本；前端 utils/validate.ts 新增 checkKcalConsistency/kcalFromMacros 替换两页面私有副本；裁定 5000/10000 为不同场景各自与后端一致（非漂移），detail.vue 加锚点注释；后端测试 + vue-tsc 全绿 |

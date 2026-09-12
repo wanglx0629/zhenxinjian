@@ -7,9 +7,10 @@ import { computed, ref } from 'vue'
 import { onLoad, onShow } from '@dcloudio/uni-app'
 import { useDietStore } from '@/store/diet'
 import { useFoodStore } from '@/store/food'
-import { MEAL_TYPES, defaultMealType, KCAL_PER_G } from '@/config/constants'
+import { MEAL_TYPES, defaultMealType } from '@/config/constants'
 import type { FoodVO } from '@/api/food'
 import { ymd } from '@/utils/format'
+import { checkKcalConsistency } from '@/utils/validate'
 import { track, trackPage } from '@/utils/track'
 
 const dietStore = useDietStore()
@@ -85,12 +86,10 @@ const manualValid = computed(() => {
   if (Number.isNaN(fat) || fat < 0 || fat > MACRO_MAX) { manualErr.value = '脂肪须在 0-2000g 之间'; return false }
   if (Number.isNaN(kcal) || kcal < 0 || kcal > KCAL_MAX) { manualErr.value = '能量须在 0-20000kcal 之间'; return false }
 
-  // 能量守恒：|碳水×4 + 蛋白×4 + 脂肪×9 − 能量| ÷ max(能量,1) ≤ 10%
-  const expected = carb * KCAL_PER_G.carb + protein * KCAL_PER_G.protein + fat * KCAL_PER_G.fat
-  const diff = Math.abs(expected - kcal)
-  const base = Math.max(kcal, 1)
-  if (diff / base > 0.10) {
-    manualErr.value = `能量须约等于 碳水×4+蛋白×4+脂肪×9（当前差 ${Math.round(diff)}kcal，偏差 ${(diff / base * 100).toFixed(1)}%）`
+  // 能量守恒：|碳水×4 + 蛋白×4 + 脂肪×9 − 能量| ÷ max(能量,1) ≤ 10%（统一走 utils/validate）
+  const cc = checkKcalConsistency(carb, protein, fat, kcal)
+  if (!cc.ok) {
+    manualErr.value = `能量须约等于 碳水×4+蛋白×4+脂肪×9（当前差 ${Math.round(cc.diff)}kcal，偏差 ${(cc.ratio * 100).toFixed(1)}%）`
     return false
   }
   return true

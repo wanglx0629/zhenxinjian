@@ -14,7 +14,7 @@
 | --- | --- | --- | --- |
 | ARCH-耦合-001 | 耦合 | 高 | 已消除 |
 | ARCH-耦合-006 | 耦合 | 高 | 已消除 |
-| ARCH-内聚-001 | 内聚 | 高 | 未清除 |
+| ARCH-内聚-001 | 内聚 | 高 | 已消除 |
 | ARCH-内聚-002 | 内聚 | 高 | 未清除 |
 | ARCH-内聚-003 | 内聚 | 高 | 未清除 |
 | ARCH-层次-001 | 层次 | 高 | 未清除 |
@@ -95,7 +95,7 @@
 | 根因 | 口径无单一归属，各端各页就地实现 |
 | 影响 | 口径修改须同步五处，已出现上限值分裂（5000 vs 10000） |
 | 修复建议 | 后端收敛为共享校验器；前端收敛到 `utils/validate.ts` 并以后端为准，删除页面私有副本 |
-| 状态 | 未清除 |
+| 状态 | 已消除（B-T03 于 2026-09-12 完成：后端 `common/utils/MacroConsistencyValidator` 收敛 DietRecordService/CustomFoodService/AdminFoodService 三处副本（含 100/900 上限常量锚定）；前端 `utils/validate.ts` 新增 `checkKcalConsistency/kcalFromMacros/KCAL_TOLERANCE` 替换 record/add.vue 与 custom-edit.vue 私有副本；复核裁定 GRAMS_MAX 5000（记录份量）vs 10000（详情试算）为不同场景各自与后端 AMOUNT_MAX/FOOD_CALC_MAX_GRAMS 一致，非真实漂移，detail.vue 加区分注释；新增校验器边界测试 6 用例，回归全绿） |
 
 ### ARCH-内聚-002 — 三宏进度展示逻辑页内重复实现
 
@@ -569,3 +569,4 @@
 | v1.1 | 2026-09-11 | `ee2a2fa927a5f66486b85a42a2a40e056ad60903`（HEAD 未变） | 盲区补扫（Migrator 编排族/定时任务层/引导配置层/resources/小程序全局层/埋点链路）新增 10 条（耦合-006、层次-003、演进-007/008/009、边界-004~008）；复核 6 条高危证据全部成立；修订 5 条（耦合-002/004、内聚-002、演进-002/003 补证据与纠表述）。共 36 条（高 12 / 中 16 / 低 8） |
 | v1.2 | 2026-09-11 | —（未提交） | B-T01 完成，ARCH-耦合-001 置"已消除"（SessionEvictor 抽象 + ws 全链路删除）。余 35 条未清除 |
 | v1.3 | 2026-09-12 | —（未提交） | B-T02 完成，ARCH-耦合-006 置"已消除"（GuestMigrationOrchestrator 编排 + Ordered 契约 + 缓存失效 afterCommit 后置）。余 34 条未清除 |
+| v1.4 | 2026-09-12 | —（未提交） | B-T03 完成，ARCH-内聚-001 置"已消除"（MacroConsistencyValidator 后端单一真源 + 前端 utils/validate.ts 收敛；5000/10000 裁定为不同场景口径）。余 33 条未清除 |

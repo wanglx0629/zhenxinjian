@@ -2,6 +2,7 @@ package cn.zhenxinjian.service.impl;
 
 import cn.zhenxinjian.common.constant.CommonConstant;
 import cn.zhenxinjian.common.constant.ExceptionConstant;
+import cn.zhenxinjian.common.utils.MacroConsistencyValidator;
 import cn.zhenxinjian.common.utils.UserContext;
 import cn.zhenxinjian.common.enums.FoodSourceEnum;
 import cn.zhenxinjian.common.exception.BusinessException;
@@ -36,11 +37,6 @@ public class AdminFoodService extends ServiceImpl<FoodMapper, Food> {
 
     /** 内置食物编号起始（F001-F200 为初始化数据） */
     private static final int BUILTIN_CODE_START = 201;
-    /** 能量守恒允许偏差比例（10%，业务不变量 I11） */
-    private static final BigDecimal KCAL_TOLERANCE_RATIO = new BigDecimal("0.10");
-    /** 守恒计算系数：碳水/蛋白 4、脂肪 9 */
-    private static final BigDecimal CARB_PROTEIN_FACTOR = new BigDecimal("4");
-    private static final BigDecimal FAT_FACTOR = new BigDecimal("9");
 
     /**
      * 分页查询（名称/别名模糊 + 分类/来源/状态筛选）
@@ -133,18 +129,13 @@ public class AdminFoodService extends ServiceImpl<FoodMapper, Food> {
         BigDecimal protein = dto.getProtein();
         BigDecimal fat = dto.getFat();
         if (carb.signum() < 0 || protein.signum() < 0 || fat.signum() < 0
-                || carb.compareTo(BigDecimal.valueOf(100)) > 0
-                || protein.compareTo(BigDecimal.valueOf(100)) > 0
-                || fat.compareTo(BigDecimal.valueOf(100)) > 0) {
+                || carb.compareTo(MacroConsistencyValidator.PER_100G_MACRO_MAX) > 0
+                || protein.compareTo(MacroConsistencyValidator.PER_100G_MACRO_MAX) > 0
+                || fat.compareTo(MacroConsistencyValidator.PER_100G_MACRO_MAX) > 0) {
             throw new BusinessException(CommonConstant.FOOD_MACRO_INVALID_CODE,
                     ExceptionConstant.FOOD_MACRO_INVALID);
         }
-        BigDecimal expected = carb.multiply(CARB_PROTEIN_FACTOR)
-                .add(protein.multiply(CARB_PROTEIN_FACTOR))
-                .add(fat.multiply(FAT_FACTOR));
-        BigDecimal diff = expected.subtract(BigDecimal.valueOf(dto.getKcal())).abs();
-        BigDecimal base = BigDecimal.valueOf(Math.max(dto.getKcal(), 1));
-        if (diff.divide(base, 4, RoundingMode.HALF_UP).compareTo(KCAL_TOLERANCE_RATIO) > 0) {
+        if (!MacroConsistencyValidator.withinTolerance(carb, protein, fat, dto.getKcal())) {
             throw new BusinessException(CommonConstant.FOOD_KCAL_MISMATCH_CODE,
                     ExceptionConstant.FOOD_KCAL_MISMATCH);
         }

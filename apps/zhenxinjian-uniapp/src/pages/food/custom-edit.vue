@@ -10,15 +10,14 @@ import { useFoodStore } from '@/store/food'
 import type { FoodCategoryVO } from '@/api/food'
 import { canSubmit } from '@/utils/throttle'
 import { track, trackPage } from '@/utils/track'
+import { checkKcalConsistency, kcalFromMacros } from '@/utils/validate'
 
 const foodStore = useFoodStore()
 
 /** 宏量区间：每 100g 值非负且 ≤100 */
 const MACRO_MAX = 100
-/** 能量区间（与后端一致） */
+/** 能量区间（与后端 MacroConsistencyValidator.PER_100G_KCAL_MAX 一致） */
 const KCAL_MAX = 900
-/** 能量守恒允许偏差比例（10%） */
-const KCAL_TOLERANCE = 0.10
 
 /** 编辑模式：路由带 id 参数 */
 const editId = ref<number | null>(null)
@@ -114,17 +113,13 @@ function validate(): boolean {
   if (serving === null || serving < 5 || serving > 1000) {
     errors.serving = '单份克数须在 5-1000g 之间'
   }
-  // 守恒校验：|碳水×4 + 蛋白×4 + 脂肪×9 − 能量| ÷ max(能量,1) ≤ 10%
+  // 守恒校验：|碳水×4 + 蛋白×4 + 脂肪×9 − 能量| ÷ max(能量,1) ≤ 10%（统一走 utils/validate）
   if (!errors.carb && !errors.protein && !errors.fat && !errors.kcal) {
     const carb = num(form.carb)!
     const protein = num(form.protein)!
     const fat = num(form.fat)!
-    const energy = kcal!
-    const expected = carb * 4 + protein * 4 + fat * 9
-    const diff = Math.abs(expected - energy)
-    const base = Math.max(energy, 1)
-    if (diff / base > KCAL_TOLERANCE) {
-      errors.kcal = `能量与宏量不匹配：${carb}g碳水+${protein}g蛋白+${fat}g脂肪约产 ${Math.round(expected)} kcal`
+    if (!checkKcalConsistency(carb, protein, fat, kcal!).ok) {
+      errors.kcal = `能量与宏量不匹配：${carb}g碳水+${protein}g蛋白+${fat}g脂肪约产 ${Math.round(kcalFromMacros(carb, protein, fat))} kcal`
     }
   }
   return Object.keys(errors).length === 0

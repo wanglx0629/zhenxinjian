@@ -12,7 +12,7 @@ import { track, trackPage } from '@/utils/track'
 
 const foodStore = useFoodStore()
 
-/** 试算克数区间（与后端一致） */
+/** 试算克数区间（与后端 CommonConstant.FOOD_CALC_MAX_GRAMS 一致；注意区别于记录份量上限 5000，场景不同） */
 const GRAMS_MIN = 1
 const GRAMS_MAX = 10000
 

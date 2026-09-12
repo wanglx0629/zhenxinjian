@@ -7,6 +7,7 @@ import cn.zhenxinjian.common.enums.DietRecordSourceEnum;
 import cn.zhenxinjian.common.enums.FoodSourceEnum;
 import cn.zhenxinjian.common.enums.MealTypeEnum;
 import cn.zhenxinjian.common.exception.BusinessException;
+import cn.zhenxinjian.common.utils.MacroConsistencyValidator;
 import cn.zhenxinjian.domain.dto.DietRecordCreateDTO;
 import cn.zhenxinjian.domain.dto.DietRecordUpdateDTO;
 import cn.zhenxinjian.domain.po.CarbCycleDay;
@@ -56,13 +57,6 @@ public class DietRecordService {
 
     /** 手动输入能量上限 kcal */
     private static final int MANUAL_KCAL_MAX = 20000;
-
-    /** 能量守恒允许偏差比例（10%） */
-    private static final BigDecimal KCAL_TOLERANCE_RATIO = new BigDecimal("0.10");
-
-    /** 守恒计算系数：碳水/蛋白 4、脂肪 9 */
-    private static final BigDecimal CARB_PROTEIN_FACTOR = new BigDecimal("4");
-    private static final BigDecimal FAT_FACTOR = new BigDecimal("9");
 
     /** 每 100g 换算基数 */
     private static final BigDecimal PER_100G = new BigDecimal("100");
@@ -330,12 +324,7 @@ public class DietRecordService {
             throw new BusinessException(CommonConstant.DIET_MACRO_INVALID_CODE,
                     ExceptionConstant.DIET_MACRO_INVALID);
         }
-        BigDecimal expected = carb.multiply(CARB_PROTEIN_FACTOR)
-                .add(protein.multiply(CARB_PROTEIN_FACTOR))
-                .add(fat.multiply(FAT_FACTOR));
-        BigDecimal diff = expected.subtract(BigDecimal.valueOf(kcal)).abs();
-        BigDecimal base = BigDecimal.valueOf(Math.max(kcal, 1));
-        if (diff.divide(base, 4, RoundingMode.HALF_UP).compareTo(KCAL_TOLERANCE_RATIO) > 0) {
+        if (!MacroConsistencyValidator.withinTolerance(carb, protein, fat, kcal)) {
             throw new BusinessException(CommonConstant.DIET_KCAL_MISMATCH_CODE,
                     ExceptionConstant.DIET_KCAL_MISMATCH);
         }
