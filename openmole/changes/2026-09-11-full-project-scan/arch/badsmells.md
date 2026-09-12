@@ -26,7 +26,7 @@
 | ARCH-边界-005 | 边界 | 高 | 已消除 |
 | ARCH-演进-003 | 演进 | 中 | 已消除 |
 | ARCH-演进-004 | 演进 | 中 | 已消除 |
-| ARCH-演进-005 | 演进 | 中 | 未清除 |
+| ARCH-演进-005 | 演进 | 中 | 已消除 |
 | ARCH-演进-008 | 演进 | 中 | 未清除 |
 | ARCH-耦合-002 | 耦合 | 中 | 未清除 |
 | ARCH-耦合-003 | 耦合 | 中 | 未清除 |
@@ -263,7 +263,7 @@
 | 根因 | 各端独立初始化，无统一版本策略 |
 | 影响 | 升级时版本冲突面大；BOM 失去意义 |
 | 修复建议 | pom 移除冗余显式版本；uniapp TS 工具链评估升级（需验证 vue-tsc 兼容） |
-| 状态 | 未清除 |
+| 状态 | 已消除（B:09-13 完成：三批治理——后端 pom 6 处 starter + spring-boot-maven-plugin 去显式版本回归 parent BOM、lombok 手钉 1.18.48 回归 BOM 1.18.46（annotationProcessorPaths 经 BOM 属性解析）、byte-buddy 显式 compile 依赖裁定死声明删除（代码零引用且无传递来源）、hutool-all 收敛 core/json/extra/captcha 按需四模块；小程序 typescript ^4.9.4→^5.4.5 + vue-tsc ^1.0.24→^2.0.19 对齐 front + @vue/tsconfig ^0.1.3→^0.7.0 消除 TS5102；管理后台 overrides brace-expansion 5.0.8 手钉删除自然解析 2.1.4（≥2.0.2 含 CVE-2025-5889 修复且主版本与 minimatch@9 声明一致）；三端安全网全绿——mvn test 132 + dependency:tree 无意外降级、uniapp type-check 零错误 + build:mp-weixin 绿、front vue-tsc+vite build 绿） |
 
 ### ARCH-演进-008 — 埋点事件码双真源（魔法字符串散落）
 
@@ -581,3 +581,4 @@
 | v1.13 | 2026-09-12 | —（未提交） | B-T12 完成，ARCH-边界-005 置"已消除"（裁定「恒 200 + 响应 data 携带剔除码列表」契约替代 40901 整批拒收：TrackEventService 逐条白名单校验毒条目剔除/合法落库/去重保序返回；TrackEventEnum 新增 track_queue_saturated；前端成功整批移除毒条目不再无限重试 + 队列 ≥80% 饱和告警一次回落复位；TrackEventServiceTest 5 用例新契约，132 测试全绿、vue-tsc 通过；openspec spec 同步）。余 24 条未清除 |
 | v1.14 | 2026-09-12 | —（未提交） | B-T13 完成，ARCH-演进-003 置"已消除"（全量比对裁定零漂移；constants.ts 四块锚点注释 + MenstrualPhaseEnum 失效引用清理；application-dev.yml.example jetcache uri 改 ${spring.data.redis.*} 单一属性源拼接；原型副本删除并入 B-T30 协同；132 测试全绿、vue-tsc 通过、dev 冒烟验证空密码拼接 uri 零异常）。余 23 条未清除 |
 | v1.15 | 2026-09-13 | —（未提交） | B-T14 完成，ARCH-演进-004 置"已消除"（逐项全库检索裁定零引用后纯删除：小程序四死函数/三死类型/白名单三死路由/foods.ts 死函数/defaultMealType 下移消费方；管理后台 register/RegisterRequest/getUserById/白名单死路由/VITE_WS_*/ws:true/notify.wav/ws 注释；后端 LOGIN_FAIL_MAX；三端安全网全绿——uniapp vue-tsc、front vue-tsc+vite build、mvn test 132）。余 22 条未清除 |
+| v1.16 | 2026-09-13 | —（未提交） | B-T15 完成，ARCH-演进-005 置"已消除"（三批治理：后端 pom 冗余显式版本回归 parent BOM + lombok 回归 BOM 1.18.46 + byte-buddy 死声明删除 + hutool-all 收敛按需四模块；小程序 TS 5.4.5/vue-tsc 2/@vue/tsconfig 0.7 工具链对齐 front；管理后台 overrides brace-expansion 手钉删除自然解析 2.1.4；三端安全网全绿）。余 21 条未清除 |

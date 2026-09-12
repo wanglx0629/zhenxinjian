@@ -26,7 +26,7 @@
 | B-T12 | ARCH-边界-005 | 埋点毒批次毒性隔离与饱和告警 | 高 | 已完成 |
 | B-T13 | ARCH-演进-003 | 业务常量单一真源 + Redis 连接配置收敛 | 中 | 已完成 |
 | B-T14 | ARCH-演进-004 | 双端演示残留清单式清理 | 中 | 已完成 |
-| B-T15 | ARCH-演进-005 | 构建配置版本治理（BOM 回归 + TS 工具链对齐） | 中 | 未开始 |
+| B-T15 | ARCH-演进-005 | 构建配置版本治理（BOM 回归 + TS 工具链对齐） | 中 | 已完成 |
 | B-T16 | ARCH-演进-008 | 埋点事件码前端常量表 + track() 类型收窄 | 中 | 未开始 |
 | B-T17 | ARCH-耦合-002 | 小程序 api 层去 store 依赖（事件化 401 处理） | 中 | 未开始 |
 | B-T18 | ARCH-耦合-003 | 管理后台 router↔store↔request 循环解耦 | 中 | 未开始 |
@@ -402,7 +402,7 @@
 | --- | --- |
 | 追溯 | ARCH-演进-005（演进，中） |
 | 目标 | pom 移除冗余显式版本回归 parent BOM；uniapp TS 工具链评估升级至 5.x；front overrides 手钉项评估去除 |
-| 状态 | 未开始 |
+| 状态 | 已完成 |
 
 步骤：
 
@@ -414,6 +414,14 @@
 6. 增量执行：三端分开提交，uniapp 升级单独验证。
 7. 回归测绿：后端 `mvn -q test` + dependency:tree 无意外降级；双前端类型检查/构建全绿。
 8. 用户确认：展示版本对比与改动 diff，获确认后收尾（写操作门禁）。
+
+执行记录（2026-09-13，16de29e / c472b5a / c8e0898 三批提交）：
+
+1. 影响分析裁定：dependency:tree 改前留档比对——6 处 starter 与 spring-boot-maven-plugin 显式版本（均 3.5.16）与 parent BOM 管理值相同属冗余；lombok 手钉 1.18.48 可回归 BOM 1.18.46（annotationProcessorPaths 处 ${lombok.version} 经 parent properties 继承链解析 BOM 值，无需本地覆盖）；byte-buddy 1.18.11 显式 compile 依赖全库代码零引用且无传递来源（test scope byte-buddy/-agent 1.17.8 由 mockito 传递），裁定死声明；hutool 使用面全库 import 裁定仅 core（StrUtil/CollUtil/DateUtil/FileUtil/IdUtil/BeanUtil）、json（JSONUtil）、extra.servlet（JakartaServletUtil）、captcha（CaptchaUtil/LineCaptcha）四模块；front overrides brace-expansion 5.0.8 系 CVE-2025-5889 手钉，minimatch@9.0.9 声明 ^2.0.1 自然解析 2.1.4 已含修复（≥2.0.2）且主版本与声明一致。
+2. 后端批次（16de29e）：properties 删 spring-boot.version/lombok.version/bytebuddy.version 三本地覆盖；6 处 starter 与 spring-boot-maven-plugin 去显式版本回归 BOM；lombok 依赖去版本（BOM 管理）annotationProcessorPaths 保留 ${lombok.version}；byte-buddy 死声明整段删除；hutool-all 收敛 core/json/extra/captcha 四模块（注释标注按需缘由）；`mvn test` 132 用例 0 失败 0 错误 + dependency:tree 对比仅预期三项变化（lombok 1.18.48→1.18.46 BOM 值、byte-buddy compile 移除、hutool 按需）无意外降级。
+3. 小程序批次（c472b5a）：typescript ^4.9.4→^5.4.5、vue-tsc ^1.0.24→^2.0.19 对齐 front 版本线；升级后 vue-tsc 2 + TS 5.5 报 TS5102（@vue/tsconfig 0.1.x 内置 importsNotUsedAsValues/preserveValueImports 已被 TS 移除），@vue/tsconfig ^0.1.3→^0.7.0（改 verbatimModuleSyntax）消除；`npm run type-check`（实际脚本名，基线 `npm run check` 笔误同 B-T12/B-T14 记录）零错误、`npm run build:mp-weixin` 构建绿。
+4. 管理后台批次（c8e0898）：overrides brace-expansion 5.0.8 删除，npm install 后自然解析 2.1.4（minimatch@9 声明线，CVE 已修复且较跨大版本手钉 5.x 更稳）；`npm run build`（vue-tsc + vite）全绿。
+5. 用户确认：三批改动清单与 diff 展示，获「最高权限自行处理、每任务提交推送」指令后逐批提交，写操作门禁通过。
 
 ### B-T16 — 埋点事件码前端常量表 + track() 类型收窄
 
@@ -835,3 +843,4 @@
 | v1.12 | 2026-09-12 | —（未提交） | B-T12 执行完成：裁定「恒 200 + 响应 data 携带剔除码列表」契约替代 40901 整批拒收——TrackEventService 逐条白名单校验毒条目剔除/合法落库/去重保序返回，TRACK_EVENT_INVALID_CODE 常量删除；TrackEventEnum 新增 track_queue_saturated；前端成功整批移除毒条目不再无限重试 + 队列 ≥80% 饱和告警一次回落复位；TrackEventServiceTest 5 用例新契约，132 测试全绿、vue-tsc 通过；openspec spec 同步，状态置已完成 |
 | v1.13 | 2026-09-12 | —（未提交） | B-T13 执行完成：全量比对裁定零漂移（活动系数/缺口档/碳循环系数/录入区间前后端一致、经期上浮 VO 下发无前端副本、热门清单同序）；constants.ts 四块锚点注释 + MenstrualPhaseEnum 失效引用清理；application-dev.yml.example jetcache uri 改 ${spring.data.redis.*} 单一属性源拼接；原型副本删除并入 B-T30 协同；132 测试全绿、vue-tsc 通过、dev 冒烟验证空密码拼接 uri 零异常，状态置已完成 |
 | v1.14 | 2026-09-13 | —（未提交） | B-T14 执行完成：逐项全库检索裁定零引用后纯删除——小程序四死函数（getCaptcha/login/register/guestRenew）+ 三死类型 + 白名单三死路由 + foods.ts searchFoods/groupByCategory 死函数 + defaultMealType 下移唯一消费方 record/add.vue；管理后台 register/RegisterRequest/getUserById + 白名单 /auth/register + VITE_WS_* + ws:true + notify.wav + ws 注释；后端 LOGIN_FAIL_MAX；三端安全网全绿（uniapp vue-tsc、front vue-tsc+vite build、mvn test 132），14 文件 +18/-119，状态置已完成 |
+| v1.15 | 2026-09-13 | —（未提交） | B-T15 执行完成：三批治理——后端 pom 6 处 starter + maven 插件去显式版本回归 parent BOM、lombok 回归 BOM 1.18.46、byte-buddy 死声明删除、hutool-all 收敛 core/json/extra/captcha 四模块；小程序 TS ^4.9.4→^5.4.5 + vue-tsc ^1.0.24→^2.0.19 对齐 front + @vue/tsconfig ^0.1.3→^0.7.0 消除 TS5102；管理后台 overrides brace-expansion 手钉删除自然解析 2.1.4（CVE 已修复）；三端安全网全绿（mvn test 132 + dependency:tree 无意外降级、uniapp type-check + build:mp-weixin、front build），状态置已完成 |
