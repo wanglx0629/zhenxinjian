@@ -42,42 +42,6 @@ export const CYCLE = {
   template: ['high', 'mid', 'low', 'low', 'mid', 'high', 'low']
 } as const
 
-/** 日型键 */
-export type DayType = 'high' | 'mid' | 'low'
-
-/** 经期四阶段（PRD §8 / 原型 F29） */
-export interface PeriodPhaseCfg {
-  label: string
-  color: string
-  carb: number
-  kcal: number
-  focus: string
-  tip: string
-}
-
-export const PERIOD_PHASES: Record<string, PeriodPhaseCfg> = {
-  menstrual: {
-    label: '经期', color: '#DB2777', carb: 15, kcal: 60,
-    focus: '补铁 · 温补 · 避寒凉：推荐红肉 / 动物肝脏 / 菠菜 / 红枣；适度增加碳水缓解乏力、情绪波动与暴食。',
-    tip: '经期身体对碳水利用更友好，上浮碳水 +15g（+60 kcal），蛋白脂肪不变。'
-  },
-  follicular: {
-    label: '卵泡期', color: '#0891B2', carb: 0, kcal: 0,
-    focus: '雌激素上升、代谢与恢复力佳，按基准热量稳步推进缺口，可正常训练。',
-    tip: '基线阶段，无需额外加碳，安心推进减脂。'
-  },
-  ovulation: {
-    label: '排卵期', color: '#7C3AED', carb: 5, kcal: 20,
-    focus: '食欲与体温回升，注意控量；补充镁、锌，缓解腹胀。',
-    tip: '排卵期轻微上浮碳水 +5g（+20 kcal），平稳过渡。'
-  },
-  luteal: {
-    label: '黄体期', color: '#EA580C', carb: 10, kcal: 120,
-    focus: '经前综合征高发：控盐控水肿、补钙镁；适度回补热量缓解 cravings，避免极端节食。',
-    tip: '黄体期回补热量 +120 kcal、碳水 +10g，降低暴食风险，保护代谢。'
-  }
-}
-
 /** 录入区间校验（PRD §2.2 / §8.1，越界前端拒绝并兜底；后端二次兜底） */
 export interface RangeCfg {
   min: number
@@ -95,34 +59,6 @@ export const RANGES: Record<string, RangeCfg> = {
   periodDays: { min: 3, max: 10, unit: '天', default: 5 },
   cycleDays: { min: 7, max: 14, unit: '天', default: 7 }
 }
-
-/** 532 四阶段（PRD §2.4 / 原型 P08） */
-export interface Stage532 {
-  n: number
-  name: string
-  carbDelta: number
-  kcalDelta: number
-  desc: string
-}
-
-export const STAGE_532: Stage532[] = [
-  {
-    n: 1, name: '阶段 1 · 月初适应期', carbDelta: 0, kcalDelta: 0,
-    desc: '维持标准 50%/30%/20% 固定配比，让身体适应减脂饮食，不做任何降碳调整。'
-  },
-  {
-    n: 2, name: '阶段 2 · 稳步减脂期（经期适配）', carbDelta: 0, kcalDelta: 0,
-    desc: '结合女性经期周期，按所处阶段自动上浮碳水与热量，降低减脂压力，规避水肿、乏力、暴食。'
-  },
-  {
-    n: 3, name: '阶段 3 · 经后高效期', carbDelta: 0, kcalDelta: 0,
-    desc: '经期结束后稳步梯度小幅降碳，温和放大热量缺口，高效减脂。'
-  },
-  {
-    n: 4, name: '阶段 4 · 平台突破期', carbDelta: -20, kcalDelta: -80,
-    desc: '针对体重停滞用户触发固定微调：碳水 −20g、总热量 −80 kcal，蛋白脂肪保持不变，平稳突破平台。'
-  }
-]
 
 /* ------------------------------------------------------------------ */
 /* Change 5 饮食记录：餐别 / 三色进度 / 微调建议（与后端 MealTypeEnum 对齐） */

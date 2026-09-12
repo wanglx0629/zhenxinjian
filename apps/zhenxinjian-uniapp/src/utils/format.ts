@@ -2,7 +2,6 @@
  * 格式化工具
  * 作者: wanglx
  */
-import { round } from './calculator'
 import { GREETING_DEFAULT, GREETING_SLOTS } from '@/config/constants'
 
 const pad = (n: number): string => (n < 10 ? '0' + n : String(n))
@@ -59,5 +58,3 @@ export function guestLeftText(expireAt?: string | null): string {
   const hours = totalHours % 24
   return hours > 0 ? `${days} 天 ${hours} 时` : `${days} 天`
 }
-
-export { round }
