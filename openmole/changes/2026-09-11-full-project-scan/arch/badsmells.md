@@ -22,7 +22,7 @@
 | ARCH-演进-001 | 演进 | 高 | 已消除 |
 | ARCH-演进-002 | 演进 | 高 | 已消除 |
 | ARCH-演进-007 | 演进 | 高 | 已消除 |
-| ARCH-边界-004 | 边界 | 高 | 未清除 |
+| ARCH-边界-004 | 边界 | 高 | 已消除 |
 | ARCH-边界-005 | 边界 | 高 | 未清除 |
 | ARCH-演进-003 | 演进 | 中 | 未清除 |
 | ARCH-演进-004 | 演进 | 中 | 未清除 |
@@ -207,7 +207,7 @@
 | 根因 | 未配置任务线程池；外呼未批量化/异步化 |
 | 影响 | 调度饥饿：推送慢则统计与清理延迟 |
 | 修复建议 | 配置 `ThreadPoolTaskScheduler`（≥3）；推送批量化（微信订阅消息支持批量）或异步化 |
-| 状态 | 未清除 |
+| 状态 | 已消除（B-T11 于 2026-09-12 完成：ScheduleConfig taskScheduler 池 4 线程承载全部 @Scheduled + reminderPushExecutor 外呼执行器 core2/max4/queue200；微信订阅消息无批量 API 裁定限并发异步——ReminderPushTask 扫描循环改投递执行器，调度线程不占外呼耗时；Executor 按构造参数名注入无歧义；补 ReminderPushTaskTest 8 用例 D4 全分支，131 测试全绿，dev 冒烟启动成功） |
 
 ### ARCH-边界-005 — 埋点毒批次无限重试占满队列
 
@@ -577,3 +577,4 @@
 | v1.9 | 2026-09-12 | —（未提交） | B-T08 完成，ARCH-演进-001 置"已消除"（schema_migrations 版本表 + SqlRunner 自动记账/SKIP/失败即终止 + 9 脚本幂等守卫 + 存量回填脚本 + 全新环境引导成文，五场景演练全绿）。余 28 条未清除 |
 | v1.10 | 2026-09-12 | —（未提交） | B-T09 完成，ARCH-演进-002 置"已消除"（calculator.ts 443→66 行仅留录入页预览三函数并标注「仅展示兜底」，isPlateau 口径分叉雷清除，format.ts 反向 import 解除，影子专用配置 PERIOD_PHASES/STAGE_532/DayType 连带退库，vue-tsc 全绿）。余 27 条未清除 |
 | v1.11 | 2026-09-12 | —（未提交） | B-T10 完成，ARCH-演进-007 置"已消除"（裁定完整基线：data.sql 重写为建库 + 15 张业务表终态全量基线、全 CREATE IF NOT EXISTS 幂等；admin 弱口令哈希出库 + 管理员初始化成文；演练库全链 RECORDED 0~9/重跑 SKIP/账 10 条/表 16 张，123 测试全绿）。余 26 条未清除 |
+| v1.12 | 2026-09-12 | —（未提交） | B-T11 完成，ARCH-边界-004 置"已消除"（ScheduleConfig 多线程调度池池 4 线程 + reminderPushExecutor 限并发异步外呼；微信订阅消息无批量 API 裁定异步化；ReminderPushTaskTest 8 用例 D4 全分支，131 测试全绿，dev 冒烟启动成功）。余 25 条未清除 |

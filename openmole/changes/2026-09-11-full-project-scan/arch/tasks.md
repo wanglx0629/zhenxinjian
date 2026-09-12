@@ -22,7 +22,7 @@
 | B-T08 | ARCH-演进-001 | SQL 迁移版本化（版本表 + 幂等守卫） | 高 | 已完成 |
 | B-T09 | ARCH-演进-002 | 删除前端影子算法库（isPlateau 优先） | 高 | 已完成 |
 | B-T10 | ARCH-演进-007 | data.sql 基线整改 + 弱口令哈希出库 | 高 | 已完成 |
-| B-T11 | ARCH-边界-004 | 定时任务线程池配置 + 推送外呼批量化 | 高 | 未开始 |
+| B-T11 | ARCH-边界-004 | 定时任务线程池配置 + 推送外呼批量化 | 高 | 已完成 |
 | B-T12 | ARCH-边界-005 | 埋点毒批次毒性隔离与饱和告警 | 高 | 未开始 |
 | B-T13 | ARCH-演进-003 | 业务常量单一真源 + Redis 连接配置收敛 | 中 | 未开始 |
 | B-T14 | ARCH-演进-004 | 双端演示残留清单式清理 | 中 | 未开始 |
@@ -294,7 +294,7 @@
 | --- | --- |
 | 追溯 | ARCH-边界-004（边界，高） |
 | 目标 | 配置 `ThreadPoolTaskScheduler`（≥3 线程），推送任务改批量/异步外呼，消除调度饥饿 |
-| 状态 | 未开始 |
+| 状态 | 已完成 |
 
 步骤：
 
@@ -306,6 +306,14 @@
 6. 增量执行：两步分开提交。
 7. 回归测绿：后端 `mvn -q test` 全绿；启动后确认调度线程池日志与推送耗时下降。
 8. 用户确认：展示线程池配置与外呼改造 diff，获确认后收尾（写操作门禁）。
+
+执行记录（2026-09-12，e1e2ad6 + a05ded6）：
+
+1. 裁定外呼方式：微信订阅消息 subscribeMessage.send 为单用户接口（无批量 API），采「限并发异步」而非批量调用——调度线程只编排扫描，外呼投递独立执行器。
+2. 步骤一（e1e2ad6）：新增 `config/ScheduleConfig.java`——`taskScheduler`（ThreadPoolTaskScheduler 池 4 线程，Bean 名被 Spring 调度自动识别，承载全部 3 个 @Scheduled 任务留一余量）+ `reminderPushExecutor`（core2/max4/queue200，优雅停机 30s）。
+3. 步骤二（a05ded6）：`ReminderPushTask` 扫描循环改投递 `reminderPushExecutor` 异步执行 processOne（判定链与异常静默语义不变）；Executor 按构造参数名注入（全库唯一 Executor 消费方，javap 验证 MethodParameters 元数据在，两个 Executor Bean 无歧义）。
+4. 测试安全网：补 `ReminderPushTaskTest` 8 用例（同步 directExecutor 驱动）覆盖 D4 判定链全分支——模板未配置空转/微信服务不可用空转/当日已发跳过/已记录跳过/游客无 openid 跳过/额度 0 跳过/成功下发 onPushSuccess/微信异常 onPushFail 静默；全套 131 用例全绿。
+5. 冒烟：补齐本机缺失的 application-dev.yml（gitignored，application-dev.yml.example 副本改本机凭据；此前本机 `mvn spring-boot:run` 因缺 dev 配置无法启动），dev profile 启动 3.163s 成功，无 BeanCreationException/UnsatisfiedDependency，Tomcat 8080 正常，验证后干净停机。
 
 ### B-T12 — 埋点毒批次毒性隔离与饱和告警
 
@@ -799,3 +807,4 @@
 | v1.8 | 2026-09-12 | —（未提交） | B-T08 执行完成：schema_migrations 版本表 + SqlRunner 自动建表/查账/SKIP/记账 + --allow-error 移除失败即终止不记账 + 9 脚本幂等守卫（information_schema 条件守卫/IF NOT EXISTS/change2 断点续跑）+ 存量回填脚本 + run-sql.cmd/README 本机路径修正与全新环境引导成文；五场景演练全绿（全链/SKIP/守卫/失败终止/回填），123 测试全绿，状态置已完成 |
 | v1.9 | 2026-09-12 | —（未提交） | B-T09 执行完成：calculator.ts 443→66 行，isPlateau 口径分叉雷与 overCheck 等零调用死函数全删，保留 bmr/tdee/macro532Base 标注「仅展示兜底」；format.ts 反向 import 解除；影子专用配置 PERIOD_PHASES/STAGE_532/DayType 一并退库；vue-tsc 全绿，状态置已完成 |
 | v1.10 | 2026-09-12 | —（未提交） | B-T10 执行完成：裁定完整基线 — data.sql 重写为全量基线（建库 + 15 张业务表终态与 change0~9 链一致，全 CREATE IF NOT EXISTS 幂等）；步骤一 admin/admin123 哈希出库 + 管理员初始化成文（10dad43），步骤二全量基线与三处文档同步；演练库全链 RECORDED 0~9/重跑 SKIP/账 10 条/表 16 张，123 测试全绿，状态置已完成 |
+| v1.11 | 2026-09-12 | —（未提交） | B-T11 执行完成：ScheduleConfig 多线程调度池（taskScheduler 池 4 线程）+ reminderPushExecutor 外呼执行器（core2/max4/queue200）；微信订阅消息无批量 API 裁定限并发异步——ReminderPushTask 扫描循环改投递执行器，Executor 按构造参数名注入（javap 验证）；补 ReminderPushTaskTest 8 用例 D4 全分支，131 测试全绿；dev 冒烟启动成功，状态置已完成 |
