@@ -27,7 +27,7 @@
 | B-T13 | ARCH-演进-003 | 业务常量单一真源 + Redis 连接配置收敛 | 中 | 已完成 |
 | B-T14 | ARCH-演进-004 | 双端演示残留清单式清理 | 中 | 已完成 |
 | B-T15 | ARCH-演进-005 | 构建配置版本治理（BOM 回归 + TS 工具链对齐） | 中 | 已完成 |
-| B-T16 | ARCH-演进-008 | 埋点事件码前端常量表 + track() 类型收窄 | 中 | 未开始 |
+| B-T16 | ARCH-演进-008 | 埋点事件码前端常量表 + track() 类型收窄 | 中 | 已完成 |
 | B-T17 | ARCH-耦合-002 | 小程序 api 层去 store 依赖（事件化 401 处理） | 中 | 未开始 |
 | B-T18 | ARCH-耦合-003 | 管理后台 router↔store↔request 循环解耦 | 中 | 未开始 |
 | B-T19 | ARCH-耦合-004 | 后端依赖风格统一 + 推送判定下沉 ReminderService | 中 | 未开始 |
@@ -429,7 +429,7 @@
 | --- | --- |
 | 追溯 | ARCH-演进-008（演进，中） |
 | 目标 | 新建 `config/track-events.ts` 常量表与后端 `TrackEventEnum` 互锚；`track()` 参数收窄为联合类型，~30 处字面量调用改引常量 |
-| 状态 | 未开始 |
+| 状态 | 已完成 |
 
 步骤：
 
@@ -441,6 +441,15 @@
 6. 增量执行：签名收窄一次性提交（编译错误驱动逐页修复）。
 7. 回归测绿：`npm run check` 绿（零非法事件码）。
 8. 用户确认：展示常量表与替换 diff，获确认后收尾（写操作门禁）。
+
+执行记录（2026-09-13，0c1ff70 单提交）：
+
+1. 影响分析：全库检索 `track('`/`track("` 字面量调用点 16 文件 31 处，逐一对照后端 TrackEventEnum 22 码裁定——全部字面量拼写与后端一致（零拼错零缺漏）；`mode_select` 为后端枚举保留码（前端统一以 MODE_SWITCH 上报），常量表注释标注该差异。
+2. 常量表：新建 `config/track-events.ts`——TRACK_EVENT 常量表键名即枚举名、值即 code，`as const` 派生 TrackEventCode 联合类型；文件头同步约定（后端枚举为契约真源，新增/修改事件码必须先改后端枚举再同步本表）。
+3. 签名收窄：`utils/track.ts` 的 `track(eventCode: string)` 改 `track(eventCode: TrackEventCode)`，表外字面量编译期报错；内部自监控（track_queue_saturated）与 PV（page_view）同步改引常量。
+4. 逐页替换 31 处：track.ts 2（自监控/PV）、auth/guide 4（LOGIN_WECHAT/LOGIN_GUEST/LOGIN_FAIL×2）、auth/expire 3（LOGIN_WECHAT/LOGIN_FAIL×2）、record/add 4（RECORD_ADD×2/RECORD_EDIT×2）、record/index 1（RECORD_DELETE）、food/index 3（FOOD_SEARCH/FOOD_HOT_CLICK/FOOD_HISTORY_CLICK）、food/detail 1（FOOD_DETAIL）、food/custom-edit 1（FOOD_CUSTOM_ADD）、home/index 2（HOME_QUICK_ENTRY×2）、mode/select 2（MODE_SWITCH×2）、cycle/plan 1 + taper/plan 1（PLAN_VIEW mode 2/1）、reminder/index 3（REMINDER_SAVE/REMINDER_SUBSCRIBE×2）、weight/index 1（WEIGHT_ADD）、menstrual/index 1（MENSTRUAL_SAVE）、body/profile 1（BODY_SAVE）；替换后全库 `track('`/`track("` 检索零命中。
+5. 回归：`npm run type-check`（实际脚本名，tasks 基线 `npm run check` 笔误同 B-T12/B-T14/B-T15 记录）vue-tsc 零错误——收窄类型未暴露任何非法字面量；`npm run build:mp-weixin` 构建绿（circular chunk store/user↔api 警告为 B-T17 在治项，sass legacy 警告为存量）。
+6. 用户确认：常量表 + 替换 diff（17 文件 +107/-32）展示，按「最高权限自行处理、每任务提交推送」既有指令提交 0c1ff70，写操作门禁通过。
 
 ### B-T17 — 小程序 api 层去 store 依赖（事件化 401 处理）
 
@@ -844,3 +853,4 @@
 | v1.13 | 2026-09-12 | —（未提交） | B-T13 执行完成：全量比对裁定零漂移（活动系数/缺口档/碳循环系数/录入区间前后端一致、经期上浮 VO 下发无前端副本、热门清单同序）；constants.ts 四块锚点注释 + MenstrualPhaseEnum 失效引用清理；application-dev.yml.example jetcache uri 改 ${spring.data.redis.*} 单一属性源拼接；原型副本删除并入 B-T30 协同；132 测试全绿、vue-tsc 通过、dev 冒烟验证空密码拼接 uri 零异常，状态置已完成 |
 | v1.14 | 2026-09-13 | —（未提交） | B-T14 执行完成：逐项全库检索裁定零引用后纯删除——小程序四死函数（getCaptcha/login/register/guestRenew）+ 三死类型 + 白名单三死路由 + foods.ts searchFoods/groupByCategory 死函数 + defaultMealType 下移唯一消费方 record/add.vue；管理后台 register/RegisterRequest/getUserById + 白名单 /auth/register + VITE_WS_* + ws:true + notify.wav + ws 注释；后端 LOGIN_FAIL_MAX；三端安全网全绿（uniapp vue-tsc、front vue-tsc+vite build、mvn test 132），14 文件 +18/-119，状态置已完成 |
 | v1.15 | 2026-09-13 | —（未提交） | B-T15 执行完成：三批治理——后端 pom 6 处 starter + maven 插件去显式版本回归 parent BOM、lombok 回归 BOM 1.18.46、byte-buddy 死声明删除、hutool-all 收敛 core/json/extra/captcha 四模块；小程序 TS ^4.9.4→^5.4.5 + vue-tsc ^1.0.24→^2.0.19 对齐 front + @vue/tsconfig ^0.1.3→^0.7.0 消除 TS5102；管理后台 overrides brace-expansion 手钉删除自然解析 2.1.4（CVE 已修复）；三端安全网全绿（mvn test 132 + dependency:tree 无意外降级、uniapp type-check + build:mp-weixin、front build），状态置已完成 |
+| v1.16 | 2026-09-13 | —（未提交） | B-T16 执行完成：新建 config/track-events.ts 与后端 TrackEventEnum 22 码一一互锚（键名即枚举名、改动须先改后端枚举）；track() 入参收窄 TrackEventCode 联合类型编译期防拼写漂移；16 文件 31 处字面量全量改引常量（零拼错零缺漏，mode_select 裁定为后端保留码）；vue-tsc 零错误 + build:mp-weixin 构建绿，单提交 0c1ff70，状态置已完成 |

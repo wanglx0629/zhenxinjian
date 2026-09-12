@@ -27,7 +27,7 @@
 | ARCH-演进-003 | 演进 | 中 | 已消除 |
 | ARCH-演进-004 | 演进 | 中 | 已消除 |
 | ARCH-演进-005 | 演进 | 中 | 已消除 |
-| ARCH-演进-008 | 演进 | 中 | 未清除 |
+| ARCH-演进-008 | 演进 | 中 | 已消除 |
 | ARCH-耦合-002 | 耦合 | 中 | 未清除 |
 | ARCH-耦合-003 | 耦合 | 中 | 未清除 |
 | ARCH-耦合-004 | 耦合 | 中 | 未清除 |
@@ -277,7 +277,7 @@
 | 根因 | 埋点契约无共享定义 |
 | 影响 | 事件码拼写错误静默进毒批次链路；新增事件无编译期约束 |
 | 修复建议 | 前端建 `config/track-events.ts` 常量表（与后端枚举注释互锚），`track()` 参数收窄为联合类型 |
-| 状态 | 未清除 |
+| 状态 | 已消除（B-T16 于 2026-09-13 完成：新建 `config/track-events.ts` 与后端 TrackEventEnum 22 码一一互锚（键名即枚举名、值即 code、改动须先改后端枚举的同步约定入注释）；`track()` 入参收窄为 TrackEventCode 联合类型，表外字面量编译期报错；16 文件 31 处字面量调用全量改引常量——track.ts 自监控/PV、auth guide+expire 登录与游客、record add/index 增删改、food index/detail/custom-edit、home/mode/cycle/taper/reminder/weight/menstrual/body 各页；vue-tsc 零错误 + build:mp-weixin 构建绿） |
 
 ### ARCH-耦合-002 — 小程序 api 层反向依赖 store
 
@@ -582,3 +582,4 @@
 | v1.14 | 2026-09-12 | —（未提交） | B-T13 完成，ARCH-演进-003 置"已消除"（全量比对裁定零漂移；constants.ts 四块锚点注释 + MenstrualPhaseEnum 失效引用清理；application-dev.yml.example jetcache uri 改 ${spring.data.redis.*} 单一属性源拼接；原型副本删除并入 B-T30 协同；132 测试全绿、vue-tsc 通过、dev 冒烟验证空密码拼接 uri 零异常）。余 23 条未清除 |
 | v1.15 | 2026-09-13 | —（未提交） | B-T14 完成，ARCH-演进-004 置"已消除"（逐项全库检索裁定零引用后纯删除：小程序四死函数/三死类型/白名单三死路由/foods.ts 死函数/defaultMealType 下移消费方；管理后台 register/RegisterRequest/getUserById/白名单死路由/VITE_WS_*/ws:true/notify.wav/ws 注释；后端 LOGIN_FAIL_MAX；三端安全网全绿——uniapp vue-tsc、front vue-tsc+vite build、mvn test 132）。余 22 条未清除 |
 | v1.16 | 2026-09-13 | —（未提交） | B-T15 完成，ARCH-演进-005 置"已消除"（三批治理：后端 pom 冗余显式版本回归 parent BOM + lombok 回归 BOM 1.18.46 + byte-buddy 死声明删除 + hutool-all 收敛按需四模块；小程序 TS 5.4.5/vue-tsc 2/@vue/tsconfig 0.7 工具链对齐 front；管理后台 overrides brace-expansion 手钉删除自然解析 2.1.4；三端安全网全绿）。余 21 条未清除 |
+| v1.17 | 2026-09-13 | —（未提交） | B-T16 完成，ARCH-演进-008 置"已消除"（config/track-events.ts 常量表与后端 TrackEventEnum 22 码互锚 + track() 收窄 TrackEventCode 联合类型编译期防拼写漂移 + 16 文件 31 处字面量全量改引常量；vue-tsc 零错误 + build:mp-weixin 构建绿）。余 20 条未清除 |
