@@ -23,7 +23,7 @@
 | B-T09 | ARCH-演进-002 | 删除前端影子算法库（isPlateau 优先） | 高 | 已完成 |
 | B-T10 | ARCH-演进-007 | data.sql 基线整改 + 弱口令哈希出库 | 高 | 已完成 |
 | B-T11 | ARCH-边界-004 | 定时任务线程池配置 + 推送外呼批量化 | 高 | 已完成 |
-| B-T12 | ARCH-边界-005 | 埋点毒批次毒性隔离与饱和告警 | 高 | 未开始 |
+| B-T12 | ARCH-边界-005 | 埋点毒批次毒性隔离与饱和告警 | 高 | 已完成 |
 | B-T13 | ARCH-演进-003 | 业务常量单一真源 + Redis 连接配置收敛 | 中 | 未开始 |
 | B-T14 | ARCH-演进-004 | 双端演示残留清单式清理 | 中 | 未开始 |
 | B-T15 | ARCH-演进-005 | 构建配置版本治理（BOM 回归 + TS 工具链对齐） | 中 | 未开始 |
@@ -321,7 +321,7 @@
 | --- | --- |
 | 追溯 | ARCH-边界-005（边界，高） |
 | 目标 | 后端区分"可重试失败/永久失败"返回码；前端隔离毒条目不再原样重试；队列接近上限时告警埋点 |
-| 状态 | 未开始 |
+| 状态 | 已完成 |
 
 步骤：
 
@@ -333,6 +333,14 @@
 6. 增量执行：后端、前端分两批提交，契约先行对齐。
 7. 回归测绿：后端 `mvn -q test` + 小程序 `npm run check` 全绿；构造非法事件码验证不再无限重试。
 8. 用户确认：展示错误码契约与分流 diff，获确认后收尾（写操作门禁）。
+
+执行记录（2026-09-12，a576ac8 单提交契约先行）：
+
+1. 裁定错误码契约：放弃"40901 整批拒收 + 端上识别契约错误码"方案，采更简「恒 200 + 响应 data 携带剔除码列表」——永久失败（毒数据）显式枚举在 200 响应里，5xx/网络异常天然属可重试失败，端上无需按错误码分流；`TRACK_EVENT_INVALID_CODE`(40901) 常量随之无引用删除。
+2. 后端：`TrackEventService.saveBatch` 整批拒收改逐条白名单校验——毒条目剔除不入库（LinkedHashSet 去重保序收集）、合法条目落库、全非法跳过 insert，返回剔除码列表；`TrackController` 改 `Result<List<String>>`；`TrackEventEnum` 新增 `track_queue_saturated` 自监控事件码。
+3. 前端：`api/track.reportEvents` 改 resolve 剔除码列表；`utils/track` flush 成功整批移除（毒条目已被服务端剔除随响应永久丢弃，不再每 10s 无限重试占满队列）；新增 `checkSaturation`——队列 ≥80%（160/200）入队一条 `track_queue_saturated`（extra 携带 queueSize/queueMax），回落至阈值下复位标记避免重复告警。
+4. 测试安全网：`TrackEventServiceTest` 重写 5 用例匹配新契约——合法落库无剔除/混批毒性隔离（验证仅合法条 insert）/全非法跳插且剔除码去重保序/未登录允许/extra 截断；全套 132 用例全绿。
+5. 回归：`mvn test` BUILD SUCCESS（132/0/0）；小程序实际脚本为 `npm run type-check`（tasks 基线命令笔误 `npm run check`，以 package.json 为准），vue-tsc 通过；`openspec/specs/track/event/spec.md` 同步——整批拒收场景改毒性隔离场景、新增队列饱和自监控场景。
 
 ### B-T13 — 业务常量单一真源 + Redis 连接配置收敛
 
@@ -808,3 +816,4 @@
 | v1.9 | 2026-09-12 | —（未提交） | B-T09 执行完成：calculator.ts 443→66 行，isPlateau 口径分叉雷与 overCheck 等零调用死函数全删，保留 bmr/tdee/macro532Base 标注「仅展示兜底」；format.ts 反向 import 解除；影子专用配置 PERIOD_PHASES/STAGE_532/DayType 一并退库；vue-tsc 全绿，状态置已完成 |
 | v1.10 | 2026-09-12 | —（未提交） | B-T10 执行完成：裁定完整基线 — data.sql 重写为全量基线（建库 + 15 张业务表终态与 change0~9 链一致，全 CREATE IF NOT EXISTS 幂等）；步骤一 admin/admin123 哈希出库 + 管理员初始化成文（10dad43），步骤二全量基线与三处文档同步；演练库全链 RECORDED 0~9/重跑 SKIP/账 10 条/表 16 张，123 测试全绿，状态置已完成 |
 | v1.11 | 2026-09-12 | —（未提交） | B-T11 执行完成：ScheduleConfig 多线程调度池（taskScheduler 池 4 线程）+ reminderPushExecutor 外呼执行器（core2/max4/queue200）；微信订阅消息无批量 API 裁定限并发异步——ReminderPushTask 扫描循环改投递执行器，Executor 按构造参数名注入（javap 验证）；补 ReminderPushTaskTest 8 用例 D4 全分支，131 测试全绿；dev 冒烟启动成功，状态置已完成 |
+| v1.12 | 2026-09-12 | —（未提交） | B-T12 执行完成：裁定「恒 200 + 响应 data 携带剔除码列表」契约替代 40901 整批拒收——TrackEventService 逐条白名单校验毒条目剔除/合法落库/去重保序返回，TRACK_EVENT_INVALID_CODE 常量删除；TrackEventEnum 新增 track_queue_saturated；前端成功整批移除毒条目不再无限重试 + 队列 ≥80% 饱和告警一次回落复位；TrackEventServiceTest 5 用例新契约，132 测试全绿、vue-tsc 通过；openspec spec 同步，状态置已完成 |
