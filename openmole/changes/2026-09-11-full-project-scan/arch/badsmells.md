@@ -15,7 +15,7 @@
 | ARCH-耦合-001 | 耦合 | 高 | 已消除 |
 | ARCH-耦合-006 | 耦合 | 高 | 已消除 |
 | ARCH-内聚-001 | 内聚 | 高 | 已消除 |
-| ARCH-内聚-002 | 内聚 | 高 | 未清除 |
+| ARCH-内聚-002 | 内聚 | 高 | 已消除 |
 | ARCH-内聚-003 | 内聚 | 高 | 未清除 |
 | ARCH-层次-001 | 层次 | 高 | 未清除 |
 | ARCH-层次-003 | 层次 | 高 | 未清除 |
@@ -109,7 +109,7 @@
 | 根因 | 收敛做了一半，第二处未迁移 |
 | 影响 | 进度口径（本轮刚统一为 150%）再次漂移只是时间问题 |
 | 修复建议 | `record/index.vue` 改为调用 `utils/macro.ts`，删除本地副本 |
-| 状态 | 未清除 |
+| 状态 | 已消除（B-T04 于 2026-09-12 完成：`pages/record/index.vue` 删除手写 progressItems 38 行与 adviceList 8 行本地副本，改为 `buildProgressItems(dietStore.summary)` / `buildAdviceList(overItems)` 调用 `utils/macro.ts` 单一真源，同步移除 PROGRESS_THRESHOLD/PROGRESS_COLORS 常量直引；口径（三色阈值 80/100、150% 上限、超标量 1 位小数、建议映射）与真源逐行比对无行为差异；vue-tsc 全绿） |
 
 ### ARCH-内聚-003 — AI skills 资产 3-4 副本入库且已漂移
 
@@ -570,3 +570,4 @@
 | v1.2 | 2026-09-11 | —（未提交） | B-T01 完成，ARCH-耦合-001 置"已消除"（SessionEvictor 抽象 + ws 全链路删除）。余 35 条未清除 |
 | v1.3 | 2026-09-12 | —（未提交） | B-T02 完成，ARCH-耦合-006 置"已消除"（GuestMigrationOrchestrator 编排 + Ordered 契约 + 缓存失效 afterCommit 后置）。余 34 条未清除 |
 | v1.4 | 2026-09-12 | —（未提交） | B-T03 完成，ARCH-内聚-001 置"已消除"（MacroConsistencyValidator 后端单一真源 + 前端 utils/validate.ts 收敛；5000/10000 裁定为不同场景口径）。余 33 条未清除 |
+| v1.5 | 2026-09-12 | —（未提交） | B-T04 完成，ARCH-内聚-002 置"已消除"（record/index.vue 手写副本替换为 utils/macro.ts 单一真源调用）。余 32 条未清除 |

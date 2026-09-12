@@ -15,7 +15,7 @@
 | B-T01 | ARCH-耦合-001 | 剥离 WebSocket 演示板（先抽象 SessionEvictor 再删包） | 高 | 已完成 |
 | B-T02 | ARCH-耦合-006 | 引入 GuestMigrationOrchestrator 编排族并后置缓存失效 | 高 | 已完成 |
 | B-T03 | ARCH-内聚-001 | 能量守恒 ±10% 校验跨端收敛单一真源 | 高 | 已完成 |
-| B-T04 | ARCH-内聚-002 | 三宏进度展示收敛到 utils/macro.ts | 高 | 未开始 |
+| B-T04 | ARCH-内聚-002 | 三宏进度展示收敛到 utils/macro.ts | 高 | 已完成 |
 | B-T05 | ARCH-内聚-003 | AI skills 资产单一真源、冗余副本退库 | 高 | 未开始 |
 | B-T06 | ARCH-层次-001 | 小程序 pages→store→api 分层收敛并补 taper store | 高 | 未开始 |
 | B-T07 | ARCH-层次-003 | 游客清理任务改批级独立事务 | 高 | 未开始 |
@@ -121,7 +121,7 @@
 | --- | --- |
 | 追溯 | ARCH-内聚-002（内聚，高） |
 | 目标 | `pages/record/index.vue` 手写进度/超标建议映射改为调用 `utils/macro.ts`，删除本地副本 |
-| 状态 | 未开始 |
+| 状态 | 已完成 |
 
 步骤：
 
@@ -752,3 +752,4 @@
 | v1.1 | 2026-09-11 | —（未提交） | B-T01 执行完成：SessionEvictor 抽象 + ws 包/配置/依赖删除，后端回归全绿，状态置已完成 |
 | v1.2 | 2026-09-12 | —（未提交） | B-T02 执行完成：GuestMigrationOrchestrator 编排入口 + Ordered 契约 + UserRecordMigrator 缓存失效改 afterCommit + 双调用点收敛，后端回归全绿，状态置已完成 |
 | v1.3 | 2026-09-12 | —（未提交） | B-T03 执行完成：后端 MacroConsistencyValidator 单一真源替换三处副本；前端 utils/validate.ts 新增 checkKcalConsistency/kcalFromMacros 替换两页面私有副本；裁定 5000/10000 为不同场景各自与后端一致（非漂移），detail.vue 加锚点注释；后端测试 + vue-tsc 全绿 |
+| v1.4 | 2026-09-12 | —（未提交） | B-T04 执行完成：record/index.vue 本地 38 行 progressItems 与 adviceList 手写副本替换为 buildProgressItems/buildAdviceList 单一真源调用，删除 PROGRESS_THRESHOLD/PROGRESS_COLORS 直引；vue-tsc 全绿，状态置已完成 |

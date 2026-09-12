@@ -8,8 +8,9 @@ import { onShow } from '@dcloudio/uni-app'
 import { useDietStore } from '@/store/diet'
 import { useBodyStore } from '@/store/body'
 import { useCycleStore } from '@/store/cycle'
-import { MEAL_TYPES, PROGRESS_THRESHOLD, PROGRESS_COLORS, OVER_ADVICE, CYCLE_DAY_TYPES } from '@/config/constants'
+import { MEAL_TYPES, OVER_ADVICE, CYCLE_DAY_TYPES } from '@/config/constants'
 import { ymd, md, week } from '@/utils/format'
+import { buildProgressItems, buildAdviceList } from '@/utils/macro'
 import type { DietRecordVO } from '@/api/diet'
 import { track, trackPage } from '@/utils/track'
 
@@ -32,44 +33,14 @@ const dateLabel = computed(() => {
   return md(d) + ' ' + week(d)
 })
 
-/** 进度条数据（三宏 + 总热量） */
-const progressItems = computed(() => {
-  const s = dietStore.summary
-  if (!s || !s.recorded) return []
-  const items = [
-    { key: 'carb', label: '碳水', actual: s.carbActual, target: s.carbTarget, rate: s.carbRate, unit: 'g' },
-    { key: 'protein', label: '蛋白', actual: s.proteinActual, target: s.proteinTarget, rate: s.proteinRate, unit: 'g' },
-    { key: 'fat', label: '脂肪', actual: s.fatActual, target: s.fatTarget, rate: s.fatRate, unit: 'g' },
-    { key: 'kcal', label: '热量', actual: s.kcalActual, target: s.kcalTarget, rate: s.kcalRate, unit: 'kcal' }
-  ]
-  return items.map(item => {
-    const rate = item.rate ?? 0
-    let color: string = PROGRESS_COLORS.yellow
-    if (rate > PROGRESS_THRESHOLD.red) color = PROGRESS_COLORS.red
-    else if (rate >= PROGRESS_THRESHOLD.green) color = PROGRESS_COLORS.green
-    const overAmount = rate > PROGRESS_THRESHOLD.red && item.target
-      ? Math.round((item.actual - item.target) * 10) / 10
-      : 0
-    return { ...item, color, overAmount, displayRate: Math.min(rate, 150) }
-  })
-})
+/** 进度条数据（三宏 + 总热量，口径单一来源 utils/macro.ts） */
+const progressItems = computed(() => buildProgressItems(dietStore.summary))
 
 /** 超标项列表 */
-const overItems = computed(() => {
-  return progressItems.value.filter(item => item.overAmount > 0)
-})
+const overItems = computed(() => progressItems.value.filter(item => item.overAmount > 0))
 
-/** 超标建议列表 */
-const adviceList = computed(() => {
-  const list: string[] = []
-  for (const item of overItems.value) {
-    if (item.key === 'fat') list.push(OVER_ADVICE.fat)
-    else if (item.key === 'carb') list.push(OVER_ADVICE.carb)
-    else if (item.key === 'protein') list.push(OVER_ADVICE.protein)
-    else if (item.key === 'kcal') list.push(OVER_ADVICE.kcal)
-  }
-  return list
-})
+/** 超标建议列表（口径单一来源 utils/macro.ts） */
+const adviceList = computed(() => buildAdviceList(overItems.value))
 
 /** 是否碳循环模式（目标口径按日型分发） */
 const isCycle = computed(() => dietStore.summary?.mode === 2)
