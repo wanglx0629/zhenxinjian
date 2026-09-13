@@ -42,10 +42,9 @@ const bodyBrief = computed(() => {
   return `${gender} · ${p.age} 岁 · ${p.height}cm · ${p.weight}kg`
 })
 
-/** 当前减脂模式名（以档案 mode 为准，默认 532） */
+/** 当前减脂模式名（bodyStore 档案单一真源，B-T22 收敛；默认 532） */
 const modeName = computed(() => {
-  const mode = bodyStore.profile?.mode ?? 1
-  return DIET_MODES.find(m => m.code === mode)?.name ?? '532'
+  return DIET_MODES.find(m => m.code === bodyStore.currentMode)?.name ?? '532'
 })
 
 /** 体重记录副标题（最近体重 / 未记录） */

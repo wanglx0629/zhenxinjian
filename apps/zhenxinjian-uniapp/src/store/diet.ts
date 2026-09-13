@@ -15,6 +15,7 @@ import {
   type DietRecordUpdateRequest,
   type DietSummaryVO
 } from '@/api/diet'
+import { useBodyStore } from '@/store/body'
 import { ymd } from '@/utils/format'
 
 export const useDietStore = defineStore('diet', () => {
@@ -29,8 +30,18 @@ export const useDietStore = defineStore('diet', () => {
   /** 提交中（防重复点击） */
   const submitting = ref(false)
 
-  /** 未建档空态标记 */
+  /** 未建档空态标记（summary.recorded=false 涵盖未建档与碳循环无周期两口径） */
   const noProfile = computed(() => loaded.value && summary.value !== null && !summary.value.recorded)
+
+  /**
+   * 空态三分支单一真源（B-T22 自 home/record 双页收敛）：
+   * summary.recorded=false 时按 bodyStore 档案与模式分流——
+   * 未建档 → showBodyEmpty；已建档且碳循环无周期 → showCycleEmpty
+   */
+  const showBodyEmpty = computed(() => noProfile.value && !useBodyStore().profile?.recorded)
+  const showCycleEmpty = computed(
+    () => noProfile.value && !!useBodyStore().profile?.recorded && useBodyStore().isCycleMode
+  )
 
   /** 拉取当日记录与累计（增删改后重拉保证实时） */
   async function fetchDay(date?: string) {
@@ -100,6 +111,8 @@ export const useDietStore = defineStore('diet', () => {
     loaded,
     submitting,
     noProfile,
+    showBodyEmpty,
+    showCycleEmpty,
     fetchDay,
     peekDay,
     addRecord,

@@ -22,8 +22,8 @@ const switching = ref(false)
 /** P16 切换确认弹窗显隐 */
 const showConfirm = ref(false)
 
-/** 当前模式（默认 532） */
-const currentMode = computed(() => bodyStore.profile?.mode ?? 1)
+/** 当前模式（bodyStore 档案单一真源，B-T22 收敛；默认 532） */
+const currentMode = computed(() => bodyStore.currentMode)
 
 onShow(async () => {
   trackPage('pages/mode/select')

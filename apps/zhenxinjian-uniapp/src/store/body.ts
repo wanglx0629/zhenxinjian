@@ -18,6 +18,10 @@ export const useBodyStore = defineStore('body', () => {
   const isEmpty = computed(() => loaded.value && !profile.value?.recorded)
   /** 免责声明（后端统一下发，页面不可移除） */
   const disclaimer = computed(() => profile.value?.disclaimer || '')
+  /** 当前减脂模式（档案单一真源；未建档默认 532） */
+  const currentMode = computed(() => profile.value?.mode ?? 1)
+  /** 是否碳循环模式（经 currentMode 派生，各页显示口径一致） */
+  const isCycleMode = computed(() => currentMode.value === 2)
 
   /** 拉取当前档案（未录入返回空态，不抛错） */
   async function fetchProfile() {
@@ -53,6 +57,8 @@ export const useBodyStore = defineStore('body', () => {
     submitting,
     isEmpty,
     disclaimer,
+    currentMode,
+    isCycleMode,
     fetchProfile,
     saveProfile,
     reset

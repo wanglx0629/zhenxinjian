@@ -43,8 +43,8 @@ const overItems = computed(() => progressItems.value.filter(item => item.overAmo
 /** 超标建议列表（口径单一来源 utils/macro.ts） */
 const adviceList = computed(() => buildAdviceList(overItems.value))
 
-/** 是否碳循环模式（目标口径按日型分发） */
-const isCycle = computed(() => dietStore.summary?.mode === 2)
+/** 是否碳循环模式（bodyStore 档案单一真源，B-T22 收敛；目标口径按日型分发） */
+const isCycle = computed(() => bodyStore.isCycleMode)
 
 /** 目标口径标签：532「今日目标」/ 碳循环「今日高/中/低碳日」 */
 const targetLabel = computed(() => {
@@ -53,9 +53,9 @@ const targetLabel = computed(() => {
   return dayType ? `今日${CYCLE_DAY_TYPES[dayType]?.name ?? '目标'}` : '今日目标'
 })
 
-/** 空态分流：未建档 → 引导录入身体数据；已建档但碳循环无周期 → 引导创建周期 */
-const showBodyEmpty = computed(() => dietStore.noProfile && !bodyStore.profile?.recorded)
-const showCycleEmpty = computed(() => dietStore.noProfile && !!bodyStore.profile?.recorded && isCycle.value)
+/** 空态分流（dietStore 单一真源，B-T22 收敛）：未建档 → 引导录入身体数据；已建档但碳循环无周期 → 引导创建周期 */
+const showBodyEmpty = computed(() => dietStore.showBodyEmpty)
+const showCycleEmpty = computed(() => dietStore.showCycleEmpty)
 
 /** 页面显示时拉取数据 */
 onShow(async () => {

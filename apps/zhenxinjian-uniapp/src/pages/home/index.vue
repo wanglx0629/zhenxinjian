@@ -42,7 +42,8 @@ const guestLeft = computed(() =>
 const summary = computed(() => dietStore.summary)
 /** 已建档且有目标（碳循环有周期同理经 summary.recorded 下发） */
 const recorded = computed(() => !!summary.value?.recorded)
-const isCycle = computed(() => summary.value?.mode === 2)
+/** 当前模式（bodyStore 档案单一真源，B-T22 收敛） */
+const isCycle = computed(() => bodyStore.isCycleMode)
 
 /** 今日总热量目标 / 已摄入 / 剩余（可为负） */
 const kcalTarget = computed(() => summary.value?.kcalTarget ?? 0)
@@ -70,13 +71,9 @@ const bodyBrief = computed(() => {
   return `${gender} · ${p.age}岁 · ${p.height}cm · ${p.weight}kg · ${act}`
 })
 
-/** 空态三分支：未建档 / 碳循环无周期 / 已建档当日无记录 */
-const showBodyEmpty = computed(
-  () => dietStore.loaded && dietStore.noProfile && !bodyStore.profile?.recorded
-)
-const showCycleEmpty = computed(
-  () => dietStore.loaded && dietStore.noProfile && !!bodyStore.profile?.recorded && isCycle.value
-)
+/** 空态三分支：未建档 / 碳循环无周期 / 已建档当日无记录（前二经 dietStore 单一真源下发，B-T22） */
+const showBodyEmpty = computed(() => dietStore.showBodyEmpty)
+const showCycleEmpty = computed(() => dietStore.showCycleEmpty)
 const showMealEmpty = computed(
   () => recorded.value && !!dietStore.dayData && dietStore.dayData.totalKcal === 0
 )
