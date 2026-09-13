@@ -31,7 +31,7 @@
 | ARCH-耦合-002 | 耦合 | 中 | 已消除 |
 | ARCH-耦合-003 | 耦合 | 中 | 已消除 |
 | ARCH-耦合-004 | 耦合 | 中 | 已消除 |
-| ARCH-耦合-005 | 耦合 | 中 | 未清除 |
+| ARCH-耦合-005 | 耦合 | 中 | 已消除 |
 | ARCH-内聚-004 | 内聚 | 中 | 未清除 |
 | ARCH-内聚-005 | 内聚 | 中 | 未清除 |
 | ARCH-内聚-006 | 内聚 | 中 | 未清除 |
@@ -333,7 +333,7 @@
 | 根因 | 无编辑态状态容器 |
 | 影响 | URL 长度/编码脆弱；字段增改须双端同步 |
 | 修复建议 | 改传记录 id 由 add 页拉取，或经 diet store 暂存编辑态 |
-| 状态 | 未清除 |
+| 状态 | 已消除（T20 于 2026-09-13 完成：裁定「URL 仅带 id + add 页从 diet store 当日分组按 id 回显」——dayData.meals[].records 本就缓存完整 DietRecordVO，编辑入口仅在列表页数据已在内存，不新增后端单条接口也不设独立编辑态容器；record/index.vue handleEdit 双分支全量 encodeURIComponent 拼接收敛单一 editId，add.vue 删逐项 decode 改 store 查找回显（中文备注不再经 URL 编解码，深链/日期切换找不到时 toast 引导返回）；encode/decodeURIComponent 全库检索清零，vue-tsc 零错误，单提交 2724839） |
 
 ### ARCH-内聚-004 — DietRecordService 超大多职责
 
@@ -586,3 +586,4 @@
 | v1.18 | 2026-09-13 | —（未提交） | B-T17 完成，ARCH-耦合-002 置"已消除"（request.ts 去 useUserStore 反向依赖 + AuthHooks 回调注入契约（onSessionClear/onTokenRefreshed）+ main.ts 组合根 pinia active 后装配 + store/user.ts 新增 syncToken/clearSession 最小 action（401 被动路径语义不变）；BASE_URL 双轨收敛 request.ts 单一来源、track.ts 引用，15s/10s 超时差异裁定保留；api 层 grep 零 store 依赖、vue-tsc 零错误、build:mp-weixin 绿且 Circular chunk store/user→api/auth→api/request→store/user 警告消除）。余 19 条未清除 |
 | v1.19 | 2026-09-13 | —（未提交） | B-T18 完成，ARCH-耦合-003 置"已消除"（管理后台三角循环解耦：request.ts 删 router+useUserStore 双反向 import + AuthHooks 契约（getToken/onTokenRefreshed/onSessionClear）+ setAuthHooks 注入器，token 改经注入不再直读 localStorage；store/user.ts 收敛 clearSession 单一入口 + syncToken，删 router import；守卫登录态改经 userStore；main.ts 组合根装配；依赖收敛 router→store→api 单向无环，vue-tsc + vite build 全绿）。余 18 条未清除 |
 | v1.20 | 2026-09-13 | —（未提交） | B-T19 完成，ARCH-耦合-004 置"已消除"（ReminderPushTask 四个 Mapper 裸查询全部下沉——ReminderService.scanDueReminders/hasSuccessPushToday、DietRecordService.hasRecord、UserService.getById，任务只编排与外呼；测试安全网同步切换，136 用例全绿；依赖风格裁定成文——开发规范 §2.1 与 java/standard.md §3 增补「实现类直依赖为主 + 接口化豁免清单」与「controller/task 禁止直依赖 Mapper」规约及两基础设施豁免）。余 17 条未清除 |
+| v1.21 | 2026-09-13 | —（未提交） | B-T20 完成，ARCH-耦合-005 置"已消除"（饮食编辑态 URL 全量 encodeURIComponent 传参改「URL 仅带 id + add 页从 diet store 当日分组按 id 回显」，中文备注不再经 URL 编解码，深链找不到 toast 引导返回；encode/decodeURIComponent 检索清零，vue-tsc 零错误）。余 16 条未清除 |

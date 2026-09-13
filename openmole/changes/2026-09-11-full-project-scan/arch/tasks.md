@@ -31,7 +31,7 @@
 | B-T17 | ARCH-耦合-002 | 小程序 api 层去 store 依赖（事件化 401 处理） | 中 | 已完成 |
 | B-T18 | ARCH-耦合-003 | 管理后台 router↔store↔request 循环解耦 | 中 | 已完成 |
 | B-T19 | ARCH-耦合-004 | 后端依赖风格统一 + 推送判定下沉 ReminderService | 中 | 已完成 |
-| B-T20 | ARCH-耦合-005 | 饮食编辑态改 id 拉取或 store 暂存 | 中 | 未开始 |
+| B-T20 | ARCH-耦合-005 | 饮食编辑态改 id 拉取或 store 暂存 | 中 | 已完成 |
 | B-T21 | ARCH-内聚-004 | DietRecordService 职责拆分 + 小重复收敛 | 中 | 未开始 |
 | B-T22 | ARCH-内聚-005 | 小程序空态/当前模式单一口径 | 中 | 未开始 |
 | B-T23 | ARCH-内聚-006 | 管理后台列表页骨架（usePageQuery + 字典层） | 中 | 未开始 |
@@ -540,7 +540,7 @@
 | --- | --- |
 | 追溯 | ARCH-耦合-005（耦合，中） |
 | 目标 | 饮食记录编辑回显不再 URL 全量编码传参，改为传记录 id 由 add 页拉取（或 diet store 暂存） |
-| 状态 | 未开始 |
+| 状态 | 已完成 |
 
 步骤：
 
@@ -552,6 +552,14 @@
 6. 增量执行：双页同批提交。
 7. 回归测绿：`npm run check` 绿；编辑回显各字段（含中文备注）回归通过。
 8. 用户确认：展示改造 diff，获确认后收尾（写操作门禁）。
+
+执行记录（2026-09-13，2724839 单提交）：
+
+1. 影响分析裁定：后端无单条查询接口，新增接口需动后端契约过重；diet store 当日分组（`dayData.meals[].records`）本就缓存完整 DietRecordVO（编辑入口仅在 record 列表页，点击时数据已在内存）——采「URL 仅带 id + add 页从 store 按 id 回显」，非独立编辑态容器，无刷新丢态面（深链/日期切换/记录已删找不到时 toast 引导返回）。
+2. index.vue：handleEdit 双分支（手动/食物来源）全量 encodeURIComponent 拼接收敛为单一 `?editId=${record.id}`。
+3. add.vue：onLoad 编辑分支删逐项 decode 解析，改从 dietStore.dayData.meals flatMap 按 id 查找——mealType/remark 直取 VO；source!==3 且 foodId 走 foodStore.detail 回显食物、克数取 amountG；source===3 回显 foodName/carbG/proteinG/fatG/kcal；中文备注不再经 URL 编解码。
+4. 回归：全库 `encodeURIComponent|decodeURIComponent` 检索清零；`npm run type-check`（实际脚本名，tasks 基线 `npm run check` 笔误同前序记录）vue-tsc 零错误。
+5. 用户确认：按「依次自动执行、每任务提交推送、期间无需确认」既有指令提交 2724839 并推送，写操作门禁通过。
 
 ### B-T21 — DietRecordService 职责拆分 + 小重复收敛
 
@@ -883,3 +891,4 @@
 | v1.17 | 2026-09-13 | —（未提交） | B-T17 执行完成：request.ts 删除 useUserStore 反向依赖，新增 AuthHooks 回调注入契约（onSessionClear/onTokenRefreshed）+ setAuthHooks 注入器，401 与游客到期两路径改走 hooks（storage 清理与 reLaunch 保留本层）；main.ts 组合根 pinia active 后装配 user store 闭包；store/user.ts 新增 syncToken/clearSession 两最小 action（401 被动路径语义不变）；BASE_URL 双轨收敛 request.ts 单一来源、track.ts 引用（15s/10s 超时差异裁定保留）；api 层 grep 零 store 依赖、vue-tsc 零错误、build:mp-weixin 绿且 Circular chunk 警告消除，单提交 311ac2d，状态置已完成 |
 | v1.18 | 2026-09-13 | —（未提交） | B-T18 执行完成：管理后台三角循环解耦——request.ts 删 router+useUserStore 双反向 import，新增 AuthHooks 契约（getToken/onTokenRefreshed/onSessionClear，与 B-T17 小程序侧同模式）+ setAuthHooks 注入器，请求拦截 token 改经注入（不再直读 localStorage）、续期与 401 双路径走 hooks；store/user.ts 收敛 clearSession 单一入口（不含导航）+ syncToken，删 router import；守卫登录态改经 userStore.token、双处 removeItem 改 clearSession；main.ts 组合根装配（清会话+跳登录在此编排）；MainLayout logout 后补 router.push；依赖收敛 router→store→api 单向无环，npm run build（vue-tsc + vite）全绿，单提交 541e7b4，状态置已完成 |
 | v1.19 | 2026-09-13 | —（未提交） | B-T19 执行完成：依赖风格裁定「实现类直依赖为主 + 接口化豁免清单」（多实现/替换点 SessionEvictor/GuestDataMigrator/StorageService、跨层稳定契约 UserService/WechatAuthService）与「controller/task 禁止直依赖 Mapper」规约成文（开发规范 §2.1 + java/standard.md §3，豁免 FoodLibraryInitializer/GuestCleanupBatchExecutor 两基础设施类）；ReminderPushTask 四个 Mapper 裸查询全部下沉——ReminderService.scanDueReminders/hasSuccessPushToday、DietRecordService.hasRecord、UserService.getById，任务只编排与外呼；测试同步切换（ReminderPushTaskTest 8 用例改桩 service 层 + 新增 ReminderServiceTest 2 用例 + DietRecordServiceTest 补 hasRecord 2 用例），mvn test 136 用例全绿，单提交 81cba5f，状态置已完成 |
+| v1.20 | 2026-09-13 | —（未提交） | B-T20 执行完成：裁定「URL 仅带 id + add 页从 diet store 当日分组按 id 回显」（dayData.meals[].records 本就缓存完整 DietRecordVO，编辑入口仅在列表页数据已在内存，非独立编辑态容器无刷新丢态面）；record/index.vue handleEdit 双分支全量 encodeURIComponent 拼接收敛单一 editId；add.vue onLoad 编辑分支删逐项 decode 改 store 查找回显（餐别/备注/三宏热量直取 VO、食物来源 foodStore.detail + amountG、中文备注不再经 URL 编解码，深链找不到 toast 引导返回）；encode/decodeURIComponent 检索清零，vue-tsc 零错误，单提交 2724839，状态置已完成 |
