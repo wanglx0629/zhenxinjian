@@ -110,33 +110,41 @@ const manualValid = computed(() => {
 /** 编辑模式ID（非空则为编辑） */
 const editId = ref<number | null>(null)
 
-/** 加载：路由带入 foodId + 克数进入食物模式，否则手动模式 */
+/** 加载：路由带入 foodId + 克数进入食物模式；editId 编辑态从 diet store 当日分组按 id 回显，否则手动模式 */
 onLoad(async (options) => {
-  // 编辑模式：回显参数
+  // 编辑模式：URL 仅带记录 id，回显数据从 diet store 当日分组查找（含中文备注不经 URL 编码）
   const eid = Number(options?.editId)
   if (eid) {
     editId.value = eid
-    if (options?.mealType) mealType.value = Number(options.mealType)
-    if (options?.remark) remark.value = decodeURIComponent(options.remark)
+    const record = dietStore.dayData?.meals
+      .flatMap((m) => m.records)
+      .find((r) => r.id === eid)
+    if (!record) {
+      // 深链/日期切换/记录已删：数据不在当前分组，引导返回重进
+      uni.showToast({ title: '记录不存在或已过期，请返回重试', icon: 'none' })
+      setTimeout(() => uni.navigateBack(), 800)
+      return
+    }
+    mealType.value = record.mealType
+    remark.value = record.remark || ''
 
-    const foodId = Number(options?.foodId)
-    if (foodId) {
+    if (record.source !== 3 && record.foodId) {
       // 食物来源编辑：回显食物 + 克数
       mode.value = 'food'
       try {
-        food.value = await foodStore.detail(foodId)
-        gramsInput.value = String(Math.round(Number(options?.grams) || food.value.serving))
+        food.value = await foodStore.detail(record.foodId)
+        gramsInput.value = String(Math.round(record.amountG) || food.value.serving)
       } catch {
         foodErr.value = '食物加载失败，请返回重试'
       }
     } else {
       // 手动输入编辑：回显名称 + 三宏 + 热量
       mode.value = 'manual'
-      manualName.value = decodeURIComponent(options?.name || '')
-      manualCarb.value = String(options?.carb || '')
-      manualProtein.value = String(options?.protein || '')
-      manualFat.value = String(options?.fat || '')
-      manualKcal.value = String(options?.kcal || '')
+      manualName.value = record.foodName
+      manualCarb.value = String(record.carbG)
+      manualProtein.value = String(record.proteinG)
+      manualFat.value = String(record.fatG)
+      manualKcal.value = String(record.kcal)
     }
     return
   }

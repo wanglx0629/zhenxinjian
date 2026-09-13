@@ -101,19 +101,9 @@ function goAddManual() {
   uni.navigateTo({ url: '/pages/record/add' })
 }
 
-/** 编辑记录 */
+/** 编辑记录：URL 仅带记录 id，回显数据由 add 页从 diet store 当日分组按 id 查找（不再全量编码传参） */
 function handleEdit(record: DietRecordVO) {
-  if (record.source === 3) {
-    // 手动输入：跳编辑（带回显参数）
-    uni.navigateTo({
-      url: `/pages/record/add?editId=${record.id}&mealType=${record.mealType}&name=${encodeURIComponent(record.foodName)}&carb=${record.carbG}&protein=${record.proteinG}&fat=${record.fatG}&kcal=${record.kcal}&remark=${encodeURIComponent(record.remark || '')}`
-    })
-  } else {
-    // 食物来源：跳编辑（带 foodId + 克数 + 餐别）
-    uni.navigateTo({
-      url: `/pages/record/add?editId=${record.id}&foodId=${record.foodId}&grams=${record.amountG}&mealType=${record.mealType}&remark=${encodeURIComponent(record.remark || '')}`
-    })
-  }
+  uni.navigateTo({ url: `/pages/record/add?editId=${record.id}` })
 }
 
 /** 删除记录（弹确认） */
