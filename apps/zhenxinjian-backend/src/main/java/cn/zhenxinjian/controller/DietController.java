@@ -8,6 +8,7 @@ import cn.zhenxinjian.domain.vo.DietDayVO;
 import cn.zhenxinjian.domain.vo.DietRecordVO;
 import cn.zhenxinjian.domain.vo.DietSummaryVO;
 import cn.zhenxinjian.service.impl.DietRecordService;
+import cn.zhenxinjian.service.impl.DietSummaryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -36,6 +37,8 @@ import java.time.LocalDate;
 public class DietController {
 
     private final DietRecordService dietRecordService;
+
+    private final DietSummaryService dietSummaryService;
 
     @Operation(summary = "新增饮食记录", description = "食物库带入（按克数换算+快照冗余）或手动输入保底；未来日期拒绝")
     @PostMapping("/records")
@@ -68,6 +71,6 @@ public class DietController {
     @GetMapping("/summary")
     public Result<DietSummaryVO> summary(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
-        return Result.ok(dietRecordService.summary(UserContext.getUserId(), date));
+        return Result.ok(dietSummaryService.summary(UserContext.getUserId(), date));
     }
 }

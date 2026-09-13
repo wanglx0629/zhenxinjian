@@ -1,24 +1,18 @@
 package cn.zhenxinjian.service.impl;
 
 import cn.zhenxinjian.common.constant.CommonConstant;
-import cn.zhenxinjian.common.enums.DietModeEnum;
 import cn.zhenxinjian.common.enums.DietRecordSourceEnum;
 import cn.zhenxinjian.common.enums.FoodSourceEnum;
 import cn.zhenxinjian.common.enums.MealTypeEnum;
 import cn.zhenxinjian.common.exception.BusinessException;
 import cn.zhenxinjian.domain.dto.DietRecordCreateDTO;
 import cn.zhenxinjian.domain.dto.DietRecordUpdateDTO;
-import cn.zhenxinjian.domain.po.CarbCycleDay;
 import cn.zhenxinjian.domain.po.DietRecord;
 import cn.zhenxinjian.domain.po.Food;
-import cn.zhenxinjian.domain.po.UserBody;
 import cn.zhenxinjian.domain.vo.DietRecordVO;
-import cn.zhenxinjian.domain.vo.DietSummaryVO;
 import cn.zhenxinjian.mapper.DietRecordMapper;
 import cn.zhenxinjian.mapper.FoodMapper;
-import cn.zhenxinjian.mapper.UserBodyMapper;
 import com.baomidou.mybatisplus.core.MybatisConfiguration;
-import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.metadata.TableInfoHelper;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,13 +20,9 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -43,16 +33,15 @@ import static org.mockito.Mockito.when;
 
 /**
  * 饮食记录服务单元测试
- * （换算精度金标 / 守恒 ±10% 边界 / 越权 40504 / 未来日期 40505 / 快照不随食物变更 / summary 建档与空态）
+ * （换算精度金标 / 守恒 ±10% 边界 / 越权 40504 / 未来日期 40505 / 快照不随食物变更 / hasRecord）
  * 作者: wanglx
+ *
+ * 汇总（summary）相关用例已迁 DietSummaryServiceTest（B-T21 职责拆分）
  */
 class DietRecordServiceTest {
 
     private DietRecordMapper dietRecordMapper;
     private FoodMapper foodMapper;
-    private UserBodyMapper userBodyMapper;
-    private CyclePlanService cyclePlanService;
-    private Taper532Service taper532Service;
     private DietRecordService service;
 
     @BeforeEach
@@ -60,14 +49,10 @@ class DietRecordServiceTest {
         // 无 MyBatis 环境下 LambdaWrapper 列名解析依赖 TableInfo（幂等初始化）
         MapperBuilderAssistant assistant = new MapperBuilderAssistant(new MybatisConfiguration(), "");
         TableInfoHelper.initTableInfo(assistant, DietRecord.class);
-        TableInfoHelper.initTableInfo(assistant, UserBody.class);
 
         dietRecordMapper = mock(DietRecordMapper.class);
         foodMapper = mock(FoodMapper.class);
-        userBodyMapper = mock(UserBodyMapper.class);
-        cyclePlanService = mock(CyclePlanService.class);
-        taper532Service = mock(Taper532Service.class);
-        service = new DietRecordService(dietRecordMapper, foodMapper, userBodyMapper, cyclePlanService, taper532Service);
+        service = new DietRecordService(dietRecordMapper, foodMapper);
     }
 
     /** 场景：150g 鸡胸肉（24.6/1.9/0.6/118 每100g）→ 摄入 36.9/2.9/0.9/177（±0.1g/±1kcal） */
@@ -224,103 +209,22 @@ class DietRecordServiceTest {
         assertEquals(MealTypeEnum.DINNER.getCode(), updated.getMealType());
     }
 
-    /** 场景：summary 有档案 → 目标与达成率正常（碳水 120/190.1 ≈ 63.1%） */
+    /** 场景：hasRecord 有记录 → true（提醒推送「已记录不重复」判定下沉查询） */
     @Test
-    void summary_withProfile_returnsTargetsAndRates() {
-        when(dietRecordMapper.selectMaps(any(Wrapper.class))).thenReturn(List.of(sumMap("120", "60", "30", "1000")));
-        UserBody body = new UserBody();
-        body.setTargetCarb(190.1);
-        body.setTargetProtein(114.1);
-        body.setTargetFat(33.8);
-        body.setTargetKcal(1521);
-        when(userBodyMapper.selectOne(any(Wrapper.class))).thenReturn(body);
-        // 532 目标由 Taper532Service 推进口径提供
-        cn.zhenxinjian.domain.vo.Taper532VO.TodayTarget todayTarget = new cn.zhenxinjian.domain.vo.Taper532VO.TodayTarget();
-        todayTarget.setCarb(190.1);
-        todayTarget.setProtein(114.1);
-        todayTarget.setFat(33.8);
-        todayTarget.setKcal(1521);
-        when(taper532Service.todayTarget(1L)).thenReturn(todayTarget);
+    void hasRecord_existing_returnsTrue() {
+        when(dietRecordMapper.selectCount(any())).thenReturn(2L);
 
-        DietSummaryVO vo = service.summary(1L, LocalDate.now().minusDays(7));
-
-        assertTrue(vo.getRecorded());
-        assertEquals(DietModeEnum.TAPER_532.getCode(), vo.getMode());
-        assertEquals(120.0, vo.getCarbActual(), 0.001);
-        assertEquals(190.1, vo.getCarbTarget(), 0.001);
-        assertEquals(63.1, vo.getCarbRate(), 0.05);
-        assertEquals(1521, vo.getKcalTarget());
-        assertEquals(65.7, vo.getKcalRate(), 0.05);
+        assertTrue(service.hasRecord(1L, LocalDate.now(), MealTypeEnum.BREAKFAST.getCode()));
     }
 
-    /** 场景：summary 未建档 → 空态，目标与达成率为空 */
+    /** 场景：hasRecord 无记录/null → false */
     @Test
-    void summary_withoutProfile_emptyState() {
-        when(dietRecordMapper.selectMaps(any(Wrapper.class))).thenReturn(List.of(sumMap("50", "20", "10", "400")));
-        when(userBodyMapper.selectOne(any(Wrapper.class))).thenReturn(null);
+    void hasRecord_absentOrNull_returnsFalse() {
+        when(dietRecordMapper.selectCount(any())).thenReturn(0L);
+        assertFalse(service.hasRecord(1L, LocalDate.now(), MealTypeEnum.LUNCH.getCode()));
 
-        DietSummaryVO vo = service.summary(1L, null);
-
-        assertFalse(vo.getRecorded());
-        assertEquals(50.0, vo.getCarbActual(), 0.001);
-        assertNull(vo.getCarbTarget());
-        assertNull(vo.getCarbRate());
-        assertNull(vo.getKcalTarget());
-    }
-
-    /** 场景：summary 未来日期 → 40505 */
-    @Test
-    void summary_futureDate_throws40505() {
-        BusinessException e = assertThrows(BusinessException.class,
-                () -> service.summary(1L, LocalDate.now().plusDays(1)));
-        assertEquals(CommonConstant.DIET_FUTURE_DATE_CODE, e.getCode());
-    }
-
-    /** 场景：碳循环模式 → 目标取当日日型行（高碳日 240.6/85.5/23.1/1512），mode=2 */
-    @Test
-    void summary_carbCycleMode_dispatchesToCycleDay() {
-        LocalDate today = LocalDate.now();
-        when(dietRecordMapper.selectMaps(any(Wrapper.class))).thenReturn(List.of(sumMap("120", "60", "30", "1000")));
-        UserBody body = new UserBody();
-        body.setMode(DietModeEnum.CARB_CYCLE.getCode());
-        when(userBodyMapper.selectOne(any(Wrapper.class))).thenReturn(body);
-        CarbCycleDay day = new CarbCycleDay();
-        day.setCarbG(new BigDecimal("240.6"));
-        day.setProteinG(new BigDecimal("85.5"));
-        day.setFatG(new BigDecimal("23.1"));
-        day.setKcal(1512);
-        when(cyclePlanService.findActiveDay(1L, today)).thenReturn(day);
-
-        DietSummaryVO vo = service.summary(1L, today);
-
-        assertTrue(vo.getRecorded());
-        assertEquals(DietModeEnum.CARB_CYCLE.getCode(), vo.getMode());
-        assertEquals(240.6, vo.getCarbTarget(), 0.001);
-        assertEquals(85.5, vo.getProteinTarget(), 0.001);
-        assertEquals(23.1, vo.getFatTarget(), 0.001);
-        assertEquals(1512, vo.getKcalTarget());
-        assertEquals(49.9, vo.getCarbRate(), 0.05);
-        // 532 档案快照不参与分发
-        assertNull(body.getTargetCarb());
-    }
-
-    /** 场景：碳循环模式无进行中周期 → 空态（recorded=false，目标为空），不报错 */
-    @Test
-    void summary_carbCycleNoPlan_emptyState() {
-        LocalDate today = LocalDate.now();
-        when(dietRecordMapper.selectMaps(any(Wrapper.class))).thenReturn(List.of(sumMap("50", "20", "10", "400")));
-        UserBody body = new UserBody();
-        body.setMode(DietModeEnum.CARB_CYCLE.getCode());
-        when(userBodyMapper.selectOne(any(Wrapper.class))).thenReturn(body);
-        when(cyclePlanService.findActiveDay(1L, today)).thenReturn(null);
-
-        DietSummaryVO vo = service.summary(1L, today);
-
-        assertFalse(vo.getRecorded());
-        assertEquals(DietModeEnum.CARB_CYCLE.getCode(), vo.getMode());
-        assertEquals(50.0, vo.getCarbActual(), 0.001);
-        assertNull(vo.getCarbTarget());
-        assertNull(vo.getKcalTarget());
+        when(dietRecordMapper.selectCount(any())).thenReturn(null);
+        assertFalse(service.hasRecord(1L, LocalDate.now(), MealTypeEnum.DINNER.getCode()));
     }
 
     // ==================== 构造辅助 ====================
@@ -374,32 +278,5 @@ class DietRecordServiceTest {
         record.setFatG(0.2);
         record.setKcal(53);
         return record;
-    }
-
-    private Map<String, Object> sumMap(String carb, String protein, String fat, String kcal) {
-        Map<String, Object> map = new HashMap<>();
-        map.put("carb", new BigDecimal(carb));
-        map.put("protein", new BigDecimal(protein));
-        map.put("fat", new BigDecimal(fat));
-        map.put("kcal", new BigDecimal(kcal));
-        return map;
-    }
-
-    /** 场景：hasRecord 有记录 → true（提醒推送「已记录不重复」判定下沉查询） */
-    @Test
-    void hasRecord_existing_returnsTrue() {
-        when(dietRecordMapper.selectCount(any())).thenReturn(2L);
-
-        assertTrue(service.hasRecord(1L, LocalDate.now(), MealTypeEnum.BREAKFAST.getCode()));
-    }
-
-    /** 场景：hasRecord 无记录/null → false */
-    @Test
-    void hasRecord_absentOrNull_returnsFalse() {
-        when(dietRecordMapper.selectCount(any())).thenReturn(0L);
-        assertFalse(service.hasRecord(1L, LocalDate.now(), MealTypeEnum.LUNCH.getCode()));
-
-        when(dietRecordMapper.selectCount(any())).thenReturn(null);
-        assertFalse(service.hasRecord(1L, LocalDate.now(), MealTypeEnum.DINNER.getCode()));
     }
 }
