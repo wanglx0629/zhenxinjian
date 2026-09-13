@@ -33,3 +33,27 @@ a {
   text-decoration: none;
   color: var(--zhenxinjian-primary);
 }
+
+/* 列表页公共布局（B-T23 自 users/foods/diet-records 三页 scoped 副本收敛） */
+.list-page {
+  background: var(--zhenxinjian-white);
+  border: 1px solid var(--zhenxinjian-border);
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.list-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.list-filters {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
