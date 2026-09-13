@@ -224,6 +224,9 @@ public final class CommonConstant {
     /** 分页最大条数 */
     public static final long MAX_PAGE_SIZE = 100L;
 
+    /** 我的自定义食物列表上限（有界查询防无限积累） */
+    public static final int CUSTOM_FOOD_MINE_LIMIT = 200;
+
     /** 搜索关键词最大长度 */
     public static final int MAX_KEYWORD_LENGTH = 64;
 

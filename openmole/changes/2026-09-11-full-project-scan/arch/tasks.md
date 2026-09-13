@@ -37,7 +37,7 @@
 | B-T23 | ARCH-内聚-006 | 管理后台列表页骨架（usePageQuery + 字典层） | 中 | 已完成 |
 | B-T24 | ARCH-内聚-007 | 微信登录流程下沉 store/user.ts | 中 | 已完成 |
 | B-T25 | ARCH-层次-002 | 文档归属收敛（docs/ 唯一真源） | 中 | 已完成 |
-| B-T26 | ARCH-边界-001 | 自定义食物列表加上限/分页 | 中 | 未开始 |
+| B-T26 | ARCH-边界-001 | 自定义食物列表加上限/分页 | 中 | 已完成 |
 | B-T27 | ARCH-边界-006 | 提醒推送窗口匹配 + 漏发补偿 | 中 | 未开始 |
 | B-T28 | ARCH-边界-007 | JWT 密钥门禁改内容检测 | 中 | 未开始 |
 | B-T29 | ARCH-模块化-001 | 小程序全局样式抽象 + 超大页拆分 | 低 | 未开始 |
@@ -707,7 +707,7 @@
 | --- | --- |
 | 追溯 | ARCH-边界-001（边界，中） |
 | 目标 | `CustomFoodService.listMine` 加 LIMIT（如 200）或分页，消除无上限查询 |
-| 状态 | 未开始 |
+| 状态 | 已完成 |
 
 步骤：
 
@@ -719,6 +719,16 @@
 6. 增量执行：一批提交。
 7. 回归测绿：后端 `mvn -q test` 全绿；小程序自定义食物列表页回归。
 8. 用户确认：展示改造 diff，获确认后收尾（写操作门禁）。
+
+执行记录（2026-09-13 完成）：
+
+1. 确认坏味道：核对 `service/impl/CustomFoodService.java:81-88`——`listMine` 为 `selectList(eq(source).eq(userId).orderByDesc(id))` 无 LIMIT 无分页，成立（全库唯一真实无上限查询）。
+2. 影响分析：消费方裁定——小程序端 `api/food.ts listMyCustomFoods()` → store/food.ts `fetchMyCustom()` 一次性全量渲染「我的食物」列表，非滚动分页场景，裁定 LIMIT 有界查询而非分页参数（避免无谓 API 变更）。
+3. 测试安全网：新增 `CustomFoodServiceTest.listMine_boundedByLimit`——TableInfoHelper.initTableInfo 幂等初始化（镜像 WeightServiceTest 既有模式）使 mock 环境下 LambdaWrapper 列名可解析，ArgumentCaptor 捕获 Wrapper 断言 SQL 片段含 LIMIT 上限。
+4. 架构模式：有界查询——`.last("LIMIT " + CommonConstant.CUSTOM_FOOD_MINE_LIMIT)`，与 AGENTS.md「无上限 selectList」Never 条款对齐；上限常量入 CommonConstant 单一真源。
+5. 迁移执行：单点改造一批提交——CommonConstant 新增 `CUSTOM_FOOD_MINE_LIMIT = 200`（不复用 MAX_PAGE_SIZE=100，自定义食物列表与分页接口缩放特征不同）；listMine 加 `.last(...)`；测试新增 1 用例。
+6. 回归：后端 mvn test 137 用例全绿（含新用例）；前端零改动 vue-tsc 零错误。
+7. 用户确认：按「重新推送，往后所有任务自动化按推荐方案执行，无需再中途问我」既有指令提交并推送（写操作门禁通过）。
 
 ### B-T27 — 提醒推送窗口匹配 + 漏发补偿
 
@@ -942,3 +952,4 @@
 | v1.23 | 2026-09-13 | —（未提交） | B-T23 执行完成：四批治理——0634cc0 批 1 骨架三件套（constants/dicts.ts 字典层 DictItem+dictMap+dictLabel 十组枚举互锚 / composables/usePageQuery.ts 查询骨架七处样板托管 / component/PagePager.vue 通用分页条 / global.css 三公共类）；5cc81db 批 2 users 页迁移（七处样板收敛 + 角色/状态/模式/活动/周期五本地字典收敛 + 分页器副本改 PagePager + 四 scoped 副本改全局类 + usePageQuery 复用 api/types.ts PageResult）；4dbcba3 批 3 foods 页迁移 + API 类型收敛（七处样板收敛 + 分类/来源/状态三本地字典收敛 + categoryName() 删除改 dictLabel + adminFood/adminDiet 返回类型收敛 PageResult<T>）；d965e95 批 4 diet-records 页迁移（七处样板收敛 + MEAL_MAP/SOURCE_MAP 两本地字典收敛 + displayUser 参数类型收窄 + 只读页无删后回退）；四批各自 vue-tsc + vite build 全绿，三页样板全量收敛骨架与字典层单一真源零行为变更，状态置已完成 |
 | v1.24 | 2026-09-13 | —（未提交） | B-T24 执行完成：微信登录流程下沉——guide/expire 双页「uni.login → [err,res] 兼容取 code → wechatLogin(guestKey) → track → toast → 400ms 跳首页」约 30 行逐字复制收敛 store/user.ts loginByWechat(opts?) 单一入口（返回 Promise<boolean>，tuple 兼容取值保留 store 层，successText/failText 参数化保留双页并集文案）；双页删副本改 await store 调用只管 loading 与 canSubmit 节流；handleGuest 游客登录单页无副本裁定保留页内 track(LOGIN_GUEST)；uni.login 全库检索唯 store 一处，vue-tsc 零错误 + build:mp-weixin 绿，单提交 644b269，状态置已完成 |
 | v1.25 | 2026-09-13 | —（未提交） | B-T25 执行完成：文档归属收敛——原拼写错误目录（dosc 前缀）git mv 更名 docsFile 保历史，全库 32 文件 48 处引用批量修正（AGENTS/Constitutions/README + docs 知识库 8 件 + openspec 归档 7 件 + sql 注释 9 件 + 代码注释 3 件 + openmole 2 件），grep 旧名清零；新建 .gitattributes 归属标记（docsFile/** attribution=project-narrative + 提交约定 [docsFile] 标记成文）；内容去重裁定——docsFile 叙述性文档与 docs/ Harness 约束资产归属清晰非副本不合并；zhenxinjian.wiki 本地不存在裁定出本仓库范围；mvn compile + vue-tsc 双绿，单提交，状态置已完成 |
+| v1.26 | 2026-09-13 | —（未提交） | B-T26 执行完成：自定义食物列表有界化——listMine 纯 selectList 无 LIMIT 无分页（全库唯一真实无上限查询）加 `.last("LIMIT " + CommonConstant.CUSTOM_FOOD_MINE_LIMIT)`；消费方裁定小程序端 listMyCustomFoods → fetchMyCustom 一次性全量渲染非滚动分页，采 LIMIT 有界查询不改 API；CommonConstant 新增 CUSTOM_FOOD_MINE_LIMIT = 200 单一真源（不复用 MAX_PAGE_SIZE=100，列表缩放特征不同）；新增 listMine_boundedByLimit 测试（TableInfoHelper.initTableInfo 幂等初始化镜像 WeightServiceTest 模式，ArgumentCaptor 断言 SQL 片段含 LIMIT）；mvn test 137 用例全绿 + 前端零改动 vue-tsc 零错误，单提交，状态置已完成 |

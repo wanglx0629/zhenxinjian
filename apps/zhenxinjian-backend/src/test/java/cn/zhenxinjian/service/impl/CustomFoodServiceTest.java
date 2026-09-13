@@ -5,14 +5,21 @@ import cn.zhenxinjian.common.exception.BusinessException;
 import cn.zhenxinjian.domain.dto.CustomFoodSaveDTO;
 import cn.zhenxinjian.domain.po.Food;
 import cn.zhenxinjian.mapper.FoodMapper;
+import com.baomidou.mybatisplus.core.MybatisConfiguration;
+import com.baomidou.mybatisplus.core.conditions.Wrapper;
+import com.baomidou.mybatisplus.core.metadata.TableInfoHelper;
+import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.dao.DuplicateKeyException;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -20,7 +27,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
- * 自定义食物服务单元测试（宏量区间 40402 / 能量守恒 40403 / 归属 40405 / 内置拒绝 40404 / 重名 40401）
+ * 自定义食物服务单元测试（宏量区间 40402 / 能量守恒 40403 / 归属 40405 / 内置拒绝 40404 / 重名 40401 / 列表有界 LIMIT 200）
  * 作者: wanglx
  */
 class CustomFoodServiceTest {
@@ -30,6 +37,10 @@ class CustomFoodServiceTest {
 
     @BeforeEach
     void setUp() {
+        // 无 MyBatis 环境下 LambdaWrapper 列名解析依赖 TableInfo（幂等初始化）
+        MapperBuilderAssistant assistant = new MapperBuilderAssistant(new MybatisConfiguration(), "");
+        TableInfoHelper.initTableInfo(assistant, Food.class);
+
         foodMapper = mock(FoodMapper.class);
         service = new CustomFoodService(foodMapper);
     }
@@ -144,6 +155,21 @@ class CustomFoodServiceTest {
         when(foodMapper.selectById(11L)).thenReturn(customFood(11L, 1L, "我的"));
         service.remove(1L, 11L);
         verify(foodMapper).deleteById(11L);
+    }
+
+    /** 口径锚点：我的自定义列表为有界查询（LIMIT 200），防用户无限积累全表拉取 */
+    @Test
+    @SuppressWarnings("unchecked")
+    void listMine_boundedByLimit() {
+        when(foodMapper.selectList(any(Wrapper.class))).thenReturn(List.of());
+
+        service.listMine(1L);
+
+        ArgumentCaptor<Wrapper<Food>> captor = ArgumentCaptor.forClass(Wrapper.class);
+        verify(foodMapper).selectList(captor.capture());
+        String sql = captor.getValue().getSqlSegment();
+        assertTrue(sql.contains("LIMIT " + CommonConstant.CUSTOM_FOOD_MINE_LIMIT),
+                "应含列表上限，实际: " + sql);
     }
 
     private CustomFoodSaveDTO validDto(String name, String carb, String protein, String fat, int kcal) {

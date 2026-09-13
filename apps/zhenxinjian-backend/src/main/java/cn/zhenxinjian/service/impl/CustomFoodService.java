@@ -74,7 +74,7 @@ public class CustomFoodService {
     }
 
     /**
-     * 我的自定义食物列表（仅本人活跃数据）
+     * 我的自定义食物列表（仅本人活跃数据，上限 200 条有界查询防无限积累）
      *
      * @param userId 当前用户ID
      */
@@ -83,7 +83,8 @@ public class CustomFoodService {
                 Wrappers.<Food>lambdaQuery()
                         .eq(Food::getSource, FoodSourceEnum.CUSTOM.getCode())
                         .eq(Food::getUserId, userId)
-                        .orderByDesc(Food::getId));
+                        .orderByDesc(Food::getId)
+                        .last("LIMIT " + CommonConstant.CUSTOM_FOOD_MINE_LIMIT));
         return foods.stream().map(this::toVO).collect(Collectors.toList());
     }
 
