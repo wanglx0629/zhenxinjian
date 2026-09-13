@@ -33,7 +33,7 @@
 | ARCH-耦合-004 | 耦合 | 中 | 已消除 |
 | ARCH-耦合-005 | 耦合 | 中 | 已消除 |
 | ARCH-内聚-004 | 内聚 | 中 | 已消除 |
-| ARCH-内聚-005 | 内聚 | 中 | 未清除 |
+| ARCH-内聚-005 | 内聚 | 中 | 已消除 |
 | ARCH-内聚-006 | 内聚 | 中 | 未清除 |
 | ARCH-内聚-007 | 内聚 | 中 | 未清除 |
 | ARCH-层次-002 | 层次 | 中 | 未清除 |
@@ -361,7 +361,7 @@
 | 根因 | 模式真源未定义（档案 vs 当日汇总） |
 | 影响 | 两源不同步时各页显示不一致 |
 | 修复建议 | 在 store 层定义单一 `currentMode` 口径（建议以档案为准），页面统一引用 |
-| 状态 | 未清除 |
+| 状态 | 已消除（T22 于 2026-09-13 完成：模式真源裁定档案 `profile.mode`——bodyStore 新增 `currentMode`（未建档默认 532）与 `isCycleMode` 派生 getter，`summary.mode` 显示源废止，`home:43`/`record:75`（summary.mode===2）与 `mine:50`/`mode/select:26`（profile?.mode ?? 1）双源四页归一；空态三分支收敛 `dietStore.showBodyEmpty`/`showCycleEmpty` 单一真源（`summary.recorded=false` 时按档案 `recorded` 与 `isCycleMode` 分流——未建档/碳循环无周期两口径），home/record 双页内联判定删除改委派，home 页 `loaded` 前置随 `noProfile` getter 内聚（`loaded && summary!==null && !recorded`）一并吸收；保留项裁定——`record:177` 进度区直引 store getter 不属重复判定、`showMealEmpty`（已建档当日无记录）为 home 页独有口径保留本页；vue-tsc 零错误、`profile?.mode ??`/`summary?.mode` 全库检索清零零行为变更，单提交 15d02c5） |
 
 ### ARCH-内聚-006 — 管理后台列表页模式三处重复
 
@@ -587,3 +587,5 @@
 | v1.19 | 2026-09-13 | —（未提交） | B-T18 完成，ARCH-耦合-003 置"已消除"（管理后台三角循环解耦：request.ts 删 router+useUserStore 双反向 import + AuthHooks 契约（getToken/onTokenRefreshed/onSessionClear）+ setAuthHooks 注入器，token 改经注入不再直读 localStorage；store/user.ts 收敛 clearSession 单一入口 + syncToken，删 router import；守卫登录态改经 userStore；main.ts 组合根装配；依赖收敛 router→store→api 单向无环，vue-tsc + vite build 全绿）。余 18 条未清除 |
 | v1.20 | 2026-09-13 | —（未提交） | B-T19 完成，ARCH-耦合-004 置"已消除"（ReminderPushTask 四个 Mapper 裸查询全部下沉——ReminderService.scanDueReminders/hasSuccessPushToday、DietRecordService.hasRecord、UserService.getById，任务只编排与外呼；测试安全网同步切换，136 用例全绿；依赖风格裁定成文——开发规范 §2.1 与 java/standard.md §3 增补「实现类直依赖为主 + 接口化豁免清单」与「controller/task 禁止直依赖 Mapper」规约及两基础设施豁免）。余 17 条未清除 |
 | v1.21 | 2026-09-13 | —（未提交） | B-T20 完成，ARCH-耦合-005 置"已消除"（饮食编辑态 URL 全量 encodeURIComponent 传参改「URL 仅带 id + add 页从 diet store 当日分组按 id 回显」，中文备注不再经 URL 编解码，深链找不到 toast 引导返回；encode/decodeURIComponent 检索清零，vue-tsc 零错误）。余 16 条未清除 |
+| v1.22 | 2026-09-13 | —（未提交） | B-T21 完成（补登版本行，08f1a40 收尾时漏登），ARCH-内聚-004 置"已消除"（批 1 三处小重复收敛公共工具——round1→Numbers.round1、operator()→Operators.user、CORS 解析→CorsOrigins.parse；批 2 新建 DietSummaryService 承接 summary() 整方法，DietRecordService 删三依赖回归 CRUD+按日分组+hasRecord 单一职责，跨调网单向零回边 DAG 无环；136 用例全绿）。余 15 条未清除 |
+| v1.23 | 2026-09-13 | —（未提交） | B-T22 完成，ARCH-内聚-005 置"已消除"（模式真源裁定档案 profile.mode——bodyStore 新增 currentMode/isCycleMode 派生 getter，summary.mode 显示源废止，home/record/mine/mode-select 四页双源归一；空态三分支收敛 dietStore.showBodyEmpty/showCycleEmpty 单一真源，home/record 内联判定删除改委派，loaded 前置随 noProfile getter 内聚吸收；vue-tsc 零错误、双源检索清零）。余 14 条未清除 |

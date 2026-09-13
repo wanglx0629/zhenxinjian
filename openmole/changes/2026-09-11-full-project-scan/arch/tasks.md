@@ -33,7 +33,7 @@
 | B-T19 | ARCH-耦合-004 | 后端依赖风格统一 + 推送判定下沉 ReminderService | 中 | 已完成 |
 | B-T20 | ARCH-耦合-005 | 饮食编辑态改 id 拉取或 store 暂存 | 中 | 已完成 |
 | B-T21 | ARCH-内聚-004 | DietRecordService 职责拆分 + 小重复收敛 | 中 | 已完成 |
-| B-T22 | ARCH-内聚-005 | 小程序空态/当前模式单一口径 | 中 | 未开始 |
+| B-T22 | ARCH-内聚-005 | 小程序空态/当前模式单一口径 | 中 | 已完成 |
 | B-T23 | ARCH-内聚-006 | 管理后台列表页骨架（usePageQuery + 字典层） | 中 | 未开始 |
 | B-T24 | ARCH-内聚-007 | 微信登录流程下沉 store/user.ts | 中 | 未开始 |
 | B-T25 | ARCH-层次-002 | 文档归属收敛（docs/ 唯一真源） | 中 | 未开始 |
@@ -595,7 +595,7 @@
 | --- | --- |
 | 追溯 | ARCH-内聚-005（内聚，中） |
 | 目标 | 空态判定与"当前模式"在 store 层定义单一口径，页面统一引用（模式建议以档案为准） |
-| 状态 | 未开始 |
+| 状态 | 已完成 |
 
 步骤：
 
@@ -607,6 +607,14 @@
 6. 增量执行：一批提交。
 7. 回归测绿：`npm run check` 绿；模式切换场景（均衡/532）各页显示一致。
 8. 用户确认：展示口径裁定与收敛 diff，获确认后收尾（写操作门禁）。
+
+执行记录（2026-09-13，15d02c5 单提交）：
+
+1. 模式真源裁定档案 `profile.mode`：bodyStore 新增 `currentMode`（未建档默认 532）与 `isCycleMode` 派生 getter；`summary.mode` 显示源废止——`home:43`/`record:75` 的 `summary.mode===2` 与 `mine:50`/`mode/select:26` 的 `profile?.mode ?? 1` 双源四页归一。
+2. 空态三分支收敛 dietStore：新增 `showBodyEmpty`/`showCycleEmpty` getter（`summary.recorded=false` 时按 bodyStore 档案 `recorded` 与 `isCycleMode` 分流——未建档/碳循环无周期两口径单一真源）；home/record 双页内联判定删除改委派；home 页 `loaded` 前置随 `noProfile` getter 内聚（`loaded && summary!==null && !recorded`）一并吸收，页面不再自持加载态判定。
+3. 保留项裁定：`record:177` 进度区 `!dietStore.noProfile` 直引 store getter 不属重复判定；`showMealEmpty`（已建档当日无记录第三分支）为 home 页独有业务口径保留本页。
+4. 回归：vue-tsc `--noEmit` 零错误；`profile?.mode ??`/`summary?.mode` 全库检索清零，零行为变更。
+5. 用户确认：按「依次自动执行、每任务提交推送、期间无需确认」既有指令提交 15d02c5 并推送（首推 Recv failure，随文档收尾一并重推），写操作门禁通过。
 
 ### B-T23 — 管理后台列表页骨架（usePageQuery + 字典层）
 
@@ -901,3 +909,5 @@
 | v1.18 | 2026-09-13 | —（未提交） | B-T18 执行完成：管理后台三角循环解耦——request.ts 删 router+useUserStore 双反向 import，新增 AuthHooks 契约（getToken/onTokenRefreshed/onSessionClear，与 B-T17 小程序侧同模式）+ setAuthHooks 注入器，请求拦截 token 改经注入（不再直读 localStorage）、续期与 401 双路径走 hooks；store/user.ts 收敛 clearSession 单一入口（不含导航）+ syncToken，删 router import；守卫登录态改经 userStore.token、双处 removeItem 改 clearSession；main.ts 组合根装配（清会话+跳登录在此编排）；MainLayout logout 后补 router.push；依赖收敛 router→store→api 单向无环，npm run build（vue-tsc + vite）全绿，单提交 541e7b4，状态置已完成 |
 | v1.19 | 2026-09-13 | —（未提交） | B-T19 执行完成：依赖风格裁定「实现类直依赖为主 + 接口化豁免清单」（多实现/替换点 SessionEvictor/GuestDataMigrator/StorageService、跨层稳定契约 UserService/WechatAuthService）与「controller/task 禁止直依赖 Mapper」规约成文（开发规范 §2.1 + java/standard.md §3，豁免 FoodLibraryInitializer/GuestCleanupBatchExecutor 两基础设施类）；ReminderPushTask 四个 Mapper 裸查询全部下沉——ReminderService.scanDueReminders/hasSuccessPushToday、DietRecordService.hasRecord、UserService.getById，任务只编排与外呼；测试同步切换（ReminderPushTaskTest 8 用例改桩 service 层 + 新增 ReminderServiceTest 2 用例 + DietRecordServiceTest 补 hasRecord 2 用例），mvn test 136 用例全绿，单提交 81cba5f，状态置已完成 |
 | v1.20 | 2026-09-13 | —（未提交） | B-T20 执行完成：裁定「URL 仅带 id + add 页从 diet store 当日分组按 id 回显」（dayData.meals[].records 本就缓存完整 DietRecordVO，编辑入口仅在列表页数据已在内存，非独立编辑态容器无刷新丢态面）；record/index.vue handleEdit 双分支全量 encodeURIComponent 拼接收敛单一 editId；add.vue onLoad 编辑分支删逐项 decode 改 store 查找回显（餐别/备注/三宏热量直取 VO、食物来源 foodStore.detail + amountG、中文备注不再经 URL 编解码，深链找不到 toast 引导返回）；encode/decodeURIComponent 检索清零，vue-tsc 零错误，单提交 2724839，状态置已完成 |
+| v1.21 | 2026-09-13 | —（未提交） | B-T21 执行完成（补登版本行，08f1a40 收尾时漏登）：f6c43c4 批 1 三处小重复收敛公共工具（round1 三处私有副本 → common/utils/Numbers.round1；operator() 六处 "user:"+userId 副本 → common/utils/Operators.user，AdminFoodService 无参 operator() 管理员用户名不同语义裁定保留；CORS origin env 解析双份 → common/utils/CorsOrigins.parse，过滤语义保留调用方本层）；641034b 批 2 拆汇总职责（新建 DietSummaryService 承接 summary() 整方法，DietRecordService 删 UserBodyMapper/CyclePlanService/Taper532Service 三依赖回归 CRUD+按日分组+hasRecord 单一职责，跨调网 Cycle/Taper 单向依赖零回边 DAG 无环，DietController 委派 /diet/summary）；守恒校验已由 B-T03 MacroConsistencyValidator 收口无需再拆；DietRecordServiceTest 15→11 + 新增 DietSummaryServiceTest 5 用例原样迁移，136 用例全绿，状态置已完成 |
+| v1.22 | 2026-09-13 | —（未提交） | B-T22 执行完成：模式真源裁定档案 profile.mode——bodyStore 新增 currentMode（未建档默认 532）/isCycleMode 派生 getter，summary.mode 显示源废止，home:43/record:75（summary.mode===2）与 mine:50/mode-select:26（profile?.mode ?? 1）双源四页归一；空态三分支收敛 dietStore.showBodyEmpty/showCycleEmpty（summary.recorded=false 按档案 recorded 与 isCycleMode 分流），home/record 双页内联判定删除改委派，home 页 loaded 前置随 noProfile getter 内聚吸收；record:177 直引 store getter 与 showMealEmpty 页独有口径裁定保留；vue-tsc 零错误、双源检索清零，单提交 15d02c5，状态置已完成 |
