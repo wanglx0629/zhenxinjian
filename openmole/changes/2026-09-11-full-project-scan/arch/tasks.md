@@ -46,7 +46,7 @@
 | B-T32 | ARCH-边界-002 | 白名单精确匹配 + Token 存储评估 | 低 | 已完成 |
 | B-T33 | ARCH-边界-003 | 埋点接口限流 | 低 | 已完成 |
 | B-T34 | ARCH-边界-008 | 小程序发布就绪性补齐（隐私/升级） | 低 | 已完成 |
-| B-T35 | ARCH-演进-006 | tools 路径解耦 + 临时残渣清理 | 低 | 未开始 |
+| B-T35 | ARCH-演进-006 | tools 路径解耦 + 临时残渣清理 | 低 | 已完成 |
 | B-T36 | ARCH-演进-009 | 微信 token 内存态约束登记 ADR | 低 | 未开始 |
 
 状态说明：**未开始** / 进行中 / 已完成。共 36 个任务（高 12 / 中 16 / 低 8）。
@@ -968,7 +968,7 @@
 | --- | --- |
 | 追溯 | ARCH-演进-006（演进，低） |
 | 目标 | 工具脚本路径改环境变量/相对定位；`.gitignore` 补 `!*.example` 豁免；清理根目录 tmp-* 残渣与 `.codegraph/` 空壳 |
-| 状态 | 未开始 |
+| 状态 | 已完成 |
 
 步骤：
 
@@ -1036,3 +1036,9 @@
 | v1.27 | 2026-09-13 | —（未提交） | B-T27 执行完成：提醒推送分钟全等改窗口补偿——窗口回看 2 分钟 [当前-2, 当前]（不采 ±2 提前推违反到点语义）；scanDueReminders(String) 改 List<String> IN 匹配规避跨零点字典序问题；hitMealType 单餐改 hitMeals 多餐全量返回修掉「先匹配餐去重跳过后另一餐丢失」暗坑；MealHit record 携到点日归属（23:59 提醒 00:01 补发归昨日，I12 按到点日去重防跨零点重复下发）；去重保持成功口径失败随窗口自然重试 ≤3 次有界，覆盖调度漏扫+瞬时失败两类漏发；ReminderPushTaskTest 新增 4 用例（上分钟补发/窗口外不命中/多餐同窗/失败重试成功），mvn test 141 用例全绿，单提交，状态置已完成 |
 | v1.28 | 2026-09-13 | —（未提交） | B-T28 执行完成：JWT 密钥门禁改内容检测——application.yml 明文默认密钥改 `${JWT_SECRET:}` 空占位强制注入；SecurityStartupChecker 去 prod profile 依赖改内容门禁（WEAK_SECRET_FEATURE = "change-in" 子串检测覆盖历史默认及变体 + UTF-8 字节 <32 拒，任何环境一律拒启，CORS * 门禁保持 prod 强制职责分离）；application-dev.yml.example 补 jwt 段（本机默认值 + 非本机必须注入注释），本机 gitignored application-dev.yml 同步补段保启动不断；新建 SecurityStartupCheckerTest 8 用例（空白/过短/历史默认/变体/非 prod 命名仍拒/强密钥放行/prod CORS 拒/非 prod CORS 放行），mvn test 149 用例全绿，单提交，状态置已完成 |
 | v1.29 | 2026-09-13 | —（未提交） | B-T29 执行完成：小程序全局样式抽象——App.vue 新增非 scoped 全局样式块（page 底色/文字色/字体 + .panel/.panel-title/.btn-primary 三类单一真源）；12 页处理：7 页直接删除一致副本（body/profile、body/result、cycle/plan、cycle/setting、food/custom-edit、menstrual/index、taper/plan），3 页漂移保留加注释（record .panel-title 20rpx/food .panel 28rpx+.panel-title 20rpx/guide .btn-primary 缺 width:100%），2 页删除一致副本（weight、expire）；.modal* 三变体漂移大裁定不全局化；页面模板 class 引用零改动；超大页拆分经前序任务已收敛裁定期望达成不强制拆分；vue-tsc 零错误 + build:mp-weixin 构建绿，状态置已完成 |
+| v1.30 | 2026-09-13 | —（未提交） | B-T30 执行完成（补登版本行，dc78408 收尾时漏登）：MRD-PRD 三路核对（git ls-files / git log --all --full-history / git ls-tree ee2a2fa）裁定从未被 git 追踪，扫描证据不实无需 git rm -r；.gitignore 新增「原型需求产物」段 MRD-PRD/ 防复发；代码引用仅 FoodLibraryInitializer.java:38 注释来源标注不依赖目录；后端 mvn test 全绿；目录保留磁盘本地归档，状态置已完成 |
+| v1.31 | 2026-09-13 | —（未提交） | B-T31 执行完成（补登版本行，09659ac 收尾时漏登）：users 345→127 行拆 UserEditDialog+UserDetailDrawer、foods 270→149 行拆 FoodEditDialog（view/<name>/components/ 就近落位，defineExpose open(row?) + @saved 契约，逐字迁移零行为变更）；dashboard echarts 全量改按需五项注册；echarts chunk 1,039.24→486.08 kB/-53.2%（gzip -52.5%），vue-tsc + vite build 双绿，状态置已完成 |
+| v1.32 | 2026-09-13 | —（未提交） | B-T32 执行完成（补登版本行，74de084 收尾时漏登）：AUTH_SKIP_URLS 子串匹配改去 query 全等精确匹配（兼容未来 cache-busting 参数，调用方两处精确路径行为不变）；Token 存储评估裁定保持 localStorage（无 XSS 面 + sessionStorage 标签页隔离 UX 退化 + 同标签 XSS 同样可读增益有限 + 后端 ADMIN 强制/JWT 过期/滑动续期纵深已具备）；vue-tsc + vite build 零错误，状态置已完成 |
+| v1.33 | 2026-09-13 | —（未提交） | B-T33 执行完成（补登版本行，7014aa0 收尾时漏登）：/track/events 改 Redis 固定窗口计数限流——登录按 u:{userId}/未登录按 ip:{clientIp}（X-Forwarded-For 首跳兜底 getRemoteAddr），30 批次/分钟/维度（正常水位 ≤6，5 倍余量）；超阈值抛 429 端上整批保留窗口过期自然恢复不丢数据；RedisUtils.incrementTrackRate + yml 配置段与登录限流同风格；TrackEventServiceTest 5→9 用例，mvn test 153 用例全绿，状态置已完成 |
+| v1.34 | 2026-09-13 | —（未提交） | B-T34 执行完成（补登版本行，2feb0b6 收尾时漏登）：小程序发布就绪三件套——vite.config.ts 新增 manifestAppidEnvPlugin 内存改写 mp-weixin.appid（VITE_MP_WEIXIN_APPID 环境注入，不落盘）；manifest.json __usePrivacyCheck__: true + App.vue onLaunch initPrivacyAuth 官方隐私弹窗；checkAppUpdate getUpdateManager 版本升级检查；mine showPrivacy 微信端改 openPrivacyContract；vue-tsc 零错误 + build:mp-weixin 双轮实证，状态置已完成（顺带修正索引表 B-T30~B-T33 漏登行） |
+| v1.35 | 2026-09-13 | —（未提交） | B-T35 执行完成：tools 路径环境解耦两批提交（957969b/2ae3498）——批 1 jdk25/mvn25/run-sql 三脚本改「环境变量优先→本机默认兜底→缺失报错提示」三级解析（ZXJ_JDK25_HOME / ZXJ_MYSQL_CONNECTOR，校验目标存在缺失即明确报错；jdk25.cmd 无 setlocal 写回变量供同会话继承）；演练实证旧路径已腐烂——JDK25 真身 D:\App\Java\jdk-25.0.4.1 版本化目录（旧 D:\App\java\25 不存在）、Maven 真身 3.9.15（help:evaluate 实证），tools/README 与 env/README 的 JDK 布局/Maven 版本/E 盘符三处过时事实同步修正；批 2 .gitignore 补 !tools/**/*.example 豁免 + db.local.properties.example 模板入库（check-ignore 双向实证：example 可入库、真实凭据仍忽略）；tmp-* 经 Glob 实证磁盘已不存在规则保留防复发、.codegraph/.gitignore 裁定保留系有意守卫非残渣；演练 mvn25 -version 输出 25.0.4.1、jdk25 切换成功、run-sql change0 全链 SKIP，状态置已完成 |
