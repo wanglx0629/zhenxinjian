@@ -141,6 +141,9 @@ public final class CommonConstant {
     /** 埋点单批上报上限 */
     public static final int TRACK_BATCH_MAX_SIZE = 50;
 
+    /** 埋点上报限流窗口（秒，固定窗口计数） */
+    public static final long TRACK_RATE_WINDOW_SECONDS = 60L;
+
     /** 埋点扩展字段最大长度 */
     public static final int TRACK_EXTRA_MAX_LENGTH = 512;
 

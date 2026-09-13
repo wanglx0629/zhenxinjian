@@ -44,7 +44,7 @@
 | ARCH-模块化-002 | 模块化 | 低 | 已消除 |
 | ARCH-模块化-003 | 模块化 | 低 | 已消除 |
 | ARCH-边界-002 | 边界 | 低 | 已消除 |
-| ARCH-边界-003 | 边界 | 低 | 未清除 |
+| ARCH-边界-003 | 边界 | 低 | 已消除 |
 | ARCH-边界-008 | 边界 | 低 | 未清除 |
 | ARCH-演进-006 | 演进 | 低 | 未清除 |
 | ARCH-演进-009 | 演进 | 低 | 未清除 |
@@ -515,7 +515,7 @@
 | 根因 | 埋点优先可用性未设防 |
 | 影响 | 统计污染 + 写库压力 |
 | 修复建议 | 加按用户/IP 的简单限流（Redis 计数） |
-| 状态 | 未清除 |
+| 状态 | 已消除（2026-09-13 B-T33：Redis 固定窗口计数限流——维度登录按 u:{userId}/未登录按 ip:{clientIp}（TrackController.resolveClientIp 取 X-Forwarded-For 首跳兜底 getRemoteAddr），阈值 30 批次/分钟/维度（端上正常水位 ≤6，5 倍余量），key zhenxinjian:track:rate:{dimension} 首击 EXPIRE 60s；超阈值抛 429 复用 TOO_MANY_REQUESTS_CODE——端上按可重试失败整批保留，窗口过期下次 flush（≤10s）自然恢复不丢数据；配置走 zhenxinjian.redis.track-rate-prefix/track-rate-limit-per-minute 与登录限流同构；TrackEventServiceTest 5→9 用例（超限 429 不落库/窗口过期恢复/用户维度/IP 维度），mvn test 153 用例全绿） |
 
 ### ARCH-边界-008 — 小程序发布就绪性缺口（隐私/升级）
 
@@ -599,3 +599,4 @@
 | v1.31 | 2026-09-13 | —（未提交） | B-T30 完成，ARCH-模块化-002 置"已消除"（扫描证据裁定有误：`git ls-files`/`git log --all --full-history`/`git ls-tree ee2a2fa` 三路核对 MRD-PRD 从未被 git 追踪，无需 `git rm -r`；.gitignore 新增 `MRD-PRD/` 防复发规则（原型需求产物不入库，仅保留 PRD 文档在 docs/prd/）；代码引用仅 FoodLibraryInitializer.java:38 注释来源标注不依赖目录；mvn test 全绿零影响；目录保留磁盘本地归档含 PRD 文档与高保真原型 HTML）。余 6 条未清除 |
 | v1.32 | 2026-09-13 | —（未提交） | B-T31 完成，ARCH-模块化-003 置"已消除"（users 345→127 行拆 UserEditDialog+UserDetailDrawer、foods 270→149 行拆 FoodEditDialog，组件落位 view/<name>/components/，defineExpose open(row?) + @saved 契约，字段/校验/交互逐字迁移零行为变更；dashboard echarts 全量改按需 echarts/core 五项注册；vue-tsc + vite build 双绿；echarts chunk 1,039.24→486.08 kB/-53.2%，gzip 345.09→163.89 kB/-52.5%，总 JS 约 2,302→1,749 kB）。余 5 条未清除 |
 | v1.33 | 2026-09-13 | —（未提交） | B-T32 完成，ARCH-边界-002 置"已消除"（AUTH_SKIP_URLS 子串匹配改去 query 全等精确匹配，未来含白名单子串 URL 不再误跳过；Token 存储评估裁定保持 localStorage——无 XSS 注入面 + sessionStorage 标签页隔离 UX 退化 + 同标签内 XSS 同样可读换介质增益有限 + 后端 ADMIN 强制/JWT 过期/滑动续期纵深已具备；vue-tsc + vite build 零错误零行为变更）。余 4 条未清除 |
+| v1.34 | 2026-09-13 | —（未提交） | B-T33 完成，ARCH-边界-003 置"已消除"（/track/events permitAll 无限流可刷量写库，改 Redis 固定窗口计数限流：维度登录按 u:{userId}/未登录按 ip:{clientIp}（resolveClientIp 取 X-Forwarded-For 首跳兜底 getRemoteAddr），阈值 30 批次/分钟/维度——端上正常水位 ≤6 批次/分钟 5 倍余量；key zhenxinjian:track:rate:{dimension} INCR 首击 EXPIRE 60s 与 recordLoginFail 同构；超阈值抛 429 复用 TOO_MANY_REQUESTS_CODE，端上按可重试失败整批保留窗口过期自然恢复不丢数据；配置 zhenxinjian.redis.track-rate-prefix/track-rate-limit-per-minute 走 yml 与登录限流同风格；TrackEventServiceTest 5→9 用例新增超限 429 不落库/窗口过期恢复链式桩/用户维度/IP 维度，mvn test 153 用例全绿）。余 3 条未清除 |

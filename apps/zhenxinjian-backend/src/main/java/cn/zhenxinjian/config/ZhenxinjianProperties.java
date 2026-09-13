@@ -43,6 +43,10 @@ public class ZhenxinjianProperties {
         private int loginFailMax = 10;
         /** 登录失败计数 TTL（分钟，默认 15） */
         private long loginFailTtlMinutes = 15;
+        /** 埋点限流计数前缀 */
+        private String trackRatePrefix;
+        /** 埋点上报限流阈值（批次/分钟/维度，默认 30；端上正常水位 ≤6 批次/分钟，5 倍余量） */
+        private int trackRateLimitPerMinute = 30;
     }
 
     @Data

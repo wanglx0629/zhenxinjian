@@ -65,6 +65,10 @@ zhenxinjian:
     login-fail-max: 10
     # 失败计数过期时间（分钟）
     login-fail-ttl-minutes: 15
+    # 埋点限流计数前缀（维度：登录用户 userId / 未登录 IP）
+    track-rate-prefix: "zhenxinjian:track:rate:"
+    # 埋点上报限流阈值（批次/分钟/维度；端上正常水位 ≤6，5 倍余量防刷量写库）
+    track-rate-limit-per-minute: 30
   cache:
     warmup-enabled: true
     max-value-bytes: 51200

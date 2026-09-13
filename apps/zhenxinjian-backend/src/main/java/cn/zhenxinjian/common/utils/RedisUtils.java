@@ -1,5 +1,6 @@
 package cn.zhenxinjian.common.utils;
 
+import cn.zhenxinjian.common.constant.CommonConstant;
 import cn.zhenxinjian.config.ZhenxinjianProperties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -97,5 +98,20 @@ public class RedisUtils {
     public void clearLoginFail(String username) {
         String key = zhenxinjianProperties.getRedis().getLoginFailPrefix() + username;
         redisTemplate.delete(key);
+    }
+
+    /**
+     * 埋点限流计数（固定窗口：INCR 后首击设 TTL，返回窗口内当前计数）
+     *
+     * @param dimension 限流维度（u:{userId} 登录用户 / ip:{clientIp} 未登录）
+     * @return 窗口内已计数（含本次）；窗口过期 key 消失后从 1 重新计
+     */
+    public long incrementTrackRate(String dimension) {
+        String key = zhenxinjianProperties.getRedis().getTrackRatePrefix() + dimension;
+        Long count = redisTemplate.opsForValue().increment(key);
+        if (count != null && count == 1L) {
+            redisTemplate.expire(key, CommonConstant.TRACK_RATE_WINDOW_SECONDS, TimeUnit.SECONDS);
+        }
+        return count == null ? 0L : count;
     }
 }

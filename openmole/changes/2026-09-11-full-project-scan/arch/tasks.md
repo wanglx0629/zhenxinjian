@@ -910,7 +910,7 @@
 | --- | --- |
 | 追溯 | ARCH-边界-003（边界，低） |
 | 目标 | `/track/events` 增加按用户/IP 的 Redis 计数限流 |
-| 状态 | 未开始 |
+| 状态 | 已完成 |
 
 步骤：
 
@@ -922,6 +922,16 @@
 6. 增量执行：一批提交。
 7. 回归测绿：后端 `mvn -q test` 全绿；超限场景手工验证。
 8. 用户确认：展示限流实现 diff，获确认后收尾（写操作门禁）。
+
+执行记录（2026-09-13 完成）：
+
+1. 确认坏味道：`application.yml:80` `/track/events` permitAll 匿名开放；`TrackEventService.saveBatch` 仅校验单批 ≤50 与事件白名单，无频率限制可刷量写库。
+2. 影响分析：维度裁定登录按 `u:{userId}`（同 IP 多用户互不挤占）、未登录按 `ip:{clientIp}`（游客/引导页上报）；阈值裁定 30 批次/分钟/维度——端上正常水位 ≤6 批次/分钟（10s 定时 flush + 满 20 条即时 flush + 冷启动满队列 200 条 4 批），5 倍余量正常流量零触限；key 设计 `zhenxinjian:track:rate:{dimension}` 固定窗口 60s TTL；拒绝契约裁定抛 429（复用既有 TOO_MANY_REQUESTS_CODE）——端上按可重试失败整批保留，窗口过期后下次 flush（≤10s）自然恢复不丢数据，优于静默丢弃（防 abuse 窗口内正常用户突发被无声吞掉）。
+3. 测试安全网：TrackEventServiceTest 5→9 用例——新增超限 429 不落库 / 窗口过期恢复（thenReturn(31L).thenReturn(1L) 链式桩）/ 登录用户 u:42 维度 / 未登录 ip:203.0.113.8 维度四用例，存量五用例签名同步（saveBatch 增 clientIp 参）。
+4. 架构模式：Redis 固定窗口计数器（INCR 首击 EXPIRE 60s，与 recordLoginFail 同构）。
+5. 迁移执行：一批提交——RedisUtils 新增 incrementTrackRate(dimension) 返回窗口内计数；ZhenxinjianProperties.Redis 新增 trackRatePrefix/trackRateLimitPerMinute=30 + application.yml 同名配置段；CommonConstant 新增 TRACK_RATE_WINDOW_SECONDS=60L、ExceptionConstant 新增 TRACK_RATE_LIMITED 文案；TrackEventService 注入 RedisUtils+ZhenxinjianProperties，saveBatch 首行 checkRateLimit 超阈值抛 BusinessException(429)；TrackController 新增 resolveClientIp（X-Forwarded-For 首跳兜底 getRemoteAddr）传参。
+6. 回归测绿：mvn test 153 用例全绿（149 + 新增 4）。
+7. 用户确认：按「重新推送，往后所有任务自动化按推荐方案执行，无需再中途问我」既有指令提交并推送（写操作门禁通过）。
 
 ### B-T34 — 小程序发布就绪性补齐（隐私/升级）
 

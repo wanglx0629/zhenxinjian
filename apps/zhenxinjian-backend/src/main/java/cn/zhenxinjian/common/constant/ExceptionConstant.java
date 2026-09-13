@@ -140,6 +140,9 @@ public final class ExceptionConstant {
     /** 40901 埋点事件非法 */
     public static final String TRACK_EVENT_INVALID = "埋点事件非法";
 
+    /** 429 埋点上报限流（按用户/IP 固定窗口计数超限） */
+    public static final String TRACK_RATE_LIMITED = "埋点上报过于频繁，请稍后再试";
+
     /** 40902 统计参数非法 */
     public static final String STATS_PARAM_INVALID = "统计参数非法";
 
