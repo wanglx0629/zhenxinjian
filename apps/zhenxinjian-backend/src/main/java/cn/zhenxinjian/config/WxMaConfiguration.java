@@ -13,6 +13,9 @@ import org.springframework.context.annotation.Configuration;
 /**
  * 微信小程序配置
  * appid/secret 存于 application-dev.yml（不入库）；未配置时跳过 Bean 注册，登录接口返回 40102
+ * WxMaDefaultConfigImpl 为内存 token 实现，一期单实例部署约束见 ADR 0005
+ * （docs/knowledge/arch/adr/0005-微信Token内存态与单实例部署约束.md），
+ * 多实例扩容前须切换 WxMaRedisConfigImpl / WxMaRedissonConfigImpl 类 Redis 集中存储实现
  * 作者: wanglx
  */
 @Configuration
