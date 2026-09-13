@@ -38,7 +38,7 @@
 | B-T24 | ARCH-内聚-007 | 微信登录流程下沉 store/user.ts | 中 | 已完成 |
 | B-T25 | ARCH-层次-002 | 文档归属收敛（docs/ 唯一真源） | 中 | 已完成 |
 | B-T26 | ARCH-边界-001 | 自定义食物列表加上限/分页 | 中 | 已完成 |
-| B-T27 | ARCH-边界-006 | 提醒推送窗口匹配 + 漏发补偿 | 中 | 未开始 |
+| B-T27 | ARCH-边界-006 | 提醒推送窗口匹配 + 漏发补偿 | 中 | 已完成 |
 | B-T28 | ARCH-边界-007 | JWT 密钥门禁改内容检测 | 中 | 未开始 |
 | B-T29 | ARCH-模块化-001 | 小程序全局样式抽象 + 超大页拆分 | 低 | 未开始 |
 | B-T30 | ARCH-模块化-002 | 原型小程序工程移出版本库 | 低 | 未开始 |
@@ -736,7 +736,7 @@
 | --- | --- |
 | 追溯 | ARCH-边界-006（边界，中） |
 | 目标 | 分钟全等匹配改窗口匹配（如 ±2 分钟未发即补），发送日志去重，漏发可补偿 |
-| 状态 | 未开始 |
+| 状态 | 已完成 |
 
 步骤：
 
@@ -748,6 +748,16 @@
 6. 增量执行：一批提交（建议在 B-T11 完成后执行，同文件）。
 7. 回归测绿：后端 `mvn -q test` 全绿；模拟调度延迟场景验证补发。
 8. 用户确认：展示窗口匹配与去重 diff，获确认后收尾（写操作门禁）。
+
+执行记录（2026-09-13 完成）：
+
+1. 确认坏味道：核对 ReminderPushTask 分钟全等（`hhmm.equals(xTime)`）与类注释自述「失败仅写日志不重试」成立——扫描延迟/重启跨过分钟该分钟提醒永久丢失。
+2. 影响分析：窗口宽度裁定回看 2 分钟（[当前-2, 当前] 三分钟 3 次扫描机会；不采 ±2 提前推送——提前推违反「到点未记录才推送」语义）；去重键裁定（userId + 到点日 + mealType）保持 hasSuccessPushToday 成功口径，失败随窗口内后续扫描自然重试 ≤3 次有界，同时覆盖调度漏扫与瞬时失败两类漏发；发送日志表查询压力不变（判定链逐餐一次 selectCount，索引沿用）。
+3. 测试安全网：ReminderPushTaskTest 新增 4 用例——上 1 分钟命中补发 / 3 分钟前窗口外不命中 / 早+午多餐同窗逐餐各发一条 / 失败下次扫描重试成功（doThrow().doNothing() 链式桩）；ReminderServiceTest 窗口签名适配。
+4. 架构模式：窗口补偿——scanDueReminders(String hhmm) 改 scanDueReminders(List<String> hhmmWindow) IN 匹配（分钟串枚举天然规避跨零点字典序与范围拼接问题）；hitMealType 单餐改 hitMeals 多餐全量返回（修掉「先匹配餐被去重跳过后另一餐丢失」暗坑）。
+5. 迁移执行：单点改造一批提交——窗口构建 buildWindow 保留 LocalDateTime 日期信息，MealHit record 携带到点日归属（23:59 提醒 00:01 补发归昨日记账，I12 按到点日去重防跨零点重复下发）；processOne 参数 today 改 remindDate 按命中到点日记账；类注释口径同步重写。
+6. 回归：mvn test 141 用例全绿（137 + 新增 4）；失败重试有界性由窗口滑出自然终止（滑出后 SQL 不再命中）。
+7. 用户确认：按「重新推送，往后所有任务自动化按推荐方案执行，无需再中途问我」既有指令提交并推送（写操作门禁通过）。
 
 ### B-T28 — JWT 密钥门禁改内容检测
 
@@ -953,3 +963,4 @@
 | v1.24 | 2026-09-13 | —（未提交） | B-T24 执行完成：微信登录流程下沉——guide/expire 双页「uni.login → [err,res] 兼容取 code → wechatLogin(guestKey) → track → toast → 400ms 跳首页」约 30 行逐字复制收敛 store/user.ts loginByWechat(opts?) 单一入口（返回 Promise<boolean>，tuple 兼容取值保留 store 层，successText/failText 参数化保留双页并集文案）；双页删副本改 await store 调用只管 loading 与 canSubmit 节流；handleGuest 游客登录单页无副本裁定保留页内 track(LOGIN_GUEST)；uni.login 全库检索唯 store 一处，vue-tsc 零错误 + build:mp-weixin 绿，单提交 644b269，状态置已完成 |
 | v1.25 | 2026-09-13 | —（未提交） | B-T25 执行完成：文档归属收敛——原拼写错误目录（dosc 前缀）git mv 更名 docsFile 保历史，全库 32 文件 48 处引用批量修正（AGENTS/Constitutions/README + docs 知识库 8 件 + openspec 归档 7 件 + sql 注释 9 件 + 代码注释 3 件 + openmole 2 件），grep 旧名清零；新建 .gitattributes 归属标记（docsFile/** attribution=project-narrative + 提交约定 [docsFile] 标记成文）；内容去重裁定——docsFile 叙述性文档与 docs/ Harness 约束资产归属清晰非副本不合并；zhenxinjian.wiki 本地不存在裁定出本仓库范围；mvn compile + vue-tsc 双绿，单提交，状态置已完成 |
 | v1.26 | 2026-09-13 | —（未提交） | B-T26 执行完成：自定义食物列表有界化——listMine 纯 selectList 无 LIMIT 无分页（全库唯一真实无上限查询）加 `.last("LIMIT " + CommonConstant.CUSTOM_FOOD_MINE_LIMIT)`；消费方裁定小程序端 listMyCustomFoods → fetchMyCustom 一次性全量渲染非滚动分页，采 LIMIT 有界查询不改 API；CommonConstant 新增 CUSTOM_FOOD_MINE_LIMIT = 200 单一真源（不复用 MAX_PAGE_SIZE=100，列表缩放特征不同）；新增 listMine_boundedByLimit 测试（TableInfoHelper.initTableInfo 幂等初始化镜像 WeightServiceTest 模式，ArgumentCaptor 断言 SQL 片段含 LIMIT）；mvn test 137 用例全绿 + 前端零改动 vue-tsc 零错误，单提交，状态置已完成 |
+| v1.27 | 2026-09-13 | —（未提交） | B-T27 执行完成：提醒推送分钟全等改窗口补偿——窗口回看 2 分钟 [当前-2, 当前]（不采 ±2 提前推违反到点语义）；scanDueReminders(String) 改 List<String> IN 匹配规避跨零点字典序问题；hitMealType 单餐改 hitMeals 多餐全量返回修掉「先匹配餐去重跳过后另一餐丢失」暗坑；MealHit record 携到点日归属（23:59 提醒 00:01 补发归昨日，I12 按到点日去重防跨零点重复下发）；去重保持成功口径失败随窗口自然重试 ≤3 次有界，覆盖调度漏扫+瞬时失败两类漏发；ReminderPushTaskTest 新增 4 用例（上分钟补发/窗口外不命中/多餐同窗/失败重试成功），mvn test 141 用例全绿，单提交，状态置已完成 |

@@ -431,7 +431,7 @@
 | 根因 | 推送按"恰好那一分钟"设计，未考虑调度抖动 |
 | 影响 | 用户提醒静默丢失，与"到点未记录才推送"承诺不符 |
 | 修复建议 | 改窗口匹配（如命中 ±2 分钟未发即补）+ 发送日志去重；或由调度器精确触发 |
-| 状态 | 未清除 |
+| 状态 | 已消除（B-T27 于 2026-09-13 完成，单提交——分钟全等改窗口补偿：匹配窗口回看 2 分钟 [当前-2, 当前]，调度延迟/重启跨分钟在窗口内补发；scanDueReminders(String) 改 List<String> IN 匹配（分钟串枚举天然规避跨零点字典序问题）；hitMealType 单餐改 hitMeals 多餐全量返回，修掉「先匹配餐被去重跳过后另一餐丢失」暗坑；MealHit record 携带到点日归属（23:59 提醒 00:01 补发归昨日记账，I12 按到点日去重防跨零点重复下发）；去重保持 hasSuccessPushToday 成功口径，失败随窗口内后续扫描自然重试 ≤3 次有界，调度漏扫与瞬时失败两类漏发同治；ReminderPushTaskTest 新增 4 用例（上分钟补发/窗口外不命中/多餐同窗各发/失败重试成功），mvn test 141 用例全绿） |
 
 ### ARCH-边界-007 — JWT 弱默认密钥仅靠 prod 门禁
 
@@ -593,3 +593,4 @@
 | v1.25 | 2026-09-13 | —（未提交） | B-T24 完成，ARCH-内聚-007 置"已消除"（微信登录流程下沉——guide/expire 双页「uni.login → [err,res] 兼容取 code → wechatLogin(guestKey) → track → toast → 400ms 跳首页」约 30 行逐字复制收敛 store/user.ts loginByWechat(opts?) 单一入口返回 Promise<boolean>，成功/失败文案 opts 参数化保留双页并集，tuple 兼容取值保留 store 层；双页删副本改 await store 调用只管 loading 与 canSubmit 节流；handleGuest 游客登录单页无副本裁定保留页内 track(LOGIN_GUEST)；uni.login 全库检索唯 store 一处，vue-tsc + build:mp-weixin 全绿，零行为变更）。余 12 条未清除 |
 | v1.26 | 2026-09-13 | —（未提交） | B-T25 完成，ARCH-层次-002 置"已消除"（原拼写错误目录（dosc 前缀）git mv 更名 docsFile 保历史，32 文件 48 处引用批量修正 grep 旧名清零；.gitattributes 归属标记 docsFile/** attribution=project-narrative + [docsFile] 提交约定成文；docsFile 叙述文档与 docs/ Harness 资产裁定非副本不合并；wiki 本地不存在出范围；mvn compile + vue-tsc 双绿）。余 11 条未清除 |
 | v1.27 | 2026-09-13 | —（未提交） | B-T26 完成，ARCH-边界-001 置"已消除"（listMine 无上限 selectList 加 `.last("LIMIT " + CommonConstant.CUSTOM_FOOD_MINE_LIMIT)` 有界查询，COMMON 常量 CUSTOM_FOOD_MINE_LIMIT = 200 单一真源不复用 MAX_PAGE_SIZE；消费方裁定一次性全量渲染非滚动分页采 LIMIT 不改 API；新增 listMine_boundedByLimit 测试 TableInfoHelper 幂等初始化 + ArgumentCaptor 断言 SQL 含 LIMIT；mvn test 137 用例全绿，对齐 AGENTS.md「无上限 selectList」Never 条款）。余 10 条未清除 |
+| v1.28 | 2026-09-13 | —（未提交） | B-T27 完成，ARCH-边界-006 置"已消除"（提醒推送分钟全等改窗口补偿：窗口回看 2 分钟 [当前-2, 当前] 调度延迟/重启跨分钟补发；scanDueReminders 改 List<String> IN 匹配规避跨零点字典序；hitMealType 单餐改 hitMeals 多餐全量返回修掉先匹配餐去重跳过后另一餐丢失暗坑；MealHit record 携到点日归属 I12 按到点日去重防跨零点重复下发；失败随窗口自然重试 ≤3 次有界，调度漏扫+瞬时失败同治；新增 4 用例，mvn test 141 用例全绿）。余 9 条未清除 |

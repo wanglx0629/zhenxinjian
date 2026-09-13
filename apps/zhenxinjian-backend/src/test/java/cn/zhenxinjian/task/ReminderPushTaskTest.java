@@ -23,18 +23,21 @@ import java.util.concurrent.Executor;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 /**
  * 三餐提醒推送任务单元测试（无 Spring 容器，Mockito 桩依赖）
- * 覆盖 D4 判定链：模板/服务空转、已推送跳过、已记录跳过、游客跳过、额度 0 跳过、成功下发、微信异常静默
+ * 覆盖 D4 判定链：模板/服务空转、已推送跳过、已记录跳过、游客跳过、额度 0 跳过、成功下发、微信异常静默；
+ * 窗口补偿：上一分钟命中补发、窗口外不命中、多餐同窗逐餐下发、失败随下次扫描有界重试
  * 作者: wanglx
  */
 class ReminderPushTaskTest {
@@ -79,7 +82,7 @@ class ReminderPushTaskTest {
 
     /** 桩定：扫描命中一条，判定链前三关默认放行（未发过/未记录/正式用户有 openid） */
     private void stubDueWithOpenid(UserReminder reminder) {
-        when(reminderService.scanDueReminders(anyString(), anyInt())).thenReturn(List.of(reminder));
+        when(reminderService.scanDueReminders(anyList(), anyInt())).thenReturn(List.of(reminder));
         when(reminderService.hasSuccessPushToday(anyLong(), anyInt(), any())).thenReturn(false);
         when(dietRecordService.hasRecord(anyLong(), any(), anyInt())).thenReturn(false);
         User user = new User();
@@ -110,7 +113,7 @@ class ReminderPushTaskTest {
     void shouldSkipWhenAlreadySentToday() {
         UserReminder reminder = dueReminder(1L);
         when(wxMaServiceProvider.getIfAvailable()).thenReturn(wxMaService);
-        when(reminderService.scanDueReminders(anyString(), anyInt())).thenReturn(List.of(reminder));
+        when(reminderService.scanDueReminders(anyList(), anyInt())).thenReturn(List.of(reminder));
         when(reminderService.hasSuccessPushToday(anyLong(), anyInt(), any())).thenReturn(true);
 
         task.pushDueReminders();
@@ -123,7 +126,7 @@ class ReminderPushTaskTest {
     void shouldSkipWhenMealAlreadyRecorded() {
         UserReminder reminder = dueReminder(1L);
         when(wxMaServiceProvider.getIfAvailable()).thenReturn(wxMaService);
-        when(reminderService.scanDueReminders(anyString(), anyInt())).thenReturn(List.of(reminder));
+        when(reminderService.scanDueReminders(anyList(), anyInt())).thenReturn(List.of(reminder));
         when(reminderService.hasSuccessPushToday(anyLong(), anyInt(), any())).thenReturn(false);
         when(dietRecordService.hasRecord(anyLong(), any(), anyInt())).thenReturn(true);
 
@@ -137,7 +140,7 @@ class ReminderPushTaskTest {
     void shouldSkipGuestWithoutOpenid() {
         UserReminder reminder = dueReminder(1L);
         when(wxMaServiceProvider.getIfAvailable()).thenReturn(wxMaService);
-        when(reminderService.scanDueReminders(anyString(), anyInt())).thenReturn(List.of(reminder));
+        when(reminderService.scanDueReminders(anyList(), anyInt())).thenReturn(List.of(reminder));
         when(reminderService.hasSuccessPushToday(anyLong(), anyInt(), any())).thenReturn(false);
         when(dietRecordService.hasRecord(anyLong(), any(), anyInt())).thenReturn(false);
         User guest = new User();
@@ -191,5 +194,82 @@ class ReminderPushTaskTest {
         verify(reminderService).onPushFail(anyLong(), anyInt(), any(LocalDate.class),
                 anyString(), anyString());
         verify(reminderService, never()).onPushSuccess(anyLong(), anyInt(), any(), anyString());
+    }
+
+    /** 窗口补偿：提醒时间在上 1 分钟（调度延迟错过当分钟）仍命中补发 */
+    @Test
+    void shouldCompensateMissedMinuteWithinWindow() throws WxErrorException {
+        UserReminder reminder = dueReminder(1L);
+        reminder.setBreakfastTime(hhmm(-1));
+        when(wxMaServiceProvider.getIfAvailable()).thenReturn(wxMaService);
+        stubDueWithOpenid(reminder);
+        when(wxMaService.getSubscribeService()).thenReturn(subscribeService);
+
+        task.pushDueReminders();
+
+        verify(subscribeService).sendSubscribeMsg(any());
+        verify(reminderService).onPushSuccess(1L, MealTypeEnum.BREAKFAST.getCode(),
+                LocalDate.now(), TEMPLATE_ID);
+    }
+
+    /** 窗口外不命中：提醒时间在 3 分钟前（滑出 [当前-2, 当前] 窗口）任务侧过滤不下发 */
+    @Test
+    void shouldNotHitOutsideWindow() {
+        UserReminder reminder = dueReminder(1L);
+        reminder.setBreakfastTime(hhmm(-3));
+        when(wxMaServiceProvider.getIfAvailable()).thenReturn(wxMaService);
+        when(reminderService.scanDueReminders(anyList(), anyInt())).thenReturn(List.of(reminder));
+
+        task.pushDueReminders();
+
+        verifyNoInteractions(dietRecordService, userService);
+        verify(reminderService, never()).onPushSuccess(anyLong(), anyInt(), any(), anyString());
+        verify(reminderService, never()).onPushFail(anyLong(), anyInt(), any(), anyString(), anyString());
+    }
+
+    /** 多餐同窗：早餐上 1 分钟 + 午餐当分钟同窗命中，逐餐独立走判定链各发一条 */
+    @Test
+    void shouldProcessBothMealsInSameWindow() throws WxErrorException {
+        UserReminder reminder = dueReminder(1L);
+        reminder.setBreakfastTime(hhmm(-1));
+        reminder.setLunchSwitch(1);
+        reminder.setLunchTime(hhmm(0));
+        when(wxMaServiceProvider.getIfAvailable()).thenReturn(wxMaService);
+        stubDueWithOpenid(reminder);
+        when(wxMaService.getSubscribeService()).thenReturn(subscribeService);
+
+        task.pushDueReminders();
+
+        verify(subscribeService, times(2)).sendSubscribeMsg(any());
+        verify(reminderService).onPushSuccess(1L, MealTypeEnum.BREAKFAST.getCode(),
+                LocalDate.now(), TEMPLATE_ID);
+        verify(reminderService).onPushSuccess(1L, MealTypeEnum.LUNCH.getCode(),
+                LocalDate.now(), TEMPLATE_ID);
+    }
+
+    /** 失败有界重试：当次扫描失败写日志，下次扫描窗口仍覆盖该分钟自然重试并成功 */
+    @Test
+    void shouldRetryFailedPushWithinWindowOnNextScan() throws WxErrorException {
+        UserReminder reminder = dueReminder(1L);
+        when(wxMaServiceProvider.getIfAvailable()).thenReturn(wxMaService);
+        stubDueWithOpenid(reminder);
+        when(wxMaService.getSubscribeService()).thenReturn(subscribeService);
+        WxError error = WxError.builder().errorCode(47003).errorMsg("template unstable").build();
+        doThrow(new WxErrorException(error)).doNothing().when(subscribeService).sendSubscribeMsg(any());
+
+        task.pushDueReminders();
+        task.pushDueReminders();
+
+        verify(subscribeService, times(2)).sendSubscribeMsg(any());
+        verify(reminderService).onPushFail(1L, MealTypeEnum.BREAKFAST.getCode(),
+                LocalDate.now(), TEMPLATE_ID, "errcode=47003, errmsg=template unstable");
+        verify(reminderService).onPushSuccess(1L, MealTypeEnum.BREAKFAST.getCode(),
+                LocalDate.now(), TEMPLATE_ID);
+    }
+
+    /** 当前时间偏移 offset 分钟后的 HH:mm（与任务窗口口径一致） */
+    private String hhmm(int offsetMinutes) {
+        return LocalDateTime.now().plusMinutes(offsetMinutes)
+                .format(DateTimeFormatter.ofPattern("HH:mm"));
     }
 }

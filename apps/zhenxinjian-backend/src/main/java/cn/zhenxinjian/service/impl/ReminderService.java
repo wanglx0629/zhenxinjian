@@ -63,22 +63,22 @@ public class ReminderService {
     private final StringRedisTemplate stringRedisTemplate;
 
     /**
-     * 扫描当前分钟到点的提醒设置（master 开且任一餐开关开且时间一致），供推送任务编排
+     * 扫描窗口内到点的提醒设置（master 开且任一餐开关开且时间在窗口内），供推送任务编排
      *
-     * @param hhmm  当前时间 HH:mm
-     * @param limit 单次扫描条数上限（避免无上限 selectList）
+     * @param hhmmWindow 匹配窗口（HH:mm 分钟串列表，IN 匹配天然规避跨零点字典序问题）
+     * @param limit      单次扫描条数上限（避免无上限 selectList）
      * @return 到点设置列表
      */
-    public List<UserReminder> scanDueReminders(String hhmm, int limit) {
+    public List<UserReminder> scanDueReminders(List<String> hhmmWindow, int limit) {
         return userReminderMapper.selectList(Wrappers.<UserReminder>lambdaQuery()
                 .eq(UserReminder::getMasterSwitch, 1)
                 .and(wrapper -> wrapper
                         .and(b -> b.eq(UserReminder::getBreakfastSwitch, 1)
-                                .eq(UserReminder::getBreakfastTime, hhmm))
+                                .in(UserReminder::getBreakfastTime, hhmmWindow))
                         .or(l -> l.eq(UserReminder::getLunchSwitch, 1)
-                                .eq(UserReminder::getLunchTime, hhmm))
+                                .in(UserReminder::getLunchTime, hhmmWindow))
                         .or(d -> d.eq(UserReminder::getDinnerSwitch, 1)
-                                .eq(UserReminder::getDinnerTime, hhmm)))
+                                .in(UserReminder::getDinnerTime, hhmmWindow)))
                 .last("LIMIT " + limit));
     }
 

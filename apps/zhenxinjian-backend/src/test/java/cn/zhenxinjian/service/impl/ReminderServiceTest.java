@@ -45,14 +45,14 @@ class ReminderServiceTest {
                 new WxMaConfiguration.WxMaProperties(), mock(StringRedisTemplate.class));
     }
 
-    /** 场景：scanDueReminders 透传查询结果（带上限），命中列表原样返回 */
+    /** 场景：scanDueReminders 透传查询结果（窗口 IN 匹配 + 上限），命中列表原样返回 */
     @Test
     void scanDueReminders_passthroughWithLimit() {
         UserReminder hit = new UserReminder();
         hit.setUserId(1L);
         when(userReminderMapper.selectList(any())).thenReturn(List.of(hit));
 
-        List<UserReminder> result = service.scanDueReminders("08:30", 500);
+        List<UserReminder> result = service.scanDueReminders(List.of("08:28", "08:29", "08:30"), 500);
 
         assertSame(hit, result.get(0));
         verify(userReminderMapper).selectList(any());
