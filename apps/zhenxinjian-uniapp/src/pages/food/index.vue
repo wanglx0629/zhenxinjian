@@ -293,6 +293,7 @@ onReachBottom(() => {
   margin-bottom: 20rpx;
 }
 
+/* B-T29 漂移覆盖：padding 28rpx 区别于全局 32rpx */
 .panel {
   background: $zhenxinjian-white;
   border: 1rpx solid $zhenxinjian-border;
@@ -323,6 +324,7 @@ onReachBottom(() => {
   align-items: center;
 }
 
+/* B-T29 漂移覆盖：margin-bottom 20rpx 区别于全局 24rpx */
 .panel-title {
   font-size: 30rpx;
   font-weight: 600;

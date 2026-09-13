@@ -24,4 +24,32 @@ page {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
     sans-serif;
 }
+
+/* 公共样式层（B-T29）：面板/面板标题/主按钮全局单一真源；
+   页面漂移属性经 scoped 覆盖（scoped 选择器优先级高于全局），漂移覆盖处附注释 */
+.panel {
+  background: $zhenxinjian-white;
+  border: 1rpx solid $zhenxinjian-border;
+  border-radius: 16rpx;
+  padding: 32rpx;
+  margin-bottom: 24rpx;
+}
+
+.panel-title {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: $zhenxinjian-text;
+  margin-bottom: 24rpx;
+  display: block;
+}
+
+.btn-primary {
+  width: 100%;
+  height: 88rpx;
+  line-height: 88rpx;
+  background: $zhenxinjian-primary;
+  color: $zhenxinjian-white;
+  border-radius: 12rpx;
+  font-size: 30rpx;
+}
 </style>

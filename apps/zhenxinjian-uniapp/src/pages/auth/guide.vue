@@ -120,6 +120,7 @@ async function handleGuest() {
   gap: 24rpx;
 }
 
+/* B-T29 漂移覆盖：无 width:100%（flex 布局自动撑满） */
 .btn-primary {
   height: 88rpx;
   line-height: 88rpx;

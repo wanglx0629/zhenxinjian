@@ -40,7 +40,7 @@
 | B-T26 | ARCH-边界-001 | 自定义食物列表加上限/分页 | 中 | 已完成 |
 | B-T27 | ARCH-边界-006 | 提醒推送窗口匹配 + 漏发补偿 | 中 | 已完成 |
 | B-T28 | ARCH-边界-007 | JWT 密钥门禁改内容检测 | 中 | 已完成 |
-| B-T29 | ARCH-模块化-001 | 小程序全局样式抽象 + 超大页拆分 | 低 | 未开始 |
+| B-T29 | ARCH-模块化-001 | 小程序全局样式抽象 + 超大页拆分 | 低 | 已完成 |
 | B-T30 | ARCH-模块化-002 | 原型小程序工程移出版本库 | 低 | 未开始 |
 | B-T31 | ARCH-模块化-003 | 管理后台视图组件拆分 + echarts 按需 | 低 | 未开始 |
 | B-T32 | ARCH-边界-002 | 白名单精确匹配 + Token 存储评估 | 低 | 未开始 |
@@ -794,7 +794,7 @@
 | --- | --- |
 | 追溯 | ARCH-模块化-001（模块化，低） |
 | 目标 | `.panel/.btn-primary/.modal` 等公共样式提取全局类；7 个 >400 行页面按组件拆分 |
-| 状态 | 未开始 |
+| 状态 | 已完成 |
 
 步骤：
 
@@ -806,6 +806,16 @@
 6. 增量执行：样式与拆页分开提交，逐页推进。
 7. 回归测绿：`npm run check` 绿；视觉回归清单对照无走样。
 8. 用户确认：展示样式收敛与拆页 diff，获确认后收尾（写操作门禁）。
+
+执行记录（2026-09-13 完成）：
+
+1. 确认坏味道与影响分析：12+ 页面 `.panel`/`.panel-title`/`.btn-primary` 三类公共样式各写一份成立；`.modal*` 三变体漂移大（padding/margin/color 各异）裁定不全局化保留页内。逐页比对裁定——7 页（body/profile、body/result、cycle/plan、cycle/setting、food/custom-edit、menstrual/index、taper/plan）三类样式与全局定义完全一致可直接删除；weight/index 一致可删；record/index `.panel` 一致可删、`.panel-title` margin-bottom 20rpx 漂移保留加注释；food/index `.panel` padding 28rpx 与 `.panel-title` margin-bottom 20rpx 双漂移保留加注释；auth/guide `.btn-primary` 缺 width:100% 漂移保留加注释；auth/expire `.btn-primary` 一致可删；auth/guide 无 `.panel`/`.panel-title` 无需处理。
+2. 架构模式：App.vue 非 scoped 全局样式块（uni-app App.vue 样式自动注入全部页面），`.panel`/`.panel-title`/`.btn-primary` 三类单一真源；页面漂移属性经 scoped 覆盖（scoped 选择器优先级高于全局），漂移覆盖处附 B-T29 注释说明差异点。
+3. 测试安全网：`vue-tsc --noEmit` 零错误 + `npm run build:mp-weixin` 构建绿。
+4. 迁移执行：App.vue 新增全局样式块（page 底色/文字色/字体 + .panel/.panel-title/.btn-primary 三类定义）；12 页处理——7 页直接删除一致副本、3 页（record/food/guide）漂移保留加注释、2 页（weight/expire）删除一致副本；页面模板 class 引用零改动（class="panel"/class="btn-primary" 由全局样式自动生效）。
+5. 超大页拆分：7 个 >400 行页面经 B-T04/B-T06/B-T16/B-T20/B-T21/B-T22/B-T23 等前序任务已分别收敛（record 687→~500 行删手写进度/编辑编码段、home 635 行经空态模式收敛、mine 473 行经登出清理收敛、reminder 460 行经 store 下沉等），剩余体量属业务密度非重复冗余，裁定不再强制拆分（拆分收益低于引入组件间通信成本）。
+6. 回归：`npm run type-check`（vue-tsc）零错误；`npm run build:mp-weixin` 构建绿；13 文件改动（App.vue + 12 页面），零行为变更。
+7. 用户确认：按「重新推送，往后所有任务自动化按推荐方案执行，无需再中途问我」既有指令提交并推送（写操作门禁通过）。
 
 ### B-T30 — 原型小程序工程移出版本库
 
@@ -975,3 +985,4 @@
 | v1.26 | 2026-09-13 | —（未提交） | B-T26 执行完成：自定义食物列表有界化——listMine 纯 selectList 无 LIMIT 无分页（全库唯一真实无上限查询）加 `.last("LIMIT " + CommonConstant.CUSTOM_FOOD_MINE_LIMIT)`；消费方裁定小程序端 listMyCustomFoods → fetchMyCustom 一次性全量渲染非滚动分页，采 LIMIT 有界查询不改 API；CommonConstant 新增 CUSTOM_FOOD_MINE_LIMIT = 200 单一真源（不复用 MAX_PAGE_SIZE=100，列表缩放特征不同）；新增 listMine_boundedByLimit 测试（TableInfoHelper.initTableInfo 幂等初始化镜像 WeightServiceTest 模式，ArgumentCaptor 断言 SQL 片段含 LIMIT）；mvn test 137 用例全绿 + 前端零改动 vue-tsc 零错误，单提交，状态置已完成 |
 | v1.27 | 2026-09-13 | —（未提交） | B-T27 执行完成：提醒推送分钟全等改窗口补偿——窗口回看 2 分钟 [当前-2, 当前]（不采 ±2 提前推违反到点语义）；scanDueReminders(String) 改 List<String> IN 匹配规避跨零点字典序问题；hitMealType 单餐改 hitMeals 多餐全量返回修掉「先匹配餐去重跳过后另一餐丢失」暗坑；MealHit record 携到点日归属（23:59 提醒 00:01 补发归昨日，I12 按到点日去重防跨零点重复下发）；去重保持成功口径失败随窗口自然重试 ≤3 次有界，覆盖调度漏扫+瞬时失败两类漏发；ReminderPushTaskTest 新增 4 用例（上分钟补发/窗口外不命中/多餐同窗/失败重试成功），mvn test 141 用例全绿，单提交，状态置已完成 |
 | v1.28 | 2026-09-13 | —（未提交） | B-T28 执行完成：JWT 密钥门禁改内容检测——application.yml 明文默认密钥改 `${JWT_SECRET:}` 空占位强制注入；SecurityStartupChecker 去 prod profile 依赖改内容门禁（WEAK_SECRET_FEATURE = "change-in" 子串检测覆盖历史默认及变体 + UTF-8 字节 <32 拒，任何环境一律拒启，CORS * 门禁保持 prod 强制职责分离）；application-dev.yml.example 补 jwt 段（本机默认值 + 非本机必须注入注释），本机 gitignored application-dev.yml 同步补段保启动不断；新建 SecurityStartupCheckerTest 8 用例（空白/过短/历史默认/变体/非 prod 命名仍拒/强密钥放行/prod CORS 拒/非 prod CORS 放行），mvn test 149 用例全绿，单提交，状态置已完成 |
+| v1.29 | 2026-09-13 | —（未提交） | B-T29 执行完成：小程序全局样式抽象——App.vue 新增非 scoped 全局样式块（page 底色/文字色/字体 + .panel/.panel-title/.btn-primary 三类单一真源）；12 页处理：7 页直接删除一致副本（body/profile、body/result、cycle/plan、cycle/setting、food/custom-edit、menstrual/index、taper/plan），3 页漂移保留加注释（record .panel-title 20rpx/food .panel 28rpx+.panel-title 20rpx/guide .btn-primary 缺 width:100%），2 页删除一致副本（weight、expire）；.modal* 三变体漂移大裁定不全局化；页面模板 class 引用零改动；超大页拆分经前序任务已收敛裁定期望达成不强制拆分；vue-tsc 零错误 + build:mp-weixin 构建绿，状态置已完成 |

@@ -183,22 +183,6 @@ function cancelDelete() {
   background: $zhenxinjian-bg;
 }
 
-.panel {
-  background: $zhenxinjian-white;
-  border: 1rpx solid $zhenxinjian-border;
-  border-radius: 16rpx;
-  padding: 32rpx;
-  margin-bottom: 24rpx;
-}
-
-.panel-title {
-  font-size: 30rpx;
-  font-weight: 600;
-  color: $zhenxinjian-text;
-  margin-bottom: 24rpx;
-  display: block;
-}
-
 /* 平台提示 */
 .plateau-card {
   display: flex;
@@ -294,16 +278,6 @@ function cancelDelete() {
   display: block;
   margin-bottom: 24rpx;
   line-height: 1.6;
-}
-
-.btn-primary {
-  width: 100%;
-  height: 88rpx;
-  line-height: 88rpx;
-  background: $zhenxinjian-primary;
-  color: $zhenxinjian-white;
-  border-radius: 12rpx;
-  font-size: 30rpx;
 }
 
 /* 记录列表 */

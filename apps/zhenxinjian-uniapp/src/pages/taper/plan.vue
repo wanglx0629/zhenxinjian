@@ -101,14 +101,6 @@ function goProfile() {
   background: $zhenxinjian-bg;
 }
 
-.panel {
-  background: $zhenxinjian-white;
-  border: 1rpx solid $zhenxinjian-border;
-  border-radius: 16rpx;
-  padding: 32rpx;
-  margin-bottom: 24rpx;
-}
-
 /* 今日目标头卡 */
 .today-card {
   background: linear-gradient(160deg, #0d9488 0%, #14b8a6 100%);
@@ -271,13 +263,5 @@ function goProfile() {
   text-align: center;
 }
 
-.btn-primary {
-  width: 100%;
-  height: 88rpx;
-  line-height: 88rpx;
-  background: $zhenxinjian-primary;
-  color: $zhenxinjian-white;
-  border-radius: 12rpx;
-  font-size: 30rpx;
-}
+
 </style>

@@ -316,15 +316,7 @@ function goCycleSetting() {
   margin-top: 4rpx;
 }
 
-/* 面板 */
-.panel {
-  background: $zhenxinjian-white;
-  border: 1rpx solid $zhenxinjian-border;
-  border-radius: 16rpx;
-  padding: 32rpx;
-  margin-bottom: 24rpx;
-}
-
+/* B-T29 漂移覆盖：margin-bottom 20rpx 区别于全局 24rpx */
 .panel-title {
   font-size: 30rpx;
   font-weight: 600;

@@ -182,22 +182,6 @@ async function handleSave() {
   background: $zhenxinjian-bg;
 }
 
-.panel {
-  background: $zhenxinjian-white;
-  border: 1rpx solid $zhenxinjian-border;
-  border-radius: 16rpx;
-  padding: 32rpx;
-  margin-bottom: 24rpx;
-}
-
-.panel-title {
-  font-size: 30rpx;
-  font-weight: 600;
-  color: $zhenxinjian-text;
-  margin-bottom: 24rpx;
-  display: block;
-}
-
 .empty {
   display: flex;
   flex-direction: column;
@@ -328,13 +312,5 @@ async function handleSave() {
   color: $zhenxinjian-text;
 }
 
-.btn-primary {
-  width: 100%;
-  height: 88rpx;
-  line-height: 88rpx;
-  background: $zhenxinjian-primary;
-  color: $zhenxinjian-white;
-  border-radius: 12rpx;
-  font-size: 30rpx;
-}
+
 </style>

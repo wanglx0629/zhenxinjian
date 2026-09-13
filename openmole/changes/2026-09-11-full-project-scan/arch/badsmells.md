@@ -40,7 +40,7 @@
 | ARCH-边界-001 | 边界 | 中 | 已消除 |
 | ARCH-边界-006 | 边界 | 中 | 已消除 |
 | ARCH-边界-007 | 边界 | 中 | 已消除 |
-| ARCH-模块化-001 | 模块化 | 低 | 未清除 |
+| ARCH-模块化-001 | 模块化 | 低 | 已消除 |
 | ARCH-模块化-002 | 模块化 | 低 | 未清除 |
 | ARCH-模块化-003 | 模块化 | 低 | 未清除 |
 | ARCH-边界-002 | 边界 | 低 | 未清除 |
@@ -459,7 +459,7 @@
 | 根因 | 样式变量只到色板层，无组件级样式沉淀 |
 | 影响 | 单页维护成本高；视觉口径靠复制维系 |
 | 修复建议 | 提取全局公共样式类（uni.scss 或 app.scss）；超大页拆分子组件 |
-| 状态 | 未清除 |
+| 状态 | 已消除（B-T29 于 2026-09-13 完成，单提交——App.vue 新增非 scoped 全局样式块承载 .panel/.panel-title/.btn-primary 三类单一真源（uni-app App.vue 样式自动注入全部页面）；12 页处理：7 页直接删除与全局定义一致副本（body/profile、body/result、cycle/plan、cycle/setting、food/custom-edit、menstrual/index、taper/plan），3 页漂移保留加 B-T29 注释（record/index .panel-title margin-bottom 20rpx、food/index .panel padding 28rpx + .panel-title 20rpx、auth/guide .btn-primary 缺 width:100%），2 页删除一致副本（weight/index、auth/expire）；.modal* 三变体漂移大裁定不全局化保留页内；页面模板 class 引用零改动；超大页拆分经 B-T04/B-T06/B-T16/B-T20/B-T21/B-T22/B-T23 等前序任务已收敛（record 687→~500、home 635、mine 473、reminder 460 等），剩余体量属业务密度非重复冗余裁定不再强制拆分；vue-tsc 零错误 + build:mp-weixin 构建绿，13 文件改动零行为变更） |
 
 ### ARCH-模块化-002 — 原型小程序工程入库未清退
 
@@ -595,3 +595,4 @@
 | v1.27 | 2026-09-13 | —（未提交） | B-T26 完成，ARCH-边界-001 置"已消除"（listMine 无上限 selectList 加 `.last("LIMIT " + CommonConstant.CUSTOM_FOOD_MINE_LIMIT)` 有界查询，COMMON 常量 CUSTOM_FOOD_MINE_LIMIT = 200 单一真源不复用 MAX_PAGE_SIZE；消费方裁定一次性全量渲染非滚动分页采 LIMIT 不改 API；新增 listMine_boundedByLimit 测试 TableInfoHelper 幂等初始化 + ArgumentCaptor 断言 SQL 含 LIMIT；mvn test 137 用例全绿，对齐 AGENTS.md「无上限 selectList」Never 条款）。余 10 条未清除 |
 | v1.28 | 2026-09-13 | —（未提交） | B-T27 完成，ARCH-边界-006 置"已消除"（提醒推送分钟全等改窗口补偿：窗口回看 2 分钟 [当前-2, 当前] 调度延迟/重启跨分钟补发；scanDueReminders 改 List<String> IN 匹配规避跨零点字典序；hitMealType 单餐改 hitMeals 多餐全量返回修掉先匹配餐去重跳过后另一餐丢失暗坑；MealHit record 携到点日归属 I12 按到点日去重防跨零点重复下发；失败随窗口自然重试 ≤3 次有界，调度漏扫+瞬时失败同治；新增 4 用例，mvn test 141 用例全绿）。余 9 条未清除 |
 | v1.29 | 2026-09-13 | —（未提交） | B-T28 完成，ARCH-边界-007 置"已消除"（JWT 密钥门禁改内容检测：application.yml 明文默认改 `${JWT_SECRET:}` 空占位强制注入；SecurityStartupChecker 去 prod profile 依赖——WEAK_SECRET_FEATURE = "change-in" 子串检测覆盖历史默认及变体 + UTF-8 字节 <32 拒，任何环境一律拒启，误配环境带弱密钥同治，CORS * 门禁保持 prod 强制职责分离；application-dev.yml.example 补 jwt 段 + 本机 gitignored application-dev.yml 同步保启动不断；新建 SecurityStartupCheckerTest 8 用例，mvn test 149 用例全绿；顺带修正索引表 ARCH-边界-001/006 已消除漏登行）。余 8 条未清除 |
+| v1.30 | 2026-09-13 | —（未提交） | B-T29 完成，ARCH-模块化-001 置"已消除"（App.vue 新增非 scoped 全局样式块承载 .panel/.panel-title/.btn-primary 三类单一真源；12 页处理：7 页删一致副本、3 页漂移保留加注释、2 页删一致副本；.modal* 三变体漂移大裁定不全局化；超大页拆分经前序任务已收敛裁定期望达成不强制拆分；vue-tsc 零错误 + build:mp-weixin 构建绿，13 文件改动零行为变更）。余 7 条未清除 |

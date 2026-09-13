@@ -108,16 +108,6 @@ function handleAbandon() {
   margin-bottom: 48rpx;
 }
 
-.btn-primary {
-  width: 100%;
-  height: 88rpx;
-  line-height: 88rpx;
-  background: $zhenxinjian-primary;
-  color: $zhenxinjian-white;
-  border-radius: 12rpx;
-  font-size: 30rpx;
-}
-
 .btn-ghost {
   width: 100%;
   height: 88rpx;
