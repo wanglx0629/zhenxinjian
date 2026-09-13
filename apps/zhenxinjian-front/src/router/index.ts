@@ -48,32 +48,31 @@ const router = createRouter({
   ]
 })
 
-// 路由守卫：未登录跳转登录页；管理员页校验角色
+// 路由守卫：未登录跳转登录页；管理员页校验角色（登录态一律经 store 读取，不直读 localStorage）
 router.beforeEach(async (to, _from, next) => {
-  const token = localStorage.getItem('token')
-  if (!to.meta.public && !token) {
+  const userStore = useUserStore()
+  if (!to.meta.public && !userStore.token) {
     next('/login')
     return
   }
-  if (token && to.path === '/login') {
+  if (userStore.token && to.path === '/login') {
     next('/')
     return
   }
   if (to.meta.admin) {
-    const userStore = useUserStore()
     if (!userStore.userInfo) {
       try {
         await userStore.fetchUserInfo()
       } catch {
-        // 拉取用户信息失败视为会话失效，回登录页
-        localStorage.removeItem('token')
+        // 拉取用户信息失败视为会话失效，清会话回登录页
+        userStore.clearSession()
         next('/login')
         return
       }
     }
     if (userStore.userInfo?.role !== 'ADMIN') {
       // 非管理员无可见页面，清除会话回登录页
-      localStorage.removeItem('token')
+      userStore.clearSession()
       next('/login')
       return
     }

@@ -21,6 +21,8 @@ onMounted(() => {
 
 async function handleLogout() {
   await userStore.logout()
+  // 导航属页面职责（store 不感知 router）
+  router.push('/login')
 }
 
 function goDashboard() {

@@ -7,9 +7,9 @@ import { ref } from 'vue'
 import type { UserInfo } from '@/api/types'
 import { getCurrentUser, login as loginApi, logout as logoutApi } from '@/api/auth'
 import type { LoginRequest } from '@/api/types'
-import router from '@/router'
 
 export const useUserStore = defineStore('user', () => {
+  // store 为登录态唯一真源，localStorage 仅作持久化介质（初始化时恢复）
   const token = ref(localStorage.getItem('token') || '')
   const userInfo = ref<UserInfo | null>(null)
 
@@ -24,15 +24,25 @@ export const useUserStore = defineStore('user', () => {
     localStorage.setItem('token', result.token)
   }
 
+  /** 清会话单一入口：清内存态与持久化介质，不含导航（导航属调用方/组合根职责） */
+  function clearSession() {
+    token.value = ''
+    userInfo.value = null
+    localStorage.removeItem('token')
+  }
+
+  /** 续期同步：响应头 x-refresh-token 经 request 层 hooks 回调至此 */
+  function syncToken(newToken: string) {
+    token.value = newToken
+    localStorage.setItem('token', newToken)
+  }
+
   /** 登出 */
   async function logout() {
     try {
       await logoutApi()
     } finally {
-      token.value = ''
-      userInfo.value = null
-      localStorage.removeItem('token')
-      router.push('/login')
+      clearSession()
     }
   }
 
@@ -42,5 +52,5 @@ export const useUserStore = defineStore('user', () => {
     userInfo.value = await getCurrentUser()
   }
 
-  return { token, userInfo, isLoggedIn, login, logout, fetchUserInfo }
+  return { token, userInfo, isLoggedIn, login, logout, clearSession, syncToken, fetchUserInfo }
 })

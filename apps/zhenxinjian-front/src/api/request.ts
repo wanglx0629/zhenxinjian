@@ -5,8 +5,25 @@
 import axios, { type AxiosRequestConfig } from 'axios'
 import type { Result } from './types'
 import { ElMessage } from 'element-plus'
-import router from '@/router'
-import { useUserStore } from '@/store/user'
+
+/**
+ * 认证回调注入契约（对齐小程序 request.ts 的 AuthHooks 模式）
+ * api 层不反向依赖 store/router，由组合根（main.ts）装配
+ */
+export interface AuthHooks {
+  /** 提供当前 token（store 为登录态真源） */
+  getToken: () => string
+  /** 续期响应头 x-refresh-token 到达时同步内存态与持久化介质 */
+  onTokenRefreshed: (token: string) => void
+  /** 401/会话失效时清会话并跳转登录 */
+  onSessionClear: () => void
+}
+
+let authHooks: AuthHooks | null = null
+
+export function setAuthHooks(hooks: AuthHooks) {
+  authHooks = hooks
+}
 
 const instance = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
@@ -17,18 +34,10 @@ const instance = axios.create({
 const AUTH_SKIP_URLS = ['/auth/login', '/auth/captcha']
 
 /**
- * 清会话并跳转登录
+ * 清会话并跳转登录（经注入 hooks，本层不感知 store/router）
  */
 function clearSessionAndGoLogin(message = '登录已过期，请重新登录') {
-  localStorage.removeItem('token')
-  try {
-    const userStore = useUserStore()
-    userStore.token = ''
-    userStore.userInfo = null
-  } catch {
-    // ignore
-  }
-  router.push('/login')
+  authHooks?.onSessionClear()
   ElMessage.error(message)
 }
 
@@ -37,7 +46,7 @@ instance.interceptors.request.use((config) => {
   const url = config.url || ''
   const skipAuth = AUTH_SKIP_URLS.some((path) => url.includes(path))
   if (!skipAuth) {
-    const token = localStorage.getItem('token')
+    const token = authHooks?.getToken()
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
@@ -50,14 +59,8 @@ instance.interceptors.response.use(
   (response) => {
     const newToken = response.headers['x-refresh-token']
     if (newToken) {
-      localStorage.setItem('token', newToken)
-      // 同步 Pinia，避免其他模块仍使用旧 token
-      try {
-        const userStore = useUserStore()
-        userStore.token = newToken
-      } catch {
-        // Pinia 未就绪时仅写 localStorage
-      }
+      // 同步 Pinia 与 localStorage，避免其他模块仍使用旧 token
+      authHooks?.onTokenRefreshed(newToken)
     }
     const res = response.data as Result
     // 后端业务码 401 也可能挂在 HTTP 200 上，需与 HTTP 401 同等处理
