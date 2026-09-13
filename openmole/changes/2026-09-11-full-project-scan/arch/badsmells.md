@@ -35,7 +35,7 @@
 | ARCH-内聚-004 | 内聚 | 中 | 已消除 |
 | ARCH-内聚-005 | 内聚 | 中 | 已消除 |
 | ARCH-内聚-006 | 内聚 | 中 | 已消除 |
-| ARCH-内聚-007 | 内聚 | 中 | 未清除 |
+| ARCH-内聚-007 | 内聚 | 中 | 已消除 |
 | ARCH-层次-002 | 层次 | 中 | 未清除 |
 | ARCH-边界-001 | 边界 | 中 | 未清除 |
 | ARCH-边界-006 | 边界 | 中 | 未清除 |
@@ -389,7 +389,7 @@
 | 根因 | 登录能力未下沉 |
 | 影响 | 登录链路变更须双改 |
 | 修复建议 | 下沉到 `store/user.ts` 的 `loginByWechat()` 方法 |
-| 状态 | 未清除 |
+| 状态 | 已消除（B-T24 于 2026-09-13 完成，644b269 单提交——guide/expire 双页约 30 行逐字复制收敛 store loginByWechat(opts?) 单一入口返回 Promise<boolean>，成功/失败文案 opts 参数化保留双页并集，tuple 兼容取值保留 store 层；双页删副本改 await store 调用只管 loading 与 canSubmit 节流；handleGuest 游客登录单页无副本裁定保留页内 track(LOGIN_GUEST)；uni.login 全库检索唯 store 一处，vue-tsc + build:mp-weixin 全绿，零行为变更） |
 
 ### ARCH-层次-002 — 文档三套并行真源不明
 
@@ -590,3 +590,4 @@
 | v1.22 | 2026-09-13 | —（未提交） | B-T21 完成（补登版本行，08f1a40 收尾时漏登），ARCH-内聚-004 置"已消除"（批 1 三处小重复收敛公共工具——round1→Numbers.round1、operator()→Operators.user、CORS 解析→CorsOrigins.parse；批 2 新建 DietSummaryService 承接 summary() 整方法，DietRecordService 删三依赖回归 CRUD+按日分组+hasRecord 单一职责，跨调网单向零回边 DAG 无环；136 用例全绿）。余 15 条未清除 |
 | v1.23 | 2026-09-13 | —（未提交） | B-T22 完成，ARCH-内聚-005 置"已消除"（模式真源裁定档案 profile.mode——bodyStore 新增 currentMode/isCycleMode 派生 getter，summary.mode 显示源废止，home/record/mine/mode-select 四页双源归一；空态三分支收敛 dietStore.showBodyEmpty/showCycleEmpty 单一真源，home/record 内联判定删除改委派，loaded 前置随 noProfile getter 内聚吸收；vue-tsc 零错误、双源检索清零）。余 14 条未清除 |
 | v1.24 | 2026-09-13 | —（未提交） | B-T23 完成，ARCH-内聚-006 置"已消除"（四批治理——0634cc0 批 1 骨架三件套：constants/dicts.ts 字典层十组枚举互锚 / composables/usePageQuery.ts 查询骨架七处托管 / component/PagePager.vue 通用分页条 / global.css 三公共类；5cc81db 批 2 users 页迁移（七处样板 + 五本地字典 + PagePager + 四 scoped 改全局 + PageResult 复用）；4dbcba3 批 3 foods 页迁移 + API 类型收敛（七处样板 + 三本地字典 + categoryName() 删除 + adminFood/adminDiet PageResult<T>）；d965e95 批 4 diet-records 页迁移（七处样板 + 两本地字典 + displayUser 参数收窄 + 只读无删后回退）；四批各自 vue-tsc + vite build 全绿，零行为变更）。余 13 条未清除 |
+| v1.25 | 2026-09-13 | —（未提交） | B-T24 完成，ARCH-内聚-007 置"已消除"（微信登录流程下沉——guide/expire 双页「uni.login → [err,res] 兼容取 code → wechatLogin(guestKey) → track → toast → 400ms 跳首页」约 30 行逐字复制收敛 store/user.ts loginByWechat(opts?) 单一入口返回 Promise<boolean>，成功/失败文案 opts 参数化保留双页并集，tuple 兼容取值保留 store 层；双页删副本改 await store 调用只管 loading 与 canSubmit 节流；handleGuest 游客登录单页无副本裁定保留页内 track(LOGIN_GUEST)；uni.login 全库检索唯 store 一处，vue-tsc + build:mp-weixin 全绿，零行为变更）。余 12 条未清除 |

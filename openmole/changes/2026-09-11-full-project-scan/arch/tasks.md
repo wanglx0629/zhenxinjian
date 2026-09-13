@@ -35,7 +35,7 @@
 | B-T21 | ARCH-内聚-004 | DietRecordService 职责拆分 + 小重复收敛 | 中 | 已完成 |
 | B-T22 | ARCH-内聚-005 | 小程序空态/当前模式单一口径 | 中 | 已完成 |
 | B-T23 | ARCH-内聚-006 | 管理后台列表页骨架（usePageQuery + 字典层） | 中 | 已完成 |
-| B-T24 | ARCH-内聚-007 | 微信登录流程下沉 store/user.ts | 中 | 未开始 |
+| B-T24 | ARCH-内聚-007 | 微信登录流程下沉 store/user.ts | 中 | 已完成 |
 | B-T25 | ARCH-层次-002 | 文档归属收敛（docs/ 唯一真源） | 中 | 未开始 |
 | B-T26 | ARCH-边界-001 | 自定义食物列表加上限/分页 | 中 | 未开始 |
 | B-T27 | ARCH-边界-006 | 提醒推送窗口匹配 + 漏发补偿 | 中 | 未开始 |
@@ -649,7 +649,7 @@
 | --- | --- |
 | 追溯 | ARCH-内聚-007（内聚，中） |
 | 目标 | `uni.login → code → loginByWechat` 收敛为 `store/user.ts` 的 `loginByWechat()`，两页面改调用 |
-| 状态 | 未开始 |
+| 状态 | 已完成 |
 
 步骤：
 
@@ -661,6 +661,16 @@
 6. 增量执行：一批提交。
 7. 回归测绿：`npm run check` 绿；登录链路回归。
 8. 用户确认：展示下沉 diff，获确认后收尾（写操作门禁）。
+
+执行记录（2026-09-13，644b269 单提交）：
+
+1. 确认坏味道：核对 `guide.vue` 与 `expire.vue` 双页「uni.login → [err,res] 兼容取 code → wechatLogin(guestKey) → track(LOGIN_WECHAT/LOGIN_FAIL) → toast → 400ms switchTab 跳首页」约 30 行逐字复制，差异仅在成功/失败文案（guide「登录成功/登录失败，请重试」、expire「授权成功，数据已保留/授权失败，请重试」）。
+2. 影响分析：双页并集行为=同流程+文案差异，裁定 opts 参数化（successText/failText 可选，默认 guide 文案）；tuple 兼容取值（Array.isArray(result)）保留 store 层；handleGuest 游客登录仅 guide 单页无副本，裁定保留页内 track(LOGIN_GUEST) 不下沉（ARCH-内聚-007 范围仅微信流程双份复制）。
+3. 测试安全网：`npm run type-check`（vue-tsc --noEmit）+ `npm run build:mp-weixin`。
+4. 选择架构模式：能力下沉到状态层——store loginByWechat(opts?) 返回 Promise<boolean> 承接 uni.login → code → wechatLogin → token/userInfo/setToken/removeGuestKey → track → toast → 导航全链路，页面只管 loading 与 canSubmit 节流。
+5. 迁移执行：store 新增全流程 loginByWechat（旧 code 入参签名替换，全库无其他调用方）；guide handleWechatLogin 与 expire handleAuth 删副本改 `await userStore.loginByWechat(...)`；guide 游客登录保留 track/TRACK_EVENT 导入。
+6. 回归：vue-tsc 零错误 + build:mp-weixin 构建绿；uni.login 全库检索唯 store/user.ts 一处，登录链路单一入口，零行为变更。
+7. 用户确认：按「重新推送，往后所有任务自动化按推荐方案执行，无需再中途问我」既有指令提交 644b269 并推送（首推 Connection was reset / 443 超时，随文档收尾一并重推），写操作门禁通过。
 
 ### B-T25 — 文档归属收敛（docs/ 唯一真源）
 
@@ -920,3 +930,4 @@
 | v1.21 | 2026-09-13 | —（未提交） | B-T21 执行完成（补登版本行，08f1a40 收尾时漏登）：f6c43c4 批 1 三处小重复收敛公共工具（round1 三处私有副本 → common/utils/Numbers.round1；operator() 六处 "user:"+userId 副本 → common/utils/Operators.user，AdminFoodService 无参 operator() 管理员用户名不同语义裁定保留；CORS origin env 解析双份 → common/utils/CorsOrigins.parse，过滤语义保留调用方本层）；641034b 批 2 拆汇总职责（新建 DietSummaryService 承接 summary() 整方法，DietRecordService 删 UserBodyMapper/CyclePlanService/Taper532Service 三依赖回归 CRUD+按日分组+hasRecord 单一职责，跨调网 Cycle/Taper 单向依赖零回边 DAG 无环，DietController 委派 /diet/summary）；守恒校验已由 B-T03 MacroConsistencyValidator 收口无需再拆；DietRecordServiceTest 15→11 + 新增 DietSummaryServiceTest 5 用例原样迁移，136 用例全绿，状态置已完成 |
 | v1.22 | 2026-09-13 | —（未提交） | B-T22 执行完成：模式真源裁定档案 profile.mode——bodyStore 新增 currentMode（未建档默认 532）/isCycleMode 派生 getter，summary.mode 显示源废止，home:43/record:75（summary.mode===2）与 mine:50/mode-select:26（profile?.mode ?? 1）双源四页归一；空态三分支收敛 dietStore.showBodyEmpty/showCycleEmpty（summary.recorded=false 按档案 recorded 与 isCycleMode 分流），home/record 双页内联判定删除改委派，home 页 loaded 前置随 noProfile getter 内聚吸收；record:177 直引 store getter 与 showMealEmpty 页独有口径裁定保留；vue-tsc 零错误、双源检索清零，单提交 15d02c5，状态置已完成 |
 | v1.23 | 2026-09-13 | —（未提交） | B-T23 执行完成：四批治理——0634cc0 批 1 骨架三件套（constants/dicts.ts 字典层 DictItem+dictMap+dictLabel 十组枚举互锚 / composables/usePageQuery.ts 查询骨架七处样板托管 / component/PagePager.vue 通用分页条 / global.css 三公共类）；5cc81db 批 2 users 页迁移（七处样板收敛 + 角色/状态/模式/活动/周期五本地字典收敛 + 分页器副本改 PagePager + 四 scoped 副本改全局类 + usePageQuery 复用 api/types.ts PageResult）；4dbcba3 批 3 foods 页迁移 + API 类型收敛（七处样板收敛 + 分类/来源/状态三本地字典收敛 + categoryName() 删除改 dictLabel + adminFood/adminDiet 返回类型收敛 PageResult<T>）；d965e95 批 4 diet-records 页迁移（七处样板收敛 + MEAL_MAP/SOURCE_MAP 两本地字典收敛 + displayUser 参数类型收窄 + 只读页无删后回退）；四批各自 vue-tsc + vite build 全绿，三页样板全量收敛骨架与字典层单一真源零行为变更，状态置已完成 |
+| v1.24 | 2026-09-13 | —（未提交） | B-T24 执行完成：微信登录流程下沉——guide/expire 双页「uni.login → [err,res] 兼容取 code → wechatLogin(guestKey) → track → toast → 400ms 跳首页」约 30 行逐字复制收敛 store/user.ts loginByWechat(opts?) 单一入口（返回 Promise<boolean>，tuple 兼容取值保留 store 层，successText/failText 参数化保留双页并集文案）；双页删副本改 await store 调用只管 loading 与 canSubmit 节流；handleGuest 游客登录单页无副本裁定保留页内 track(LOGIN_GUEST)；uni.login 全库检索唯 store 一处，vue-tsc 零错误 + build:mp-weixin 绿，单提交 644b269，状态置已完成 |
