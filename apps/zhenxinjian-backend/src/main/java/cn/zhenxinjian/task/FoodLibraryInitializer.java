@@ -24,7 +24,7 @@ import java.util.List;
  * 内置食物库初始化器（启动时幂等导入 foods_200.json，200 条《中国食物成分表》第 6 版数据）
  * 作者: wanglx
  *
- * 口径: doscFile/projectFile/04-食物库数据字典.md（每 100g 可食部、干重不泡发、生熟分列）
+ * 口径: docsFile/projectFile/04-食物库数据字典.md（每 100g 可食部、干重不泡发、生熟分列）
  * 幂等: 内置食物数 ≥200 跳过；逐条插入并按 code 唯一约束捕获冲突（仅补缺，不覆盖）
  */
 @Slf4j

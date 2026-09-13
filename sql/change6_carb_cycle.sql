@@ -1,7 +1,7 @@
 -- Change 6 — 碳循环模式：user_body 加 mode 列 + carb_cycle_plan / carb_cycle_day 两表
 -- 作者: wanglx
 -- 依据: openspec/changes/carb-cycle（design §2）
---       doscFile/03-开发规范.md §4（逻辑删除 delete_flag、业务表必备 status、软删表不建唯一索引）
+--       docsFile/03-开发规范.md §4（逻辑删除 delete_flag、业务表必备 status、软删表不建唯一索引）
 -- 口径: 周期每日目标创建时固化（D1 快照不回改）；克数 DECIMAL(5,1) 与 foods/diet_records 一致；
 --       池总量 DECIMAL(7,1)（目标体重≤200kg × 2.5 × 14 = 7000g 上限内）；热量 INT 取整
 -- 幂等: mode 列已存在（本变更已应用）则 ALTER 跳过；两表 CREATE IF NOT EXISTS；版本账见 schema_migrations。

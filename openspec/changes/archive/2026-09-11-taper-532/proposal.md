@@ -35,5 +35,5 @@ MVP 四大能力中「算得准」只落地了一半：核心计算（BMR/TDEE/5
 - **DB**：`sql/change8_taper_532.sql`（新建 `user_menstrual` / `weight_record` / `adjust_log` 三表，均带 `delete_flag`/`status`/审计列；`user_menstrual` 按生成列活跃唯一约束每用户一条）
 - **后端**：新 `MenstrualController/Service/Mapper`、`WeightController/Service/Mapper`、`Taper532Service`（四阶段计划 + 今日目标公式 + 平台判定引擎）、`AdjustLogMapper`、`Taper532Migrator`；`MenstrualCalcService`（四阶段判定与上浮，复用经期口径）；`DietRecordService.summary` 按 532 推进目标分发 + 碳循环叠加经期；`ExceptionConstant`/`CommonConstant` 启用 408xx；新枚举 `MenstrualPhaseEnum`、`AdjustActionEnum`
 - **小程序**：P08 `pages/taper/plan.vue`（四阶段计划卡）、P09 `pages/weight/index.vue`（体重记录 + 平台提示 + 调碳日志，kg/斤切换）、`pages/menstrual/index.vue`（经期设置）；`pages/mine/index.vue` 功能列表加「体重记录 / 月经周期」入口；`api/weight.ts`、`api/menstrual.ts`、`api/taper.ts`；`pages/home/index.vue` 头卡加经期徽标、532「看计划」改跳 P08、532 目标展示改服务端推进目标；`pages/record/index.vue` 的 532 目标展示改服务端推进目标
-- **口径真源**：MVP v1 §532碳水渐降 / §验收（金标验算）、`doscFile/projectFile/02-业务规则与公式速查.md` §3/§5/§6/§9、不变量 I5（调碳兜底）、原型 P08/P09
+- **口径真源**：MVP v1 §532碳水渐降 / §验收（金标验算）、`docsFile/projectFile/02-业务规则与公式速查.md` §3/§5/§6/§9、不变量 I5（调碳兜底）、原型 P08/P09
 - **验算基准**（速查 §9）：女 30 岁 / 162cm / 55kg→53kg / 1.375 / 缺口 200 → 532 基线 碳 190.1g / 蛋白 114.1g / 脂肪 33.8g / 热量 1521kcal；经期第 3 天今日目标 碳 205.1g / 热量 1581kcal；平台下调后 碳 170.1g / 热量 1441kcal

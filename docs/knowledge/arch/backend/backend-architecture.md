@@ -55,7 +55,7 @@ Spring Boot 3.5.16 单体，统一提供小程序端与管理后台全部 API：
 1. 新增业务 CRUD（脚手架脚本恢复前按规范手写）：controller + service 接口/impl + mapper + po/dto/query/vo + `data.sql` + `ExceptionConstant`。
 2. 计算类能力做成**纯函数工具或独立 Service**，便于 khufu-ut 覆盖定稿样例（如碳循环 241/23、153/49、72/77）。
 3. 多表一致性写操作加 `@Transactional`；更新后清 JetCache 缓存。
-4. **食物库建表**：内置 200 条（F001–F200，10 大分类）从 `MRD-PRD/foods_200.json（开发导入用）.json` 批量导入；营养值 `DECIMAL(5,1)`、`kcal INT`；字段口径见 [doscFile/projectFile/04-食物库数据字典.md](../../../doscFile/projectFile/04-食物库数据字典.md) §6（含活跃唯一约束与自定义食物软删约定）。
+4. **食物库建表**：内置 200 条（F001–F200，10 大分类）从 `MRD-PRD/foods_200.json（开发导入用）.json` 批量导入；营养值 `DECIMAL(5,1)`、`kcal INT`；字段口径见 [docsFile/projectFile/04-食物库数据字典.md](../../../docsFile/projectFile/04-食物库数据字典.md) §6（含活跃唯一约束与自定义食物软删约定）。
 
 ## 6. 已知事项
 

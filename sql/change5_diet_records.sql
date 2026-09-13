@@ -1,7 +1,7 @@
 -- Change 5 — 饮食记录：diet_records（三类来源单表 + 食物快照冗余）
 -- 作者: wanglx
 -- 依据: openspec/changes/diet-record（design D1/D2）
---       doscFile/03-开发规范.md §4（逻辑删除 delete_flag、业务表必备 status、DOUBLE 存克数）
+--       docsFile/03-开发规范.md §4（逻辑删除 delete_flag、业务表必备 status、DOUBLE 存克数）
 -- 口径: 实际摄入克数 DOUBLE（随记录累计防漂移）；每 100g 快照 DECIMAL(5,1) 与 foods 表一致；
 --       热量 INT 取整；手动输入快照列 NULL、amount_g 占位 1
 -- 幂等: CREATE IF NOT EXISTS（已存在即跳过）；版本账见 schema_migrations。

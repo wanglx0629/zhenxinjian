@@ -1,7 +1,7 @@
 -- Change 9 — 管理后台与行为分析：track_event 埋点明细表 + stat_daily_active / stat_event_daily 聚合表
 -- 作者: wanglx
 -- 依据: openspec/changes/admin-analytics（design §2 数据模型）
---       doscFile/03-开发规范.md §4（逻辑删除 delete_flag、业务表必备 status、软删表不建唯一索引）
+--       docsFile/03-开发规范.md §4（逻辑删除 delete_flag、业务表必备 status、软删表不建唯一索引）
 -- 口径: 活跃统计以 create_time 为准（client_time 仅记录防端上篡改）；user_type 冗余聚合免 JOIN；
 --       聚合幂等由服务层软删当日旧行再插新行实现，故聚合表不建 UNIQUE
 -- 幂等: 三表 CREATE IF NOT EXISTS（已存在即跳过）；版本账见 schema_migrations。

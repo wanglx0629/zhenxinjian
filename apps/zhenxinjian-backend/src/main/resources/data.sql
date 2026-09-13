@@ -2,7 +2,7 @@
 -- 作者: wanglx
 -- 说明: 全新环境首次部署前执行本脚本，建库 + 全部 15 张业务表（schema_migrations 版本表由 SqlRunner 自动建账）。
 --       全部 CREATE TABLE IF NOT EXISTS，重复执行安全；执行后再跑 change 链，脚本守卫自动跳过（零变更）并补记账。
---       新增/变更表结构时须同步本基线与新增 change<N> 脚本（doscFile/03-开发规范.md §4.7）。
+--       新增/变更表结构时须同步本基线与新增 change<N> 脚本（docsFile/03-开发规范.md §4.7）。
 -- 管理员初始化: 本脚本不含初始账号——首个管理员由部署者自行生成 BCrypt 哈希后手工 INSERT，
 --       口令哈希不进版本库（见 tools/db/README「管理员初始化」）
 

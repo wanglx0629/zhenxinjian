@@ -1,7 +1,7 @@
 -- Change 8 — 532 碳水渐降推进：user_menstrual / weight_record / adjust_log 三表 + user_body 加下调态列
 -- 作者: wanglx
 -- 依据: openspec/changes/taper-532（design D1/D3）
---       doscFile/03-开发规范.md §4（逻辑删除 delete_flag、业务表必备 status、生成列活跃唯一、软删表不建唯一索引）
+--       docsFile/03-开发规范.md §4（逻辑删除 delete_flag、业务表必备 status、生成列活跃唯一、软删表不建唯一索引）
 -- 口径: 经期设置每用户活跃唯一（生成列兜底）；体重永久留存按日多版本（业务同日幂等由服务层软删再插实现）；
 --       调碳日志仅追加写留痕；下调态存 user_body（is_adjusted + trigger_weight），克数 DOUBLE 与 user_body 体重列一致
 -- 幂等: 三表 CREATE IF NOT EXISTS；is_adjusted 列已存在（本变更已应用）则 ALTER 跳过；版本账见 schema_migrations。

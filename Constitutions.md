@@ -39,7 +39,7 @@
 1. `MRD-PRD/臻心减-V1.1-最终版PRD-开发交付版.docx`（9/3 图片公式定稿，开发交付唯一口径）
 2. `MRD-PRD/臻心减_PRD_V1.1_含食物库.docx`（数据模型、埋点、食物库规则）
 3. `MRD-PRD/臻心减小程序V1.1高保真原型/`（16 页可交互原型，P01–P16 / F01–F27）
-4. `doscFile/`（项目介绍 / 技术栈说明 / 开发规范）
+4. `docsFile/`（项目介绍 / 技术栈说明 / 开发规范）
 
 > 任何需求变更须由 PM 更新 PRD 后同步至 [docs/prd/](./docs/prd/README.md)，代码实现以最新 PRD 与原型为准。
 
@@ -115,10 +115,10 @@ controller → service（接口）→ service/impl（实现）→ mapper
 - 人体数据区间**前后端双重校验**（越界前端标红、后端拒绝）：年龄 12–80、身高 100–250cm、体重 25–200kg、目标体重 25–200kg 且 ≤ 当前体重。
 - 碳循环日型除数 `2 / 2.2 / 2` 固定写死，周期 ≠ 7 天按比例放大；**禁止**用 `nH+1` 等动态值重算。
 - 营养克数后端按 `double` 存储防累计漂移，前端展示四舍五入到整数克；周期总量守恒允许 ±1g。
-- MySQL / Redis 遵守 [开发规范](./doscFile/03-开发规范.md) §4、§5（软删 + 活跃唯一约束、会话 Key 必须 TTL、无 BigKey）。
+- MySQL / Redis 遵守 [开发规范](./docsFile/03-开发规范.md) §4、§5（软删 + 活跃唯一约束、会话 Key 必须 TTL、无 BigKey）。
 - 管理端接口加 `@PreAuthorize("hasRole('ADMIN')")`。
 - 文件头注释：`作者: wanglx`；注释另起一行。
-- Git 提交信息：功能开发用 `feature：功能说明`；修 bug 用 `fix：问题说明`（详见 [开发规范 §10](./doscFile/03-开发规范.md)）。
+- Git 提交信息：功能开发用 `feature：功能说明`；修 bug 用 `fix：问题说明`（详见 [开发规范 §10](./docsFile/03-开发规范.md)）。
 - **分层结构强制**：后端 `controller → service → service/impl → mapper（+xml）`、对象 `po/dto/query/vo` 各就各位（§3.1）；前端两端按各自规范目录（§3.2 / §3.3）；新文件必须落在对应层，**禁止跨层引用**（如 Controller 直调 Mapper）、禁止自创目录结构。
 
 ### Never（禁止）

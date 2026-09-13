@@ -2,7 +2,7 @@
 
 ## Context
 
-后端已有登录/游客（`users`）与身体档案（`user_body`）两层，软删 + 生成列活跃唯一 + 枚举字典的样板已在 Change 2/3 固化（参照 `sql/change3_user_body.sql` 与 `BodyProfileService`）。食物数据真源三份同源：`MRD-PRD/foods_200.json（开发导入用）.json`（后端导入唯一真源）、`doscFile/projectFile/04-食物库数据字典.md`（口径规则）、`apps/zhenxinjian-uniapp/src/data/foods.ts`（小程序离线兜底，已全量对拍一致）。目标见 proposal「Why」。
+后端已有登录/游客（`users`）与身体档案（`user_body`）两层，软删 + 生成列活跃唯一 + 枚举字典的样板已在 Change 2/3 固化（参照 `sql/change3_user_body.sql` 与 `BodyProfileService`）。食物数据真源三份同源：`MRD-PRD/foods_200.json（开发导入用）.json`（后端导入唯一真源）、`docsFile/projectFile/04-食物库数据字典.md`（口径规则）、`apps/zhenxinjian-uniapp/src/data/foods.ts`（小程序离线兜底，已全量对拍一致）。目标见 proposal「Why」。
 
 ## Goals / Non-Goals
 

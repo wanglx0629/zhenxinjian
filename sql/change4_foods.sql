@@ -1,8 +1,8 @@
 -- Change 4 — 食物库：foods（内置 200 条 + 用户自定义，单表 + source 隔离）
 -- 作者: wanglx
 -- 依据: openspec/changes/food-library（design D1/D2/D3/D4）
---       doscFile/03-开发规范.md §4（逻辑删除 delete_flag、业务表必备 status、生成列活跃唯一）
---       doscFile/projectFile/04-食物库数据字典.md（每 100g 可食部口径、DECIMAL(5,1) 营养值）
+--       docsFile/03-开发规范.md §4（逻辑删除 delete_flag、业务表必备 status、生成列活跃唯一）
+--       docsFile/projectFile/04-食物库数据字典.md（每 100g 可食部口径、DECIMAL(5,1) 营养值）
 -- 口径: 碳水/蛋白/脂肪/单份克数 DECIMAL(5,1)（静态权威值防浮点漂移）；能量 INT；serving 默认 100
 -- 幂等: CREATE IF NOT EXISTS（已存在即跳过）；版本账见 schema_migrations。
 

@@ -27,13 +27,13 @@
 
 ### D2. 算法层 5 文件连同当前暂存区一并提交，拆两个 commit
 
-- **commit A（文档基线）**：已暂存的 MRD-PRD / docs / doscFile 更新 + `common/ai/` 四个文件删除 + pom/application.yml 的既有改动（升级与 AI 依赖移除）。
+- **commit A（文档基线）**：已暂存的 MRD-PRD / docs / docsFile 更新 + `common/ai/` 四个文件删除 + pom/application.yml 的既有改动（升级与 AI 依赖移除）。
 - **commit B（口径资产）**：`apps/zhenxinjian-uniapp/src/{utils,config,data}/` 5 个 untracked 文件，commit message 注明「48 项对拍通过，作为后端计算服务对拍基准」。
 - **理由**：文档/脚手架调整与口径资产入库是两类性质不同的变更，分开提交使 B 可被单独引用（后续 change 的对拍断言可指向该 commit hash）。
 
 ### D3. 食物库真源：`MRD-PRD/foods_200.json（开发导入用）.json`
 
-- **理由**：文件名即标注「开发导入用」；JSON 结构与 `data/foods.ts` 的 FoodItem 字段一致（见 `doscFile/projectFile/04-食物库数据字典.md` 口径 D1–D6），后端可零转换导入。xlsx/csv 为人工预览与原始档案，不参与导入。
+- **理由**：文件名即标注「开发导入用」；JSON 结构与 `data/foods.ts` 的 FoodItem 字段一致（见 `docsFile/projectFile/04-食物库数据字典.md` 口径 D1–D6），后端可零转换导入。xlsx/csv 为人工预览与原始档案，不参与导入。
 - **约束**：后端导入实现属 Change 4（food-library），本变更只做声明。
 
 ## Risks / Trade-offs

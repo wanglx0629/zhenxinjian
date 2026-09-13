@@ -1,7 +1,7 @@
 -- Change 7 — 三餐饮食提醒：user_reminders / reminder_send_log 两表
 -- 作者: wanglx
 -- 依据: openspec/changes/reminder（design D1）
---       doscFile/03-开发规范.md §4（逻辑删除 delete_flag、业务表必备 status、生成列活跃唯一）
+--       docsFile/03-开发规范.md §4（逻辑删除 delete_flag、业务表必备 status、生成列活跃唯一）
 -- 口径: 默认全开 08:30/12:00/18:30（MVP v1 §提醒，骨架 07:30 不采纳）；
 --       时间 CHAR(5) 存 HH:mm；订阅额度 INT 默认 0（授权上报 +1、推送成功 -1）
 -- 幂等: 两表 CREATE IF NOT EXISTS（已存在即跳过）；版本账见 schema_migrations。

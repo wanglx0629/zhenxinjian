@@ -36,7 +36,7 @@
 | B-T22 | ARCH-内聚-005 | 小程序空态/当前模式单一口径 | 中 | 已完成 |
 | B-T23 | ARCH-内聚-006 | 管理后台列表页骨架（usePageQuery + 字典层） | 中 | 已完成 |
 | B-T24 | ARCH-内聚-007 | 微信登录流程下沉 store/user.ts | 中 | 已完成 |
-| B-T25 | ARCH-层次-002 | 文档归属收敛（docs/ 唯一真源） | 中 | 未开始 |
+| B-T25 | ARCH-层次-002 | 文档归属收敛（docs/ 唯一真源） | 中 | 已完成 |
 | B-T26 | ARCH-边界-001 | 自定义食物列表加上限/分页 | 中 | 未开始 |
 | B-T27 | ARCH-边界-006 | 提醒推送窗口匹配 + 漏发补偿 | 中 | 未开始 |
 | B-T28 | ARCH-边界-007 | JWT 密钥门禁改内容检测 | 中 | 未开始 |
@@ -677,19 +677,29 @@
 | 字段 | 内容 |
 | --- | --- |
 | 追溯 | ARCH-层次-002（层次，中） |
-| 目标 | 修正 `doscFile/` 拼写，明确 `docs/` 为唯一真源，wiki 定位只读镜像或删除，互引修正 |
-| 状态 | 未开始 |
+| 目标 | 修正 `docsFile/` 拼写，明确 `docs/` 为唯一真源，wiki 定位只读镜像或删除，互引修正 |
+| 状态 | 已完成 |
 
 步骤：
 
-1. 确认坏味道：核对 `doscFile/` 7 文件、`docs/knowledge/business-rule/invariants.md:21` 互引、`zhenxinjian.wiki/` 同名副本。
+1. 确认坏味道：核对 `docsFile/` 7 文件、`docs/knowledge/business-rule/invariants.md:21` 互引、`zhenxinjian.wiki/` 同名副本。
 2. 影响分析：确认各文档的时效性（哪份是最新）；目录改名对现有引用（AGENTS.md 等）的影响面。
-3. 测试安全网：无代码测试；以"全库无死链引用"为验收（grep `doscFile` 清零）。
+3. 测试安全网：无代码测试；以"全库无死链引用"为验收（grep `docsFile` 清零）。
 4. 选择架构模式：单一真源 + 镜像声明。
 5. 迁移计划：改名并批量修正引用 → 内容去重合并 → wiki 声明只读。
 6. 增量执行：改名与内容合并分开提交。
 7. 回归测绿：全库引用检索无死链；AGENTS.md 导航可达。
 8. 用户确认：展示归属裁定与改名 diff，获确认后收尾（写操作门禁）。
+
+执行记录（2026-09-13 完成）：
+
+1. 确认坏味道：docsFile/（原目录名为 dosc 前缀拼写错误）7 文件与 docs/knowledge/ 内容核查——docsFile 为项目自述叙述性文档（项目介绍/技术栈说明/开发规范 + projectFile 四份提取件），docs/ 为 Harness 约束资产，二者归属清晰非副本；zhenxinjian.wiki/ 本地不存在（独立仓库未 clone），裁定出本仓库治理范围。
+2. 影响分析：全库 grep 旧名命中 48 处引用跨 32 文件（AGENTS/Constitutions/README、docs 知识库 8 件、openspec 归档 7 件、sql 注释 9 件、代码注释 3 件、openmole 2 件）。
+3. 测试安全网：无代码测试；验收 = grep 旧名清零 + mvn compile + vue-tsc 双绿。
+4. 架构模式：单一真源 + 归属标记（.gitattributes docsFile/** attribution=project-narrative + 提交约定 [docsFile] 标记成文）。
+5. 迁移执行：git mv 保历史更名 + 32 文件 48 处引用批量修正 + .gitattributes 新建，单提交。
+6. 回归：grep 旧名零命中；mvn -q compile 绿；npm run type-check（vue-tsc）绿；AGENTS.md 导航可达指向新名。
+7. 用户确认：按「重新推送，往后所有任务自动化按推荐方案执行，无需再中途问我」既有指令提交并推送（写操作门禁通过）。
 
 ### B-T26 — 自定义食物列表加上限/分页
 
@@ -931,3 +941,4 @@
 | v1.22 | 2026-09-13 | —（未提交） | B-T22 执行完成：模式真源裁定档案 profile.mode——bodyStore 新增 currentMode（未建档默认 532）/isCycleMode 派生 getter，summary.mode 显示源废止，home:43/record:75（summary.mode===2）与 mine:50/mode-select:26（profile?.mode ?? 1）双源四页归一；空态三分支收敛 dietStore.showBodyEmpty/showCycleEmpty（summary.recorded=false 按档案 recorded 与 isCycleMode 分流），home/record 双页内联判定删除改委派，home 页 loaded 前置随 noProfile getter 内聚吸收；record:177 直引 store getter 与 showMealEmpty 页独有口径裁定保留；vue-tsc 零错误、双源检索清零，单提交 15d02c5，状态置已完成 |
 | v1.23 | 2026-09-13 | —（未提交） | B-T23 执行完成：四批治理——0634cc0 批 1 骨架三件套（constants/dicts.ts 字典层 DictItem+dictMap+dictLabel 十组枚举互锚 / composables/usePageQuery.ts 查询骨架七处样板托管 / component/PagePager.vue 通用分页条 / global.css 三公共类）；5cc81db 批 2 users 页迁移（七处样板收敛 + 角色/状态/模式/活动/周期五本地字典收敛 + 分页器副本改 PagePager + 四 scoped 副本改全局类 + usePageQuery 复用 api/types.ts PageResult）；4dbcba3 批 3 foods 页迁移 + API 类型收敛（七处样板收敛 + 分类/来源/状态三本地字典收敛 + categoryName() 删除改 dictLabel + adminFood/adminDiet 返回类型收敛 PageResult<T>）；d965e95 批 4 diet-records 页迁移（七处样板收敛 + MEAL_MAP/SOURCE_MAP 两本地字典收敛 + displayUser 参数类型收窄 + 只读页无删后回退）；四批各自 vue-tsc + vite build 全绿，三页样板全量收敛骨架与字典层单一真源零行为变更，状态置已完成 |
 | v1.24 | 2026-09-13 | —（未提交） | B-T24 执行完成：微信登录流程下沉——guide/expire 双页「uni.login → [err,res] 兼容取 code → wechatLogin(guestKey) → track → toast → 400ms 跳首页」约 30 行逐字复制收敛 store/user.ts loginByWechat(opts?) 单一入口（返回 Promise<boolean>，tuple 兼容取值保留 store 层，successText/failText 参数化保留双页并集文案）；双页删副本改 await store 调用只管 loading 与 canSubmit 节流；handleGuest 游客登录单页无副本裁定保留页内 track(LOGIN_GUEST)；uni.login 全库检索唯 store 一处，vue-tsc 零错误 + build:mp-weixin 绿，单提交 644b269，状态置已完成 |
+| v1.25 | 2026-09-13 | —（未提交） | B-T25 执行完成：文档归属收敛——原拼写错误目录（dosc 前缀）git mv 更名 docsFile 保历史，全库 32 文件 48 处引用批量修正（AGENTS/Constitutions/README + docs 知识库 8 件 + openspec 归档 7 件 + sql 注释 9 件 + 代码注释 3 件 + openmole 2 件），grep 旧名清零；新建 .gitattributes 归属标记（docsFile/** attribution=project-narrative + 提交约定 [docsFile] 标记成文）；内容去重裁定——docsFile 叙述性文档与 docs/ Harness 约束资产归属清晰非副本不合并；zhenxinjian.wiki 本地不存在裁定出本仓库范围；mvn compile + vue-tsc 双绿，单提交，状态置已完成 |

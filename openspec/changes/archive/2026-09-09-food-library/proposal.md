@@ -42,5 +42,5 @@
 - **依赖**：无新增后端 maven / 前端 npm 依赖
 - **代码**：backend 新增 `controller/FoodController`、`service/FoodService`（+ 自定义食物服务）、`mapper/FoodMapper`、`domain/po|dto|vo` 若干、`common/enums` 新增食物来源/分类枚举、`resources/foods_200.json` + 幂等导入初始化器；uniapp 实现 `pages/food/index.vue`、新增食物详情与自定义食物页、`api/food.ts`
 - **数据**：`sql/` 新增 `foods` 表迁移脚本；`users` / `user_body` 表不变
-- **口径真源**：`doscFile/projectFile/04-食物库数据字典.md`；导入源 `MRD-PRD/foods_200.json（开发导入用）.json`（已与 xlsx、`foods.ts` 全量对拍一致）
+- **口径真源**：`docsFile/projectFile/04-食物库数据字典.md`；导入源 `MRD-PRD/foods_200.json（开发导入用）.json`（已与 xlsx、`foods.ts` 全量对拍一致）
 - **前置**：依赖 Change 1/2 已归档；Change 5 饮食记录（`diet_records` 快照引用食物）依赖本变更的食物表与接口

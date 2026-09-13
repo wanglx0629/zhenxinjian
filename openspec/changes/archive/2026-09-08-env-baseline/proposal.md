@@ -13,7 +13,7 @@ MVP v1 开发启动前存在三处环境/资产隐患，若不在业务 change �
 - **端口统一**：后端 `application.yml` 的 `server.port` 从 1215 改回 **8080**（与全部文档、front 代理、uniapp 默认值对齐，改动面最小）；同步核对 front Vite 代理与 uniapp `BASE_URL` 无需再改。
 - **口径资产入库**：将 `apps/zhenxinjian-uniapp/src/` 下的 `utils/calculator.ts`、`utils/validate.ts`、`utils/format.ts`、`config/constants.ts`、`data/foods.ts` 提交入库，作为计算口径的版本锚点。
 - **食物库真源声明**：明确 `MRD-PRD/foods_200.json（开发导入用）.json` 为后端 foods 表导入的唯一真源，其余 xlsx/csv 为预览/原始档案。
-- 顺带处理：当前工作区中已暂存的 V1.1 需求文档更新（MRD-PRD/、docs/、doscFile/ 等）与已删除的 `common/ai/` 四个文件，随本变更一并提交，使仓库回到「干净基线 + 算法层就绪」状态。
+- 顺带处理：当前工作区中已暂存的 V1.1 需求文档更新（MRD-PRD/、docs/、docsFile/ 等）与已删除的 `common/ai/` 四个文件，随本变更一并提交，使仓库回到「干净基线 + 算法层就绪」状态。
 
 ## Capabilities
 

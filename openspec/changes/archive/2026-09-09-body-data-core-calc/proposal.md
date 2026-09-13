@@ -40,5 +40,5 @@
 - **依赖**：无新增后端 maven / 前端 npm 依赖
 - **代码**：backend 新增 `controller/BodyController`、`service/BodyProfileService` + `BodyCalcService`、`mapper/UserBodyMapper(+History)`、`domain/po|dto|vo` 若干、`common/enums` 新增性别/活动系数/缺口档位字典枚举；uniapp 新增 `pages/body/profile.vue`、`pages/body/result.vue`、`api/body.ts`，`pages.json` 注册两页
 - **数据**：`sql/` 新增 `user_body` + 历史表迁移脚本；`users` 表不变
-- **口径真源**：`doscFile/projectFile/02-业务规则与公式速查.md`（48 项对拍口径）；小程序 `calculator.ts` 降级为展示预览与离线兜底
+- **口径真源**：`docsFile/projectFile/02-业务规则与公式速查.md`（48 项对拍口径）；小程序 `calculator.ts` 降级为展示预览与离线兜底
 - **前置**：依赖 Change 1（登录/游客身份）已归档；首页 Dashboard、模式选择、食物库等后续 change 依赖本变更的档案与计算结果

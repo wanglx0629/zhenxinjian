@@ -1,0 +1,5 @@
+# 文档归属标记（B-T25 / ARCH-层次-002）
+# docsFile/ = 项目自述叙述性文档唯一真源（01-项目介绍 / 02-技术栈说明 / 03-开发规范 + projectFile/ 四份提取件）
+# docs/     = Harness 约束资产真源（harness / knowledge / prd），与 docsFile/ 不互为副本
+# 提交约定：docsFile/ 下内容变更，commit message 须含 [docsFile] 标记
+docsFile/** text eol=lf attribution=project-narrative

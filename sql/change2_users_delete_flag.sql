@@ -1,6 +1,6 @@
 -- Change 2 — users 表逻辑删除列改名 deleted → delete_flag（建表规约统一）
 -- 作者: wanglx
--- 依据: doscFile/03-开发规范.md §2.2 / §4.3（所有表逻辑删除列统一命名 delete_flag）
+-- 依据: docsFile/03-开发规范.md §2.2 / §4.3（所有表逻辑删除列统一命名 delete_flag）
 -- 说明: RENAME COLUMN 同步更新依赖该列的两个活跃唯一生成列表达式，数据无需回填；
 --       status 语义扩为三态（0冻结 1正常 2注销，见 UserStatusEnum），存量数据 0/1 语义兼容。
 -- 幂等: MySQL DDL 自动提交不可事务回滚，改分步幂等守卫——每步执行前实时查 information_schema，

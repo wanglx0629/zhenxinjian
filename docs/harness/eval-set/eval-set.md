@@ -29,7 +29,7 @@
 | EVAL-019 | 新用户首次打开小程序 | 弹窗提示游客 3 天体验规则，确认后进入游客模式（完整功能无阉割） | [business.md](../context-package/business.md) §1.2 |
 | EVAL-020 | 已记录饮食当日到达提醒时间 | 不重复推送（每日单次） | [business.md](../context-package/business.md) §1.4 |
 | EVAL-021 | 平台期检测：近 7 天体重记录 [55.0, 55.1, 54.9, 55.05, 55.0]（最大-最小 = 0.2 < 0.3） | 判定平台期成立，触发单次微调（碳水 −20g / 热量 −80kcal）；记录不足 2 条或波动 ≥ 0.3kg 不判定 | [invariants.md](../../knowledge/business-rule/invariants.md) I5 |
-| EVAL-022 | 食物库检索「白米饭」并录入 150g | 命中 F002 米饭（蒸）；换算碳 38.9g / 蛋 3.9g / 脂 0.5g / 热量 175kcal（每 100g × 1.5 口径） | [business.md](../context-package/business.md) §1.4、`doscFile/projectFile/04-食物库数据字典.md` |
+| EVAL-022 | 食物库检索「白米饭」并录入 150g | 命中 F002 米饭（蒸）；换算碳 38.9g / 蛋 3.9g / 脂 0.5g / 热量 175kcal（每 100g × 1.5 口径） | [business.md](../context-package/business.md) §1.4、`docsFile/projectFile/04-食物库数据字典.md` |
 
 ***
 

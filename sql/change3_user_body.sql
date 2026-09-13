@@ -1,7 +1,7 @@
 -- Change 3 — 身体数据档案：user_body（当前档案）+ user_body_history（历史版本）
 -- 作者: wanglx
 -- 依据: openspec/changes/body-data-core-calc（design D1/D2/D3）；ADR-0002（覆盖当前值并留存历史版本）
---       doscFile/03-开发规范.md §4（逻辑删除 delete_flag、业务表必备 status、生成列活跃唯一、DOUBLE 存克数）
+--       docsFile/03-开发规范.md §4（逻辑删除 delete_flag、业务表必备 status、生成列活跃唯一、DOUBLE 存克数）
 -- 口径: BMR/TDEE/基准热量四舍五入取整 kcal（INT 存）；三宏克数保留 1 位小数（DOUBLE 存）
 -- 幂等: 两表 CREATE IF NOT EXISTS（已存在即跳过）；版本账见 schema_migrations。
 

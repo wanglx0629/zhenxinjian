@@ -20,7 +20,7 @@
   [code-standard](./docs/knowledge/code-standard/) ·
   [business-rule 不变量](./docs/knowledge/business-rule/invariants.md)
 - 需求：[PRD 索引](./docs/prd/README.md)
-- 项目自述：[项目介绍](./doscFile/01-项目介绍.md) · [技术栈说明](./doscFile/02-技术栈说明.md) · [开发规范](./doscFile/03-开发规范.md)
+- 项目自述：[项目介绍](./docsFile/01-项目介绍.md) · [技术栈说明](./docsFile/02-技术栈说明.md) · [开发规范](./docsFile/03-开发规范.md)
 
 ## 项目是什么
 
@@ -46,16 +46,16 @@ cd apps/zhenxinjian-uniapp && npm run dev:mp-weixin
 
 ## 新增业务 CRUD
 
-> 新增 CRUD 请按 [Java 代码规范](./docs/knowledge/code-standard/java/standard.md) 与 [开发规范](./doscFile/03-开发规范.md) 手写样板，并完整遵守分层、软删、`Result`/`ExceptionConstant`、活跃唯一约束等约定。
+> 新增 CRUD 请按 [Java 代码规范](./docs/knowledge/code-standard/java/standard.md) 与 [开发规范](./docsFile/03-开发规范.md) 手写样板，并完整遵守分层、软删、`Result`/`ExceptionConstant`、活跃唯一约束等约定。
 
 ## 硬性边界（摘要，全文见宪法 §5）
 
 ### Always
 
-- Git 提交信息：功能开发用 `feature：功能说明`；修 bug 用 `fix：问题说明`（详见 [开发规范 §10](./doscFile/03-开发规范.md)）
+- Git 提交信息：功能开发用 `feature：功能说明`；修 bug 用 `fix：问题说明`（详见 [开发规范 §10](./docsFile/03-开发规范.md)）
 - 错误文案进 `ExceptionConstant`；接口返回 `Result`；注释：`作者: wanglx`（另起一行）
 - 核心计算逻辑后置后端；人体数据区间前后端双重校验
-- MySQL / Redis 遵守 [开发规范](./doscFile/03-开发规范.md) §4、§5
+- MySQL / Redis 遵守 [开发规范](./docsFile/03-开发规范.md) §4、§5
 - **建表规约**：所有表必备 `delete_flag`（`@TableLogic` 逻辑删除）；业务表必备 `status` 状态列；列名跨表统一；建表同时必须新建对应字典枚举（`common/enums/`，code+desc+of）
 
 ### Never
