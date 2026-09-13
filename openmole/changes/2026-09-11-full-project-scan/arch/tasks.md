@@ -34,7 +34,7 @@
 | B-T20 | ARCH-耦合-005 | 饮食编辑态改 id 拉取或 store 暂存 | 中 | 已完成 |
 | B-T21 | ARCH-内聚-004 | DietRecordService 职责拆分 + 小重复收敛 | 中 | 已完成 |
 | B-T22 | ARCH-内聚-005 | 小程序空态/当前模式单一口径 | 中 | 已完成 |
-| B-T23 | ARCH-内聚-006 | 管理后台列表页骨架（usePageQuery + 字典层） | 中 | 未开始 |
+| B-T23 | ARCH-内聚-006 | 管理后台列表页骨架（usePageQuery + 字典层） | 中 | 已完成 |
 | B-T24 | ARCH-内聚-007 | 微信登录流程下沉 store/user.ts | 中 | 未开始 |
 | B-T25 | ARCH-层次-002 | 文档归属收敛（docs/ 唯一真源） | 中 | 未开始 |
 | B-T26 | ARCH-边界-001 | 自定义食物列表加上限/分页 | 中 | 未开始 |
@@ -622,7 +622,7 @@
 | --- | --- |
 | 追溯 | ARCH-内聚-006（内聚，中） |
 | 目标 | 抽 `usePageQuery` composable + 通用分页条 + `constants/` 字典层，三个列表页迁移 |
-| 状态 | 未开始 |
+| 状态 | 已完成 |
 
 步骤：
 
@@ -634,6 +634,14 @@
 6. 增量执行：按页小步提交。
 7. 回归测绿：`npm run build` 绿；三页回归清单通过。
 8. 用户确认：展示骨架与迁移 diff，获确认后收尾（写操作门禁）。
+
+执行记录（2026-09-13，0634cc0 批 1 + 5cc81db 批 2 + 4dbcba3 批 3 + d965e95 批 4 四提交）：
+
+1. 批 1（0634cc0 骨架三件套）：新建 `constants/dicts.ts` 字典层——DictItem 统一 value/label/type 形态 + dictMap 码表 + dictLabel 兜底 '-'，USER_STATUS/USER_ROLE/DIET_MODE/ACTIVITY_LEVEL/PLAN_STATUS/FOOD_CATEGORY/FOOD_SOURCE/FOOD_STATUS/MEAL_TYPE/RECORD_SOURCE 十组与后端枚举互锚；新建 `composables/usePageQuery.ts` 查询骨架——loading/表格数据/总数托管 + 查询重置页码 + 分页回调 + 删后回退页码 + 挂载首载；新建 `component/PagePager.vue` 通用分页条含右对齐布局；`global.css` 新增 .list-page/.list-toolbar/.list-filters 三公共类自三页 scoped 副本收敛。
+2. 批 2（5cc81db users 页迁移）：loading/tableData/total/loadUsers/handleSearch/handlePageChange/onMounted 七处样板收敛 usePageQuery，删后回退页码改 reloadAfterDelete；角色/状态字典页内 4 处声明全量收敛 USER_ROLE_OPTIONS/USER_STATUS_OPTIONS 单一真源，MODE_MAP/ACTIVITY_MAP/PLAN_STATUS_MAP 三本地字典删除改 dictLabel；分页器副本改 PagePager；.users-page/.toolbar/.filters/.pager 四 scoped 副本删除改全局类；usePageQuery 复用 api/types.ts 既有 PageResult 删本地重复定义。
+3. 批 3（4dbcba3 foods 页迁移 + API 类型收敛）：foods 页七处样板收敛 usePageQuery，删后回退页码改 reloadAfterDelete；分类/来源/状态三本地字典删除改 FOOD_CATEGORY_OPTIONS/FOOD_SOURCE_MAP/FOOD_STATUS_MAP 单一真源，categoryName() 局部函数删除改 dictLabel；分页器副本改 PagePager；四 scoped 副本删除改全局类；adminFood.getFoodPage 与 adminDiet.getDietRecordPage 返回类型自内联 { records; total } 收敛 api/types.ts PageResult<T> 消除重复定义。
+4. 批 4（d965e95 diet-records 页迁移）：七处样板收敛 usePageQuery；MEAL_MAP/SOURCE_MAP 两本地字典删除改 MEAL_TYPE_MAP/MEAL_TYPE_OPTIONS/RECORD_SOURCE_OPTIONS 单一真源，displayUser 参数类型自 AdminDietRecord 收敛行内结构；分页器副本改 PagePager；四 scoped 副本删除改全局类；只读页无删后回退。
+5. 回归：四批各自 `vue-tsc + vite build` 全绿；三页样板（七处查询/分页/挂载 + 四 scoped 样式 + 分页器副本 + 本地字典）全量收敛骨架与字典层单一真源，零行为变更。
 
 ### B-T24 — 微信登录流程下沉 store/user.ts
 
@@ -911,3 +919,4 @@
 | v1.20 | 2026-09-13 | —（未提交） | B-T20 执行完成：裁定「URL 仅带 id + add 页从 diet store 当日分组按 id 回显」（dayData.meals[].records 本就缓存完整 DietRecordVO，编辑入口仅在列表页数据已在内存，非独立编辑态容器无刷新丢态面）；record/index.vue handleEdit 双分支全量 encodeURIComponent 拼接收敛单一 editId；add.vue onLoad 编辑分支删逐项 decode 改 store 查找回显（餐别/备注/三宏热量直取 VO、食物来源 foodStore.detail + amountG、中文备注不再经 URL 编解码，深链找不到 toast 引导返回）；encode/decodeURIComponent 检索清零，vue-tsc 零错误，单提交 2724839，状态置已完成 |
 | v1.21 | 2026-09-13 | —（未提交） | B-T21 执行完成（补登版本行，08f1a40 收尾时漏登）：f6c43c4 批 1 三处小重复收敛公共工具（round1 三处私有副本 → common/utils/Numbers.round1；operator() 六处 "user:"+userId 副本 → common/utils/Operators.user，AdminFoodService 无参 operator() 管理员用户名不同语义裁定保留；CORS origin env 解析双份 → common/utils/CorsOrigins.parse，过滤语义保留调用方本层）；641034b 批 2 拆汇总职责（新建 DietSummaryService 承接 summary() 整方法，DietRecordService 删 UserBodyMapper/CyclePlanService/Taper532Service 三依赖回归 CRUD+按日分组+hasRecord 单一职责，跨调网 Cycle/Taper 单向依赖零回边 DAG 无环，DietController 委派 /diet/summary）；守恒校验已由 B-T03 MacroConsistencyValidator 收口无需再拆；DietRecordServiceTest 15→11 + 新增 DietSummaryServiceTest 5 用例原样迁移，136 用例全绿，状态置已完成 |
 | v1.22 | 2026-09-13 | —（未提交） | B-T22 执行完成：模式真源裁定档案 profile.mode——bodyStore 新增 currentMode（未建档默认 532）/isCycleMode 派生 getter，summary.mode 显示源废止，home:43/record:75（summary.mode===2）与 mine:50/mode-select:26（profile?.mode ?? 1）双源四页归一；空态三分支收敛 dietStore.showBodyEmpty/showCycleEmpty（summary.recorded=false 按档案 recorded 与 isCycleMode 分流），home/record 双页内联判定删除改委派，home 页 loaded 前置随 noProfile getter 内聚吸收；record:177 直引 store getter 与 showMealEmpty 页独有口径裁定保留；vue-tsc 零错误、双源检索清零，单提交 15d02c5，状态置已完成 |
+| v1.23 | 2026-09-13 | —（未提交） | B-T23 执行完成：四批治理——0634cc0 批 1 骨架三件套（constants/dicts.ts 字典层 DictItem+dictMap+dictLabel 十组枚举互锚 / composables/usePageQuery.ts 查询骨架七处样板托管 / component/PagePager.vue 通用分页条 / global.css 三公共类）；5cc81db 批 2 users 页迁移（七处样板收敛 + 角色/状态/模式/活动/周期五本地字典收敛 + 分页器副本改 PagePager + 四 scoped 副本改全局类 + usePageQuery 复用 api/types.ts PageResult）；4dbcba3 批 3 foods 页迁移 + API 类型收敛（七处样板收敛 + 分类/来源/状态三本地字典收敛 + categoryName() 删除改 dictLabel + adminFood/adminDiet 返回类型收敛 PageResult<T>）；d965e95 批 4 diet-records 页迁移（七处样板收敛 + MEAL_MAP/SOURCE_MAP 两本地字典收敛 + displayUser 参数类型收窄 + 只读页无删后回退）；四批各自 vue-tsc + vite build 全绿，三页样板全量收敛骨架与字典层单一真源零行为变更，状态置已完成 |

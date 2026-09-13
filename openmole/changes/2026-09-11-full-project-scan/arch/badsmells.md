@@ -34,7 +34,7 @@
 | ARCH-耦合-005 | 耦合 | 中 | 已消除 |
 | ARCH-内聚-004 | 内聚 | 中 | 已消除 |
 | ARCH-内聚-005 | 内聚 | 中 | 已消除 |
-| ARCH-内聚-006 | 内聚 | 中 | 未清除 |
+| ARCH-内聚-006 | 内聚 | 中 | 已消除 |
 | ARCH-内聚-007 | 内聚 | 中 | 未清除 |
 | ARCH-层次-002 | 层次 | 中 | 未清除 |
 | ARCH-边界-001 | 边界 | 中 | 未清除 |
@@ -375,7 +375,7 @@
 | 根因 | 无列表页骨架组件与字典层 |
 | 影响 | 每个新列表页复制 ~60 行样板 |
 | 修复建议 | 抽 `usePageQuery` composable + 通用分页条组件 + `constants/` 字典层 |
-| 状态 | 未清除 |
+| 状态 | 已消除（B-T23 于 2026-09-13 完成，0634cc0 批 1 + 5cc81db 批 2 + 4dbcba3 批 3 + d965e95 批 4 四提交——批 1 骨架三件套：`constants/dicts.ts` 字典层（DictItem value/label/type + dictMap 码表 + dictLabel 兜底，十组枚举互锚）、`composables/usePageQuery.ts` 查询骨架（loading/数据/总数/查询重置/分页回调/删后回退/挂载首载七处托管）、`component/PagePager.vue` 通用分页条、`global.css` 三公共类；批 2 users 页迁移（七处样板收敛 + 五本地字典收敛 + PagePager + 四 scoped 改全局类 + PageResult 复用）；批 3 foods 页迁移 + API 类型收敛（七处样板收敛 + 三本地字典收敛 + categoryName() 删除改 dictLabel + adminFood/adminDiet 返回类型收敛 PageResult<T>）；批 4 diet-records 页迁移（七处样板收敛 + 两本地字典收敛 + displayUser 参数类型收窄 + 只读页无删后回退）；四批各自 vue-tsc + vite build 全绿，零行为变更） |
 
 ### ARCH-内聚-007 — 小程序微信登录流程双份复制
 
@@ -589,3 +589,4 @@
 | v1.21 | 2026-09-13 | —（未提交） | B-T20 完成，ARCH-耦合-005 置"已消除"（饮食编辑态 URL 全量 encodeURIComponent 传参改「URL 仅带 id + add 页从 diet store 当日分组按 id 回显」，中文备注不再经 URL 编解码，深链找不到 toast 引导返回；encode/decodeURIComponent 检索清零，vue-tsc 零错误）。余 16 条未清除 |
 | v1.22 | 2026-09-13 | —（未提交） | B-T21 完成（补登版本行，08f1a40 收尾时漏登），ARCH-内聚-004 置"已消除"（批 1 三处小重复收敛公共工具——round1→Numbers.round1、operator()→Operators.user、CORS 解析→CorsOrigins.parse；批 2 新建 DietSummaryService 承接 summary() 整方法，DietRecordService 删三依赖回归 CRUD+按日分组+hasRecord 单一职责，跨调网单向零回边 DAG 无环；136 用例全绿）。余 15 条未清除 |
 | v1.23 | 2026-09-13 | —（未提交） | B-T22 完成，ARCH-内聚-005 置"已消除"（模式真源裁定档案 profile.mode——bodyStore 新增 currentMode/isCycleMode 派生 getter，summary.mode 显示源废止，home/record/mine/mode-select 四页双源归一；空态三分支收敛 dietStore.showBodyEmpty/showCycleEmpty 单一真源，home/record 内联判定删除改委派，loaded 前置随 noProfile getter 内聚吸收；vue-tsc 零错误、双源检索清零）。余 14 条未清除 |
+| v1.24 | 2026-09-13 | —（未提交） | B-T23 完成，ARCH-内聚-006 置"已消除"（四批治理——0634cc0 批 1 骨架三件套：constants/dicts.ts 字典层十组枚举互锚 / composables/usePageQuery.ts 查询骨架七处托管 / component/PagePager.vue 通用分页条 / global.css 三公共类；5cc81db 批 2 users 页迁移（七处样板 + 五本地字典 + PagePager + 四 scoped 改全局 + PageResult 复用）；4dbcba3 批 3 foods 页迁移 + API 类型收敛（七处样板 + 三本地字典 + categoryName() 删除 + adminFood/adminDiet PageResult<T>）；d965e95 批 4 diet-records 页迁移（七处样板 + 两本地字典 + displayUser 参数收窄 + 只读无删后回退）；四批各自 vue-tsc + vite build 全绿，零行为变更）。余 13 条未清除 |
