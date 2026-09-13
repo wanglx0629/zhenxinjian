@@ -881,7 +881,7 @@
 | --- | --- |
 | 追溯 | ARCH-边界-002（边界，低） |
 | 目标 | `AUTH_SKIP_URLS` 改精确/前缀匹配；评估 Token 存储介质（sessionStorage + 短会话） |
-| 状态 | 未开始 |
+| 状态 | 已完成 |
 
 步骤：
 
@@ -893,6 +893,16 @@
 6. 增量执行：分开提交。
 7. 回归测绿：`npm run build` 绿；免鉴权路径回归。
 8. 用户确认：展示改造/评估结论，获确认后收尾（写操作门禁）。
+
+执行记录（2026-09-13 完成）：
+
+1. 确认坏味道：`request.ts:34,47` `AUTH_SKIP_URLS.some(path => url.includes(path))` 子串匹配——未来含白名单子串的 URL（如 `/admin/auth/login-log`、`/auth/login-history`）会被误跳过不带 Token；`store/user.ts:13,24,31,37` token 存 localStorage。
+2. 影响分析：白名单全库检索调用方仅 `auth.ts` 两处（`/auth/login`、`/auth/captcha` 精确路径无 query），改「去 query 后全等」精确匹配并兼容未来 cache-busting 参数（`.split('?')[0]`）。
+3. 存储介质评估（裁定结论成文、不改实现）：保持 localStorage——①管理后台无 XSS 注入面（Element Plus 默认转义、全库无 v-html/eval），Token 被窃前提当前不成立；②sessionStorage 按标签页隔离，管理端多标签页每页需重登、关浏览器即丢登录，与「刷新保持登录」诉求冲突 UX 退化明显；③XSS 在同标签内同样可读 sessionStorage，换介质防御增益有限；④纵深防御已具备：后端 `@PreAuthorize hasRole('ADMIN')` 服务端强制 + JWT 过期 + x-refresh-token 滑动续期限定暴露窗口，真正缓解项为保持无 XSS 面与短 TTL（均已具备）。
+4. 架构模式：白名单精确化（子串匹配 → 去 query 全等）。
+5. 迁移执行：一批提交——request.ts 请求拦截器改 `AUTH_SKIP_URLS.includes(url.split('?')[0])`（存储介质评估结论不改实现，无第二提交）。
+6. 回归测绿：vue-tsc + vite build 零错误；登录/验证码两白名单路径精确命中行为不变（调用方均为无 query 精确路径），非白名单路径带 Token 行为不变，零行为变更。
+7. 用户确认：按「重新推送，往后所有任务自动化按推荐方案执行，无需再中途问我」既有指令提交并推送（写操作门禁通过）。
 
 ### B-T33 — 埋点接口限流
 

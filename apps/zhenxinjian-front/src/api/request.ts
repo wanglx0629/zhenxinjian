@@ -43,8 +43,10 @@ function clearSessionAndGoLogin(message = '登录已过期，请重新登录') {
 
 // 请求拦截：附加 Token
 instance.interceptors.request.use((config) => {
-  const url = config.url || ''
-  const skipAuth = AUTH_SKIP_URLS.some((path) => url.includes(path))
+  // B-T32：白名单改精确匹配（去 query 后全等），原 includes 子串匹配会误跳过
+  // 未来含白名单子串的 URL（如 /admin/auth/login-log）
+  const url = (config.url || '').split('?')[0]
+  const skipAuth = AUTH_SKIP_URLS.includes(url)
   if (!skipAuth) {
     const token = authHooks?.getToken()
     if (token) {

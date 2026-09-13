@@ -43,7 +43,7 @@
 | ARCH-模块化-001 | 模块化 | 低 | 已消除 |
 | ARCH-模块化-002 | 模块化 | 低 | 已消除 |
 | ARCH-模块化-003 | 模块化 | 低 | 已消除 |
-| ARCH-边界-002 | 边界 | 低 | 未清除 |
+| ARCH-边界-002 | 边界 | 低 | 已消除 |
 | ARCH-边界-003 | 边界 | 低 | 未清除 |
 | ARCH-边界-008 | 边界 | 低 | 未清除 |
 | ARCH-演进-006 | 演进 | 低 | 未清除 |
@@ -501,7 +501,7 @@
 | 根因 | 后台安全基线未专项评审 |
 | 影响 | 纵深防御薄弱（当前无 XSS 入口故实际风险低） |
 | 修复建议 | 白名单改精确/前缀匹配；评估 sessionStorage + 短会话 |
-| 状态 | 未清除 |
+| 状态 | 已消除（B-T32 于 2026-09-13 完成，单提交——白名单子串匹配改精确匹配：`request.ts` 请求拦截器 `AUTH_SKIP_URLS.some(path => url.includes(path))` 改 `AUTH_SKIP_URLS.includes(url.split('?')[0])` 去 query 全等，未来含白名单子串的 URL（如 `/admin/auth/login-log`）不再被误跳过，调用方仅 auth.ts 两处精确路径无 query 行为不变；Token 存储介质评估裁定保持 localStorage 不改实现——①管理后台无 XSS 注入面（Element Plus 默认转义、全库无 v-html/eval）被窃前提不成立；②sessionStorage 按标签页隔离多标签每页需重登、关浏览器丢登录与刷新保持登录诉求冲突；③XSS 同标签内同样可读 sessionStorage 换介质增益有限；④纵深防御已具备——后端 @PreAuthorize hasRole('ADMIN') 服务端强制 + JWT 过期 + x-refresh-token 滑动续期限定暴露窗口；vue-tsc + vite build 零错误零行为变更） |
 
 ### ARCH-边界-003 — 埋点接口匿名开放无限流
 
@@ -598,3 +598,4 @@
 | v1.30 | 2026-09-13 | —（未提交） | B-T29 完成，ARCH-模块化-001 置"已消除"（App.vue 新增非 scoped 全局样式块承载 .panel/.panel-title/.btn-primary 三类单一真源；12 页处理：7 页删一致副本、3 页漂移保留加注释、2 页删一致副本；.modal* 三变体漂移大裁定不全局化；超大页拆分经前序任务已收敛裁定期望达成不强制拆分；vue-tsc 零错误 + build:mp-weixin 构建绿，13 文件改动零行为变更）。余 7 条未清除 |
 | v1.31 | 2026-09-13 | —（未提交） | B-T30 完成，ARCH-模块化-002 置"已消除"（扫描证据裁定有误：`git ls-files`/`git log --all --full-history`/`git ls-tree ee2a2fa` 三路核对 MRD-PRD 从未被 git 追踪，无需 `git rm -r`；.gitignore 新增 `MRD-PRD/` 防复发规则（原型需求产物不入库，仅保留 PRD 文档在 docs/prd/）；代码引用仅 FoodLibraryInitializer.java:38 注释来源标注不依赖目录；mvn test 全绿零影响；目录保留磁盘本地归档含 PRD 文档与高保真原型 HTML）。余 6 条未清除 |
 | v1.32 | 2026-09-13 | —（未提交） | B-T31 完成，ARCH-模块化-003 置"已消除"（users 345→127 行拆 UserEditDialog+UserDetailDrawer、foods 270→149 行拆 FoodEditDialog，组件落位 view/<name>/components/，defineExpose open(row?) + @saved 契约，字段/校验/交互逐字迁移零行为变更；dashboard echarts 全量改按需 echarts/core 五项注册；vue-tsc + vite build 双绿；echarts chunk 1,039.24→486.08 kB/-53.2%，gzip 345.09→163.89 kB/-52.5%，总 JS 约 2,302→1,749 kB）。余 5 条未清除 |
+| v1.33 | 2026-09-13 | —（未提交） | B-T32 完成，ARCH-边界-002 置"已消除"（AUTH_SKIP_URLS 子串匹配改去 query 全等精确匹配，未来含白名单子串 URL 不再误跳过；Token 存储评估裁定保持 localStorage——无 XSS 注入面 + sessionStorage 标签页隔离 UX 退化 + 同标签内 XSS 同样可读换介质增益有限 + 后端 ADMIN 强制/JWT 过期/滑动续期纵深已具备；vue-tsc + vite build 零错误零行为变更）。余 4 条未清除 |
