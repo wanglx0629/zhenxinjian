@@ -4,17 +4,12 @@
  * 作者: wanglx
  */
 import { onMounted, ref } from 'vue'
+import type { PageResult } from '@/api/types'
 
 /** 分页查询参数基座（各页在此上扩展筛选字段） */
 export interface PageQueryBase {
   page: number
   size: number
-}
-
-/** 后端分页结果（Page<T> 序列化形态） */
-export interface PageResult<T> {
-  records?: T[]
-  total?: number
 }
 
 export function usePageQuery<T, Q extends PageQueryBase>(

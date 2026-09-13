@@ -3,30 +3,29 @@
  * 用户管理页（管理员）
  * 作者: wanglx
  */
-import { onMounted, reactive, ref } from 'vue'
+import { reactive, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import { addUser, deleteUser, getUserPage, updateUser } from '@/api/user'
 import { getUserProfile } from '@/api/adminUser'
 import type { UserProfile } from '@/api/adminUser'
 import type { UserInfo } from '@/api/types'
-
-const loading = ref(false)
-const tableData = ref<UserInfo[]>([])
-const total = ref(0)
+import PagePager from '@/component/PagePager.vue'
+import { usePageQuery } from '@/composables/usePageQuery'
+import {
+  ACTIVITY_LEVEL_OPTIONS,
+  DIET_MODE_OPTIONS,
+  PLAN_STATUS_OPTIONS,
+  USER_ROLE_MAP,
+  USER_ROLE_OPTIONS,
+  USER_STATUS_MAP,
+  USER_STATUS_OPTIONS,
+  dictLabel
+} from '@/constants/dicts'
 
 const drawerVisible = ref(false)
 const profileLoading = ref(false)
 const profile = ref<UserProfile | null>(null)
-
-/** 减脂模式字典（后端 DietModeEnum：1=532 2=碳循环） */
-const MODE_MAP: Record<number, string> = { 1: '532 碳水渐降', 2: '碳循环' }
-
-/** 活动系数字典（后端 ActivityLevelEnum） */
-const ACTIVITY_MAP: Record<number, string> = { 1: '久坐', 2: '轻度', 3: '中度', 4: '高度' }
-
-/** 周期状态字典（1进行中 2已完成 3已终止） */
-const PLAN_STATUS_MAP: Record<number, string> = { 1: '进行中', 2: '已完成', 3: '已终止' }
 
 /** 打开用户聚合详情抽屉 */
 async function openDetail(row: UserInfo) {
@@ -40,13 +39,6 @@ async function openDetail(row: UserInfo) {
   }
 }
 
-/** 用户状态字典（后端 UserStatusEnum：0冻结 1正常 2注销） */
-const STATUS_MAP: Record<number, { label: string; type: 'success' | 'danger' | 'info' }> = {
-  0: { label: '冻结', type: 'danger' },
-  1: { label: '正常', type: 'success' },
-  2: { label: '注销', type: 'info' }
-}
-
 const query = reactive({
   page: 1,
   size: 10,
@@ -54,6 +46,18 @@ const query = reactive({
   status: undefined as number | undefined,
   role: ''
 })
+
+/** 列表查询骨架（B-T23：loading/数据/分页回调/删后回退收敛 composable） */
+const { loading, tableData, total, load, handleSearch, handlePageChange, reloadAfterDelete } =
+  usePageQuery(query, q =>
+    getUserPage({
+      page: q.page,
+      size: q.size,
+      keyword: q.keyword || undefined,
+      status: q.status,
+      role: q.role || undefined
+    })
+  )
 
 const dialogVisible = ref(false)
 const dialogTitle = ref('新增用户')
@@ -92,23 +96,6 @@ const rules: FormRules = {
     }
   ],
   role: [{ required: true, message: '请选择角色', trigger: 'change' }]
-}
-
-async function loadUsers() {
-  loading.value = true
-  try {
-    const page = await getUserPage({
-      page: query.page,
-      size: query.size,
-      keyword: query.keyword || undefined,
-      status: query.status,
-      role: query.role || undefined
-    })
-    tableData.value = page.records || []
-    total.value = page.total || 0
-  } finally {
-    loading.value = false
-  }
 }
 
 function resetForm() {
@@ -176,7 +163,7 @@ async function handleSubmit() {
       ElMessage.success('新增成功')
     }
     dialogVisible.value = false
-    await loadUsers()
+    await load()
   } finally {
     submitting.value = false
   }
@@ -192,29 +179,14 @@ async function handleDelete(row: UserInfo) {
   }
   await deleteUser(row.id)
   ElMessage.success('删除成功')
-  if (tableData.value.length === 1 && query.page > 1) {
-    query.page -= 1
-  }
-  await loadUsers()
+  await reloadAfterDelete()
 }
-
-function handleSearch() {
-  query.page = 1
-  loadUsers()
-}
-
-function handlePageChange(page: number) {
-  query.page = page
-  loadUsers()
-}
-
-onMounted(loadUsers)
 </script>
 
 <template>
-  <div class="users-page">
-    <div class="toolbar">
-      <div class="filters">
+  <div class="list-page">
+    <div class="list-toolbar">
+      <div class="list-filters">
         <el-input
           v-model="query.keyword"
           clearable
@@ -223,13 +195,10 @@ onMounted(loadUsers)
           @keyup.enter="handleSearch"
         />
         <el-select v-model="query.status" clearable placeholder="状态" style="width: 120px">
-          <el-option label="冻结" :value="0" />
-          <el-option label="正常" :value="1" />
-          <el-option label="注销" :value="2" />
+          <el-option v-for="o in USER_STATUS_OPTIONS" :key="o.value" :label="o.label" :value="o.value" />
         </el-select>
         <el-select v-model="query.role" clearable placeholder="角色" style="width: 120px">
-          <el-option label="管理员" value="ADMIN" />
-          <el-option label="普通用户" value="USER" />
+          <el-option v-for="o in USER_ROLE_OPTIONS" :key="o.value" :label="o.label" :value="o.value" />
         </el-select>
         <el-button type="primary" @click="handleSearch">查询</el-button>
       </div>
@@ -243,15 +212,15 @@ onMounted(loadUsers)
       <el-table-column prop="email" label="邮箱" min-width="160" />
       <el-table-column prop="role" label="角色" width="100">
         <template #default="{ row }">
-          <el-tag :type="row.role === 'ADMIN' ? 'danger' : 'info'" size="small">
-            {{ row.role === 'ADMIN' ? '管理员' : '普通用户' }}
+          <el-tag :type="USER_ROLE_MAP[row.role]?.type || 'info'" size="small">
+            {{ USER_ROLE_MAP[row.role]?.label ?? '未知' }}
           </el-tag>
         </template>
       </el-table-column>
       <el-table-column prop="status" label="状态" width="90">
         <template #default="{ row }">
-          <el-tag :type="STATUS_MAP[row.status]?.type || 'info'" size="small">
-            {{ STATUS_MAP[row.status]?.label ?? '未知' }}
+          <el-tag :type="USER_STATUS_MAP[row.status]?.type || 'info'" size="small">
+            {{ USER_STATUS_MAP[row.status]?.label ?? '未知' }}
           </el-tag>
         </template>
       </el-table-column>
@@ -264,16 +233,7 @@ onMounted(loadUsers)
       </el-table-column>
     </el-table>
 
-    <div class="pager">
-      <el-pagination
-        background
-        layout="total, prev, pager, next"
-        :total="total"
-        :page-size="query.size"
-        :current-page="query.page"
-        @current-change="handlePageChange"
-      />
-    </div>
+    <PagePager :total="total" :page="query.page" :size="query.size" @change="handlePageChange" />
 
     <el-dialog v-model="dialogVisible" :title="dialogTitle" width="480px" destroy-on-close>
       <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
@@ -300,15 +260,12 @@ onMounted(loadUsers)
         </el-form-item>
         <el-form-item label="角色" prop="role">
           <el-select v-model="form.role" style="width: 100%">
-            <el-option label="管理员" value="ADMIN" />
-            <el-option label="普通用户" value="USER" />
+            <el-option v-for="o in USER_ROLE_OPTIONS" :key="o.value" :label="o.label" :value="o.value" />
           </el-select>
         </el-form-item>
         <el-form-item label="状态">
           <el-radio-group v-model="form.status">
-            <el-radio :value="1">正常</el-radio>
-            <el-radio :value="0">冻结</el-radio>
-            <el-radio :value="2">注销</el-radio>
+            <el-radio v-for="o in USER_STATUS_OPTIONS" :key="o.value" :value="o.value">{{ o.label }}</el-radio>
           </el-radio-group>
         </el-form-item>
       </el-form>
@@ -326,10 +283,10 @@ onMounted(loadUsers)
             <el-descriptions-item label="用户名">{{ profile.user.username }}</el-descriptions-item>
             <el-descriptions-item label="昵称">{{ profile.user.nickname || '-' }}</el-descriptions-item>
             <el-descriptions-item label="状态">
-              {{ STATUS_MAP[profile.user.status ?? -1]?.label ?? '未知' }}
+              {{ USER_STATUS_MAP[profile.user.status ?? -1]?.label ?? '未知' }}
             </el-descriptions-item>
             <el-descriptions-item label="角色">
-              {{ profile.user.role === 'ADMIN' ? '管理员' : '普通用户' }}
+              {{ dictLabel(USER_ROLE_OPTIONS, profile.user.role) }}
             </el-descriptions-item>
             <el-descriptions-item label="注册时间">{{ profile.user.createTime || '-' }}</el-descriptions-item>
             <el-descriptions-item label="最近登录">{{ profile.user.lastLoginTime || '-' }}</el-descriptions-item>
@@ -345,7 +302,7 @@ onMounted(loadUsers)
               <el-descriptions-item label="当前体重">{{ profile.bodyProfile.weight ?? '-' }} kg</el-descriptions-item>
               <el-descriptions-item label="目标体重">{{ profile.bodyProfile.targetWeight ?? '-' }} kg</el-descriptions-item>
               <el-descriptions-item label="活动系数">
-                {{ ACTIVITY_MAP[profile.bodyProfile.activityLevel ?? -1] || '-' }}
+                {{ dictLabel(ACTIVITY_LEVEL_OPTIONS, profile.bodyProfile.activityLevel) }}
               </el-descriptions-item>
               <el-descriptions-item label="减脂缺口">{{ profile.bodyProfile.deficit ?? '-' }} kcal</el-descriptions-item>
               <el-descriptions-item label="BMR / TDEE">
@@ -362,7 +319,7 @@ onMounted(loadUsers)
 
           <el-descriptions title="当前模式与周期" :column="1" border class="mt">
             <el-descriptions-item label="当前模式">
-              {{ profile.currentMode != null ? MODE_MAP[profile.currentMode] || '-' : '-' }}
+              {{ dictLabel(DIET_MODE_OPTIONS, profile.currentMode) }}
             </el-descriptions-item>
             <template v-if="profile.currentPlan">
               <el-descriptions-item label="周期天数">{{ profile.currentPlan.cycleDays ?? '-' }} 天</el-descriptions-item>
@@ -370,7 +327,7 @@ onMounted(loadUsers)
                 {{ profile.currentPlan.startDate || '-' }} ~ {{ profile.currentPlan.endDate || '-' }}
               </el-descriptions-item>
               <el-descriptions-item label="周期状态">
-                {{ PLAN_STATUS_MAP[profile.currentPlan.status ?? -1] || '-' }}
+                {{ dictLabel(PLAN_STATUS_OPTIONS, profile.currentPlan.status) }}
               </el-descriptions-item>
             </template>
             <el-descriptions-item v-else label="进行中周期">无</el-descriptions-item>
@@ -382,35 +339,6 @@ onMounted(loadUsers)
 </template>
 
 <style scoped>
-.users-page {
-  background: var(--zhenxinjian-white);
-  border: 1px solid var(--zhenxinjian-border);
-  border-radius: 8px;
-  padding: 20px;
-}
-
-.toolbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 16px;
-  flex-wrap: wrap;
-}
-
-.filters {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.pager {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 16px;
-}
-
 .mt {
   margin-top: 16px;
 }
