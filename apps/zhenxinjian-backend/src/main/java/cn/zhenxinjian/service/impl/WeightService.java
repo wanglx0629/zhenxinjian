@@ -4,6 +4,7 @@ import cn.zhenxinjian.common.constant.CommonConstant;
 import cn.zhenxinjian.common.constant.ExceptionConstant;
 import cn.zhenxinjian.common.enums.AdjustActionEnum;
 import cn.zhenxinjian.common.exception.BusinessException;
+import cn.zhenxinjian.common.utils.Operators;
 import cn.zhenxinjian.domain.dto.WeightSaveDTO;
 import cn.zhenxinjian.domain.po.AdjustLog;
 import cn.zhenxinjian.domain.po.UserBody;
@@ -91,7 +92,7 @@ public class WeightService {
         record.setRecordDate(recordDate);
         record.setWeight(weight);
         record.setStatus(1);
-        record.setCreateBy(operator(userId));
+        record.setCreateBy(Operators.user(userId));
         weightRecordMapper.insert(record);
 
         // 平台下调/恢复判定（以当日体重为触发参考）
@@ -207,7 +208,7 @@ public class WeightService {
             if (isPlateau(userId)) {
                 body.setIsAdjusted(1);
                 body.setTriggerWeight(todayWeight);
-                body.setUpdateBy(operator(userId));
+                body.setUpdateBy(Operators.user(userId));
                 userBodyMapper.updateById(body);
                 insertLog(userId, AdjustActionEnum.DOWN, todayWeight);
                 log.info("[WeightService] 平台下调: userId={}, triggerWeight={}", userId, todayWeight);
@@ -221,7 +222,7 @@ public class WeightService {
                 .compareTo(RESTORE_DELTA) >= 0) {
             body.setIsAdjusted(0);
             body.setTriggerWeight(null);
-            body.setUpdateBy(operator(userId));
+            body.setUpdateBy(Operators.user(userId));
             userBodyMapper.updateById(body);
             insertLog(userId, AdjustActionEnum.RESTORE, todayWeight);
             log.info("[WeightService] 平台恢复: userId={}, weight={}", userId, todayWeight);
@@ -235,7 +236,7 @@ public class WeightService {
         logEntity.setAction(action.getCode());
         logEntity.setTriggerWeight(triggerWeight);
         logEntity.setStatus(1);
-        logEntity.setCreateBy(operator(userId));
+        logEntity.setCreateBy(Operators.user(userId));
         adjustLogMapper.insert(logEntity);
     }
 
@@ -249,10 +250,5 @@ public class WeightService {
         vo.setTriggerWeight(entity.getTriggerWeight());
         vo.setCreateTime(entity.getCreateTime());
         return vo;
-    }
-
-    /** 操作者标识（审计列） */
-    private String operator(Long userId) {
-        return "user:" + userId;
     }
 }

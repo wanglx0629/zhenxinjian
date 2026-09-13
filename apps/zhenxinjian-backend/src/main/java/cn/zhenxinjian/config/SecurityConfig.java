@@ -3,6 +3,7 @@ package cn.zhenxinjian.config;
 import cn.zhenxinjian.security.JwtAccessDeniedHandler;
 import cn.zhenxinjian.security.JwtAuthenticationEntryPoint;
 import cn.zhenxinjian.security.JwtAuthenticationFilter;
+import cn.zhenxinjian.common.utils.CorsOrigins;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import lombok.RequiredArgsConstructor;
@@ -93,14 +94,7 @@ public class SecurityConfig {
      * 解析 CORS 来源（支持 env 逗号分隔，禁止 *）
      */
     private List<String> resolveCorsOrigins(List<String> origins) {
-        if (CollUtil.isEmpty(origins)) {
-            return origins;
-        }
-        List<String> resolved = origins;
-        if (origins.size() == 1 && StrUtil.contains(origins.get(0), ',')) {
-            resolved = StrUtil.splitTrim(origins.get(0), ',');
-        }
-        return resolved.stream()
+        return CorsOrigins.parse(origins).stream()
                 .filter(o -> StrUtil.isNotBlank(o) && !"*".equals(o))
                 .toList();
     }

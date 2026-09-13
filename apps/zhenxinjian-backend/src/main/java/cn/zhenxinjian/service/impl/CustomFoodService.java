@@ -6,6 +6,7 @@ import cn.zhenxinjian.common.enums.FoodCategoryEnum;
 import cn.zhenxinjian.common.enums.FoodSourceEnum;
 import cn.zhenxinjian.common.exception.BusinessException;
 import cn.zhenxinjian.common.utils.MacroConsistencyValidator;
+import cn.zhenxinjian.common.utils.Operators;
 import cn.zhenxinjian.domain.dto.CustomFoodSaveDTO;
 import cn.zhenxinjian.domain.po.Food;
 import cn.zhenxinjian.domain.vo.FoodVO;
@@ -91,7 +92,7 @@ public class CustomFoodService {
         Food food = new Food();
         food.setUserId(userId);
         food.setSource(FoodSourceEnum.CUSTOM.getCode());
-        food.setCreateBy(operator(userId));
+        food.setCreateBy(Operators.user(userId));
         applyValues(food, dto, category);
         try {
             foodMapper.insert(food);
@@ -106,7 +107,7 @@ public class CustomFoodService {
     private FoodVO update(Long userId, CustomFoodSaveDTO dto, FoodCategoryEnum category) {
         Food food = selectOwnCustom(userId, dto.getId());
         applyValues(food, dto, category);
-        food.setUpdateBy(operator(userId));
+        food.setUpdateBy(Operators.user(userId));
         try {
             foodMapper.updateById(food);
         } catch (DuplicateKeyException e) {
@@ -185,10 +186,5 @@ public class CustomFoodService {
         FoodVO vo = new FoodVO();
         BeanUtils.copyProperties(food, vo);
         return vo;
-    }
-
-    /** 操作者标识（审计列） */
-    private String operator(Long userId) {
-        return "user:" + userId;
     }
 }

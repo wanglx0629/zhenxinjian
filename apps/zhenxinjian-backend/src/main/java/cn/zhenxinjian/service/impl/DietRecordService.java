@@ -8,6 +8,8 @@ import cn.zhenxinjian.common.enums.FoodSourceEnum;
 import cn.zhenxinjian.common.enums.MealTypeEnum;
 import cn.zhenxinjian.common.exception.BusinessException;
 import cn.zhenxinjian.common.utils.MacroConsistencyValidator;
+import cn.zhenxinjian.common.utils.Numbers;
+import cn.zhenxinjian.common.utils.Operators;
 import cn.zhenxinjian.domain.dto.DietRecordCreateDTO;
 import cn.zhenxinjian.domain.dto.DietRecordUpdateDTO;
 import cn.zhenxinjian.domain.po.CarbCycleDay;
@@ -104,7 +106,7 @@ public class DietRecordService {
         record.setRecordDate(date);
         record.setMealType(meal.getCode());
         record.setRemark(dto.getRemark());
-        record.setCreateBy(operator(userId));
+        record.setCreateBy(Operators.user(userId));
 
         if (DietRecordSourceEnum.MANUAL == source) {
             applyManual(record, dto.getName(), dto.getCarb(), dto.getProtein(), dto.getFat(), dto.getKcal());
@@ -128,7 +130,7 @@ public class DietRecordService {
         MealTypeEnum meal = resolveMeal(dto.getMealType());
         record.setMealType(meal.getCode());
         record.setRemark(dto.getRemark());
-        record.setUpdateBy(operator(userId));
+        record.setUpdateBy(Operators.user(userId));
 
         if (DietRecordSourceEnum.MANUAL.getCode().equals(record.getSource())) {
             applyManual(record, dto.getName(), dto.getCarb(), dto.getProtein(), dto.getFat(), dto.getKcal());
@@ -192,9 +194,9 @@ public class DietRecordService {
                 fat += r.getFatG();
                 kcal += r.getKcal();
             }
-            group.setCarb(round1(carb));
-            group.setProtein(round1(protein));
-            group.setFat(round1(fat));
+            group.setCarb(Numbers.round1(carb));
+            group.setProtein(Numbers.round1(protein));
+            group.setFat(Numbers.round1(fat));
             group.setKcal(kcal);
             groups.add(group);
             totalCarb += carb;
@@ -203,9 +205,9 @@ public class DietRecordService {
             totalKcal += kcal;
         }
         vo.setMeals(groups);
-        vo.setTotalCarb(round1(totalCarb));
-        vo.setTotalProtein(round1(totalProtein));
-        vo.setTotalFat(round1(totalFat));
+        vo.setTotalCarb(Numbers.round1(totalCarb));
+        vo.setTotalProtein(Numbers.round1(totalProtein));
+        vo.setTotalFat(Numbers.round1(totalFat));
         vo.setTotalKcal(totalKcal);
         return vo;
     }
@@ -236,9 +238,9 @@ public class DietRecordService {
         double protein = toDouble(sums.get("protein"));
         double fat = toDouble(sums.get("fat"));
         int kcal = (int) Math.round(toDouble(sums.get("kcal")));
-        vo.setCarbActual(round1(carb));
-        vo.setProteinActual(round1(protein));
-        vo.setFatActual(round1(fat));
+        vo.setCarbActual(Numbers.round1(carb));
+        vo.setProteinActual(Numbers.round1(protein));
+        vo.setFatActual(Numbers.round1(fat));
         vo.setKcalActual(kcal);
 
         UserBody body = userBodyMapper.selectOne(
@@ -264,7 +266,7 @@ public class DietRecordService {
             }
             vo.setRecorded(true);
             Double carbTarget = day.getCarbG() == null ? null
-                    : round1(day.getCarbG().doubleValue() + carbUplift);
+                    : Numbers.round1(day.getCarbG().doubleValue() + carbUplift);
             Double proteinTarget = day.getProteinG() == null ? null : day.getProteinG().doubleValue();
             Double fatTarget = day.getFatG() == null ? null : day.getFatG().doubleValue();
             int kcalTarget = (day.getKcal() == null ? 0 : day.getKcal()) + kcalUplift;
@@ -347,18 +349,18 @@ public class DietRecordService {
         record.setSource(DietRecordSourceEnum.MANUAL.getCode());
         record.setFoodName(name.trim());
         record.setAmountG(1.0);
-        record.setCarbG(round1(carb));
-        record.setProteinG(round1(protein));
-        record.setFatG(round1(fat));
+        record.setCarbG(Numbers.round1(carb));
+        record.setProteinG(Numbers.round1(protein));
+        record.setFatG(Numbers.round1(fat));
         record.setKcal(kcal);
     }
 
     /** 按快照每 100g 值 × 克数 ÷ 100 重算实际摄入（克数 1 位小数、热量取整） */
     private void applyIntakeFromSnapshot(DietRecord record, BigDecimal amount) {
         BigDecimal ratio = amount.divide(PER_100G, 4, RoundingMode.HALF_UP);
-        record.setCarbG(round1(record.getCarb100g().multiply(ratio)));
-        record.setProteinG(round1(record.getProtein100g().multiply(ratio)));
-        record.setFatG(round1(record.getFat100g().multiply(ratio)));
+        record.setCarbG(Numbers.round1(record.getCarb100g().multiply(ratio)));
+        record.setProteinG(Numbers.round1(record.getProtein100g().multiply(ratio)));
+        record.setFatG(Numbers.round1(record.getFat100g().multiply(ratio)));
         record.setKcal(BigDecimal.valueOf(record.getKcal100g()).multiply(ratio)
                 .setScale(0, RoundingMode.HALF_UP).intValue());
     }
@@ -417,22 +419,12 @@ public class DietRecordService {
         if (target == null || target <= 0) {
             return null;
         }
-        return round1(actual * 100 / target);
+        return Numbers.round1(actual * 100 / target);
     }
 
     /** Number → double 安全转换（SUM 聚合可能返回 BigDecimal/Double/Long） */
     private double toDouble(Object value) {
         return value instanceof Number ? ((Number) value).doubleValue() : 0d;
-    }
-
-    /** 1 位小数四舍五入 */
-    private static double round1(BigDecimal value) {
-        return value.setScale(1, RoundingMode.HALF_UP).doubleValue();
-    }
-
-    /** 1 位小数四舍五入 */
-    private static double round1(double value) {
-        return BigDecimal.valueOf(value).setScale(1, RoundingMode.HALF_UP).doubleValue();
     }
 
     /** PO → VO */
@@ -442,10 +434,5 @@ public class DietRecordService {
         MealTypeEnum meal = MealTypeEnum.of(record.getMealType());
         vo.setMealName(meal == null ? null : meal.getDesc());
         return vo;
-    }
-
-    /** 操作者标识（审计列） */
-    private String operator(Long userId) {
-        return "user:" + userId;
     }
 }

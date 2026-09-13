@@ -6,6 +6,7 @@ import cn.zhenxinjian.common.enums.ActivityLevelEnum;
 import cn.zhenxinjian.common.enums.DeficitOptionEnum;
 import cn.zhenxinjian.common.enums.GenderEnum;
 import cn.zhenxinjian.common.exception.BusinessException;
+import cn.zhenxinjian.common.utils.Operators;
 import cn.zhenxinjian.domain.dto.BodyProfileSaveDTO;
 import cn.zhenxinjian.domain.po.UserBody;
 import cn.zhenxinjian.domain.po.UserBodyHistory;
@@ -84,7 +85,7 @@ public class BodyProfileService {
         if (existing == null) {
             UserBody fresh = new UserBody();
             applyProfile(fresh, userId, dto, level, deficit, cfc, r);
-            fresh.setCreateBy(operator(userId));
+            fresh.setCreateBy(Operators.user(userId));
             try {
                 userBodyMapper.insert(fresh);
             } catch (DuplicateKeyException e) {
@@ -140,7 +141,7 @@ public class BodyProfileService {
         userBodyHistoryMapper.insert(history);
 
         applyProfile(existing, userId, dto, level, deficit, cfc, r);
-        existing.setUpdateBy(operator(userId));
+        existing.setUpdateBy(Operators.user(userId));
         // strictUpdateFill 仅在字段为空时填充，查询出的旧值需显式刷新
         existing.setUpdateTime(LocalDateTime.now());
         userBodyMapper.updateById(existing);
@@ -166,10 +167,5 @@ public class BodyProfileService {
         ub.setTargetCarb(r.carb());
         ub.setTargetProtein(r.protein());
         ub.setTargetFat(r.fat());
-    }
-
-    /** 操作者标识（审计列） */
-    private String operator(Long userId) {
-        return "user:" + userId;
     }
 }

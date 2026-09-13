@@ -4,6 +4,7 @@ import cn.zhenxinjian.common.constant.CommonConstant;
 import cn.zhenxinjian.common.constant.ExceptionConstant;
 import cn.zhenxinjian.common.enums.GenderEnum;
 import cn.zhenxinjian.common.exception.BusinessException;
+import cn.zhenxinjian.common.utils.Operators;
 import cn.zhenxinjian.domain.dto.MenstrualSaveDTO;
 import cn.zhenxinjian.domain.po.UserBody;
 import cn.zhenxinjian.domain.po.UserMenstrual;
@@ -99,14 +100,14 @@ public class MenstrualService {
         if (entity == null) {
             entity = new UserMenstrual();
             entity.setUserId(userId);
-            entity.setCreateBy(operator(userId));
+            entity.setCreateBy(Operators.user(userId));
             entity.setStatus(1);
         }
         entity.setEnabled(enabled);
         entity.setPeriodStartDate(startDate);
         entity.setCycleLen(cycleLen);
         entity.setPeriodDays(periodDays);
-        entity.setUpdateBy(operator(userId));
+        entity.setUpdateBy(Operators.user(userId));
         if (entity.getId() == null) {
             userMenstrualMapper.insert(entity);
         } else {
@@ -157,10 +158,5 @@ public class MenstrualService {
             vo.setKcalUplift(phase.kcalUplift());
         }
         return vo;
-    }
-
-    /** 操作者标识（审计列） */
-    private String operator(Long userId) {
-        return "user:" + userId;
     }
 }

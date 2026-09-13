@@ -6,6 +6,7 @@ import cn.zhenxinjian.common.enums.CycleDayTypeEnum;
 import cn.zhenxinjian.common.enums.CyclePlanStatusEnum;
 import cn.zhenxinjian.common.enums.DietModeEnum;
 import cn.zhenxinjian.common.exception.BusinessException;
+import cn.zhenxinjian.common.utils.Operators;
 import cn.zhenxinjian.domain.dto.CyclePlanCreateDTO;
 import cn.zhenxinjian.domain.po.CarbCycleDay;
 import cn.zhenxinjian.domain.po.CarbCyclePlan;
@@ -114,7 +115,7 @@ public class CyclePlanService {
         plan.setFatPool(result.fatPool());
         plan.setDailyProtein(result.dailyProtein());
         plan.setStatus(CyclePlanStatusEnum.ACTIVE.getCode());
-        plan.setCreateBy(operator(userId));
+        plan.setCreateBy(Operators.user(userId));
         carbCyclePlanMapper.insert(plan);
 
         List<CarbCycleDay> days = new ArrayList<>(cycleDays);
@@ -131,7 +132,7 @@ public class CyclePlanService {
             day.setFatG(d.fatG());
             day.setKcal(d.kcal());
             day.setStatus(1);
-            day.setCreateBy(operator(userId));
+            day.setCreateBy(Operators.user(userId));
             carbCycleDayMapper.insert(day);
             days.add(day);
         }
@@ -203,7 +204,7 @@ public class CyclePlanService {
             terminateActive(userId);
         }
         body.setMode(target.getCode());
-        body.setUpdateBy(operator(userId));
+        body.setUpdateBy(Operators.user(userId));
         userBodyMapper.updateById(body);
     }
 
@@ -257,7 +258,7 @@ public class CyclePlanService {
             return;
         }
         active.setStatus(CyclePlanStatusEnum.TERMINATED.getCode());
-        active.setUpdateBy(operator(userId));
+        active.setUpdateBy(Operators.user(userId));
         carbCyclePlanMapper.updateById(active);
         log.info("[CyclePlan] 周期终止: userId={}, planId={}", userId, active.getId());
     }
@@ -296,10 +297,5 @@ public class CyclePlanService {
         }
         vo.setDays(dayVOs);
         return vo;
-    }
-
-    /** 操作者标识（审计列） */
-    private String operator(Long userId) {
-        return "user:" + userId;
     }
 }

@@ -2,6 +2,7 @@ package cn.zhenxinjian.service.impl;
 
 import cn.zhenxinjian.common.enums.GenderEnum;
 import cn.zhenxinjian.common.enums.MenstrualPhaseEnum;
+import cn.zhenxinjian.common.utils.Numbers;
 import cn.zhenxinjian.domain.po.UserBody;
 import cn.zhenxinjian.domain.po.UserMenstrual;
 import cn.zhenxinjian.domain.vo.Taper532VO;
@@ -117,7 +118,7 @@ public class Taper532Service {
                 .setScale(0, RoundingMode.HALF_UP).intValue();
 
         Taper532VO.TodayTarget today = new Taper532VO.TodayTarget();
-        today.setCarb(round1(carb));
+        today.setCarb(Numbers.round1(carb));
         today.setProtein(body.getTargetProtein());
         today.setFat(body.getTargetFat());
         today.setKcal(kcal);
@@ -165,10 +166,5 @@ public class Taper532Service {
         item.setKcalDelta(kcalDelta);
         item.setPlateauTriggered(plateauTriggered);
         return item;
-    }
-
-    /** 克数 1 位小数 HALF_UP */
-    private static double round1(BigDecimal value) {
-        return value.setScale(1, RoundingMode.HALF_UP).doubleValue();
     }
 }

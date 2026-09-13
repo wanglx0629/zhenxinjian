@@ -1,7 +1,7 @@
 package cn.zhenxinjian.config;
 
-import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.zhenxinjian.common.utils.CorsOrigins;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
@@ -59,11 +59,7 @@ public class SecurityStartupChecker implements ApplicationRunner {
      * 生产环境要求显式 CORS，禁止 *
      */
     private void checkCors(boolean prod) {
-        List<String> origins = zhenxinjianProperties.getSecurity().getCorsAllowedOrigins();
-        List<String> resolved = CollUtil.isEmpty(origins) ? List.of() : origins;
-        if (resolved.size() == 1 && StrUtil.contains(resolved.get(0), ',')) {
-            resolved = StrUtil.splitTrim(resolved.get(0), ',');
-        }
+        List<String> resolved = CorsOrigins.parse(zhenxinjianProperties.getSecurity().getCorsAllowedOrigins());
         boolean hasStar = resolved.stream().anyMatch("*"::equals);
         boolean empty = resolved.stream().noneMatch(StrUtil::isNotBlank);
         if (prod && (empty || hasStar)) {

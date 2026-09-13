@@ -2,10 +2,8 @@ package cn.zhenxinjian.service.impl;
 
 import cn.zhenxinjian.common.enums.DeficitOptionEnum;
 import cn.zhenxinjian.common.enums.GenderEnum;
+import cn.zhenxinjian.common.utils.Numbers;
 import org.springframework.stereotype.Component;
-
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 
 /**
  * 身体核心计算服务（全产品唯一计算真源）
@@ -66,9 +64,9 @@ public class BodyCalcService {
         int bmr = roundKcal(bmrRaw);
         int tdee = roundKcal(bmrRaw * activityFactor);
         int targetKcal = tdee - deficit;
-        double carb = round1(targetKcal * MACRO_CARB_RATIO / KCAL_PER_G_CARB);
-        double protein = round1(targetKcal * MACRO_PROTEIN_RATIO / KCAL_PER_G_PROTEIN);
-        double fat = round1(targetKcal * MACRO_FAT_RATIO / KCAL_PER_G_FAT);
+        double carb = Numbers.round1(targetKcal * MACRO_CARB_RATIO / KCAL_PER_G_CARB);
+        double protein = Numbers.round1(targetKcal * MACRO_PROTEIN_RATIO / KCAL_PER_G_PROTEIN);
+        double fat = Numbers.round1(targetKcal * MACRO_FAT_RATIO / KCAL_PER_G_FAT);
         return new CalcResult(bmr, tdee, targetKcal, carb, protein, fat,
                 isLowKcalRisk(gender, targetKcal));
     }
@@ -93,11 +91,6 @@ public class BodyCalcService {
     /** 热量取整 kcal（四舍五入） */
     private int roundKcal(double v) {
         return (int) Math.round(v);
-    }
-
-    /** 克数保留 1 位小数（HALF_UP） */
-    private double round1(double v) {
-        return BigDecimal.valueOf(v).setScale(1, RoundingMode.HALF_UP).doubleValue();
     }
 
     /**
