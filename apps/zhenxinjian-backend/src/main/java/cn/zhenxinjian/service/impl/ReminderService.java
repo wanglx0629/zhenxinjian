@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.regex.Pattern;
 
 /**
@@ -60,6 +61,43 @@ public class ReminderService {
     private final WxMaConfiguration.WxMaProperties wxMaProperties;
 
     private final StringRedisTemplate stringRedisTemplate;
+
+    /**
+     * 扫描当前分钟到点的提醒设置（master 开且任一餐开关开且时间一致），供推送任务编排
+     *
+     * @param hhmm  当前时间 HH:mm
+     * @param limit 单次扫描条数上限（避免无上限 selectList）
+     * @return 到点设置列表
+     */
+    public List<UserReminder> scanDueReminders(String hhmm, int limit) {
+        return userReminderMapper.selectList(Wrappers.<UserReminder>lambdaQuery()
+                .eq(UserReminder::getMasterSwitch, 1)
+                .and(wrapper -> wrapper
+                        .and(b -> b.eq(UserReminder::getBreakfastSwitch, 1)
+                                .eq(UserReminder::getBreakfastTime, hhmm))
+                        .or(l -> l.eq(UserReminder::getLunchSwitch, 1)
+                                .eq(UserReminder::getLunchTime, hhmm))
+                        .or(d -> d.eq(UserReminder::getDinnerSwitch, 1)
+                                .eq(UserReminder::getDinnerTime, hhmm)))
+                .last("LIMIT " + limit));
+    }
+
+    /**
+     * 当日该餐别是否已成功推送过（I12 单次口径）
+     *
+     * @param userId     用户ID
+     * @param mealType   餐别（1早 2午 3晚）
+     * @param remindDate 提醒日期
+     * @return 已成功推送返回 true
+     */
+    public boolean hasSuccessPushToday(Long userId, Integer mealType, LocalDate remindDate) {
+        Long sentCount = reminderSendLogMapper.selectCount(Wrappers.<ReminderSendLog>lambdaQuery()
+                .eq(ReminderSendLog::getUserId, userId)
+                .eq(ReminderSendLog::getRemindDate, remindDate)
+                .eq(ReminderSendLog::getMealType, mealType)
+                .eq(ReminderSendLog::getSendStatus, ReminderSendStatusEnum.SUCCESS.getCode()));
+        return sentCount != null && sentCount > 0;
+    }
 
     /**
      * 查询当前用户提醒设置（无记录按默认值落库）

@@ -384,4 +384,22 @@ class DietRecordServiceTest {
         map.put("kcal", new BigDecimal(kcal));
         return map;
     }
+
+    /** 场景：hasRecord 有记录 → true（提醒推送「已记录不重复」判定下沉查询） */
+    @Test
+    void hasRecord_existing_returnsTrue() {
+        when(dietRecordMapper.selectCount(any())).thenReturn(2L);
+
+        assertTrue(service.hasRecord(1L, LocalDate.now(), MealTypeEnum.BREAKFAST.getCode()));
+    }
+
+    /** 场景：hasRecord 无记录/null → false */
+    @Test
+    void hasRecord_absentOrNull_returnsFalse() {
+        when(dietRecordMapper.selectCount(any())).thenReturn(0L);
+        assertFalse(service.hasRecord(1L, LocalDate.now(), MealTypeEnum.LUNCH.getCode()));
+
+        when(dietRecordMapper.selectCount(any())).thenReturn(null);
+        assertFalse(service.hasRecord(1L, LocalDate.now(), MealTypeEnum.DINNER.getCode()));
+    }
 }

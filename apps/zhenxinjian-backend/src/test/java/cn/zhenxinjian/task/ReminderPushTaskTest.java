@@ -6,10 +6,8 @@ import cn.zhenxinjian.common.enums.MealTypeEnum;
 import cn.zhenxinjian.config.WxMaConfiguration;
 import cn.zhenxinjian.domain.po.User;
 import cn.zhenxinjian.domain.po.UserReminder;
-import cn.zhenxinjian.mapper.DietRecordMapper;
-import cn.zhenxinjian.mapper.ReminderSendLogMapper;
-import cn.zhenxinjian.mapper.UserMapper;
-import cn.zhenxinjian.mapper.UserReminderMapper;
+import cn.zhenxinjian.service.UserService;
+import cn.zhenxinjian.service.impl.DietRecordService;
 import cn.zhenxinjian.service.impl.ReminderService;
 import me.chanjar.weixin.common.error.WxError;
 import me.chanjar.weixin.common.error.WxErrorException;
@@ -43,11 +41,9 @@ class ReminderPushTaskTest {
 
     private static final String TEMPLATE_ID = "tpl-remind-1";
 
-    private final UserReminderMapper userReminderMapper = mock(UserReminderMapper.class);
-    private final ReminderSendLogMapper reminderSendLogMapper = mock(ReminderSendLogMapper.class);
-    private final DietRecordMapper dietRecordMapper = mock(DietRecordMapper.class);
-    private final UserMapper userMapper = mock(UserMapper.class);
     private final ReminderService reminderService = mock(ReminderService.class);
+    private final DietRecordService dietRecordService = mock(DietRecordService.class);
+    private final UserService userService = mock(UserService.class);
     private final WxMaConfiguration.WxMaProperties wxMaProperties = new WxMaConfiguration.WxMaProperties();
     @SuppressWarnings("unchecked")
     private final ObjectProvider<WxMaService> wxMaServiceProvider = mock(ObjectProvider.class);
@@ -62,8 +58,8 @@ class ReminderPushTaskTest {
     @BeforeEach
     void setUp() {
         wxMaProperties.setRemindTemplateId(TEMPLATE_ID);
-        task = new ReminderPushTask(userReminderMapper, reminderSendLogMapper, dietRecordMapper,
-                userMapper, reminderService, wxMaProperties, wxMaServiceProvider, directExecutor);
+        task = new ReminderPushTask(reminderService, dietRecordService, userService,
+                wxMaProperties, wxMaServiceProvider, directExecutor);
     }
 
     /** 构造一条命中当前分钟（早餐档）的提醒设置 */
@@ -83,13 +79,13 @@ class ReminderPushTaskTest {
 
     /** 桩定：扫描命中一条，判定链前三关默认放行（未发过/未记录/正式用户有 openid） */
     private void stubDueWithOpenid(UserReminder reminder) {
-        when(userReminderMapper.selectList(any())).thenReturn(List.of(reminder));
-        when(reminderSendLogMapper.selectCount(any())).thenReturn(0L);
-        when(dietRecordMapper.selectCount(any())).thenReturn(0L);
+        when(reminderService.scanDueReminders(anyString(), anyInt())).thenReturn(List.of(reminder));
+        when(reminderService.hasSuccessPushToday(anyLong(), anyInt(), any())).thenReturn(false);
+        when(dietRecordService.hasRecord(anyLong(), any(), anyInt())).thenReturn(false);
         User user = new User();
         user.setId(reminder.getUserId());
         user.setWechatOpenid("openid-" + reminder.getUserId());
-        when(userMapper.selectById(reminder.getUserId())).thenReturn(user);
+        when(userService.getById(reminder.getUserId())).thenReturn(user);
     }
 
     @Test
@@ -98,7 +94,7 @@ class ReminderPushTaskTest {
 
         task.pushDueReminders();
 
-        verifyNoInteractions(userReminderMapper, reminderService);
+        verifyNoInteractions(reminderService, dietRecordService, userService);
     }
 
     @Test
@@ -107,48 +103,51 @@ class ReminderPushTaskTest {
 
         task.pushDueReminders();
 
-        verifyNoInteractions(userReminderMapper, reminderService);
+        verifyNoInteractions(reminderService, dietRecordService, userService);
     }
 
     @Test
     void shouldSkipWhenAlreadySentToday() {
         UserReminder reminder = dueReminder(1L);
         when(wxMaServiceProvider.getIfAvailable()).thenReturn(wxMaService);
-        when(userReminderMapper.selectList(any())).thenReturn(List.of(reminder));
-        when(reminderSendLogMapper.selectCount(any())).thenReturn(1L);
+        when(reminderService.scanDueReminders(anyString(), anyInt())).thenReturn(List.of(reminder));
+        when(reminderService.hasSuccessPushToday(anyLong(), anyInt(), any())).thenReturn(true);
 
         task.pushDueReminders();
 
-        verifyNoInteractions(dietRecordMapper, userMapper, reminderService);
+        verifyNoInteractions(dietRecordService, userService);
+        verify(reminderService, never()).onPushSuccess(anyLong(), anyInt(), any(), anyString());
     }
 
     @Test
     void shouldSkipWhenMealAlreadyRecorded() {
         UserReminder reminder = dueReminder(1L);
         when(wxMaServiceProvider.getIfAvailable()).thenReturn(wxMaService);
-        when(userReminderMapper.selectList(any())).thenReturn(List.of(reminder));
-        when(reminderSendLogMapper.selectCount(any())).thenReturn(0L);
-        when(dietRecordMapper.selectCount(any())).thenReturn(1L);
+        when(reminderService.scanDueReminders(anyString(), anyInt())).thenReturn(List.of(reminder));
+        when(reminderService.hasSuccessPushToday(anyLong(), anyInt(), any())).thenReturn(false);
+        when(dietRecordService.hasRecord(anyLong(), any(), anyInt())).thenReturn(true);
 
         task.pushDueReminders();
 
-        verifyNoInteractions(userMapper, reminderService);
+        verifyNoInteractions(userService);
+        verify(reminderService, never()).onPushSuccess(anyLong(), anyInt(), any(), anyString());
     }
 
     @Test
     void shouldSkipGuestWithoutOpenid() {
         UserReminder reminder = dueReminder(1L);
         when(wxMaServiceProvider.getIfAvailable()).thenReturn(wxMaService);
-        when(userReminderMapper.selectList(any())).thenReturn(List.of(reminder));
-        when(reminderSendLogMapper.selectCount(any())).thenReturn(0L);
-        when(dietRecordMapper.selectCount(any())).thenReturn(0L);
+        when(reminderService.scanDueReminders(anyString(), anyInt())).thenReturn(List.of(reminder));
+        when(reminderService.hasSuccessPushToday(anyLong(), anyInt(), any())).thenReturn(false);
+        when(dietRecordService.hasRecord(anyLong(), any(), anyInt())).thenReturn(false);
         User guest = new User();
         guest.setId(1L);
-        when(userMapper.selectById(1L)).thenReturn(guest);
+        when(userService.getById(1L)).thenReturn(guest);
 
         task.pushDueReminders();
 
-        verifyNoInteractions(reminderService);
+        verify(reminderService, never()).onPushSuccess(anyLong(), anyInt(), any(), anyString());
+        verify(reminderService, never()).onPushFail(anyLong(), anyInt(), any(), anyString(), anyString());
     }
 
     @Test
@@ -160,7 +159,8 @@ class ReminderPushTaskTest {
 
         task.pushDueReminders();
 
-        verifyNoInteractions(reminderService);
+        verify(reminderService, never()).onPushSuccess(anyLong(), anyInt(), any(), anyString());
+        verify(reminderService, never()).onPushFail(anyLong(), anyInt(), any(), anyString(), anyString());
     }
 
     @Test

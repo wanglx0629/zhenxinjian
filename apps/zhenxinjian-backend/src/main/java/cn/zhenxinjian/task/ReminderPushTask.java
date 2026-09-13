@@ -3,18 +3,12 @@ package cn.zhenxinjian.task;
 import cn.binarywang.wx.miniapp.api.WxMaService;
 import cn.binarywang.wx.miniapp.bean.WxMaSubscribeMessage;
 import cn.zhenxinjian.common.enums.MealTypeEnum;
-import cn.zhenxinjian.common.enums.ReminderSendStatusEnum;
 import cn.zhenxinjian.config.WxMaConfiguration;
-import cn.zhenxinjian.domain.po.DietRecord;
-import cn.zhenxinjian.domain.po.ReminderSendLog;
 import cn.zhenxinjian.domain.po.User;
 import cn.zhenxinjian.domain.po.UserReminder;
-import cn.zhenxinjian.mapper.DietRecordMapper;
-import cn.zhenxinjian.mapper.ReminderSendLogMapper;
-import cn.zhenxinjian.mapper.UserMapper;
-import cn.zhenxinjian.mapper.UserReminderMapper;
+import cn.zhenxinjian.service.UserService;
+import cn.zhenxinjian.service.impl.DietRecordService;
 import cn.zhenxinjian.service.impl.ReminderService;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.common.error.WxErrorException;
@@ -37,6 +31,7 @@ import java.util.concurrent.Executor;
  * 口径：同用户同日同餐别至多一条成功推送（I12）；已记录该餐跳过；游客（无 openid）不推送；
  * 额度 0 / 模板未配置 / 微信服务不可用静默空转（PRD §2.9 已知限制，不打扰）；失败仅写日志不重试。
  * 外呼经 reminderPushExecutor 限并发异步下发（调度池见 ScheduleConfig），微信侧变慢不阻塞统计/清理任务。
+ * 判定查询一律经 service 层（ReminderService/DietRecordService/UserService），任务只编排不裸写 Mapper。
  * 一期单实例部署，多实例时需 ShedLock
  */
 @Slf4j
@@ -59,15 +54,11 @@ public class ReminderPushTask {
     /** 提醒引导文案（thing2） */
     private static final String MESSAGE_GUIDE = "记得记录这一餐，保持数据连续";
 
-    private final UserReminderMapper userReminderMapper;
-
-    private final ReminderSendLogMapper reminderSendLogMapper;
-
-    private final DietRecordMapper dietRecordMapper;
-
-    private final UserMapper userMapper;
-
     private final ReminderService reminderService;
+
+    private final DietRecordService dietRecordService;
+
+    private final UserService userService;
 
     private final WxMaConfiguration.WxMaProperties wxMaProperties;
 
@@ -94,16 +85,7 @@ public class ReminderPushTask {
         LocalDateTime now = LocalDateTime.now();
         String hhmm = now.format(TIME_FORMATTER);
         LocalDate today = now.toLocalDate();
-        List<UserReminder> dueList = userReminderMapper.selectList(Wrappers.<UserReminder>lambdaQuery()
-                .eq(UserReminder::getMasterSwitch, 1)
-                .and(wrapper -> wrapper
-                        .and(b -> b.eq(UserReminder::getBreakfastSwitch, 1)
-                                .eq(UserReminder::getBreakfastTime, hhmm))
-                        .or(l -> l.eq(UserReminder::getLunchSwitch, 1)
-                                .eq(UserReminder::getLunchTime, hhmm))
-                        .or(d -> d.eq(UserReminder::getDinnerSwitch, 1)
-                                .eq(UserReminder::getDinnerTime, hhmm)))
-                .last("LIMIT " + SCAN_LIMIT));
+        List<UserReminder> dueList = reminderService.scanDueReminders(hhmm, SCAN_LIMIT);
         if (dueList.isEmpty()) {
             return;
         }
@@ -157,24 +139,15 @@ public class ReminderPushTask {
                             String templateId, WxMaService wxMaService) {
         Long userId = reminder.getUserId();
         // 1. 当日该餐别已成功推送过 → 跳过（I12 单次）
-        Long sentCount = reminderSendLogMapper.selectCount(Wrappers.<ReminderSendLog>lambdaQuery()
-                .eq(ReminderSendLog::getUserId, userId)
-                .eq(ReminderSendLog::getRemindDate, today)
-                .eq(ReminderSendLog::getMealType, mealType)
-                .eq(ReminderSendLog::getSendStatus, ReminderSendStatusEnum.SUCCESS.getCode()));
-        if (sentCount != null && sentCount > 0) {
+        if (reminderService.hasSuccessPushToday(userId, mealType, today)) {
             return;
         }
         // 2. 当日该餐别已有饮食记录 → 跳过（已记录不重复）
-        Long recordCount = dietRecordMapper.selectCount(Wrappers.<DietRecord>lambdaQuery()
-                .eq(DietRecord::getUserId, userId)
-                .eq(DietRecord::getRecordDate, today)
-                .eq(DietRecord::getMealType, mealType));
-        if (recordCount != null && recordCount > 0) {
+        if (dietRecordService.hasRecord(userId, today, mealType)) {
             return;
         }
         // 3. 游客（无 openid）不推送
-        User user = userMapper.selectById(userId);
+        User user = userService.getById(userId);
         if (user == null || !StringUtils.hasText(user.getWechatOpenid())) {
             return;
         }

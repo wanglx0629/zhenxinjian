@@ -32,6 +32,8 @@
 - 分层：`controller → service（接口）→ service/impl → mapper`；对象四象限 `po / dto / query / vo`。
 - Controller 只做参数接收与结果返回；业务在 Service；SQL 在 Mapper。
 - `@Transactional` 写在 Service 实现类 public 方法（同类自调用不走代理，需拆分或注入自身代理）；多表一致性写必须事务。
+- **依赖风格（B-T19 裁定）**：实现类直依赖为主，接口化仅限豁免清单——多实现/替换点（`SessionEvictor`、`GuestDataMigrator`、`StorageService`）或跨层稳定契约（`UserService`、`WechatAuthService`）；新增 Service 默认实现类直依赖。
+- **controller / task 禁止直依赖 Mapper**：判定、查询一律下沉 Service 层，task 只编排与外呼；豁免 `FoodLibraryInitializer`（启动引导种子导入）与 `GuestCleanupBatchExecutor`（B-T07 批级事务主体）。
 
 ## 4. 错误处理与错误码
 

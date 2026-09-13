@@ -72,6 +72,22 @@ public class DietRecordService {
     private final Taper532Service taper532Service;
 
     /**
+     * 当日该餐别是否已有饮食记录（提醒推送「已记录不重复」判定）
+     *
+     * @param userId     用户ID
+     * @param recordDate 记录日期
+     * @param mealType   餐别（1早 2午 3晚）
+     * @return 已有记录返回 true
+     */
+    public boolean hasRecord(Long userId, LocalDate recordDate, Integer mealType) {
+        Long count = dietRecordMapper.selectCount(Wrappers.<DietRecord>lambdaQuery()
+                .eq(DietRecord::getUserId, userId)
+                .eq(DietRecord::getRecordDate, recordDate)
+                .eq(DietRecord::getMealType, mealType));
+        return count != null && count > 0;
+    }
+
+    /**
      * 新增饮食记录
      *
      * @param userId 当前用户ID
