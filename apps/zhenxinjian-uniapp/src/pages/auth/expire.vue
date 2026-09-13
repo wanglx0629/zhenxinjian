@@ -8,8 +8,7 @@ import { ref } from 'vue'
 import { onBackPress, onShow } from '@dcloudio/uni-app'
 import { useUserStore } from '@/store/user'
 import { canSubmit } from '@/utils/throttle'
-import { track, trackPage } from '@/utils/track'
-import { TRACK_EVENT } from '@/config/track-events'
+import { trackPage } from '@/utils/track'
 
 const userStore = useUserStore()
 const loading = ref(false)
@@ -21,7 +20,7 @@ onShow(() => {
   trackPage('pages/auth/expire')
 })
 
-/** 立即授权：wx.login() 取新 code，携 guestKey 完成迁移（spec：游客期内登录并迁移） */
+/** 立即授权（B-T24：uni.login → code → wechatLogin 收敛 store，页面只管 loading 与节流） */
 async function handleAuth() {
   if (loading.value) return
   if (!canSubmit()) {
@@ -30,24 +29,7 @@ async function handleAuth() {
   }
   loading.value = true
   try {
-    // 注意：部分平台 Promise 形式返回 [err, res] 数组，需兼容取值
-    const result: unknown = await uni.login({ provider: 'weixin' })
-    const loginRes = (Array.isArray(result) ? result[1] : result) as { code?: string }
-    const code = loginRes?.code
-    if (!code) {
-      track(TRACK_EVENT.LOGIN_FAIL)
-      uni.showToast({ title: '获取登录凭证失败，请重试', icon: 'none' })
-      return
-    }
-    await userStore.loginByWechat(code)
-    track(TRACK_EVENT.LOGIN_WECHAT)
-    uni.showToast({ title: '授权成功，数据已保留', icon: 'success' })
-    setTimeout(() => {
-      uni.switchTab({ url: '/pages/home/index' })
-    }, 400)
-  } catch {
-    track(TRACK_EVENT.LOGIN_FAIL)
-    uni.showToast({ title: '授权失败，请重试', icon: 'none' })
+    await userStore.loginByWechat({ successText: '授权成功，数据已保留', failText: '授权失败，请重试' })
   } finally {
     loading.value = false
   }

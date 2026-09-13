@@ -6,6 +6,7 @@ import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import type { UserInfo } from '@/api/types'
 import { createGuest, getCurrentUser, logout as logoutApi, wechatLogin } from '@/api/auth'
+import { TRACK_EVENT } from '@/config/track-events'
 import { useBodyStore } from '@/store/body'
 import { useCycleStore } from '@/store/cycle'
 import { useDietStore } from '@/store/diet'
@@ -13,6 +14,7 @@ import { useMenstrualStore } from '@/store/menstrual'
 import { useReminderStore } from '@/store/reminder'
 import { useTaperStore } from '@/store/taper'
 import { useWeightStore } from '@/store/weight'
+import { track } from '@/utils/track'
 import {
   getGuestKey,
   getToken,
@@ -34,17 +36,39 @@ export const useUserStore = defineStore('user', () => {
   const isLoggedIn = () => !!token.value
 
   /**
-   * 微信授权登录：wx.login() 的 code 换登录态
-   * 携带本地 guestKey 触发游客数据迁移（后端幂等）
+   * 微信授权登录全流程（B-T24：uni.login → code → wechatLogin 收敛 store 单一入口）
+   * 携带本地 guestKey 触发游客数据迁移（后端幂等）；
+   * 成功自动 toast + 跳首页，失败自动 toast + track，页面只需管 loading 与节流
    */
-  async function loginByWechat(code: string) {
-    const guestKey = getGuestKey()
-    const result = await wechatLogin(guestKey ? { code, guestKey } : { code })
-    token.value = result.token
-    userInfo.value = result.user
-    setToken(result.token)
-    // 登录成功即完成迁移，游客标识使命结束
-    removeGuestKey()
+  async function loginByWechat(opts?: { successText?: string; failText?: string }): Promise<boolean> {
+    try {
+      // 注意：部分平台 Promise 形式返回 [err, res] 数组，需兼容取值
+      const result: unknown = await uni.login({ provider: 'weixin' })
+      const loginRes = (Array.isArray(result) ? result[1] : result) as { code?: string }
+      const code = loginRes?.code
+      if (!code) {
+        track(TRACK_EVENT.LOGIN_FAIL)
+        uni.showToast({ title: '获取登录凭证失败，请重试', icon: 'none' })
+        return false
+      }
+      const guestKey = getGuestKey()
+      const loginResult = await wechatLogin(guestKey ? { code, guestKey } : { code })
+      token.value = loginResult.token
+      userInfo.value = loginResult.user
+      setToken(loginResult.token)
+      // 登录成功即完成迁移，游客标识使命结束
+      removeGuestKey()
+      track(TRACK_EVENT.LOGIN_WECHAT)
+      uni.showToast({ title: opts?.successText || '登录成功', icon: 'success' })
+      setTimeout(() => {
+        uni.switchTab({ url: '/pages/home/index' })
+      }, 400)
+      return true
+    } catch {
+      track(TRACK_EVENT.LOGIN_FAIL)
+      uni.showToast({ title: opts?.failText || '登录失败，请重试', icon: 'none' })
+      return false
+    }
   }
 
   /**

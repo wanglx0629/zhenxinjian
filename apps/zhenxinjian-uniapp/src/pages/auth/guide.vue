@@ -23,7 +23,7 @@ onShow(() => {
   }
 })
 
-/** 微信一键授权登录（spec：授权失败可重试，不缓存 code） */
+/** 微信一键授权登录（B-T24：uni.login → code → wechatLogin 收敛 store，页面只管 loading 与节流） */
 async function handleWechatLogin() {
   if (loading.value) return
   if (!canSubmit()) {
@@ -32,25 +32,7 @@ async function handleWechatLogin() {
   }
   loading.value = true
   try {
-    // 注意：部分平台 Promise 形式返回 [err, res] 数组，需兼容取值
-    const result: unknown = await uni.login({ provider: 'weixin' })
-    const loginRes = (Array.isArray(result) ? result[1] : result) as { code?: string }
-    const code = loginRes?.code
-    if (!code) {
-      track(TRACK_EVENT.LOGIN_FAIL)
-      uni.showToast({ title: '获取登录凭证失败，请重试', icon: 'none' })
-      return
-    }
-    await userStore.loginByWechat(code)
-    track(TRACK_EVENT.LOGIN_WECHAT)
-    uni.showToast({ title: '登录成功', icon: 'success' })
-    setTimeout(() => {
-      uni.switchTab({ url: '/pages/home/index' })
-    }, 400)
-  } catch {
-    // 失败可重试：下次点击重新 wx.login() 取新 code
-    track(TRACK_EVENT.LOGIN_FAIL)
-    uni.showToast({ title: '登录失败，请重试', icon: 'none' })
+    await userStore.loginByWechat()
   } finally {
     loading.value = false
   }
