@@ -3,6 +3,7 @@
  * 作者: wanglx
  */
 import request from './request'
+import type { PageResult } from './types'
 
 /** 饮食记录列表项（管理端只读视图，字段与后端快照列对齐） */
 export interface AdminDietRecord {
@@ -33,7 +34,7 @@ export interface AdminDietQuery {
 
 /** 分页查询饮食记录（只读） */
 export function getDietRecordPage(params: AdminDietQuery) {
-  return request.get<{ records: AdminDietRecord[]; total: number }>('/admin/diet-records', {
+  return request.get<PageResult<AdminDietRecord>>('/admin/diet-records', {
     params
   })
 }

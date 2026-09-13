@@ -3,6 +3,7 @@
  * 作者: wanglx
  */
 import request from './request'
+import type { PageResult } from './types'
 
 /** 食物列表项（管理端） */
 export interface AdminFood {
@@ -46,7 +47,7 @@ export interface AdminFoodQuery {
 
 /** 分页查询食物 */
 export function getFoodPage(params: AdminFoodQuery) {
-  return request.get<{ records: AdminFood[]; total: number }>('/admin/foods', { params })
+  return request.get<PageResult<AdminFood>>('/admin/foods', { params })
 }
 
 /** 新增内置食物（code 自动顺延） */

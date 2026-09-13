@@ -3,29 +3,22 @@
  * 食物库维护页（内置食物可增删改停用；自定义食物只读置灰）
  * 作者: wanglx
  */
-import { onMounted, reactive, ref } from 'vue'
+import { reactive, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import { addFood, changeFoodStatus, deleteFood, getFoodPage, updateFood } from '@/api/adminFood'
 import type { AdminFood } from '@/api/adminFood'
+import PagePager from '@/component/PagePager.vue'
+import { usePageQuery } from '@/composables/usePageQuery'
+import {
+  FOOD_CATEGORY_OPTIONS,
+  FOOD_SOURCE_MAP,
+  FOOD_SOURCE_OPTIONS,
+  FOOD_STATUS_MAP,
+  FOOD_STATUS_OPTIONS,
+  dictLabel
+} from '@/constants/dicts'
 
-/** 10 大分类（与后端 FoodCategoryEnum 一致，01–10 顺序固定） */
-const CATEGORIES = [
-  { code: '01', name: '谷薯杂豆·主食' },
-  { code: '02', name: '畜禽肉及制品' },
-  { code: '03', name: '蛋奶及制品' },
-  { code: '04', name: '水产及制品' },
-  { code: '05', name: '大豆及制品' },
-  { code: '06', name: '蔬菜' },
-  { code: '07', name: '菌藻' },
-  { code: '08', name: '水果' },
-  { code: '09', name: '坚果·种子' },
-  { code: '10', name: '油脂·调味·饮品' }
-]
-
-const loading = ref(false)
-const tableData = ref<AdminFood[]>([])
-const total = ref(0)
 const query = reactive({
   page: 1,
   size: 20,
@@ -34,6 +27,19 @@ const query = reactive({
   source: undefined as number | undefined,
   status: undefined as number | undefined
 })
+
+/** 列表查询骨架（B-T23：loading/数据/分页回调/删后回退收敛 composable） */
+const { loading, tableData, total, load, handleSearch, handlePageChange, reloadAfterDelete } =
+  usePageQuery(query, q =>
+    getFoodPage({
+      page: q.page,
+      size: q.size,
+      keyword: q.keyword || undefined,
+      categoryCode: q.categoryCode || undefined,
+      source: q.source,
+      status: q.status
+    })
+  )
 
 const dialogVisible = ref(false)
 const dialogTitle = ref('新增内置食物')
@@ -61,28 +67,6 @@ const rules: FormRules = {
   protein: [{ required: true, message: '请输入蛋白质', trigger: 'blur' }],
   fat: [{ required: true, message: '请输入脂肪', trigger: 'blur' }],
   kcal: [{ required: true, message: '请输入热量', trigger: 'blur' }]
-}
-
-async function loadFoods() {
-  loading.value = true
-  try {
-    const page = await getFoodPage({
-      page: query.page,
-      size: query.size,
-      keyword: query.keyword || undefined,
-      categoryCode: query.categoryCode || undefined,
-      source: query.source,
-      status: query.status
-    })
-    tableData.value = page.records || []
-    total.value = page.total || 0
-  } finally {
-    loading.value = false
-  }
-}
-
-function categoryName(code: string) {
-  return CATEGORIES.find((c) => c.code === code)?.name || '-'
 }
 
 function resetForm() {
@@ -131,7 +115,7 @@ async function handleSubmit() {
     const payload = {
       name: form.name,
       categoryCode: form.categoryCode,
-      categoryName: categoryName(form.categoryCode),
+      categoryName: dictLabel(FOOD_CATEGORY_OPTIONS, form.categoryCode),
       alias: form.alias || undefined,
       carb: form.carb,
       protein: form.protein,
@@ -147,7 +131,7 @@ async function handleSubmit() {
       ElMessage.success('新增成功')
     }
     dialogVisible.value = false
-    await loadFoods()
+    await load()
   } finally {
     submitting.value = false
   }
@@ -163,35 +147,20 @@ async function handleDelete(row: AdminFood) {
   }
   await deleteFood(row.id)
   ElMessage.success('删除成功')
-  if (tableData.value.length === 1 && query.page > 1) {
-    query.page -= 1
-  }
-  await loadFoods()
+  await reloadAfterDelete()
 }
 
 async function handleToggleStatus(row: AdminFood) {
   await changeFoodStatus(row.id, row.status === 1 ? 0 : 1)
   ElMessage.success(row.status === 1 ? '已停用，C 端搜索不再可见' : '已启用')
-  await loadFoods()
+  await load()
 }
-
-function handleSearch() {
-  query.page = 1
-  loadFoods()
-}
-
-function handlePageChange(page: number) {
-  query.page = page
-  loadFoods()
-}
-
-onMounted(loadFoods)
 </script>
 
 <template>
-  <div class="foods-page">
-    <div class="toolbar">
-      <div class="filters">
+  <div class="list-page">
+    <div class="list-toolbar">
+      <div class="list-filters">
         <el-input
           v-model="query.keyword"
           clearable
@@ -200,15 +169,13 @@ onMounted(loadFoods)
           @keyup.enter="handleSearch"
         />
         <el-select v-model="query.categoryCode" clearable placeholder="分类" style="width: 160px">
-          <el-option v-for="c in CATEGORIES" :key="c.code" :label="c.name" :value="c.code" />
+          <el-option v-for="o in FOOD_CATEGORY_OPTIONS" :key="o.value" :label="o.label" :value="o.value" />
         </el-select>
         <el-select v-model="query.source" clearable placeholder="来源" style="width: 120px">
-          <el-option label="内置" :value="1" />
-          <el-option label="自定义" :value="2" />
+          <el-option v-for="o in FOOD_SOURCE_OPTIONS" :key="o.value" :label="o.label" :value="o.value" />
         </el-select>
         <el-select v-model="query.status" clearable placeholder="状态" style="width: 120px">
-          <el-option label="有效" :value="1" />
-          <el-option label="停用" :value="0" />
+          <el-option v-for="o in FOOD_STATUS_OPTIONS" :key="o.value" :label="o.label" :value="o.value" />
         </el-select>
         <el-button type="primary" @click="handleSearch">查询</el-button>
       </div>
@@ -221,7 +188,7 @@ onMounted(loadFoods)
       </el-table-column>
       <el-table-column prop="name" label="名称" min-width="140" />
       <el-table-column label="分类" width="140">
-        <template #default="{ row }">{{ categoryName(row.categoryCode) }}</template>
+        <template #default="{ row }">{{ dictLabel(FOOD_CATEGORY_OPTIONS, row.categoryCode) }}</template>
       </el-table-column>
       <el-table-column prop="carb" label="碳水g" width="90" align="right" />
       <el-table-column prop="protein" label="蛋白g" width="90" align="right" />
@@ -229,15 +196,15 @@ onMounted(loadFoods)
       <el-table-column prop="kcal" label="热量kcal" width="100" align="right" />
       <el-table-column label="来源" width="90">
         <template #default="{ row }">
-          <el-tag :type="row.source === 1 ? 'success' : 'info'" size="small">
-            {{ row.source === 1 ? '内置' : '自定义' }}
+          <el-tag :type="FOOD_SOURCE_MAP[row.source]?.type || 'info'" size="small">
+            {{ FOOD_SOURCE_MAP[row.source]?.label ?? '未知' }}
           </el-tag>
         </template>
       </el-table-column>
       <el-table-column label="状态" width="90">
         <template #default="{ row }">
-          <el-tag :type="row.status === 1 ? 'success' : 'danger'" size="small">
-            {{ row.status === 1 ? '有效' : '停用' }}
+          <el-tag :type="FOOD_STATUS_MAP[row.status]?.type || 'info'" size="small">
+            {{ FOOD_STATUS_MAP[row.status]?.label ?? '未知' }}
           </el-tag>
         </template>
       </el-table-column>
@@ -255,16 +222,7 @@ onMounted(loadFoods)
       </el-table-column>
     </el-table>
 
-    <div class="pager">
-      <el-pagination
-        background
-        layout="total, prev, pager, next"
-        :total="total"
-        :page-size="query.size"
-        :current-page="query.page"
-        @current-change="handlePageChange"
-      />
-    </div>
+    <PagePager :total="total" :page="query.page" :size="query.size" @change="handlePageChange" />
 
     <el-dialog v-model="dialogVisible" :title="dialogTitle" width="520px" destroy-on-close>
       <el-form ref="formRef" :model="form" :rules="rules" label-width="100px">
@@ -273,7 +231,7 @@ onMounted(loadFoods)
         </el-form-item>
         <el-form-item label="分类" prop="categoryCode">
           <el-select v-model="form.categoryCode" style="width: 100%">
-            <el-option v-for="c in CATEGORIES" :key="c.code" :label="c.name" :value="c.code" />
+            <el-option v-for="o in FOOD_CATEGORY_OPTIONS" :key="o.value" :label="o.label" :value="o.value" />
           </el-select>
         </el-form-item>
         <el-form-item label="别名">
@@ -304,35 +262,6 @@ onMounted(loadFoods)
 </template>
 
 <style scoped>
-.foods-page {
-  background: var(--zhenxinjian-white);
-  border: 1px solid var(--zhenxinjian-border);
-  border-radius: 8px;
-  padding: 20px;
-}
-
-.toolbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 16px;
-  flex-wrap: wrap;
-}
-
-.filters {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.pager {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 16px;
-}
-
 .readonly-tip {
   color: var(--zhenxinjian-text-sub, #8a8f99);
   font-size: 12px;
