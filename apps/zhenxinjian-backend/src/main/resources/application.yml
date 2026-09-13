@@ -53,7 +53,8 @@ zhenxinjian:
     # 订阅消息跳转小程序版本：developer开发版/trial体验版/formal正式版
     remind-miniprogram-state: ${WECHAT_REMIND_MP_STATE:formal}
   jwt:
-    secret: zhenxinjian-jwt-secret-key-change-in-production-wanglx
+    # 密钥强制环境变量注入（启动内容门禁：缺失/过短/含弱特征一律拒启；本地开发可写入 gitignored 的 application-dev.yml）
+    secret: ${JWT_SECRET:}
     expire-minutes: 120
     refresh-threshold-minutes: 30
   redis:

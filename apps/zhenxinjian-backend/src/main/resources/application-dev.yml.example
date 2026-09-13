@@ -38,3 +38,7 @@ zhenxinjian:
   wechat:
     appid: ${WECHAT_APPID:wx-your-appid}
     secret: ${WECHAT_SECRET:your-secret}
+  # JWT 密钥（主配置为空占位强制注入；下方默认值仅限本机开发——启动内容门禁拒绝空白/<32字节/含 change-in 弱特征密钥，
+  # 任何非本机环境必须通过 JWT_SECRET 注入独立强随机密钥）
+  jwt:
+    secret: ${JWT_SECRET:local-dev-only-jwt-secret-zxj-0123456789}

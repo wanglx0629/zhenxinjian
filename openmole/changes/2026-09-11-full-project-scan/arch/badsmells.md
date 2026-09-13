@@ -37,9 +37,9 @@
 | ARCH-内聚-006 | 内聚 | 中 | 已消除 |
 | ARCH-内聚-007 | 内聚 | 中 | 已消除 |
 | ARCH-层次-002 | 层次 | 中 | 已消除 |
-| ARCH-边界-001 | 边界 | 中 | 未清除 |
-| ARCH-边界-006 | 边界 | 中 | 未清除 |
-| ARCH-边界-007 | 边界 | 中 | 未清除 |
+| ARCH-边界-001 | 边界 | 中 | 已消除 |
+| ARCH-边界-006 | 边界 | 中 | 已消除 |
+| ARCH-边界-007 | 边界 | 中 | 已消除 |
 | ARCH-模块化-001 | 模块化 | 低 | 未清除 |
 | ARCH-模块化-002 | 模块化 | 低 | 未清除 |
 | ARCH-模块化-003 | 模块化 | 低 | 未清除 |
@@ -445,7 +445,7 @@
 | 根因 | 安全门禁按 profile 名而非部署事实 |
 | 影响 | 误配环境即弱密钥生产化 |
 | 修复建议 | 改为检测密钥内容本身（含"change-in"即拒）或强制环境变量注入；默认值改为占位符 |
-| 状态 | 未清除 |
+| 状态 | 已消除（B-T28 于 2026-09-13 完成，单提交——application.yml 明文默认密钥改 `${JWT_SECRET:}` 空占位强制注入；SecurityStartupChecker 去 prod profile 依赖改内容门禁：WEAK_SECRET_FEATURE = "change-in" 子串检测覆盖历史默认 `zhenxinjian-jwt-secret-key-change-in-production-wanglx` 及其全部变体（强于等值比对单点），UTF-8 字节长度 <32 拒（与 JwtUtils 签名口径一致），任何环境一律拒启不认 profile 名，误配环境（production/pre 拼写差异）带弱密钥同样拒启；CORS * 门禁保持 prod 强制职责分离；application-dev.yml.example 补 jwt 段（本机默认值 40 字节不含弱特征 + 非本机必须 JWT_SECRET 注入注释），本机 gitignored application-dev.yml 同步补段保启动不断；新建 SecurityStartupCheckerTest 8 用例（空白/过短/历史默认/变体/非 prod 命名仍拒/强密钥放行/prod CORS 拒/非 prod CORS 放行），mvn test 149 用例全绿；顺带修正索引表 ARCH-边界-001/006 已消除漏登行） |
 
 ### ARCH-模块化-001 — 小程序页面超大 + 样式无全局抽象
 
@@ -594,3 +594,4 @@
 | v1.26 | 2026-09-13 | —（未提交） | B-T25 完成，ARCH-层次-002 置"已消除"（原拼写错误目录（dosc 前缀）git mv 更名 docsFile 保历史，32 文件 48 处引用批量修正 grep 旧名清零；.gitattributes 归属标记 docsFile/** attribution=project-narrative + [docsFile] 提交约定成文；docsFile 叙述文档与 docs/ Harness 资产裁定非副本不合并；wiki 本地不存在出范围；mvn compile + vue-tsc 双绿）。余 11 条未清除 |
 | v1.27 | 2026-09-13 | —（未提交） | B-T26 完成，ARCH-边界-001 置"已消除"（listMine 无上限 selectList 加 `.last("LIMIT " + CommonConstant.CUSTOM_FOOD_MINE_LIMIT)` 有界查询，COMMON 常量 CUSTOM_FOOD_MINE_LIMIT = 200 单一真源不复用 MAX_PAGE_SIZE；消费方裁定一次性全量渲染非滚动分页采 LIMIT 不改 API；新增 listMine_boundedByLimit 测试 TableInfoHelper 幂等初始化 + ArgumentCaptor 断言 SQL 含 LIMIT；mvn test 137 用例全绿，对齐 AGENTS.md「无上限 selectList」Never 条款）。余 10 条未清除 |
 | v1.28 | 2026-09-13 | —（未提交） | B-T27 完成，ARCH-边界-006 置"已消除"（提醒推送分钟全等改窗口补偿：窗口回看 2 分钟 [当前-2, 当前] 调度延迟/重启跨分钟补发；scanDueReminders 改 List<String> IN 匹配规避跨零点字典序；hitMealType 单餐改 hitMeals 多餐全量返回修掉先匹配餐去重跳过后另一餐丢失暗坑；MealHit record 携到点日归属 I12 按到点日去重防跨零点重复下发；失败随窗口自然重试 ≤3 次有界，调度漏扫+瞬时失败同治；新增 4 用例，mvn test 141 用例全绿）。余 9 条未清除 |
+| v1.29 | 2026-09-13 | —（未提交） | B-T28 完成，ARCH-边界-007 置"已消除"（JWT 密钥门禁改内容检测：application.yml 明文默认改 `${JWT_SECRET:}` 空占位强制注入；SecurityStartupChecker 去 prod profile 依赖——WEAK_SECRET_FEATURE = "change-in" 子串检测覆盖历史默认及变体 + UTF-8 字节 <32 拒，任何环境一律拒启，误配环境带弱密钥同治，CORS * 门禁保持 prod 强制职责分离；application-dev.yml.example 补 jwt 段 + 本机 gitignored application-dev.yml 同步保启动不断；新建 SecurityStartupCheckerTest 8 用例，mvn test 149 用例全绿；顺带修正索引表 ARCH-边界-001/006 已消除漏登行）。余 8 条未清除 |

@@ -39,7 +39,7 @@
 | B-T25 | ARCH-层次-002 | 文档归属收敛（docs/ 唯一真源） | 中 | 已完成 |
 | B-T26 | ARCH-边界-001 | 自定义食物列表加上限/分页 | 中 | 已完成 |
 | B-T27 | ARCH-边界-006 | 提醒推送窗口匹配 + 漏发补偿 | 中 | 已完成 |
-| B-T28 | ARCH-边界-007 | JWT 密钥门禁改内容检测 | 中 | 未开始 |
+| B-T28 | ARCH-边界-007 | JWT 密钥门禁改内容检测 | 中 | 已完成 |
 | B-T29 | ARCH-模块化-001 | 小程序全局样式抽象 + 超大页拆分 | 低 | 未开始 |
 | B-T30 | ARCH-模块化-002 | 原型小程序工程移出版本库 | 低 | 未开始 |
 | B-T31 | ARCH-模块化-003 | 管理后台视图组件拆分 + echarts 按需 | 低 | 未开始 |
@@ -765,7 +765,7 @@
 | --- | --- |
 | 追溯 | ARCH-边界-007（边界，中） |
 | 目标 | 启动门禁从"仅 prod profile"改为检测密钥内容（含弱默认特征即拒）或强制环境变量注入 |
-| 状态 | 未开始 |
+| 状态 | 已完成 |
 
 步骤：
 
@@ -777,6 +777,16 @@
 6. 增量执行：一批提交。
 7. 回归测绿：后端 `mvn -q test` 全绿；本地启动验证正常、弱密钥模拟启动被拒。
 8. 用户确认：展示门禁改造 diff，获确认后收尾（写操作门禁）。
+
+执行记录（2026-09-13 完成）：
+
+1. 确认坏味道：核对 application.yml 明文默认 `zhenxinjian-jwt-secret-key-change-in-production-wanglx` 与 SecurityStartupChecker 仅 `prod` profile 拒绝成立——任何非 prod 命名（production/pre 拼写差异）即带弱密钥上线。
+2. 影响分析：密钥注入方式裁定「主配置空占位 `${JWT_SECRET:}` 强制注入 + gitignored application-dev.yml 承接本机密钥」；开发环境启动影响评估——无 @SpringBootTest 全仓单测不加载 Spring 上下文零影响，本地 bootRun 经 application-dev.yml 补 jwt 段保启动不断；application-dev.yml.example（tracked 模板）同步补 jwt 段防新克隆者启动即拒。
+3. 测试安全网：新建 SecurityStartupCheckerTest 8 用例——空白拒启/不足 32 字节拒启/历史弱默认拒启/弱特征变体（my-...-change-in-prod）拒启/弱密钥+非 prod 命名 profile（production）仍拒启（内容门禁不认 profile 名）/强密钥放行/prod+CORS * 拒启/非 prod+CORS * 仅告警放行。
+4. 架构模式：内容门禁——WEAK_SECRET_FEATURE = "change-in" 子串检测（覆盖历史默认及其全部变体，强于等值比对单点）；UTF-8 字节长度 <32 拒（与 JwtUtils 签名口径一致）；密钥检测不认 profile 名任何环境一律拒启，CORS * 门禁保持 prod 强制职责分离。
+5. 迁移执行：单点改造一批提交——application.yml 明文默认改 `${JWT_SECRET:}` 空占位（注释成文口径）；SecurityStartupChecker 重写 checkJwtSecret() 去 prod 参数弱特征即抛 IllegalStateException；application-dev.yml.example 补 jwt 段（本机默认值 40 字节不含弱特征 + 非本机必须 JWT_SECRET 注入注释）；本机 application-dev.yml（gitignored 不入库）补 jwt 段保本地启动不断。
+6. 回归：mvn test 149 用例全绿（141 + 新增 8）；弱密钥模拟启动被拒由 blankSecret/legacyWeakDefault/weakFeatureVariant/nonProdProfileName 四用例覆盖。
+7. 用户确认：按「重新推送，往后所有任务自动化按推荐方案执行，无需再中途问我」既有指令提交并推送（写操作门禁通过）。
 
 ### B-T29 — 小程序全局样式抽象 + 超大页拆分
 
@@ -964,3 +974,4 @@
 | v1.25 | 2026-09-13 | —（未提交） | B-T25 执行完成：文档归属收敛——原拼写错误目录（dosc 前缀）git mv 更名 docsFile 保历史，全库 32 文件 48 处引用批量修正（AGENTS/Constitutions/README + docs 知识库 8 件 + openspec 归档 7 件 + sql 注释 9 件 + 代码注释 3 件 + openmole 2 件），grep 旧名清零；新建 .gitattributes 归属标记（docsFile/** attribution=project-narrative + 提交约定 [docsFile] 标记成文）；内容去重裁定——docsFile 叙述性文档与 docs/ Harness 约束资产归属清晰非副本不合并；zhenxinjian.wiki 本地不存在裁定出本仓库范围；mvn compile + vue-tsc 双绿，单提交，状态置已完成 |
 | v1.26 | 2026-09-13 | —（未提交） | B-T26 执行完成：自定义食物列表有界化——listMine 纯 selectList 无 LIMIT 无分页（全库唯一真实无上限查询）加 `.last("LIMIT " + CommonConstant.CUSTOM_FOOD_MINE_LIMIT)`；消费方裁定小程序端 listMyCustomFoods → fetchMyCustom 一次性全量渲染非滚动分页，采 LIMIT 有界查询不改 API；CommonConstant 新增 CUSTOM_FOOD_MINE_LIMIT = 200 单一真源（不复用 MAX_PAGE_SIZE=100，列表缩放特征不同）；新增 listMine_boundedByLimit 测试（TableInfoHelper.initTableInfo 幂等初始化镜像 WeightServiceTest 模式，ArgumentCaptor 断言 SQL 片段含 LIMIT）；mvn test 137 用例全绿 + 前端零改动 vue-tsc 零错误，单提交，状态置已完成 |
 | v1.27 | 2026-09-13 | —（未提交） | B-T27 执行完成：提醒推送分钟全等改窗口补偿——窗口回看 2 分钟 [当前-2, 当前]（不采 ±2 提前推违反到点语义）；scanDueReminders(String) 改 List<String> IN 匹配规避跨零点字典序问题；hitMealType 单餐改 hitMeals 多餐全量返回修掉「先匹配餐去重跳过后另一餐丢失」暗坑；MealHit record 携到点日归属（23:59 提醒 00:01 补发归昨日，I12 按到点日去重防跨零点重复下发）；去重保持成功口径失败随窗口自然重试 ≤3 次有界，覆盖调度漏扫+瞬时失败两类漏发；ReminderPushTaskTest 新增 4 用例（上分钟补发/窗口外不命中/多餐同窗/失败重试成功），mvn test 141 用例全绿，单提交，状态置已完成 |
+| v1.28 | 2026-09-13 | —（未提交） | B-T28 执行完成：JWT 密钥门禁改内容检测——application.yml 明文默认密钥改 `${JWT_SECRET:}` 空占位强制注入；SecurityStartupChecker 去 prod profile 依赖改内容门禁（WEAK_SECRET_FEATURE = "change-in" 子串检测覆盖历史默认及变体 + UTF-8 字节 <32 拒，任何环境一律拒启，CORS * 门禁保持 prod 强制职责分离）；application-dev.yml.example 补 jwt 段（本机默认值 + 非本机必须注入注释），本机 gitignored application-dev.yml 同步补段保启动不断；新建 SecurityStartupCheckerTest 8 用例（空白/过短/历史默认/变体/非 prod 命名仍拒/强密钥放行/prod CORS 拒/非 prod CORS 放行），mvn test 149 用例全绿，单提交，状态置已完成 |
