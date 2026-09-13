@@ -111,9 +111,10 @@ test-results/
 *.lcov
 
 # ====================
-# 本机工具私有凭据（tools/ 下的 .local 文件）
+# 本机工具私有凭据（tools/ 下的 .local 文件；*.example 模板豁免可入库）
 # ====================
 tools/**/*.local.*
+!tools/**/*.example
 tools/db/out/
 
 # ====================
