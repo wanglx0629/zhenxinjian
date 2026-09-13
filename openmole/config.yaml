@@ -1,5 +1,5 @@
 # OpenMole workspace config (managed by openmole init)
-current_change: 2026-09-11-full-project-scan
+current_change:
 installed_ides:
   - opencode
   - codex
