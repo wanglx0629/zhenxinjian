@@ -29,7 +29,7 @@
 | ARCH-演进-005 | 演进 | 中 | 已消除 |
 | ARCH-演进-008 | 演进 | 中 | 已消除 |
 | ARCH-耦合-002 | 耦合 | 中 | 已消除 |
-| ARCH-耦合-003 | 耦合 | 中 | 未清除 |
+| ARCH-耦合-003 | 耦合 | 中 | 已消除 |
 | ARCH-耦合-004 | 耦合 | 中 | 未清除 |
 | ARCH-耦合-005 | 耦合 | 中 | 未清除 |
 | ARCH-内聚-004 | 内聚 | 中 | 未清除 |
@@ -305,7 +305,7 @@
 | 根因 | 登录态横切逻辑无单一归属 |
 | 影响 | 状态真源分裂（localStorage vs store）；循环依赖打包顺序敏感 |
 | 修复建议 | 清会话收敛到 store 单一入口；守卫经 store 读登录态；request 不 import store |
-| 状态 | 未清除 |
+| 状态 | 已消除（B-T18 于 2026-09-13 完成：request.ts 删 router+useUserStore 双反向 import，新增 AuthHooks 契约（getToken/onTokenRefreshed/onSessionClear）+ setAuthHooks 注入器，请求拦截 token 改经注入不再直读 localStorage，续期与 401 双路径走 hooks；store/user.ts 收敛 clearSession 单一入口（不含导航）+ syncToken，删 router import；守卫登录态改经 userStore.token、双处 removeItem 改 clearSession；main.ts 组合根 pinia active 后装配（清会话+跳登录在此编排）；MainLayout logout 后补 router.push；依赖收敛 router→store→api 单向无环，npm run build（vue-tsc + vite）全绿，单提交 541e7b4） |
 
 ### ARCH-耦合-004 — 后端 controller/task 直依赖 service.impl 双轨并存
 
@@ -584,3 +584,4 @@
 | v1.16 | 2026-09-13 | —（未提交） | B-T15 完成，ARCH-演进-005 置"已消除"（三批治理：后端 pom 冗余显式版本回归 parent BOM + lombok 回归 BOM 1.18.46 + byte-buddy 死声明删除 + hutool-all 收敛按需四模块；小程序 TS 5.4.5/vue-tsc 2/@vue/tsconfig 0.7 工具链对齐 front；管理后台 overrides brace-expansion 手钉删除自然解析 2.1.4；三端安全网全绿）。余 21 条未清除 |
 | v1.17 | 2026-09-13 | —（未提交） | B-T16 完成，ARCH-演进-008 置"已消除"（config/track-events.ts 常量表与后端 TrackEventEnum 22 码互锚 + track() 收窄 TrackEventCode 联合类型编译期防拼写漂移 + 16 文件 31 处字面量全量改引常量；vue-tsc 零错误 + build:mp-weixin 构建绿）。余 20 条未清除 |
 | v1.18 | 2026-09-13 | —（未提交） | B-T17 完成，ARCH-耦合-002 置"已消除"（request.ts 去 useUserStore 反向依赖 + AuthHooks 回调注入契约（onSessionClear/onTokenRefreshed）+ main.ts 组合根 pinia active 后装配 + store/user.ts 新增 syncToken/clearSession 最小 action（401 被动路径语义不变）；BASE_URL 双轨收敛 request.ts 单一来源、track.ts 引用，15s/10s 超时差异裁定保留；api 层 grep 零 store 依赖、vue-tsc 零错误、build:mp-weixin 绿且 Circular chunk store/user→api/auth→api/request→store/user 警告消除）。余 19 条未清除 |
+| v1.19 | 2026-09-13 | —（未提交） | B-T18 完成，ARCH-耦合-003 置"已消除"（管理后台三角循环解耦：request.ts 删 router+useUserStore 双反向 import + AuthHooks 契约（getToken/onTokenRefreshed/onSessionClear）+ setAuthHooks 注入器，token 改经注入不再直读 localStorage；store/user.ts 收敛 clearSession 单一入口 + syncToken，删 router import；守卫登录态改经 userStore；main.ts 组合根装配；依赖收敛 router→store→api 单向无环，vue-tsc + vite build 全绿）。余 18 条未清除 |
