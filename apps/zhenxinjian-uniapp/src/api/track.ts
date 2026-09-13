@@ -1,11 +1,13 @@
 /**
  * 埋点上报 API（静默上报：失败不弹 toast、不触发登录跳转，队列侧自行重试）
  * 作者: wanglx
+ *
+ * 与 request.ts 共享 BASE_URL 单一来源；独立裸 uni.request 属刻意——
+ * 静默语义（不 toast/不 401 跳转）与 10s 短超时不同于业务请求 15s 默认
  */
 import type { Result } from './types'
+import { BASE_URL } from './request'
 import { getToken } from '@/utils/storage'
-
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api'
 
 export interface TrackEventItem {
   eventCode: string

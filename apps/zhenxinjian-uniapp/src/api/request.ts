@@ -1,18 +1,39 @@
 /**
  * uni.request 统一封装
  * 作者: wanglx
+ *
+ * 分层约束：api 层不依赖 store——401/游客到期的会话内存态清理与续期 token 的
+ * 内存同步经 AuthHooks 回调注入（main.ts 组合根装配 user store），
+ * 消除 store→api→store 循环依赖
  */
 import type { Result } from './types'
 import { getToken, removeToken, setToken } from '@/utils/storage'
-import { useUserStore } from '@/store/user'
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api'
+/** API 服务地址（api 层单一来源，track.ts 经此处引用） */
+export const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api'
 
 /** 业务错误码：游客体验已到期 */
 const GUEST_EXPIRED_CODE = 40201
 
 /** 登录相关接口不附带 Authorization */
 const AUTH_SKIP_URLS = ['/auth/wechat/login', '/auth/guest']
+
+/**
+ * 会话事件钩子（api 层去 store 化的注入点，main.ts 组合根装配）
+ * onSessionClear：401/游客到期清内存会话态（storage 清理与页面跳转由本层负责）
+ * onTokenRefreshed：服务端续期 token 同步内存态
+ */
+export interface AuthHooks {
+  onSessionClear: () => void
+  onTokenRefreshed: (token: string) => void
+}
+
+let authHooks: AuthHooks | null = null
+
+/** 装配会话事件钩子（应用启动时调用一次；未装配时仅做 storage 层处理，语义等价原 Pinia 未就绪分支） */
+export function setAuthHooks(hooks: AuthHooks) {
+  authHooks = hooks
+}
 
 interface RequestOptions {
   url: string
@@ -57,11 +78,7 @@ function request<T>(options: RequestOptions): Promise<T> {
         const newToken = headers['X-Refresh-Token'] || headers['x-refresh-token']
         if (newToken) {
           setToken(newToken)
-          try {
-            useUserStore().token = newToken
-          } catch {
-            // Pinia 未就绪时仅写 storage
-          }
+          authHooks?.onTokenRefreshed(newToken)
         }
         const body = res.data as Result<T>
         if (!body || typeof body !== 'object') {
@@ -98,13 +115,7 @@ function request<T>(options: RequestOptions): Promise<T> {
  */
 function clearSessionAndGoLogin() {
   removeToken()
-  try {
-    const userStore = useUserStore()
-    userStore.token = ''
-    userStore.userInfo = null
-  } catch {
-    // ignore
-  }
+  authHooks?.onSessionClear()
   uni.reLaunch({ url: '/pages/auth/guide' })
 }
 
@@ -113,13 +124,7 @@ function clearSessionAndGoLogin() {
  */
 function clearSessionAndGoExpire() {
   removeToken()
-  try {
-    const userStore = useUserStore()
-    userStore.token = ''
-    userStore.userInfo = null
-  } catch {
-    // ignore
-  }
+  authHooks?.onSessionClear()
   uni.reLaunch({ url: '/pages/auth/expire' })
 }
 

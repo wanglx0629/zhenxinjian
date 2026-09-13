@@ -103,6 +103,17 @@ export const useUserStore = defineStore('user', () => {
     useTaperStore().reset()
   }
 
+  /** 续期 token 同步内存态（api 层 AuthHooks 注入点，request.ts 去 store 化） */
+  function syncToken(t: string) {
+    token.value = t
+  }
+
+  /** 清会话内存态（api 层 401/游客到期 AuthHooks 注入点；storage 清理与页面跳转由 request 负责） */
+  function clearSession() {
+    token.value = ''
+    userInfo.value = null
+  }
+
   /** 拉取当前用户 */
   async function fetchUserInfo() {
     if (!token.value) {
@@ -121,6 +132,8 @@ export const useUserStore = defineStore('user', () => {
     loginAsGuest,
     abandonGuest,
     logout,
-    fetchUserInfo
+    fetchUserInfo,
+    syncToken,
+    clearSession
   }
 })
