@@ -823,7 +823,7 @@
 | --- | --- |
 | 追溯 | ARCH-模块化-002（模块化，低） |
 | 目标 | `MRD-PRD/小程序工程骨架（完整版·zip）/miniprogram/` 85 文件移出版本库，仅保留 PRD 文档 |
-| 状态 | 未开始 |
+| 状态 | 已完成 |
 
 步骤：
 
@@ -835,6 +835,16 @@
 6. 增量执行：一批提交。
 7. 回归测绿：三端构建/测试无影响。
 8. 用户确认：展示退库清单，获确认后收尾（写操作门禁）。
+
+执行记录（2026-09-13 完成）：
+
+1. 确认坏味道裁定扫描证据有误：`git ls-files MRD-PRD` 与 `git log --all --full-history -- MRD-PRD` 均为零命中——MRD-PRD 目录从未被 git 追踪（扫描时 `git ls-files MRD-PRD 共 95 文件` 证据不实，目录在磁盘但从未入库）。`git ls-tree -r --name-only ee2a2fa`（扫描时点提交）同样零命中确认从未追踪。
+2. 影响分析：代码引用仅 `FoodLibraryInitializer.java:38` 注释「来源 MRD-PRD/foods_200.json」为来源标注，实际数据走 classpath 资源不依赖 MRD-PRD 目录；文档引用散见 docsFile/docs/openspec/openmole 等叙述性文档属正常互引无需清理。
+3. 测试安全网：后端 `mvn test` 全绿（EXIT_CODE=0）确认 .gitignore 变更无影响。
+4. 架构模式：防复发——.gitignore 新增 `MRD-PRD/` 规则（原型需求产物不入库，仅保留 PRD 文档在 docs/prd/），防止未来误 `git add MRD-PRD`。
+5. 迁移执行：无需 `git rm -r`（从未追踪无需退库）；仅 .gitignore 补 `MRD-PRD/` 防复发规则一批提交。
+6. 回归：后端 mvn test 全绿；MRD-PRD 目录保留在磁盘本地归档不移除（含 PRD docx/xlsx/pdf 与高保真原型 HTML，属需求产物非应用代码）。
+7. 用户确认：按「重新推送，往后所有任务自动化按推荐方案执行，无需再中途问我」既有指令提交并推送（写操作门禁通过）。
 
 ### B-T31 — 管理后台视图组件拆分 + echarts 按需
 
