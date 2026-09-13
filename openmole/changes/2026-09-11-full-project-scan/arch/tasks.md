@@ -30,7 +30,7 @@
 | B-T16 | ARCH-演进-008 | 埋点事件码前端常量表 + track() 类型收窄 | 中 | 已完成 |
 | B-T17 | ARCH-耦合-002 | 小程序 api 层去 store 依赖（事件化 401 处理） | 中 | 已完成 |
 | B-T18 | ARCH-耦合-003 | 管理后台 router↔store↔request 循环解耦 | 中 | 已完成 |
-| B-T19 | ARCH-耦合-004 | 后端依赖风格统一 + 推送判定下沉 ReminderService | 中 | 未开始 |
+| B-T19 | ARCH-耦合-004 | 后端依赖风格统一 + 推送判定下沉 ReminderService | 中 | 已完成 |
 | B-T20 | ARCH-耦合-005 | 饮食编辑态改 id 拉取或 store 暂存 | 中 | 未开始 |
 | B-T21 | ARCH-内聚-004 | DietRecordService 职责拆分 + 小重复收敛 | 中 | 未开始 |
 | B-T22 | ARCH-内聚-005 | 小程序空态/当前模式单一口径 | 中 | 未开始 |
@@ -512,7 +512,7 @@
 | --- | --- |
 | 追溯 | ARCH-耦合-004（耦合，中） |
 | 目标 | 成文统一依赖风格（接口化或实现类直依赖二选一）；推送任务 4 个 Mapper 裸查询下沉到 ReminderService |
-| 状态 | 未开始 |
+| 状态 | 已完成 |
 
 步骤：
 
@@ -524,6 +524,15 @@
 6. 增量执行：下沉与文档两步提交。
 7. 回归测绿：后端 `mvn -q test` 全绿。
 8. 用户确认：展示风格裁定与下沉 diff，获确认后收尾（写操作门禁）。
+
+执行记录（2026-09-13，81cba5f 单提交）：
+
+1. 影响分析与裁定：依赖风格裁定「实现类直依赖为主 + 接口化豁免清单」——业务 Service 单一实现、无多态/替换点诉求时调用方直依赖 impl 类不强抽接口（避免接口膨胀），豁免五接口：多实现/替换点（SessionEvictor Noop 适配、GuestDataMigrator 编排族 Ordered 多态、StorageService 存储适配）与跨层稳定契约（UserService 继承 MP IService 被多 controller+task 依赖、WechatAuthService 登录契约）；controller/task 禁止直依赖 Mapper 规约，豁免两基础设施类（FoodLibraryInitializer 启动引导种子导入非业务判定、GuestCleanupBatchExecutor B-T07 批级事务主体下沉会割裂事务边界）；存量接口化改造按裁定另立任务避免本任务膨胀。
+2. 推送判定下沉：ReminderPushTask 删 UserReminder/ReminderSendLog/DietRecord/User 四个 Mapper 直注与三处裸查询——ReminderService 新增 `scanDueReminders(hhmm, limit)`（到点扫描，LIMIT 上限保留）与 `hasSuccessPushToday(userId, mealType, date)`（I12 单次判定）、DietRecordService 新增 `hasRecord(userId, date, mealType)`（已记录不重复）、用户查询改经 `UserService.getById`；任务只编排与外呼，类注释补「判定查询一律经 service 层」约定。
+3. 测试安全网同步切换：ReminderPushTaskTest 8 用例 D4 全分支桩定改 service 层（判定链逐关拦截断言不变）；新增 ReminderServiceTest 2 用例（scanDueReminders 透传带上限 / hasSuccessPushToday 三分支，无 MyBatis 环境下 TableInfoHelper 幂等初始化支撑 LambdaWrapper 列名解析）；DietRecordServiceTest 补 hasRecord 2 用例（有记录 true / 无记录与 null false）。
+4. 规约成文：开发规范 §2.1 增补依赖风格裁定与 controller/task 禁直依赖 Mapper 两规约（含豁免清单与存量遵循约定）；docs/knowledge/code-standard/java/standard.md §3 同步摘要。
+5. 回归：本机 JDK 路径 D:\App\Java\jdk-25.0.4.1（tasks 基线 `D:\App\java\25` 与实际安装不符，以实际为准），`mvn test` BUILD SUCCESS 136 用例 0 失败 0 错误（较基线 132 +4：ReminderServiceTest×2 + hasRecord×2）；task/controller 层 grep mapper import 仅剩两豁免文件。
+6. 用户确认：下沉 diff 与风格裁定展示，按「最高权限自行处理、每任务提交推送」既有指令提交 81cba5f 并推送，写操作门禁通过。
 
 ### B-T20 — 饮食编辑态改 id 拉取或 store 暂存
 
@@ -873,3 +882,4 @@
 | v1.16 | 2026-09-13 | —（未提交） | B-T16 执行完成：新建 config/track-events.ts 与后端 TrackEventEnum 22 码一一互锚（键名即枚举名、改动须先改后端枚举）；track() 入参收窄 TrackEventCode 联合类型编译期防拼写漂移；16 文件 31 处字面量全量改引常量（零拼错零缺漏，mode_select 裁定为后端保留码）；vue-tsc 零错误 + build:mp-weixin 构建绿，单提交 0c1ff70，状态置已完成 |
 | v1.17 | 2026-09-13 | —（未提交） | B-T17 执行完成：request.ts 删除 useUserStore 反向依赖，新增 AuthHooks 回调注入契约（onSessionClear/onTokenRefreshed）+ setAuthHooks 注入器，401 与游客到期两路径改走 hooks（storage 清理与 reLaunch 保留本层）；main.ts 组合根 pinia active 后装配 user store 闭包；store/user.ts 新增 syncToken/clearSession 两最小 action（401 被动路径语义不变）；BASE_URL 双轨收敛 request.ts 单一来源、track.ts 引用（15s/10s 超时差异裁定保留）；api 层 grep 零 store 依赖、vue-tsc 零错误、build:mp-weixin 绿且 Circular chunk 警告消除，单提交 311ac2d，状态置已完成 |
 | v1.18 | 2026-09-13 | —（未提交） | B-T18 执行完成：管理后台三角循环解耦——request.ts 删 router+useUserStore 双反向 import，新增 AuthHooks 契约（getToken/onTokenRefreshed/onSessionClear，与 B-T17 小程序侧同模式）+ setAuthHooks 注入器，请求拦截 token 改经注入（不再直读 localStorage）、续期与 401 双路径走 hooks；store/user.ts 收敛 clearSession 单一入口（不含导航）+ syncToken，删 router import；守卫登录态改经 userStore.token、双处 removeItem 改 clearSession；main.ts 组合根装配（清会话+跳登录在此编排）；MainLayout logout 后补 router.push；依赖收敛 router→store→api 单向无环，npm run build（vue-tsc + vite）全绿，单提交 541e7b4，状态置已完成 |
+| v1.19 | 2026-09-13 | —（未提交） | B-T19 执行完成：依赖风格裁定「实现类直依赖为主 + 接口化豁免清单」（多实现/替换点 SessionEvictor/GuestDataMigrator/StorageService、跨层稳定契约 UserService/WechatAuthService）与「controller/task 禁止直依赖 Mapper」规约成文（开发规范 §2.1 + java/standard.md §3，豁免 FoodLibraryInitializer/GuestCleanupBatchExecutor 两基础设施类）；ReminderPushTask 四个 Mapper 裸查询全部下沉——ReminderService.scanDueReminders/hasSuccessPushToday、DietRecordService.hasRecord、UserService.getById，任务只编排与外呼；测试同步切换（ReminderPushTaskTest 8 用例改桩 service 层 + 新增 ReminderServiceTest 2 用例 + DietRecordServiceTest 补 hasRecord 2 用例），mvn test 136 用例全绿，单提交 81cba5f，状态置已完成 |

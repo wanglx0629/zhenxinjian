@@ -30,7 +30,7 @@
 | ARCH-演进-008 | 演进 | 中 | 已消除 |
 | ARCH-耦合-002 | 耦合 | 中 | 已消除 |
 | ARCH-耦合-003 | 耦合 | 中 | 已消除 |
-| ARCH-耦合-004 | 耦合 | 中 | 未清除 |
+| ARCH-耦合-004 | 耦合 | 中 | 已消除 |
 | ARCH-耦合-005 | 耦合 | 中 | 未清除 |
 | ARCH-内聚-004 | 内聚 | 中 | 未清除 |
 | ARCH-内聚-005 | 内聚 | 中 | 未清除 |
@@ -319,7 +319,7 @@
 | 根因 | 增量开发未定统一约定；推送判定链图省事写在 task |
 | 影响 | 替换实现/加装饰器困难；同一业务数据访问分裂在两层 |
 | 修复建议 | 二选一统一依赖风格并成文；推送判定查询下沉到 ReminderService |
-| 状态 | 未清除 |
+| 状态 | 已消除（T19 于 2026-09-13 完成：ReminderPushTask 四个 Mapper 裸查询全部下沉——ReminderService 新增 scanDueReminders（到点扫描带 LIMIT）/hasSuccessPushToday（I12 单次）、DietRecordService 新增 hasRecord（已记录不重复）、用户查询改经 UserService.getById，任务只编排与外呼；测试安全网同步切换（ReminderPushTaskTest 8 用例改桩 service 层 + 新增 ReminderServiceTest 2 用例 + DietRecordServiceTest 补 hasRecord 2 用例），136 用例全绿；依赖风格裁定成文——开发规范 §2.1 与 java/standard.md §3 增补「实现类直依赖为主 + 接口化豁免清单」（多实现/替换点与跨层稳定契约五接口豁免）与「controller/task 禁止直依赖 Mapper」规约（豁免 FoodLibraryInitializer 启动引导、GuestCleanupBatchExecutor 批级事务主体）；存量接口化改造按裁定另立任务，单提交 81cba5f） |
 
 ### ARCH-耦合-005 — 小程序页面间 URL 传复杂状态
 
@@ -585,3 +585,4 @@
 | v1.17 | 2026-09-13 | —（未提交） | B-T16 完成，ARCH-演进-008 置"已消除"（config/track-events.ts 常量表与后端 TrackEventEnum 22 码互锚 + track() 收窄 TrackEventCode 联合类型编译期防拼写漂移 + 16 文件 31 处字面量全量改引常量；vue-tsc 零错误 + build:mp-weixin 构建绿）。余 20 条未清除 |
 | v1.18 | 2026-09-13 | —（未提交） | B-T17 完成，ARCH-耦合-002 置"已消除"（request.ts 去 useUserStore 反向依赖 + AuthHooks 回调注入契约（onSessionClear/onTokenRefreshed）+ main.ts 组合根 pinia active 后装配 + store/user.ts 新增 syncToken/clearSession 最小 action（401 被动路径语义不变）；BASE_URL 双轨收敛 request.ts 单一来源、track.ts 引用，15s/10s 超时差异裁定保留；api 层 grep 零 store 依赖、vue-tsc 零错误、build:mp-weixin 绿且 Circular chunk store/user→api/auth→api/request→store/user 警告消除）。余 19 条未清除 |
 | v1.19 | 2026-09-13 | —（未提交） | B-T18 完成，ARCH-耦合-003 置"已消除"（管理后台三角循环解耦：request.ts 删 router+useUserStore 双反向 import + AuthHooks 契约（getToken/onTokenRefreshed/onSessionClear）+ setAuthHooks 注入器，token 改经注入不再直读 localStorage；store/user.ts 收敛 clearSession 单一入口 + syncToken，删 router import；守卫登录态改经 userStore；main.ts 组合根装配；依赖收敛 router→store→api 单向无环，vue-tsc + vite build 全绿）。余 18 条未清除 |
+| v1.20 | 2026-09-13 | —（未提交） | B-T19 完成，ARCH-耦合-004 置"已消除"（ReminderPushTask 四个 Mapper 裸查询全部下沉——ReminderService.scanDueReminders/hasSuccessPushToday、DietRecordService.hasRecord、UserService.getById，任务只编排与外呼；测试安全网同步切换，136 用例全绿；依赖风格裁定成文——开发规范 §2.1 与 java/standard.md §3 增补「实现类直依赖为主 + 接口化豁免清单」与「controller/task 禁止直依赖 Mapper」规约及两基础设施豁免）。余 17 条未清除 |
