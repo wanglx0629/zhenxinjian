@@ -4,9 +4,15 @@
  * 作者: wanglx
  */
 import { onBeforeUnmount, onMounted, ref } from 'vue'
-import * as echarts from 'echarts'
+import * as echarts from 'echarts/core'
+import { LineChart } from 'echarts/charts'
+import { GridComponent, LegendComponent, TooltipComponent } from 'echarts/components'
+import { CanvasRenderer } from 'echarts/renderers'
 import { getActiveTrend, getEventRank, getOverview, getPageRank } from '@/api/stats'
 import type { DailyActive, EventRank, PageRank, StatsOverview } from '@/api/stats'
+
+/** B-T31：echarts 按需注册（趋势图仅需折线图 + 三组件 + Canvas 渲染器，替代全量包） */
+echarts.use([LineChart, GridComponent, LegendComponent, TooltipComponent, CanvasRenderer])
 
 const overview = ref<StatsOverview | null>(null)
 const trendDays = ref(30)
@@ -14,7 +20,7 @@ const trendData = ref<DailyActive[]>([])
 const eventRank = ref<EventRank[]>([])
 const pageRank = ref<PageRank[]>([])
 const trendRef = ref<HTMLElement>()
-let chart: echarts.ECharts | null = null
+let chart: ReturnType<typeof echarts.init> | null = null
 
 async function loadOverview() {
   overview.value = await getOverview()

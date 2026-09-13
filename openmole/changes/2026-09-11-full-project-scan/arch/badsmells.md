@@ -42,7 +42,7 @@
 | ARCH-边界-007 | 边界 | 中 | 已消除 |
 | ARCH-模块化-001 | 模块化 | 低 | 已消除 |
 | ARCH-模块化-002 | 模块化 | 低 | 已消除 |
-| ARCH-模块化-003 | 模块化 | 低 | 未清除 |
+| ARCH-模块化-003 | 模块化 | 低 | 已消除 |
 | ARCH-边界-002 | 边界 | 低 | 未清除 |
 | ARCH-边界-003 | 边界 | 低 | 未清除 |
 | ARCH-边界-008 | 边界 | 低 | 未清除 |
@@ -487,7 +487,7 @@
 | 根因 | 单页快速实现未拆分 |
 | 影响 | 复用受限；包体积偏大 |
 | 修复建议 | 弹窗/抽屉拆为独立组件；echarts 按需引入 |
-| 状态 | 未清除 |
+| 状态 | 已消除（B-T31 于 2026-09-13 完成，单提交——users/index.vue 345→127 行：UserEditDialog（新增/编辑弹窗含表单校验与提交）、UserDetailDrawer（聚合详情抽屉，getUserProfile 调用内聚入组件）拆出，父页仅列表编排 + open* 委派 + @saved 刷新；foods/index.vue 270→149 行：FoodEditDialog 表单弹窗拆出同模式；组件落位 `view/<name>/components/`（视图级就近，`src/component/` 保持共享层），defineExpose open(row?) 开启契约；dashboard echarts 全量 `import * as echarts from 'echarts'` 改按需 echarts/core + LineChart + Grid/Legend/Tooltip + CanvasRenderer 五项注册（`echarts.ECharts` 类型改 `ReturnType<typeof echarts.init>`）；字段/校验/交互逐字迁移零行为变更；vue-tsc 零错误 + vite build 双绿；体积 git worktree HEAD 基线对比——echarts chunk 1,039.24→486.08 kB（-53.2%，gzip 345.09→163.89 kB/-52.5%），主 vendor 1,237.62 kB 不变，总 JS 约 2,302→1,749 kB） |
 
 ### ARCH-边界-002 — 管理后台 Token 存 localStorage + 子串匹配白名单
 
@@ -597,3 +597,4 @@
 | v1.29 | 2026-09-13 | —（未提交） | B-T28 完成，ARCH-边界-007 置"已消除"（JWT 密钥门禁改内容检测：application.yml 明文默认改 `${JWT_SECRET:}` 空占位强制注入；SecurityStartupChecker 去 prod profile 依赖——WEAK_SECRET_FEATURE = "change-in" 子串检测覆盖历史默认及变体 + UTF-8 字节 <32 拒，任何环境一律拒启，误配环境带弱密钥同治，CORS * 门禁保持 prod 强制职责分离；application-dev.yml.example 补 jwt 段 + 本机 gitignored application-dev.yml 同步保启动不断；新建 SecurityStartupCheckerTest 8 用例，mvn test 149 用例全绿；顺带修正索引表 ARCH-边界-001/006 已消除漏登行）。余 8 条未清除 |
 | v1.30 | 2026-09-13 | —（未提交） | B-T29 完成，ARCH-模块化-001 置"已消除"（App.vue 新增非 scoped 全局样式块承载 .panel/.panel-title/.btn-primary 三类单一真源；12 页处理：7 页删一致副本、3 页漂移保留加注释、2 页删一致副本；.modal* 三变体漂移大裁定不全局化；超大页拆分经前序任务已收敛裁定期望达成不强制拆分；vue-tsc 零错误 + build:mp-weixin 构建绿，13 文件改动零行为变更）。余 7 条未清除 |
 | v1.31 | 2026-09-13 | —（未提交） | B-T30 完成，ARCH-模块化-002 置"已消除"（扫描证据裁定有误：`git ls-files`/`git log --all --full-history`/`git ls-tree ee2a2fa` 三路核对 MRD-PRD 从未被 git 追踪，无需 `git rm -r`；.gitignore 新增 `MRD-PRD/` 防复发规则（原型需求产物不入库，仅保留 PRD 文档在 docs/prd/）；代码引用仅 FoodLibraryInitializer.java:38 注释来源标注不依赖目录；mvn test 全绿零影响；目录保留磁盘本地归档含 PRD 文档与高保真原型 HTML）。余 6 条未清除 |
+| v1.32 | 2026-09-13 | —（未提交） | B-T31 完成，ARCH-模块化-003 置"已消除"（users 345→127 行拆 UserEditDialog+UserDetailDrawer、foods 270→149 行拆 FoodEditDialog，组件落位 view/<name>/components/，defineExpose open(row?) + @saved 契约，字段/校验/交互逐字迁移零行为变更；dashboard echarts 全量改按需 echarts/core 五项注册；vue-tsc + vite build 双绿；echarts chunk 1,039.24→486.08 kB/-53.2%，gzip 345.09→163.89 kB/-52.5%，总 JS 约 2,302→1,749 kB）。余 5 条未清除 |

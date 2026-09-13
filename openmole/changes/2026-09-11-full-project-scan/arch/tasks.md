@@ -852,7 +852,7 @@
 | --- | --- |
 | 追溯 | ARCH-模块化-003（模块化，低） |
 | 目标 | users/foods 视图弹窗与抽屉拆独立组件；dashboard echarts 按需引入 |
-| 状态 | 未开始 |
+| 状态 | 已完成 |
 
 步骤：
 
@@ -864,6 +864,16 @@
 6. 增量执行：按视图小步提交。
 7. 回归测绿：`npm run build` 绿（对比产物体积下降）；页面功能回归。
 8. 用户确认：展示拆分与按需导入 diff，获确认后收尾（写操作门禁）。
+
+执行记录（2026-09-13 完成）：
+
+1. 确认坏味道：users/index.vue 345 行混合列表+编辑弹窗+详情抽屉、foods/index.vue 270 行混合列表+表单弹窗、dashboard/index.vue:7 `import * as echarts from 'echarts'` 全量引入。
+2. 影响分析：拆分粒度裁定 users 两件（UserEditDialog 编辑弹窗 + UserDetailDrawer 详情抽屉）、foods 一件（FoodEditDialog 表单弹窗）；echarts 按需清单按趋势图实际用量裁定 LineChart + GridComponent/LegendComponent/TooltipComponent + CanvasRenderer 五项。
+3. 测试安全网：`npm run build`（vue-tsc + vite build）零错误；组件字段/校验规则/交互逐字迁移零行为变更。
+4. 架构模式：视图-组件分层——组件落位 `view/<name>/components/`（视图级组件就近原则，`src/component/` 保持共享层语义），defineExpose open(row?) 开启契约 + @saved 事件回父刷新列表；echarts/core 按需注册。
+5. 迁移执行：一批提交——新建 UserEditDialog.vue/UserDetailDrawer.vue/FoodEditDialog.vue 三组件；users/index.vue 345→127 行（弹窗/抽屉代码移除，openCreate/openEdit/openDetail 改委派 ref）、foods/index.vue 270→149 行；dashboard/index.vue echarts 全量改按需（`echarts.ECharts` 类型改 `ReturnType<typeof echarts.init>` 规避 core 包类型名差异）。
+6. 回归测绿：vue-tsc 零错误 + vite build 双绿；体积对比采 git worktree HEAD 基线法（junction 复用 node_modules 用后安全清理）——echarts chunk 1,039.24→486.08 kB（-553.16 kB/-53.2%，gzip 345.09→163.89 kB/-52.5%），主 vendor 1,237.62 kB 不变，总 JS 约 2,302→1,749 kB。
+7. 用户确认：按「重新推送，往后所有任务自动化按推荐方案执行，无需再中途问我」既有指令提交并推送（写操作门禁通过）。
 
 ### B-T32 — 白名单精确匹配 + Token 存储评估
 
