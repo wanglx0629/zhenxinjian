@@ -15,8 +15,8 @@
 
 | 项 | 值 |
 | ---- | ---- |
-| JDK 布局 | `D:\App\java\{8,17,21,25,jre8}`；系统 JAVA_HOME=`D:\App\java\8`（另一项目占用） |
-| Maven 本地仓库 | `D:\App\apache-maven-3.9.16\repository` |
+| JDK25 | `D:\App\Java\jdk-25.0.4.1`（版本化目录；PATH 上 java 经 Oracle javapath shim 解析；Maven 只认 JAVA_HOME，用 `tools\env\mvn25.cmd`） |
+| Maven 本地仓库 | `D:\App\apache-maven-3.9.15\repository`（实证 `help:evaluate settings.localRepository`） |
 | MySQL 服务 | 127.0.0.1:3306，库 `zhenxinjian`；客户端 `D:\App\MySQL\MySQLServer8\bin\mysql.exe` |
 | MySQL 驱动 jar | `<maven仓库>\com\mysql\mysql-connector-j\9.7.0\mysql-connector-j-9.7.0.jar` |
 | Redis | 127.0.0.1:6379 db0；客户端 `D:\App\Redis\redis-cli.exe` |
@@ -31,5 +31,5 @@
 5. `set VAR=value && cmd` 的 value 会带上 `&&` 前的空格——写成 `set VAR=value&& cmd` 或用 `tools\env\mvn25.cmd`
 6. 长命令输出到 `%TEMP%\xxx.log` 再用 Read/Grep 工具查看，避免管道 findstr
 7. **`.cmd` 文件禁止中文**：cmd.exe 按 GBK 代码页解析批处理，UTF-8 中文注释的字节流可能被拆成可执行片段（报 `'xx' is not recognized`）——批处理一律 ASCII 注释，中文写进同名 README.md
-8. 相对路径跨目录调用 `.cmd` 时注意基准目录（`apps\zhenxinjian-backend\tools` 不存在）——仓库根工具一律用绝对路径 `E:\project\zhenxinjian\tools\...`
+8. 相对路径跨目录调用 `.cmd` 时注意基准目录（`apps\zhenxinjian-backend\tools` 不存在）——仓库根工具一律用绝对路径 `<仓库根>\tools\...`（本机如 `H:\project\github\zhenxinjian\tools\...`）
 9. **JSON 接口测试禁止 curl/内联 JSON**：curl `-H` 引号被吞回退 form 编码（415/500）；`powershell -Command` 的 `$变量` 被吞；`-Body "{}"`/`'{}'` 引号原样传入致 Jackson 解析失败——一律 `tools\http\api-test.ps1 -BodyFile`（详见 [http/README.md](./http/README.md)）

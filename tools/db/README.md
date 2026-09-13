@@ -18,6 +18,7 @@
 
 - 按 `;` 切分语句、剥离 `--` 注释；DDL/DQL 通吃；SELECT 结果以 `|` 分隔打印
 - 中文乱码防护：脚本已带 `-Dfile.encoding=UTF-8`；SQL 文件须 UTF-8 保存
+- 驱动 jar 解析（B-T35 环境解耦）：`ZXJ_MYSQL_CONNECTOR` 环境变量优先，未设置兜底本机 Maven 仓库路径（见下「坑」3）；缺失即报错提示设变量
 - 凭据解析：`db.local.properties` → 环境变量 `MYSQL_URL/MYSQL_USERNAME/MYSQL_PASSWORD`
 - **版本记账**：`change<N>_*.sql` 自动纳入 `schema_migrations` 版本表——执行前查账，已应用整体跳过（SKIP）；全部语句成功后回写记账（RECORDED）；任何报错立即终止且**不记账**
 - **幂等守卫**：迁移脚本自带 `IF NOT EXISTS` / information_schema 条件守卫，手工重复执行安全（change2 为逐步前置状态守卫，支持断点续跑）
