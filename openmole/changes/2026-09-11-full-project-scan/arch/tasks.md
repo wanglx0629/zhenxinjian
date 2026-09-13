@@ -47,7 +47,7 @@
 | B-T33 | ARCH-边界-003 | 埋点接口限流 | 低 | 已完成 |
 | B-T34 | ARCH-边界-008 | 小程序发布就绪性补齐（隐私/升级） | 低 | 已完成 |
 | B-T35 | ARCH-演进-006 | tools 路径解耦 + 临时残渣清理 | 低 | 已完成 |
-| B-T36 | ARCH-演进-009 | 微信 token 内存态约束登记 ADR | 低 | 未开始 |
+| B-T36 | ARCH-演进-009 | 微信 token 内存态约束登记 ADR | 低 | 已完成 |
 
 状态说明：**未开始** / 进行中 / 已完成。共 36 个任务（高 12 / 中 16 / 低 8）。
 
@@ -987,7 +987,7 @@
 | --- | --- |
 | 追溯 | ARCH-演进-009（演进，低） |
 | 目标 | 在 ADR/知识库登记"一期单实例约束：WxMaDefaultConfigImpl 内存 token，扩容前须切 Redis 实现" |
-| 状态 | 未开始 |
+| 状态 | 已完成 |
 
 步骤：
 
@@ -1042,3 +1042,4 @@
 | v1.33 | 2026-09-13 | —（未提交） | B-T33 执行完成（补登版本行，7014aa0 收尾时漏登）：/track/events 改 Redis 固定窗口计数限流——登录按 u:{userId}/未登录按 ip:{clientIp}（X-Forwarded-For 首跳兜底 getRemoteAddr），30 批次/分钟/维度（正常水位 ≤6，5 倍余量）；超阈值抛 429 端上整批保留窗口过期自然恢复不丢数据；RedisUtils.incrementTrackRate + yml 配置段与登录限流同风格；TrackEventServiceTest 5→9 用例，mvn test 153 用例全绿，状态置已完成 |
 | v1.34 | 2026-09-13 | —（未提交） | B-T34 执行完成（补登版本行，2feb0b6 收尾时漏登）：小程序发布就绪三件套——vite.config.ts 新增 manifestAppidEnvPlugin 内存改写 mp-weixin.appid（VITE_MP_WEIXIN_APPID 环境注入，不落盘）；manifest.json __usePrivacyCheck__: true + App.vue onLaunch initPrivacyAuth 官方隐私弹窗；checkAppUpdate getUpdateManager 版本升级检查；mine showPrivacy 微信端改 openPrivacyContract；vue-tsc 零错误 + build:mp-weixin 双轮实证，状态置已完成（顺带修正索引表 B-T30~B-T33 漏登行） |
 | v1.35 | 2026-09-13 | —（未提交） | B-T35 执行完成：tools 路径环境解耦两批提交（957969b/2ae3498）——批 1 jdk25/mvn25/run-sql 三脚本改「环境变量优先→本机默认兜底→缺失报错提示」三级解析（ZXJ_JDK25_HOME / ZXJ_MYSQL_CONNECTOR，校验目标存在缺失即明确报错；jdk25.cmd 无 setlocal 写回变量供同会话继承）；演练实证旧路径已腐烂——JDK25 真身 D:\App\Java\jdk-25.0.4.1 版本化目录（旧 D:\App\java\25 不存在）、Maven 真身 3.9.15（help:evaluate 实证），tools/README 与 env/README 的 JDK 布局/Maven 版本/E 盘符三处过时事实同步修正；批 2 .gitignore 补 !tools/**/*.example 豁免 + db.local.properties.example 模板入库（check-ignore 双向实证：example 可入库、真实凭据仍忽略）；tmp-* 经 Glob 实证磁盘已不存在规则保留防复发、.codegraph/.gitignore 裁定保留系有意守卫非残渣；演练 mvn25 -version 输出 25.0.4.1、jdk25 切换成功、run-sql change0 全链 SKIP，状态置已完成 |
+| v1.36 | 2026-09-13 | `84d21d8` | B-T36 执行完成：微信 token 内存态约束登记 ADR 0005「微信 Token 内存态与单实例部署约束」——一期裁定单实例部署 WxMaDefaultConfigImpl 内存 token 为正式方案；扩容前置门禁：多实例前须切换 SDK 4.7.0 内置 WxMaRedisConfigImpl/WxMaRedissonConfigImpl（jar tf 实证 cn.binarywang.wx.miniapp.config.impl 包内置齐备），配置类替换业务零改动；与定时任务 ShedLock 化同属多实例扩展门禁族扩容评审一并核对；WxMaConfiguration 类注释互链 ADR 双向可达，adr/README 索引登记文档版本 V1.1，单提交 84d21d8，状态置已完成；**36 任务全量收官** |

@@ -47,7 +47,7 @@
 | ARCH-边界-003 | 边界 | 低 | 已消除 |
 | ARCH-边界-008 | 边界 | 低 | 已消除 |
 | ARCH-演进-006 | 演进 | 低 | 已消除 |
-| ARCH-演进-009 | 演进 | 低 | 未清除 |
+| ARCH-演进-009 | 演进 | 低 | 已消除 |
 
 状态说明：**未清除** / 已消除 / 部分残余。共 36 条（高 12 / 中 16 / 低 8）。
 
@@ -557,7 +557,7 @@
 | 根因 | 一期单实例假设下的简化 |
 | 影响 | 扩容即踩坑（与 ShedLock 同类未设防扩展点） |
 | 修复建议 | 扩容前切换 `WxMaRedisConfigImpl` 类 Redis 实现；在 ADR 中登记该约束 |
-| 状态 | 未清除 |
+| 状态 | 已消除（2026-09-13 B-T36，提交 84d21d8：新建 ADR 0005「微信 Token 内存态与单实例部署约束」——一期裁定单实例部署 `WxMaDefaultConfigImpl` 内存 token 为正式方案零协调成本；扩容前置门禁：任何多实例部署前必须切换 SDK 4.7.0 内置 `WxMaRedisConfigImpl`/`WxMaRedissonConfigImpl`（jar tf 实证 `cn.binarywang.wx.miniapp.config.impl` 包内置齐备），配置类替换业务代码零改动；与定时任务 ShedLock 化同属多实例扩展门禁族扩容评审一并核对；`WxMaConfiguration` 类注释互链 ADR 0005 双向可达；adr/README 索引登记文档版本 V1.0→V1.1） |
 
 ---
 
@@ -602,3 +602,4 @@
 | v1.34 | 2026-09-13 | —（未提交） | B-T33 完成，ARCH-边界-003 置"已消除"（/track/events permitAll 无限流可刷量写库，改 Redis 固定窗口计数限流：维度登录按 u:{userId}/未登录按 ip:{clientIp}（resolveClientIp 取 X-Forwarded-For 首跳兜底 getRemoteAddr），阈值 30 批次/分钟/维度——端上正常水位 ≤6 批次/分钟 5 倍余量；key zhenxinjian:track:rate:{dimension} INCR 首击 EXPIRE 60s 与 recordLoginFail 同构；超阈值抛 429 复用 TOO_MANY_REQUESTS_CODE，端上按可重试失败整批保留窗口过期自然恢复不丢数据；配置 zhenxinjian.redis.track-rate-prefix/track-rate-limit-per-minute 走 yml 与登录限流同风格；TrackEventServiceTest 5→9 用例新增超限 429 不落库/窗口过期恢复链式桩/用户维度/IP 维度，mvn test 153 用例全绿）。余 3 条未清除 |
 | v1.35 | 2026-09-13 | —（未提交） | B-T34 完成，ARCH-边界-008 置"已消除"（appid 环境变量登记——vite.config.ts 新增 manifestAppidEnvPlugin，enforce:pre 拦截 uni manifest-json-js 虚拟模块 transform 管线，loadEnv 读 VITE_MP_WEIXIN_APPID 内存改写 mp-weixin.appid 不落盘零污染 git 工作区，未设置保持空串占位开发者工具可用测试号；隐私流程——manifest.json mp-weixin 新增 `__usePrivacyCheck__: true` 经 mergeMiniProgramAppJson 实证进 app.json，App.vue onLaunch 新增 initPrivacyAuth：getPrivacySetting.needAuthorization → requirePrivacyAuthorize 触发微信官方隐私弹窗（协议名取自 mp 后台配置，不注册自定义弹窗的最简合规路径）；升级检查——onLaunch 新增 checkAppUpdate：getUpdateManager.onUpdateReady → showModal 确认 applyUpdate，稍后则下次冷启动自动应用；mine showPrivacy 微信端改 openPrivacyContract 替代静态文案；两流程 `// #ifdef MP-WEIXIN` 条件编译隔离 H5 + typeof 守卫低版本基础库；README 新增发布态配置段登记；vue-tsc 零错误 + build:mp-weixin 双轮实证——无 env appid=touristappid 兜底/设 env 注入生效，app.json 含 `__usePrivacyCheck__: true`；顺带修正 tasks 索引表 B-T30~B-T33 已完成漏登行）。余 2 条未清除 |
 | v1.36 | 2026-09-13 | —（未提交） | B-T35 完成，ARCH-演进-006 置"已消除"（两批提交 957969b/2ae3498：批 1 脚本环境解耦——jdk25/mvn25/run-sql 三脚本改「环境变量优先→本机默认兜底→缺失报错提示」三级解析，ZXJ_JDK25_HOME 与 ZXJ_MYSQL_CONNECTOR 校验目标存在；演练实证旧路径已腐烂——JDK25 真身 D:\App\Java\jdk-25.0.4.1 版本化目录、旧 D:\App\java\25 不存在，Maven 真身 3.9.15 经 help:evaluate 实证，README 三处过时事实同步修正；批 2 .gitignore 补 `!tools/**/*.example` 豁免 + db.local.properties.example 模板入库，check-ignore 双向实证；tmp-* 磁盘已不存在规则保留防复发；.codegraph/.gitignore 裁定保留系有意守卫非残渣；演练 mvn25 -version 25.0.4.1、jdk25 切换成功、run-sql change0 全链 SKIP）。余 1 条未清除 |
+| v1.37 | 2026-09-13 | `84d21d8` | B-T36 完成，ARCH-演进-009 置"已消除"（新建 ADR 0005「微信 Token 内存态与单实例部署约束」：一期裁定单实例部署 WxMaDefaultConfigImpl 内存 token 为正式方案；扩容前置门禁——多实例前须切换 SDK 4.7.0 内置 WxMaRedisConfigImpl/WxMaRedissonConfigImpl，jar tf 实证 cn.binarywang.wx.miniapp.config.impl 包内置齐备，配置类替换业务零改动；与定时任务 ShedLock 化同属多实例扩展门禁族扩容评审一并核对；WxMaConfiguration 类注释互链 ADR 双向可达；adr/README 索引登记 V1.1）。**36 条全量清零，本轮全项目扫描收官** |
