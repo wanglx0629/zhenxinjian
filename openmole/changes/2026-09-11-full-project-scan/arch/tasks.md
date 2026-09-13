@@ -32,7 +32,7 @@
 | B-T18 | ARCH-耦合-003 | 管理后台 router↔store↔request 循环解耦 | 中 | 已完成 |
 | B-T19 | ARCH-耦合-004 | 后端依赖风格统一 + 推送判定下沉 ReminderService | 中 | 已完成 |
 | B-T20 | ARCH-耦合-005 | 饮食编辑态改 id 拉取或 store 暂存 | 中 | 已完成 |
-| B-T21 | ARCH-内聚-004 | DietRecordService 职责拆分 + 小重复收敛 | 中 | 未开始 |
+| B-T21 | ARCH-内聚-004 | DietRecordService 职责拆分 + 小重复收敛 | 中 | 已完成 |
 | B-T22 | ARCH-内聚-005 | 小程序空态/当前模式单一口径 | 中 | 未开始 |
 | B-T23 | ARCH-内聚-006 | 管理后台列表页骨架（usePageQuery + 字典层） | 中 | 未开始 |
 | B-T24 | ARCH-内聚-007 | 微信登录流程下沉 store/user.ts | 中 | 未开始 |
@@ -567,7 +567,7 @@
 | --- | --- |
 | 追溯 | ARCH-内聚-004（内聚，中） |
 | 目标 | 拆出汇总/守恒校验职责；`round1`/`operator()`/CORS origin 解析三处小重复收敛到公共工具 |
-| 状态 | 未开始 |
+| 状态 | 已完成 |
 
 步骤：
 
@@ -579,6 +579,15 @@
 6. 增量执行：小重复与拆职责分开提交。
 7. 回归测绿：后端 `mvn -q test` 全绿。
 8. 用户确认：展示拆分与收敛 diff，获确认后收尾（写操作门禁）。
+
+执行记录（2026-09-13，f6c43c4 批 1 + 641034b 批 2 双提交）：
+
+1. 批 1（f6c43c4 小重复收敛，零行为变更）：`round1` 三处私有副本（BodyCalcService/Taper532Service/DietRecordService，BigDecimal/double 双 overload）收敛到 `common/utils/Numbers.round1` 单一真源；`operator()` 六处 `"user:"+userId` 副本（BodyProfile/CustomFood/CyclePlan/DietRecord/Menstrual/Weight）收敛到 `common/utils/Operators.user`，AdminFoodService 无参 `operator()` 返回管理员用户名属不同语义裁定保留；CORS origin env 逗号分隔扁平化解析（SecurityConfig/SecurityStartupChecker 双份，WebSocketConfig 第三处已随 B-T01 删除）收敛到 `common/utils/CorsOrigins.parse`，过滤空白与星号语义保留调用方本层（解析共享/过滤分层）。
+2. 批 2（641034b 职责拆分）：新建 `DietSummaryService` 承接 `summary()` 整方法（532 推进口径经 `Taper532Service.todayTarget`、碳循环日型经 `CyclePlanService.findActiveDay`、经期上浮经 `resolvePhase` 跨模式叠加、未建档/无周期空态 `recorded=false` 口径不变）；`DietRecordService` 删 `UserBodyMapper`/`CyclePlanService`/`Taper532Service` 三依赖与 `rate`/`toDouble` 私有助手，回归 CRUD + 按日分组 + hasRecord 单一职责；跨调网 Cycle/Taper 改由 `DietSummaryService` 单向依赖零回边，DAG 无环。
+3. 守恒校验职责无需新拆：B-T03 已抽 `MacroConsistencyValidator` 共享校验器，DietRecordService 仅一处调用 `withinTolerance`（已在批 1 完成对齐）。
+4. DietController 注入 `DietSummaryService` 委派 `/diet/summary`；`/diet/records` 增删改查路径行为不变。
+5. 测试安全网同步拆分：DietRecordServiceTest 15→11 用例（移除 summary 5 用例 + 构造器去 3 mock），新增 DietSummaryServiceTest 5 用例原样迁移（532 分发/碳循环日型/未建档空态/无周期空态/未来日期 40505），136 用例全绿。
+6. 用户确认：按「依次自动执行、每任务提交推送、期间无需确认」既有指令提交 f6c43c4 与 641034b 并推送（首推 Recv failure，重推通过），写操作门禁通过。
 
 ### B-T22 — 小程序空态/当前模式单一口径
 

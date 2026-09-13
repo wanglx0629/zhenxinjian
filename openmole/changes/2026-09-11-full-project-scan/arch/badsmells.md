@@ -32,7 +32,7 @@
 | ARCH-耦合-003 | 耦合 | 中 | 已消除 |
 | ARCH-耦合-004 | 耦合 | 中 | 已消除 |
 | ARCH-耦合-005 | 耦合 | 中 | 已消除 |
-| ARCH-内聚-004 | 内聚 | 中 | 未清除 |
+| ARCH-内聚-004 | 内聚 | 中 | 已消除 |
 | ARCH-内聚-005 | 内聚 | 中 | 未清除 |
 | ARCH-内聚-006 | 内聚 | 中 | 未清除 |
 | ARCH-内聚-007 | 内聚 | 中 | 未清除 |
@@ -347,7 +347,7 @@
 | 根因 | 饮食记录是业务枢纽，职责持续堆积 |
 | 影响 | 改动影响面大；口径重复 |
 | 修复建议 | 拆出汇总/校验职责；`round1`/`operator()` 收敛到公共工具 |
-| 状态 | 未清除 |
+| 状态 | 已消除（T21 于 2026-09-13 完成，f6c43c4 批 1 + 641034b 批 2 双提交——批 1 三处小重复收敛公共工具：`round1` 三处私有副本（BodyCalc/Taper532/DietRecord，BigDecimal/double 双 overload）→ `common/utils/Numbers.round1` 单一真源，`operator()` 六处 `"user:"+userId` 副本（BodyProfile/CustomFood/CyclePlan/DietRecord/Menstrual/Weight）→ `common/utils/Operators.user`（AdminFoodService 无参 operator() 管理员用户名不同语义裁定保留），CORS origin env 逗号分隔扁平化解析双份 → `common/utils/CorsOrigins.parse`（过滤空白与星号语义保留调用方本层）；批 2 拆汇总职责：新建 `DietSummaryService` 承接 `summary()` 整方法（532 推进口径/碳循环日型/经期上浮叠加/未建档与无周期空态口径不变），`DietRecordService` 删 UserBodyMapper/CyclePlanService/Taper532Service 三依赖与 rate/toDouble 私有助手回归 CRUD+按日分组+hasRecord 单一职责，跨调网 Cycle/Taper 改由 DietSummaryService 单向依赖零回边 DAG 无环，DietController 注入委派 `/diet/summary`；守恒校验已由 B-T03 `MacroConsistencyValidator` 收口无需再拆；DietRecordServiceTest 15→11 + 新增 DietSummaryServiceTest 5 用例原样迁移，136 用例全绿零行为变更） |
 
 ### ARCH-内聚-005 — 小程序空态/模式判断多套口径
 
