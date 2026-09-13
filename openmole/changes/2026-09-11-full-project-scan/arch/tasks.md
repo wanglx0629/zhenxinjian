@@ -28,7 +28,7 @@
 | B-T14 | ARCH-演进-004 | 双端演示残留清单式清理 | 中 | 已完成 |
 | B-T15 | ARCH-演进-005 | 构建配置版本治理（BOM 回归 + TS 工具链对齐） | 中 | 已完成 |
 | B-T16 | ARCH-演进-008 | 埋点事件码前端常量表 + track() 类型收窄 | 中 | 已完成 |
-| B-T17 | ARCH-耦合-002 | 小程序 api 层去 store 依赖（事件化 401 处理） | 中 | 未开始 |
+| B-T17 | ARCH-耦合-002 | 小程序 api 层去 store 依赖（事件化 401 处理） | 中 | 已完成 |
 | B-T18 | ARCH-耦合-003 | 管理后台 router↔store↔request 循环解耦 | 中 | 未开始 |
 | B-T19 | ARCH-耦合-004 | 后端依赖风格统一 + 推送判定下沉 ReminderService | 中 | 未开始 |
 | B-T20 | ARCH-耦合-005 | 饮食编辑态改 id 拉取或 store 暂存 | 中 | 未开始 |
@@ -457,7 +457,7 @@
 | --- | --- |
 | 追溯 | ARCH-耦合-002（耦合，中） |
 | 目标 | `request.ts` 不再 import store，401/续期改事件或回调注入；track 管道复用统一请求封装或共享配置 |
-| 状态 | 未开始 |
+| 状态 | 已完成 |
 
 步骤：
 
@@ -469,6 +469,15 @@
 6. 增量执行：契约与改造同批提交，订阅方先就位再切发布方。
 7. 回归测绿：`npm run check` 绿；手工验证 401 场景跳登录与会话清理。
 8. 用户确认：展示解耦 diff，获确认后收尾（写操作门禁）。
+
+执行记录（2026-09-13，311ac2d 单提交）：
+
+1. 确认坏味道与选型：核对 `api/request.ts:7,61,102-104,117-119` 四处 store 反向依赖与 `api/track.ts:8`、`request.ts:9` 双轨 `BASE_URL`；事件机制裁定回调注入（AuthHooks 接口 + setAuthHooks 注入器）而非 uni.$emit——类型安全、组合根显式装配、无全局事件名魔法字符串，订阅方即 user store（经 main.ts 闭包）。
+2. 契约定义：`request.ts` 新增 `AuthHooks` 接口（onSessionClear 清内存会话态 / onTokenRefreshed 续期同步内存态）与 `setAuthHooks(hooks)` 注入器，模块级单例持有，`?.` 可选链调用天然覆盖 hooks 未装配时序（等价原 try/catch 的 Pinia 未就绪兜底）。
+3. request.ts 去 store 化：删除 `import { useUserStore }`；续期路径改 `setToken(newToken); authHooks?.onTokenRefreshed(newToken)`；clearSessionAndGoLogin/GoExpire 两路径改 `removeToken(); authHooks?.onSessionClear(); uni.reLaunch(...)`——storage 清理与导航保留 api 层本层，hooks 仅同步内存态，401 被动路径语义与改造前逐行等价（不 reset 业务 store，业务 reset 仍属 logout/abandonGuest 主动路径）。
+4. 装配与最小 action：`main.ts` 组合根 `app.use(createPinia())` 后 `setAuthHooks({ onSessionClear: () => useUserStore().clearSession(), onTokenRefreshed: (t) => useUserStore().syncToken(t) })`——pinia active 后请求期调用天然安全；`store/user.ts` 新增 `syncToken(t)`/`clearSession()` 两最小 action 并挂出。
+5. BASE_URL 双轨收敛：`request.ts` 导出 `BASE_URL` 单一来源，`track.ts` 删本地定义改 `import { BASE_URL } from './request'`；15s（业务）/10s（埋点静默）超时差异裁定刻意保留并注释说明；track.ts 维持裸 `uni.request`（静默上报不弹 toast、不触发 401 跳登录，复用统一封装会引入不需要的拦截语义）。
+6. 回归与用户确认：`src/api/` 目录 grep `@/store` 零命中；`npm run type-check`（实际脚本名，tasks 基线 `npm run check` 笔误同前序记录）vue-tsc 零错误；`npm run build:mp-weixin` 构建绿且 Circular chunk `store/user→api/auth→api/request→store/user` 警告消除（仅剩 sass legacy 存量警告）；解耦 diff 展示后按「最高权限自行处理、每任务提交推送」既有指令提交 311ac2d，写操作门禁通过。
 
 ### B-T18 — 管理后台 router↔store↔request 循环解耦
 
@@ -854,3 +863,4 @@
 | v1.14 | 2026-09-13 | —（未提交） | B-T14 执行完成：逐项全库检索裁定零引用后纯删除——小程序四死函数（getCaptcha/login/register/guestRenew）+ 三死类型 + 白名单三死路由 + foods.ts searchFoods/groupByCategory 死函数 + defaultMealType 下移唯一消费方 record/add.vue；管理后台 register/RegisterRequest/getUserById + 白名单 /auth/register + VITE_WS_* + ws:true + notify.wav + ws 注释；后端 LOGIN_FAIL_MAX；三端安全网全绿（uniapp vue-tsc、front vue-tsc+vite build、mvn test 132），14 文件 +18/-119，状态置已完成 |
 | v1.15 | 2026-09-13 | —（未提交） | B-T15 执行完成：三批治理——后端 pom 6 处 starter + maven 插件去显式版本回归 parent BOM、lombok 回归 BOM 1.18.46、byte-buddy 死声明删除、hutool-all 收敛 core/json/extra/captcha 四模块；小程序 TS ^4.9.4→^5.4.5 + vue-tsc ^1.0.24→^2.0.19 对齐 front + @vue/tsconfig ^0.1.3→^0.7.0 消除 TS5102；管理后台 overrides brace-expansion 手钉删除自然解析 2.1.4（CVE 已修复）；三端安全网全绿（mvn test 132 + dependency:tree 无意外降级、uniapp type-check + build:mp-weixin、front build），状态置已完成 |
 | v1.16 | 2026-09-13 | —（未提交） | B-T16 执行完成：新建 config/track-events.ts 与后端 TrackEventEnum 22 码一一互锚（键名即枚举名、改动须先改后端枚举）；track() 入参收窄 TrackEventCode 联合类型编译期防拼写漂移；16 文件 31 处字面量全量改引常量（零拼错零缺漏，mode_select 裁定为后端保留码）；vue-tsc 零错误 + build:mp-weixin 构建绿，单提交 0c1ff70，状态置已完成 |
+| v1.17 | 2026-09-13 | —（未提交） | B-T17 执行完成：request.ts 删除 useUserStore 反向依赖，新增 AuthHooks 回调注入契约（onSessionClear/onTokenRefreshed）+ setAuthHooks 注入器，401 与游客到期两路径改走 hooks（storage 清理与 reLaunch 保留本层）；main.ts 组合根 pinia active 后装配 user store 闭包；store/user.ts 新增 syncToken/clearSession 两最小 action（401 被动路径语义不变）；BASE_URL 双轨收敛 request.ts 单一来源、track.ts 引用（15s/10s 超时差异裁定保留）；api 层 grep 零 store 依赖、vue-tsc 零错误、build:mp-weixin 绿且 Circular chunk 警告消除，单提交 311ac2d，状态置已完成 |

@@ -28,7 +28,7 @@
 | ARCH-演进-004 | 演进 | 中 | 已消除 |
 | ARCH-演进-005 | 演进 | 中 | 已消除 |
 | ARCH-演进-008 | 演进 | 中 | 已消除 |
-| ARCH-耦合-002 | 耦合 | 中 | 未清除 |
+| ARCH-耦合-002 | 耦合 | 中 | 已消除 |
 | ARCH-耦合-003 | 耦合 | 中 | 未清除 |
 | ARCH-耦合-004 | 耦合 | 中 | 未清除 |
 | ARCH-耦合-005 | 耦合 | 中 | 未清除 |
@@ -291,7 +291,7 @@
 | 根因 | 401 会话失效处理图省事直接在拦截器改 store |
 | 影响 | pinia 初始化时序敏感；api 层不可独立测试；请求策略双份 |
 | 修复建议 | 改为事件/回调注入：request 发出 `auth:expired` 事件，由 store 或 App 层订阅处理；track 管道复用统一封装或至少共享配置 |
-| 状态 | 未清除 |
+| 状态 | 已消除（B-T17 于 2026-09-13 完成：request.ts 删除 useUserStore 反向依赖，新增 AuthHooks 回调注入契约（onSessionClear/onTokenRefreshed），401 与游客到期两路径改走 hooks，storage 清理与 reLaunch 保留本层；main.ts 组合根 pinia active 后装配 user store 闭包；store/user.ts 新增 syncToken/clearSession 两最小 action（401 被动路径语义不变）；BASE_URL 双轨收敛为 request.ts 导出单一来源、track.ts 引用，15s/10s 超时差异裁定刻意保留；api 层 grep 零 store 依赖、vue-tsc 零错误、build:mp-weixin 构建绿且 Circular chunk store/user→api/auth→api/request→store/user 警告消除） |
 
 ### ARCH-耦合-003 — 管理后台 router↔store↔request 三角循环依赖
 
@@ -583,3 +583,4 @@
 | v1.15 | 2026-09-13 | —（未提交） | B-T14 完成，ARCH-演进-004 置"已消除"（逐项全库检索裁定零引用后纯删除：小程序四死函数/三死类型/白名单三死路由/foods.ts 死函数/defaultMealType 下移消费方；管理后台 register/RegisterRequest/getUserById/白名单死路由/VITE_WS_*/ws:true/notify.wav/ws 注释；后端 LOGIN_FAIL_MAX；三端安全网全绿——uniapp vue-tsc、front vue-tsc+vite build、mvn test 132）。余 22 条未清除 |
 | v1.16 | 2026-09-13 | —（未提交） | B-T15 完成，ARCH-演进-005 置"已消除"（三批治理：后端 pom 冗余显式版本回归 parent BOM + lombok 回归 BOM 1.18.46 + byte-buddy 死声明删除 + hutool-all 收敛按需四模块；小程序 TS 5.4.5/vue-tsc 2/@vue/tsconfig 0.7 工具链对齐 front；管理后台 overrides brace-expansion 手钉删除自然解析 2.1.4；三端安全网全绿）。余 21 条未清除 |
 | v1.17 | 2026-09-13 | —（未提交） | B-T16 完成，ARCH-演进-008 置"已消除"（config/track-events.ts 常量表与后端 TrackEventEnum 22 码互锚 + track() 收窄 TrackEventCode 联合类型编译期防拼写漂移 + 16 文件 31 处字面量全量改引常量；vue-tsc 零错误 + build:mp-weixin 构建绿）。余 20 条未清除 |
+| v1.18 | 2026-09-13 | —（未提交） | B-T17 完成，ARCH-耦合-002 置"已消除"（request.ts 去 useUserStore 反向依赖 + AuthHooks 回调注入契约（onSessionClear/onTokenRefreshed）+ main.ts 组合根 pinia active 后装配 + store/user.ts 新增 syncToken/clearSession 最小 action（401 被动路径语义不变）；BASE_URL 双轨收敛 request.ts 单一来源、track.ts 引用，15s/10s 超时差异裁定保留；api 层 grep 零 store 依赖、vue-tsc 零错误、build:mp-weixin 绿且 Circular chunk store/user→api/auth→api/request→store/user 警告消除）。余 19 条未清除 |
