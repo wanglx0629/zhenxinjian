@@ -117,8 +117,14 @@ function goMenstrual() {
   uni.navigateTo({ url: '/pages/menstrual/index' })
 }
 
-/** 隐私与安全（静态说明） */
+/** 隐私与安全（B-T34：微信端打开隐私协议页，其余端静态说明） */
 function showPrivacy() {
+  // #ifdef MP-WEIXIN
+  if (typeof uni.openPrivacyContract === 'function') {
+    uni.openPrivacyContract({})
+    return
+  }
+  // #endif
   uni.showToast({ title: '数据已加密存储，禁止明文传输', icon: 'none' })
 }
 

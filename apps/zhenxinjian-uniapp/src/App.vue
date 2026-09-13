@@ -7,9 +7,47 @@ import { onLaunch } from '@dcloudio/uni-app'
 import { getToken } from '@/utils/storage'
 import { startTrackFlushTimer } from '@/utils/track'
 
+// #ifdef MP-WEIXIN
+/** 微信隐私授权检查（B-T34 发布就绪）：未授权时触发微信官方隐私授权弹窗；
+ *  弹窗协议名取自小程序后台「用户隐私保护指引」配置，无需自定义弹窗 UI */
+function initPrivacyAuth() {
+  if (typeof uni.getPrivacySetting !== 'function') return
+  uni.getPrivacySetting({
+    success: (res) => {
+      if (res.needAuthorization && typeof uni.requirePrivacyAuthorize === 'function') {
+        uni.requirePrivacyAuthorize({})
+      }
+    }
+  })
+}
+
+/** 版本升级检查（B-T34 发布就绪）：新版本下载就绪后提示重启生效，稍后则下次冷启动自动应用 */
+function checkAppUpdate() {
+  if (typeof uni.getUpdateManager !== 'function') return
+  const updateManager = uni.getUpdateManager()
+  updateManager.onUpdateReady(() => {
+    uni.showModal({
+      title: '更新提示',
+      content: '新版本已就绪，是否重启应用？',
+      confirmText: '立即重启',
+      cancelText: '稍后',
+      success: (res) => {
+        if (res.confirm) {
+          updateManager.applyUpdate()
+        }
+      }
+    })
+  })
+}
+// #endif
+
 onLaunch(() => {
   // 启动埋点队列定时上报（补发上次未发成功的事件）
   startTrackFlushTimer()
+  // #ifdef MP-WEIXIN
+  initPrivacyAuth()
+  checkAppUpdate()
+  // #endif
   // pages.json 首页为 auth/guide（P01）；已登录（游客或正式）直接进首页
   if (getToken()) {
     uni.switchTab({ url: '/pages/home/index' })

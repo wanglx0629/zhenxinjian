@@ -45,7 +45,7 @@
 | ARCH-模块化-003 | 模块化 | 低 | 已消除 |
 | ARCH-边界-002 | 边界 | 低 | 已消除 |
 | ARCH-边界-003 | 边界 | 低 | 已消除 |
-| ARCH-边界-008 | 边界 | 低 | 未清除 |
+| ARCH-边界-008 | 边界 | 低 | 已消除 |
 | ARCH-演进-006 | 演进 | 低 | 未清除 |
 | ARCH-演进-009 | 演进 | 低 | 未清除 |
 
@@ -529,7 +529,7 @@
 | 根因 | 一期以开发态验收，未走发布态检查单 |
 | 影响 | 提审/合规风险；线上用户无法感知新版本 |
 | 修复建议 | appid 经环境变量登记；补 `__usePrivacyCheck__` 流程与 updateManager 检查 |
-| 状态 | 未清除 |
+| 状态 | 已消除（2026-09-13 B-T34：appid 环境变量登记——vite.config.ts 新增 manifestAppidEnvPlugin（enforce:pre 拦截 uni manifest-json-js 虚拟模块 transform，loadEnv 读 VITE_MP_WEIXIN_APPID 内存改写 mp-weixin.appid，不落盘零污染 git 工作区），未设置保持空串占位开发者工具可用测试号；隐私流程——manifest.json mp-weixin 新增 `"__usePrivacyCheck__": true`（经 mergeMiniProgramAppJson 实证拷贝进 app.json），App.vue onLaunch 新增 initPrivacyAuth（getPrivacySetting.needAuthorization → requirePrivacyAuthorize 触发微信官方隐私弹窗，协议名取自 mp 后台配置，不注册 onNeedPrivacyAuthorization 自定义弹窗的最简合规路径）；升级检查——App.vue onLaunch 新增 checkAppUpdate（getUpdateManager.onUpdateReady → showModal 确认 applyUpdate，稍后则下次冷启动自动应用）；mine/index.vue showPrivacy 微信端改 openPrivacyContract 打开隐私协议页替代静态文案；两流程 `// #ifdef MP-WEIXIN` 条件编译隔离 H5，typeof 守卫低版本基础库；README 新增「发布态配置（B-T34）」段登记三件套；vue-tsc 零错误 + build:mp-weixin 双轮实证（无 env appid=touristappid 兜底 / 设 env 注入生效，app.json 含 `__usePrivacyCheck__: true`）） |
 
 ### ARCH-演进-006 — tools 本机路径耦合与临时残渣
 
@@ -600,3 +600,4 @@
 | v1.32 | 2026-09-13 | —（未提交） | B-T31 完成，ARCH-模块化-003 置"已消除"（users 345→127 行拆 UserEditDialog+UserDetailDrawer、foods 270→149 行拆 FoodEditDialog，组件落位 view/<name>/components/，defineExpose open(row?) + @saved 契约，字段/校验/交互逐字迁移零行为变更；dashboard echarts 全量改按需 echarts/core 五项注册；vue-tsc + vite build 双绿；echarts chunk 1,039.24→486.08 kB/-53.2%，gzip 345.09→163.89 kB/-52.5%，总 JS 约 2,302→1,749 kB）。余 5 条未清除 |
 | v1.33 | 2026-09-13 | —（未提交） | B-T32 完成，ARCH-边界-002 置"已消除"（AUTH_SKIP_URLS 子串匹配改去 query 全等精确匹配，未来含白名单子串 URL 不再误跳过；Token 存储评估裁定保持 localStorage——无 XSS 注入面 + sessionStorage 标签页隔离 UX 退化 + 同标签内 XSS 同样可读换介质增益有限 + 后端 ADMIN 强制/JWT 过期/滑动续期纵深已具备；vue-tsc + vite build 零错误零行为变更）。余 4 条未清除 |
 | v1.34 | 2026-09-13 | —（未提交） | B-T33 完成，ARCH-边界-003 置"已消除"（/track/events permitAll 无限流可刷量写库，改 Redis 固定窗口计数限流：维度登录按 u:{userId}/未登录按 ip:{clientIp}（resolveClientIp 取 X-Forwarded-For 首跳兜底 getRemoteAddr），阈值 30 批次/分钟/维度——端上正常水位 ≤6 批次/分钟 5 倍余量；key zhenxinjian:track:rate:{dimension} INCR 首击 EXPIRE 60s 与 recordLoginFail 同构；超阈值抛 429 复用 TOO_MANY_REQUESTS_CODE，端上按可重试失败整批保留窗口过期自然恢复不丢数据；配置 zhenxinjian.redis.track-rate-prefix/track-rate-limit-per-minute 走 yml 与登录限流同风格；TrackEventServiceTest 5→9 用例新增超限 429 不落库/窗口过期恢复链式桩/用户维度/IP 维度，mvn test 153 用例全绿）。余 3 条未清除 |
+| v1.35 | 2026-09-13 | —（未提交） | B-T34 完成，ARCH-边界-008 置"已消除"（appid 环境变量登记——vite.config.ts 新增 manifestAppidEnvPlugin，enforce:pre 拦截 uni manifest-json-js 虚拟模块 transform 管线，loadEnv 读 VITE_MP_WEIXIN_APPID 内存改写 mp-weixin.appid 不落盘零污染 git 工作区，未设置保持空串占位开发者工具可用测试号；隐私流程——manifest.json mp-weixin 新增 `__usePrivacyCheck__: true` 经 mergeMiniProgramAppJson 实证进 app.json，App.vue onLaunch 新增 initPrivacyAuth：getPrivacySetting.needAuthorization → requirePrivacyAuthorize 触发微信官方隐私弹窗（协议名取自 mp 后台配置，不注册自定义弹窗的最简合规路径）；升级检查——onLaunch 新增 checkAppUpdate：getUpdateManager.onUpdateReady → showModal 确认 applyUpdate，稍后则下次冷启动自动应用；mine showPrivacy 微信端改 openPrivacyContract 替代静态文案；两流程 `// #ifdef MP-WEIXIN` 条件编译隔离 H5 + typeof 守卫低版本基础库；README 新增发布态配置段登记；vue-tsc 零错误 + build:mp-weixin 双轮实证——无 env appid=touristappid 兜底/设 env 注入生效，app.json 含 `__usePrivacyCheck__: true`；顺带修正 tasks 索引表 B-T30~B-T33 已完成漏登行）。余 2 条未清除 |
