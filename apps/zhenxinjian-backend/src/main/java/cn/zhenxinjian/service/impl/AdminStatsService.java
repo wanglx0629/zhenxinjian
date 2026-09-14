@@ -57,12 +57,10 @@ public class AdminStatsService {
      */
     public StatsOverviewVO overview() {
         LocalDateTime todayStart = LocalDate.now().atStartOfDay();
-        Long todayDau = trackEventMapper.selectCount(new QueryWrapper<TrackEvent>()
-                .select("COUNT(DISTINCT user_id) AS cnt")
+        Long todayDau = countDistinctUserId(new QueryWrapper<TrackEvent>()
                 .isNotNull("user_id")
                 .ge("create_time", todayStart));
-        Long mau = trackEventMapper.selectCount(new QueryWrapper<TrackEvent>()
-                .select("COUNT(DISTINCT user_id) AS cnt")
+        Long mau = countDistinctUserId(new QueryWrapper<TrackEvent>()
                 .isNotNull("user_id")
                 .ge("create_time", todayStart.minusDays(29)));
         StatDailyActive yesterday = statDailyActiveMapper.selectOne(Wrappers
@@ -166,6 +164,18 @@ public class AdminStatsService {
                     ExceptionConstant.STATS_PARAM_INVALID);
         }
         statAggregateService.aggregate(date);
+    }
+
+    /**
+     * 去重用户计数（COUNT(DISTINCT user_id)，直接取聚合单值；不用 selectCount，避免其对自定义 select 二次包裹成非法 SQL）
+     */
+    private Long countDistinctUserId(QueryWrapper<TrackEvent> wrapper) {
+        wrapper.select("COUNT(DISTINCT user_id)");
+        List<Object> rows = trackEventMapper.selectObjs(wrapper);
+        if (rows == null || rows.isEmpty() || rows.get(0) == null) {
+            return 0L;
+        }
+        return ((Number) rows.get(0)).longValue();
     }
 
     private void checkDays(Integer days) {

@@ -49,12 +49,10 @@ public class StatAggregateService {
         LocalDateTime end = date.plusDays(1).atStartOfDay();
 
         // 1. 计算 DAU / guest_dau / new_user
-        Long dau = trackEventMapper.selectCount(new QueryWrapper<TrackEvent>()
-                .select("COUNT(DISTINCT user_id) AS cnt")
+        Long dau = countDistinctUserId(new QueryWrapper<TrackEvent>()
                 .isNotNull("user_id")
                 .ge("create_time", start).lt("create_time", end));
-        Long guestDau = trackEventMapper.selectCount(new QueryWrapper<TrackEvent>()
-                .select("COUNT(DISTINCT user_id) AS cnt")
+        Long guestDau = countDistinctUserId(new QueryWrapper<TrackEvent>()
                 .isNotNull("user_id")
                 .eq("user_type", CommonConstant.USER_TYPE_GUEST)
                 .ge("create_time", start).lt("create_time", end));
@@ -92,5 +90,17 @@ public class StatAggregateService {
             statEventDailyMapper.insert(daily);
         }
         log.info("stat aggregate done: date={}, dau={}, events={}", date, dau, rows.size());
+    }
+
+    /**
+     * 去重用户计数（COUNT(DISTINCT user_id)，直接取聚合单值；不用 selectCount，避免其对自定义 select 二次包裹成非法 SQL）
+     */
+    private Long countDistinctUserId(QueryWrapper<TrackEvent> wrapper) {
+        wrapper.select("COUNT(DISTINCT user_id)");
+        List<Object> rows = trackEventMapper.selectObjs(wrapper);
+        if (rows == null || rows.isEmpty() || rows.get(0) == null) {
+            return 0L;
+        }
+        return ((Number) rows.get(0)).longValue();
     }
 }

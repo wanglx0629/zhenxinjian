@@ -45,7 +45,8 @@ class StatAggregateServiceTest {
     @Test
     void aggregate_softDeleteThenInsert_idempotent() {
         LocalDate date = LocalDate.of(2026, 9, 10);
-        when(trackEventMapper.selectCount(any(Wrapper.class))).thenReturn(5L, 2L);
+        when(trackEventMapper.selectObjs(any(Wrapper.class)))
+                .thenReturn(List.of(5L), List.of(2L));
         when(userMapper.selectCount(any(Wrapper.class))).thenReturn(3L);
         when(trackEventMapper.selectMaps(any(Wrapper.class))).thenReturn(List.of(
                 Map.of("event_code", "page_view", "event_name", "页面访问", "pv", 20L, "uv", 5L)));
@@ -62,7 +63,8 @@ class StatAggregateServiceTest {
     @Test
     void aggregate_noEvents_insertZeroRow() {
         LocalDate date = LocalDate.of(2026, 9, 10);
-        when(trackEventMapper.selectCount(any(Wrapper.class))).thenReturn(0L, 0L);
+        when(trackEventMapper.selectObjs(any(Wrapper.class)))
+                .thenReturn(List.of(0L), List.of(0L));
         when(userMapper.selectCount(any(Wrapper.class))).thenReturn(0L);
         when(trackEventMapper.selectMaps(any(Wrapper.class))).thenReturn(List.of());
 
