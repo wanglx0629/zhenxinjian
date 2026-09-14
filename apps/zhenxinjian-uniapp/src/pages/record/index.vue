@@ -148,14 +148,14 @@ function goCycleSetting() {
     <!-- 日期导航 -->
     <view class="date-nav">
       <view class="nav-arrow" @click="prevDay">
-        <text class="arrow-icon">&lt;</text>
+        <text class="arrow-icon">‹</text>
       </view>
       <view class="date-center" @click="goToday">
         <text class="date-label">{{ dateLabel }}</text>
         <text class="date-sub">{{ dietStore.currentDate }}</text>
       </view>
       <view class="nav-arrow" :class="{ disabled: isToday }" @click="nextDay">
-        <text class="arrow-icon">&gt;</text>
+        <text class="arrow-icon">›</text>
       </view>
     </view>
 

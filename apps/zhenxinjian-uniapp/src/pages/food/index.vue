@@ -116,8 +116,10 @@ function goMyCustom() {
 
 onLoad(async () => {
   loadHistory()
-  categories.value = await foodStore.fetchCategories()
-  hotList.value = await foodStore.fetchHot()
+  // 分类与热门并行拉取（首进食物库提速）
+  const [cats, hot] = await Promise.all([foodStore.fetchCategories(), foodStore.fetchHot()])
+  categories.value = cats
+  hotList.value = hot
 })
 
 onShow(() => {

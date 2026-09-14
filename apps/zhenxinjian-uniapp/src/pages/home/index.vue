@@ -27,6 +27,8 @@ const menstrualStore = useMenstrualStore()
 /** 页面加载态 / 错误态 */
 const loading = ref(true)
 const loadError = ref(false)
+/** 是否已完成首次加载（tab 切回时静默刷新，不再整页骨架阻塞） */
+const firstLoaded = ref(false)
 
 /** 经期阶段徽标（仅女性且已开启时非空，经 menstrualStore 收敛） */
 const periodPhase = computed(() => menstrualStore.phaseName)
@@ -105,7 +107,8 @@ onShow(() => {
 
 /** 并行拉取：当日记录+累计（peekDay 不改记录页查看日期）/ 身体档案 / 用户信息；碳循环再拉当前周期（失败不阻塞） */
 async function loadAll() {
-  loading.value = true
+  // 仅首次进入展示骨架屏；tab 切回静默刷新（旧数据先渲染，新数据返回即更新）
+  loading.value = !firstLoaded.value
   loadError.value = false
   try {
     await Promise.all([
@@ -123,9 +126,10 @@ async function loadAll() {
     // 经期阶段徽标（仅女性且已开启时返回阶段；失败静默不阻塞首页）
     menstrualStore.fetch().catch(() => undefined)
   } catch {
-    loadError.value = true
+    loadError.value = !firstLoaded.value
   } finally {
     loading.value = false
+    firstLoaded.value = true
   }
 }
 

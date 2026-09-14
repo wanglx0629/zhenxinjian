@@ -15,10 +15,20 @@ import { TRACK_EVENT } from '@/config/track-events'
 const userStore = useUserStore()
 const loading = ref(false)
 
-onShow(() => {
+onShow(async () => {
   trackPage('pages/auth/guide')
-  // 已有登录态（游客或正式）直接进首页
-  if (getToken()) {
+  if (!getToken()) return
+  // 已有登录态时：仅确认非游客（正式用户）才直接进首页；
+  // 游客需停留本页完成微信授权，不能因持有游客 token 被弹走
+  if (!userStore.userInfo) {
+    try {
+      await userStore.fetchUserInfo()
+    } catch {
+      // 拉取失败无法判定身份，停留本页
+      return
+    }
+  }
+  if (!userStore.isGuest) {
     uni.switchTab({ url: '/pages/home/index' })
   }
 })

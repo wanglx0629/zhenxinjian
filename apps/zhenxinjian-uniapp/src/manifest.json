@@ -28,6 +28,7 @@
   "mp-weixin": {
     "appid": "",
     "__usePrivacyCheck__": true,
+    "lazyCodeLoading": "requiredComponents",
     "setting": {
       "urlCheck": false,
       "es6": true,
