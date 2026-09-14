@@ -144,3 +144,8 @@ zhenxinjian.wiki/
 /.claude/
 /.codex/
 /.opencode/
+
+# ====================
+# Maven Wrapper 本地配置（含本机 JDK 路径，不入库）
+# ====================
+**/.mvn/
