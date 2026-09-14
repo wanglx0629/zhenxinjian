@@ -26,7 +26,7 @@
   },
   "quickapp": {},
   "mp-weixin": {
-    "appid": "",
+    "appid": "wxa3d93eea9a562667",
     "__usePrivacyCheck__": true,
     "lazyCodeLoading": "requiredComponents",
     "setting": {

@@ -248,6 +248,8 @@
                             <artifactId>lombok</artifactId>
                         </exclude>
                     </excludes>
+                    <!-- 抑制 JDK 24+ 对 Netty 使用 sun.misc.Unsafe 的告警（JEP 498） -->
+                    <jvmArguments>--sun-misc-unsafe-memory-access=allow</jvmArguments>
                 </configuration>
             </plugin>
         </plugins>
