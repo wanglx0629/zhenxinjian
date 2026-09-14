@@ -29,6 +29,9 @@
         <!-- 以下版本 parent BOM（spring-boot-dependencies 3.5.16）未覆盖，需显式管理 -->
         <mybatis-plus.version>3.5.7</mybatis-plus.version>
         <jjwt.version>0.12.5</jjwt.version>
+        <knife4j.version>4.5.0</knife4j.version>
+        <!-- Knife4j 4.5.0 传递依赖 springdoc 2.3.0，与 Spring Boot 3.5（Spring 6.5）不兼容
+             （ControllerAdviceBean(Object) 构造器已移除），经 dependencyManagement 强制升级 -->
         <springdoc.version>2.8.8</springdoc.version>
         <hutool.version>5.8.47</hutool.version>
         <minio.version>8.5.12</minio.version>
@@ -38,6 +41,27 @@
         <!-- lombok.version 由 parent BOM 管理（1.18.46），此处不覆盖；
              annotationProcessorPaths 处的 ${lombok.version} 解析自 BOM -->
     </properties>
+
+    <dependencyManagement>
+        <!-- 强制升级 Knife4j 传递的 springdoc 2.3.0 → 2.8.8（兼容 Spring Boot 3.5） -->
+        <dependencies>
+            <dependency>
+                <groupId>org.springdoc</groupId>
+                <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+                <version>${springdoc.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springdoc</groupId>
+                <artifactId>springdoc-openapi-starter-webmvc-api</artifactId>
+                <version>${springdoc.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springdoc</groupId>
+                <artifactId>springdoc-openapi-starter-common</artifactId>
+                <version>${springdoc.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
         <!-- Web -->
@@ -110,11 +134,11 @@
             <scope>runtime</scope>
         </dependency>
 
-        <!-- SpringDoc OpenAPI (Swagger) -->
+        <!-- Knife4j OpenAPI 3 文档（内部传递依赖 springdoc，入口 /doc.html） -->
         <dependency>
-            <groupId>org.springdoc</groupId>
-            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-            <version>${springdoc.version}</version>
+            <groupId>com.github.xiaoymin</groupId>
+            <artifactId>knife4j-openapi3-jakarta-spring-boot-starter</artifactId>
+            <version>${knife4j.version}</version>
         </dependency>
 
         <!-- Hutool 工具包（按需模块：core/json/extra/captcha，替代 hutool-all） -->

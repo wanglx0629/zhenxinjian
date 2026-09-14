@@ -36,14 +36,10 @@ mybatis-plus:
     map-underscore-to-camel-case: true
     # SQL 日志默认关闭，开发环境在 application-dev.yml 打开
 
-# SpringDoc Swagger 配置
+# SpringDoc / Knife4j 配置（入口 /doc.html；api-docs 供文档数据）
 springdoc:
   api-docs:
     path: /v3/api-docs
-  swagger-ui:
-    path: /swagger-ui.html
-    tags-sorter: alpha
-    operations-sorter: alpha
 
 # 自定义配置
 zhenxinjian:
@@ -82,9 +78,10 @@ zhenxinjian:
       - /auth/guest
       # 埋点上报（登录态可选）
       - /track/events
-      # Swagger 文档（dev 基线开箱即通；生产禁用 springdoc 属后续运维 change）
-      - /swagger-ui.html
-      - /swagger-ui/**
+      # Knife4j 文档（dev 基线开箱即通；生产禁用属后续运维 change）
+      - /doc.html
+      - /webjars/**
+      - /favicon.ico
       - /v3/api-docs/**
     cors-allowed-origins:
       - http://localhost:5173
