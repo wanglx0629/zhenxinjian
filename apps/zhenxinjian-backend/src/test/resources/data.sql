@@ -1,0 +1,2 @@
+-- 覆盖 main/resources/data.sql（H2 不需要 MySQL 特定 DDL）
+-- 集成测试使用 h2-schema.sql 建表
