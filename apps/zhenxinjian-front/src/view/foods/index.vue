@@ -5,6 +5,7 @@
  */
 import { reactive, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { Edit, Delete, Switch } from '@element-plus/icons-vue'
 import { changeFoodStatus, deleteFood, getFoodPage } from '@/api/adminFood'
 import type { AdminFood } from '@/api/adminFood'
 import PagePager from '@/component/PagePager.vue'
@@ -98,6 +99,9 @@ async function handleToggleStatus(row: AdminFood) {
     </div>
 
     <el-table v-loading="loading" :data="tableData" stripe border>
+      <template #empty>
+        <el-empty description="暂无食物数据，调整筛选条件或点击右上角「新增内置食物」" :image-size="120" />
+      </template>
       <el-table-column prop="code" label="编号" width="90">
         <template #default="{ row }">{{ row.code || '-' }}</template>
       </el-table-column>
@@ -126,11 +130,11 @@ async function handleToggleStatus(row: AdminFood) {
       <el-table-column label="操作" width="220" fixed="right">
         <template #default="{ row }">
           <template v-if="row.source === 1">
-            <el-button link type="primary" @click="openEdit(row)">编辑</el-button>
-            <el-button link type="warning" @click="handleToggleStatus(row)">
+            <el-button link type="primary" :icon="Edit" @click="openEdit(row)">编辑</el-button>
+            <el-button link type="warning" :icon="Switch" @click="handleToggleStatus(row)">
               {{ row.status === 1 ? '停用' : '启用' }}
             </el-button>
-            <el-button link type="danger" @click="handleDelete(row)">删除</el-button>
+            <el-button link type="danger" :icon="Delete" @click="handleDelete(row)">删除</el-button>
           </template>
           <span v-else class="readonly-tip">自定义食物只读</span>
         </template>

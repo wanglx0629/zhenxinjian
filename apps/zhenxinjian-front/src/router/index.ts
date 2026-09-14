@@ -12,7 +12,7 @@ const router = createRouter({
       path: '/login',
       name: 'Login',
       component: () => import('@/view/login/index.vue'),
-      meta: { public: true }
+      meta: { public: true, title: '登录' }
     },
     {
       path: '/',
@@ -23,27 +23,33 @@ const router = createRouter({
           path: 'dashboard',
           name: 'Dashboard',
           component: () => import('@/view/dashboard/index.vue'),
-          meta: { admin: true }
+          meta: { admin: true, title: '数据看板' }
         },
         {
           path: 'users',
           name: 'Users',
           component: () => import('@/view/users/index.vue'),
-          meta: { admin: true }
+          meta: { admin: true, title: '用户管理' }
         },
         {
           path: 'foods',
           name: 'Foods',
           component: () => import('@/view/foods/index.vue'),
-          meta: { admin: true }
+          meta: { admin: true, title: '食物库' }
         },
         {
           path: 'diet-records',
           name: 'DietRecords',
           component: () => import('@/view/diet-records/index.vue'),
-          meta: { admin: true }
+          meta: { admin: true, title: '饮食记录' }
         }
       ]
+    },
+    {
+      path: '/:pathMatch(.*)*',
+      name: 'NotFound',
+      component: () => import('@/view/error/404.vue'),
+      meta: { public: true, title: '页面不存在' }
     }
   ]
 })
@@ -78,6 +84,13 @@ router.beforeEach(async (to, _from, next) => {
     }
   }
   next()
+})
+
+// 标题同步
+router.afterEach((to) => {
+  if (to.meta?.title) {
+    document.title = `${to.meta.title} · 臻心减管理后台`
+  }
 })
 
 export default router

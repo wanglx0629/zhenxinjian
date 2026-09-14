@@ -8,6 +8,7 @@ import { computed, ref } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
 import { useBodyStore } from '@/store/body'
 import { trackPage } from '@/utils/track'
+import EmptyState from '@/components/EmptyState.vue'
 
 const bodyStore = useBodyStore()
 const loading = ref(true)
@@ -52,9 +53,13 @@ function goChooseMode() {
   <view class="page">
     <!-- 空态：未录入引导 -->
     <view v-if="!loading && isEmpty" class="panel empty">
-      <text class="empty-title">还没有身体数据</text>
-      <text class="empty-desc">录入身高、体重等基础数据后，才能为你计算每日热量与营养素目标。</text>
-      <button class="btn-primary" @click="goProfile">去录入</button>
+      <EmptyState
+        type="body"
+        title="还没有身体数据"
+        desc="录入身高、体重等基础数据后，才能为你计算每日热量与营养素目标。"
+        btn-text="去录入"
+        @action="goProfile"
+      />
     </view>
 
     <template v-else-if="!loading && p?.recorded">
@@ -64,7 +69,7 @@ function goChooseMode() {
       </view>
 
       <view class="panel">
-        <text class="panel-title">代谢与热量</text>
+        <text class="panel-title">🔥 代谢与热量</text>
         <view class="grid">
           <view class="cell"><text class="num">{{ p.bmr }}</text><text class="label">BMR 基础代谢 kcal</text></view>
           <view class="cell"><text class="num">{{ p.tdee }}</text><text class="label">TDEE 每日消耗 kcal</text></view>
@@ -74,7 +79,7 @@ function goChooseMode() {
       </view>
 
       <view class="panel">
-        <text class="panel-title">每日营养目标（532 配比）</text>
+        <text class="panel-title">🥗 每日营养目标（532 配比）</text>
         <view class="grid">
           <view class="cell"><text class="num">{{ carbs }}</text><text class="label">碳水 g</text></view>
           <view class="cell"><text class="num">{{ protein }}</text><text class="label">蛋白质 g</text></view>
@@ -113,13 +118,20 @@ function goChooseMode() {
 }
 
 .num {
-  font-size: 40rpx;
-  font-weight: 600;
+  font-size: 56rpx;
+  font-weight: 700;
   color: $zhenxinjian-text;
+  line-height: 1.1;
+  letter-spacing: -0.5rpx;
 }
 
 .num.highlight {
+  font-size: 72rpx;
   color: $zhenxinjian-primary;
+  background: $zhenxinjian-gradient-brand;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .label {
@@ -138,8 +150,8 @@ function goChooseMode() {
 }
 
 .risk {
-  background: #fdf6ec;
-  border: 1rpx solid #f5dab1;
+  background: #FEF3C7;
+  border: 1rpx solid #FDE68A;
   border-radius: 12rpx;
   padding: 20rpx 24rpx;
   margin-bottom: 24rpx;
@@ -147,7 +159,7 @@ function goChooseMode() {
 
 .risk-text {
   font-size: 24rpx;
-  color: #b88230;
+  color: #92400E;
   line-height: 1.5;
 }
 
@@ -162,25 +174,7 @@ function goChooseMode() {
 }
 
 .empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 64rpx 48rpx;
-}
-
-.empty-title {
-  font-size: 32rpx;
-  font-weight: 600;
-  color: $zhenxinjian-text;
-  margin-bottom: 16rpx;
-}
-
-.empty-desc {
-  font-size: 26rpx;
-  color: $zhenxinjian-text-secondary;
-  line-height: 1.6;
-  margin-bottom: 40rpx;
-  text-align: center;
+  padding: 8rpx 0;
 }
 
 .btn-ghost {

@@ -8,10 +8,11 @@ import { onShow } from '@dcloudio/uni-app'
 import { useDietStore } from '@/store/diet'
 import { useBodyStore } from '@/store/body'
 import { useCycleStore } from '@/store/cycle'
-import { MEAL_TYPES, OVER_ADVICE, CYCLE_DAY_TYPES } from '@/config/constants'
+import { MEAL_EMOJI, OVER_ADVICE, CYCLE_DAY_TYPES } from '@/config/constants'
 import { ymd, md, week } from '@/utils/format'
 import { buildProgressItems, buildAdviceList } from '@/utils/macro'
 import type { DietRecordVO } from '@/api/diet'
+import EmptyState from '@/components/EmptyState.vue'
 import { track, trackPage } from '@/utils/track'
 import { TRACK_EVENT } from '@/config/track-events'
 
@@ -161,16 +162,24 @@ function goCycleSetting() {
 
     <!-- 未建档空态 -->
     <view v-if="showBodyEmpty" class="panel empty-profile">
-      <text class="empty-title">先录入身体数据</text>
-      <text class="empty-desc">录入身高体重后，这里会显示目标与进度</text>
-      <view class="empty-btn" @click="goBodyProfile">去录入</view>
+      <EmptyState
+        type="body"
+        title="先录入身体数据"
+        desc="录入身高体重后，这里会显示目标与进度"
+        btn-text="去录入"
+        @action="goBodyProfile"
+      />
     </view>
 
     <!-- 碳循环无周期空态 -->
     <view v-else-if="showCycleEmpty" class="panel empty-profile">
-      <text class="empty-title">还没有进行中的碳循环</text>
-      <text class="empty-desc">创建周期后，这里会按高/中/低碳日显示目标与进度</text>
-      <view class="empty-btn" @click="goCycleSetting">去创建周期</view>
+      <EmptyState
+        type="calendar"
+        title="还没有进行中的碳循环"
+        desc="创建周期后，这里会按高/中/低碳日显示目标与进度"
+        btn-text="去创建周期"
+        @action="goCycleSetting"
+      />
     </view>
 
     <!-- 三色进度区 -->
@@ -201,12 +210,15 @@ function goCycleSetting() {
     <!-- 餐别分组列表 -->
     <view v-for="group in dietStore.dayData?.meals" :key="group.mealType" class="panel">
       <view class="meal-header">
-        <text class="meal-name">{{ group.mealName }}</text>
+        <view class="meal-title-wrap">
+          <view class="meal-chip" :class="'mc' + group.mealType">{{ MEAL_EMOJI[group.mealType] ?? '🍽️' }}</view>
+          <text class="meal-name">{{ group.mealName }}</text>
+        </view>
         <text v-if="group.records.length" class="meal-sub">{{ group.kcal }}kcal</text>
       </view>
 
       <view v-if="!group.records.length" class="meal-empty">
-        <text class="meal-empty-text">暂无记录</text>
+        <text class="meal-empty-text">🍽️ 暂无记录，点右下角 + 添加</text>
       </view>
 
       <view v-for="record in group.records" :key="record.id" class="record-item">
@@ -325,32 +337,9 @@ function goCycleSetting() {
   display: block;
 }
 
-/* 未建档空态 */
+/* 未建档空态（插画与按钮收敛至 EmptyState 组件） */
 .empty-profile {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 48rpx 32rpx;
-}
-
-.empty-title {
-  font-size: 28rpx;
-  color: $zhenxinjian-text;
-  margin-bottom: 12rpx;
-}
-
-.empty-desc {
-  font-size: 24rpx;
-  color: $zhenxinjian-text-secondary;
-  margin-bottom: 24rpx;
-}
-
-.empty-btn {
-  padding: 16rpx 48rpx;
-  background: $zhenxinjian-primary;
-  color: #fff;
-  font-size: 26rpx;
-  border-radius: 12rpx;
+  padding: 8rpx 0;
 }
 
 /* 进度条 */
@@ -440,6 +429,28 @@ function goCycleSetting() {
   font-weight: 600;
   color: $zhenxinjian-text;
 }
+
+.meal-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 14rpx;
+}
+
+.meal-chip {
+  width: 48rpx;
+  height: 48rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26rpx;
+  background: #f1f5f9;
+}
+
+.meal-chip.mc1 { background: #ffedd5; }
+.meal-chip.mc2 { background: #ccfbf1; }
+.meal-chip.mc3 { background: #e0e7ff; }
+.meal-chip.mc4 { background: #fef3c7; }
 
 .meal-sub {
   font-size: 22rpx;
@@ -562,11 +573,11 @@ function goCycleSetting() {
   width: 96rpx;
   height: 96rpx;
   border-radius: 50%;
-  background: $zhenxinjian-primary;
+  background: $zhenxinjian-gradient-cta;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4rpx 16rpx rgba(64, 158, 255, 0.4);
+  box-shadow: $zhenxinjian-shadow-fab;
   z-index: 10;
 }
 

@@ -16,7 +16,7 @@ defineProps<{
 
 <style scoped lang="scss">
 .te-logo {
-  background: linear-gradient(135deg, $zhenxinjian-primary, #66b1ff);
+  background: linear-gradient(135deg, $zhenxinjian-primary, $zhenxinjian-primary-light);
   border-radius: 16rpx;
   display: flex;
   align-items: center;

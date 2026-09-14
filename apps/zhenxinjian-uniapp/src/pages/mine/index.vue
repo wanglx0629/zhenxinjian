@@ -145,6 +145,8 @@ function handleLogout() {
   <view class="page">
     <!-- 头部用户卡 -->
     <view class="hero">
+      <text class="hero-deco deco-rainbow">🌈</text>
+      <text class="hero-deco deco-sparkle">✨</text>
       <view class="avatar">
         <image v-if="userStore.userInfo?.avatar" class="avatar-img" :src="userStore.userInfo.avatar" mode="aspectFill" />
         <TeLogo v-else :size="72" />
@@ -174,7 +176,9 @@ function handleLogout() {
     <!-- 功能列表 -->
     <view class="card list-card">
       <view class="list-item" @click="goBody">
-        <text class="list-icon">👤</text>
+        <view class="list-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </view>
         <view class="list-main">
           <text class="list-title">身体数据</text>
           <text class="list-sub">{{ bodyBrief }}</text>
@@ -182,7 +186,9 @@ function handleLogout() {
         <text class="list-arrow">›</text>
       </view>
       <view class="list-item" @click="goMode">
-        <text class="list-icon">🔄</text>
+        <view class="list-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+        </view>
         <view class="list-main">
           <text class="list-title">减脂模式</text>
           <text class="list-sub">当前：{{ modeName }}</text>
@@ -191,7 +197,9 @@ function handleLogout() {
         <text class="list-arrow">›</text>
       </view>
       <view class="list-item" @click="goReminder">
-        <text class="list-icon">🔔</text>
+        <view class="list-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        </view>
         <view class="list-main">
           <text class="list-title">提醒设置</text>
           <text class="list-sub">{{ reminderEnabled ? '已开启' : '已关闭' }}</text>
@@ -199,7 +207,9 @@ function handleLogout() {
         <text class="list-arrow">›</text>
       </view>
       <view class="list-item" @click="goWeight">
-        <text class="list-icon">⚖️</text>
+        <view class="list-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+        </view>
         <view class="list-main">
           <text class="list-title">体重记录</text>
           <text class="list-sub">{{ weightBrief }}</text>
@@ -207,7 +217,9 @@ function handleLogout() {
         <text class="list-arrow">›</text>
       </view>
       <view v-if="showMenstrual" class="list-item" @click="goMenstrual">
-        <text class="list-icon">🩸</text>
+        <view class="list-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+        </view>
         <view class="list-main">
           <text class="list-title">月经周期</text>
           <text class="list-sub">{{ menstrualBrief }}</text>
@@ -215,7 +227,9 @@ function handleLogout() {
         <text class="list-arrow">›</text>
       </view>
       <view class="list-item" @click="showPrivacy">
-        <text class="list-icon">🔒</text>
+        <view class="list-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </view>
         <view class="list-main">
           <text class="list-title">隐私与安全</text>
           <text class="list-sub">隐私数据加密存储 · 禁止明文传输</text>
@@ -275,14 +289,38 @@ function handleLogout() {
 
 /* 头部用户卡 */
 .hero {
+  position: relative;
+  overflow: hidden;
   background: linear-gradient(160deg, #0d9488 0%, #14b8a6 100%);
-  border-radius: 16rpx;
+  border-radius: 20rpx;
   padding: 32rpx;
   margin-bottom: 24rpx;
   display: flex;
   align-items: center;
   gap: 24rpx;
   color: #fff;
+  box-shadow: $zhenxinjian-shadow-hero;
+}
+
+/* 漂浮装饰 emoji */
+.hero-deco {
+  position: absolute;
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.deco-rainbow {
+  top: 16rpx;
+  right: 28rpx;
+  font-size: 64rpx;
+  transform: rotate(10deg);
+}
+
+.deco-sparkle {
+  bottom: 20rpx;
+  right: 140rpx;
+  font-size: 32rpx;
+  opacity: 0.45;
 }
 
 .avatar {
@@ -387,7 +425,18 @@ function handleLogout() {
 }
 
 .list-icon {
-  font-size: 36rpx;
+  width: 40rpx;
+  height: 40rpx;
+  color: $zhenxinjian-primary;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.list-icon svg {
+  width: 36rpx;
+  height: 36rpx;
 }
 
 .list-main {
@@ -449,7 +498,7 @@ function handleLogout() {
   height: 88rpx;
   line-height: 88rpx;
   background: $zhenxinjian-white;
-  color: #f56c6c;
+  color: $zhenxinjian-danger;
   border: 1rpx solid $zhenxinjian-border;
   border-radius: 12rpx;
   font-size: 30rpx;

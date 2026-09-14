@@ -11,6 +11,7 @@ defineProps<{
 
 const emit = defineEmits<{
   (e: 'change', page: number): void
+  (e: 'size-change', size: number): void
 }>()
 </script>
 
@@ -18,11 +19,13 @@ const emit = defineEmits<{
   <div class="pager">
     <el-pagination
       background
-      layout="total, prev, pager, next"
+      layout="total, sizes, prev, pager, next, jumper"
       :total="total"
       :page-size="size"
       :current-page="page"
+      :page-sizes="[10, 20, 50, 100]"
       @current-change="emit('change', $event)"
+      @size-change="emit('size-change', $event)"
     />
   </div>
 </template>

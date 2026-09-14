@@ -71,10 +71,11 @@ page {
   border-radius: 16rpx;
   padding: 32rpx;
   margin-bottom: 24rpx;
+  box-shadow: $zhenxinjian-shadow-card;
 }
 
 .panel-title {
-  font-size: 30rpx;
+  font-size: 32rpx;
   font-weight: 600;
   color: $zhenxinjian-text;
   margin-bottom: 24rpx;
@@ -85,9 +86,35 @@ page {
   width: 100%;
   height: 88rpx;
   line-height: 88rpx;
-  background: $zhenxinjian-primary;
+  background: $zhenxinjian-gradient-cta;
   color: $zhenxinjian-white;
   border-radius: 12rpx;
   font-size: 30rpx;
+  font-weight: 600;
+  box-shadow: 0 4rpx 12rpx rgba(249, 115, 22, 0.24);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.btn-primary:active {
+  transform: scale(0.97);
+  background: $zhenxinjian-cta-active;
+  box-shadow: 0 2rpx 6rpx rgba(249, 115, 22, 0.18);
+}
+
+/* 次级按钮（teal 描边） */
+.btn-secondary {
+  width: 100%;
+  height: 88rpx;
+  line-height: 88rpx;
+  background: $zhenxinjian-white;
+  color: $zhenxinjian-primary;
+  border: 1rpx solid $zhenxinjian-primary;
+  border-radius: 12rpx;
+  font-size: 30rpx;
+  font-weight: 600;
+}
+
+.btn-secondary:active {
+  background: $zhenxinjian-primary-bg;
 }
 </style>

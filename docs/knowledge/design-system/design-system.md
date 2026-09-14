@@ -2,8 +2,9 @@
 
 | 项目 | 内容 |
 | ---- | ---- |
-| 文档版本 | V1.0 |
+| 文档版本 | V1.1 |
 | 编写日期 | 2026-09-04 |
+| 最近更新 | 2026-09-14（V1.1 品牌色板与阴影体系增量） |
 | 需求基准 | 高保真原型 `MRD-PRD/臻心减小程序V1.1高保真原型/`（16 页 / F01–F27）与 PRD 页面元素表 |
 
 ***
@@ -47,4 +48,63 @@ P01 游客引导 · P02 首页总览 · P03 身体数据 · P04 代谢结果 · 
 
 ***
 
-> **文档版本**：V1.0　**最后更新**：2026-09-04　**维护**：臻心减项目组
+## 7. V1.1 增量 — 品牌色板与视觉层级（2026-09-14）
+
+> 背景：双端此前「hero teal + 全局 EP 工厂蓝 #409eff」双色身份割裂、无阴影层级、emoji 充当图标。V1.1 统一为 teal + orange 双品牌色，并建立阴影 / 圆角 / 空态插画规范。落地变更详见 `openspec/changes/2026-09-14-ui-refresh/`。
+
+### 7.1 色板（双端唯一真源）
+
+| 角色 | 色值 | 用途 |
+| ---- | ---- | ---- |
+| 品牌主色 primary | `#0D9488` | 导航选中、链接、进度、主按钮（非 CTA）、EP `--el-color-primary` |
+| primary-light | `#14B8A6` | 渐变副色、hover |
+| primary-lighter | `#5EEAD4` | 高亮过渡 |
+| primary-bg | `#F0FDFA` | 页面底色、浅底纹 |
+| primary-border | `#CCFBF1` | 卡片描边、分割 |
+| primary-dark | `#0F766E` | 按压 / 深色态 |
+| **CTA 行动橙** | `#F97316` | 主行动按钮（去录入 / 去记录 / FAB）、强调 |
+| cta-hover | `#FB923C` | CTA 渐变副色 |
+| cta-active | `#EA580C` | CTA 按压态 |
+| 充足 success | `#22C55E` | 三色语义（§1） |
+| 不足 warning | `#F59E0B` | 三色语义 |
+| 超标 danger | `#EF4444` | 三色语义、退出登录等危险动作 |
+| 正文 text | `#134E4A` | 标题 / 正文强色 |
+| text-regular | `#1F2937` | 正文 |
+| text-secondary | `#475569` | 次要说明 |
+| text-placeholder | `#94A3B8` | 占位 |
+
+**禁用**：Element Plus 工厂蓝 `#409eff` 一族（`#66b1ff` / `#ECF5FF`）不得再出现在业务代码；双端 `Grep "#409eff"` 应无残留。
+
+### 7.2 渐变
+
+- 品牌渐变（hero / logo / 大数字）：`linear-gradient(160deg, #0D9488, #14B8A6)`
+- CTA 渐变（主按钮 / FAB）：`linear-gradient(160deg, #F97316, #FB923C)`
+
+### 7.3 阴影分层（小程序 rpx / 后台 px 同比例）
+
+| 层级 | 值 | 用途 |
+| ---- | ---- | ---- |
+| card | `0 2rpx 8rpx rgba(13,148,136,.06), 0 8rpx 24rpx rgba(13,148,136,.08)` | 内容卡片 .panel |
+| pop | `0 8rpx 32rpx rgba(13,148,136,.16)` | 弹层 / 下拉 |
+| fab | `0 8rpx 24rpx rgba(249,115,22,.32)` | 悬浮行动按钮 |
+| hero | `0 12rpx 32rpx rgba(13,148,136,.24)` | 顶部渐变头卡 |
+
+### 7.4 圆角与字号层级
+
+- 卡片圆角 16rpx（小程序）/ 12px（后台）；按钮圆角 12rpx，胶囊按钮 32rpx。
+- 核心结果大数字：72rpx / 700–800，可用品牌渐变文字（`-webkit-background-clip: text`）强化层级（参考 P04 代谢结果）。
+- 标题 30rpx / 600；正文 26–28rpx；辅助说明 22–24rpx。
+
+### 7.5 图标与空态
+
+- **不用 emoji 当 UI 图标**：操作与导航图标一律 inline SVG（stroke 风格、24 viewBox、2px 描边，参考 `pages/mine/index.vue`）。
+- 空态统一走 `components/EmptyState.vue`（小程序）：200rpx SVG 插画（bowl / calendar / search / body 四型）+ 标题 + 描述 + 橙色渐变主 CTA。
+- 后台空态用 `el-empty` 并配文案 slot。
+
+### 7.6 后台（Element Plus）主题定制
+
+`apps/zhenxinjian-front/src/styles/global.css` 注入 `--el-color-primary` 一族（light-3/5/7/8/9 + dark-2）覆盖 EP 默认蓝；success / warning / danger 同步 §7.1 三色。ECharts 图表色板 `[#0D9488, #F97316]` 双线起。
+
+***
+
+> **文档版本**：V1.1　**最后更新**：2026-09-14　**维护**：臻心减项目组

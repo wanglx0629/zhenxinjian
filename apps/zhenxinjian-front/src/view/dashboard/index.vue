@@ -8,6 +8,7 @@ import * as echarts from 'echarts/core'
 import { LineChart } from 'echarts/charts'
 import { GridComponent, LegendComponent, TooltipComponent } from 'echarts/components'
 import { CanvasRenderer } from 'echarts/renderers'
+import { User, UserFilled, TrendCharts, Document } from '@element-plus/icons-vue'
 import { getActiveTrend, getEventRank, getOverview, getPageRank } from '@/api/stats'
 import type { DailyActive, EventRank, PageRank, StatsOverview } from '@/api/stats'
 
@@ -32,14 +33,63 @@ function renderTrend() {
     chart = echarts.init(trendRef.value)
   }
   chart.setOption({
-    tooltip: { trigger: 'axis' },
+    color: ['#0D9488', '#F97316'],
+    tooltip: {
+      trigger: 'axis',
+      backgroundColor: '#fff',
+      borderColor: '#CCFBF1',
+      textStyle: { color: '#134E4A' },
+      extraCssText: 'border-radius: 8px; box-shadow: 0 4px 16px rgba(13,148,136,0.15);'
+    },
     legend: { data: ['DAU', '游客'] },
     grid: { left: 40, right: 20, top: 40, bottom: 30 },
-    xAxis: { type: 'category', data: trendData.value.map((d) => d.statDate.slice(5)) },
-    yAxis: { type: 'value', minInterval: 1 },
+    xAxis: {
+      type: 'category',
+      data: trendData.value.map((d) => d.statDate.slice(5)),
+      axisLine: { lineStyle: { color: '#CCFBF1' } },
+      axisLabel: { color: '#475569' }
+    },
+    yAxis: {
+      type: 'value',
+      minInterval: 1,
+      splitLine: { lineStyle: { color: '#F0FDFA' } },
+      axisLabel: { color: '#475569' }
+    },
     series: [
-      { name: 'DAU', type: 'line', smooth: true, data: trendData.value.map((d) => d.dau) },
-      { name: '游客', type: 'line', smooth: true, data: trendData.value.map((d) => d.guestDau) }
+      {
+        name: 'DAU',
+        type: 'line',
+        smooth: true,
+        showSymbol: false,
+        symbol: 'circle',
+        symbolSize: 7,
+        data: trendData.value.map((d) => d.dau),
+        lineStyle: { width: 3 },
+        itemStyle: { color: '#0D9488' },
+        areaStyle: {
+          color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+            { offset: 0, color: 'rgba(13,148,136,0.28)' },
+            { offset: 1, color: 'rgba(13,148,136,0)' }
+          ])
+        }
+      },
+      {
+        name: '游客',
+        type: 'line',
+        smooth: true,
+        showSymbol: false,
+        symbol: 'circle',
+        symbolSize: 7,
+        data: trendData.value.map((d) => d.guestDau),
+        lineStyle: { width: 3 },
+        itemStyle: { color: '#F97316' },
+        areaStyle: {
+          color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+            { offset: 0, color: 'rgba(249,115,22,0.24)' },
+            { offset: 1, color: 'rgba(249,115,22,0)' }
+          ])
+        }
+      }
     ]
   })
 }
@@ -80,31 +130,59 @@ onBeforeUnmount(() => {
   <div class="dashboard-page">
     <el-row :gutter="16" class="cards">
       <el-col :xs="12" :sm="6">
-        <el-card shadow="never">
-          <div class="card-label">
-            今日 DAU
-            <el-tag size="small" type="warning">实时</el-tag>
+        <el-card shadow="hover" class="stat-card stat-card-teal">
+          <div class="stat-body">
+            <div class="stat-icon">
+              <el-icon :size="28"><User /></el-icon>
+            </div>
+            <div class="stat-main">
+              <div class="card-label">
+                今日 DAU
+                <el-tag size="small" type="warning">实时</el-tag>
+              </div>
+              <div class="card-value">{{ overview?.todayDau ?? '-' }}</div>
+            </div>
           </div>
-          <div class="card-value">{{ overview?.todayDau ?? '-' }}</div>
         </el-card>
       </el-col>
       <el-col :xs="12" :sm="6">
-        <el-card shadow="never">
-          <div class="card-label">昨日 DAU</div>
-          <div class="card-value">{{ overview?.yesterdayDau ?? '-' }}</div>
+        <el-card shadow="hover" class="stat-card stat-card-cyan">
+          <div class="stat-body">
+            <div class="stat-icon">
+              <el-icon :size="28"><UserFilled /></el-icon>
+            </div>
+            <div class="stat-main">
+              <div class="card-label">昨日 DAU</div>
+              <div class="card-value">{{ overview?.yesterdayDau ?? '-' }}</div>
+            </div>
+          </div>
         </el-card>
       </el-col>
       <el-col :xs="12" :sm="6">
-        <el-card shadow="never">
-          <div class="card-label">近 30 天 MAU</div>
-          <div class="card-value">{{ overview?.mau ?? '-' }}</div>
+        <el-card shadow="hover" class="stat-card stat-card-orange">
+          <div class="stat-body">
+            <div class="stat-icon">
+              <el-icon :size="28"><TrendCharts /></el-icon>
+            </div>
+            <div class="stat-main">
+              <div class="card-label">近 30 天 MAU</div>
+              <div class="card-value">{{ overview?.mau ?? '-' }}</div>
+            </div>
+          </div>
         </el-card>
       </el-col>
       <el-col :xs="12" :sm="6">
-        <el-card shadow="never">
-          <div class="card-label">累计用户 / 饮食记录</div>
-          <div class="card-value">
-            {{ overview?.totalUsers ?? '-' }} / {{ overview?.totalDietRecords ?? '-' }}
+        <el-card shadow="hover" class="stat-card stat-card-green">
+          <div class="stat-body">
+            <div class="stat-icon">
+              <el-icon :size="28"><Document /></el-icon>
+            </div>
+            <div class="stat-main">
+              <div class="card-label">累计用户 / 饮食记录</div>
+              <div class="card-value">
+                {{ overview?.totalUsers ?? '-' }} / {{ overview?.totalDietRecords ?? '-' }}
+              </div>
+            </div>
           </div>
         </el-card>
       </el-col>
@@ -159,19 +237,72 @@ onBeforeUnmount(() => {
   margin-bottom: 16px;
 }
 
+.stat-card {
+  border: 1px solid var(--zhenxinjian-border);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+}
+
+.stat-body {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.stat-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: #fff;
+}
+
+.stat-card-teal .stat-icon {
+  background: linear-gradient(135deg, #0D9488, #14B8A6);
+  box-shadow: 0 4px 12px rgba(13, 148, 136, 0.3);
+}
+
+.stat-card-cyan .stat-icon {
+  background: linear-gradient(135deg, #0891B2, #22D3EE);
+  box-shadow: 0 4px 12px rgba(8, 145, 178, 0.3);
+}
+
+.stat-card-orange .stat-icon {
+  background: linear-gradient(135deg, #F97316, #FB923C);
+  box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+}
+
+.stat-card-green .stat-icon {
+  background: linear-gradient(135deg, #22C55E, #4ADE80);
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+}
+
+.stat-main {
+  flex: 1;
+  min-width: 0;
+}
+
 .card-label {
   font-size: 13px;
-  color: var(--zhenxinjian-text-sub, #8a8f99);
+  color: var(--zhenxinjian-text-secondary);
   display: flex;
   align-items: center;
   gap: 6px;
 }
 
 .card-value {
-  margin-top: 8px;
-  font-size: 26px;
-  font-weight: 600;
+  margin-top: 6px;
+  font-size: 32px;
+  font-weight: 700;
   color: var(--zhenxinjian-text);
+  line-height: 1.1;
+  letter-spacing: -0.5px;
 }
 
 .block {

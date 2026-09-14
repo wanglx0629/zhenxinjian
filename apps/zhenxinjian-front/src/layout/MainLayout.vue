@@ -102,6 +102,12 @@ function goDietRecords() {
       </div>
     </header>
     <main class="main-content">
+      <div v-if="route.meta?.title" class="breadcrumb">
+        <el-breadcrumb separator="/">
+          <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
+          <el-breadcrumb-item>{{ route.meta.title }}</el-breadcrumb-item>
+        </el-breadcrumb>
+      </div>
       <router-view />
     </main>
   </div>
@@ -173,8 +179,12 @@ function goDietRecords() {
 
 .main-content {
   flex: 1;
-  padding: 28px 32px 40px;
+  padding: 20px 32px 40px;
   width: 100%;
+}
+
+.breadcrumb {
+  margin-bottom: 16px;
 }
 
 @media (max-width: 768px) {

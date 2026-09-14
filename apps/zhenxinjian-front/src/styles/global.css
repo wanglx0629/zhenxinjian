@@ -1,16 +1,63 @@
 /**
- * 全局样式 - 淡蓝+灰+白
+ * 全局样式 - 健康 teal + 活力橙（对齐设计系统 V1.1）
  * 作者: wanglx
  */
 
 :root {
-  --zhenxinjian-primary: #409eff;
-  --zhenxinjian-primary-light: #ecf5ff;
-  --zhenxinjian-bg: #f5f7fa;
-  --zhenxinjian-text: #303133;
-  --zhenxinjian-text-secondary: #909399;
-  --zhenxinjian-border: #dcdfe6;
+  /* 品牌 teal */
+  --zhenxinjian-primary: #0D9488;
+  --zhenxinjian-primary-light: #14B8A6;
+  --zhenxinjian-primary-lighter: #5EEAD4;
+  --zhenxinjian-primary-bg: #F0FDFA;
+  --zhenxinjian-primary-border: #CCFBF1;
+  --zhenxinjian-primary-dark: #0F766E;
+
+  /* CTA 橙 */
+  --zhenxinjian-cta: #F97316;
+  --zhenxinjian-cta-hover: #FB923C;
+
+  /* 三色语义 */
+  --zhenxinjian-success: #22C55E;
+  --zhenxinjian-warning: #F59E0B;
+  --zhenxinjian-danger: #EF4444;
+
+  /* 中性色 */
+  --zhenxinjian-bg: #F0FDFA;
   --zhenxinjian-white: #ffffff;
+  --zhenxinjian-text: #134E4A;
+  --zhenxinjian-text-regular: #1F2937;
+  --zhenxinjian-text-secondary: #475569;
+  --zhenxinjian-border: #CCFBF1;
+
+  /* 阴影 */
+  --zhenxinjian-shadow-card: 0 2px 8px rgba(13, 148, 136, 0.06), 0 8px 24px rgba(13, 148, 136, 0.08);
+  --zhenxinjian-shadow-pop: 0 8px 32px rgba(15, 23, 42, 0.12);
+
+  /* 渐变 */
+  --zhenxinjian-gradient-brand: linear-gradient(135deg, #0D9488, #14B8A6);
+
+  /* ============ Element Plus 主题定制 ============ */
+  --el-color-primary: #0D9488;
+  --el-color-primary-light-3: #14B8A6;
+  --el-color-primary-light-5: #5EEAD4;
+  --el-color-primary-light-7: #99F6E4;
+  --el-color-primary-light-8: #CCFBF1;
+  --el-color-primary-light-9: #F0FDFA;
+  --el-color-primary-dark-2: #0F766E;
+
+  --el-color-success: #22C55E;
+  --el-color-warning: #F59E0B;
+  --el-color-danger: #EF4444;
+  --el-color-error: #EF4444;
+
+  --el-border-radius-base: 8px;
+  --el-border-radius-small: 6px;
+  --el-border-radius-round: 24px;
+
+  --el-box-shadow: 0 2px 8px rgba(13, 148, 136, 0.06), 0 8px 24px rgba(13, 148, 136, 0.08);
+  --el-box-shadow-light: 0 2px 8px rgba(13, 148, 136, 0.06);
+  --el-box-shadow-lighter: 0 1px 4px rgba(13, 148, 136, 0.04);
+  --el-box-shadow-dark: 0 8px 32px rgba(15, 23, 42, 0.12);
 }
 
 * {
@@ -22,8 +69,8 @@
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   background:
-    radial-gradient(1200px 480px at 12% -10%, rgba(64, 158, 255, 0.12), transparent 55%),
-    radial-gradient(900px 420px at 100% 0%, rgba(144, 147, 153, 0.08), transparent 50%),
+    radial-gradient(1200px 480px at 12% -10%, rgba(13, 148, 136, 0.10), transparent 55%),
+    radial-gradient(900px 420px at 100% 0%, rgba(249, 115, 22, 0.06), transparent 50%),
     var(--zhenxinjian-bg);
   color: var(--zhenxinjian-text);
   min-height: 100vh;
@@ -38,8 +85,9 @@ a {
 .list-page {
   background: var(--zhenxinjian-white);
   border: 1px solid var(--zhenxinjian-border);
-  border-radius: 8px;
+  border-radius: 12px;
   padding: 20px;
+  box-shadow: var(--zhenxinjian-shadow-card);
 }
 
 .list-toolbar {

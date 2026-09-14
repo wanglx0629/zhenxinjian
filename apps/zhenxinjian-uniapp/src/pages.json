@@ -121,11 +121,11 @@
     "navigationBarTextStyle": "black",
     "navigationBarTitleText": "zhenxinjian",
     "navigationBarBackgroundColor": "#ffffff",
-    "backgroundColor": "#f5f7fa"
+    "backgroundColor": "#F0FDFA"
   },
   "tabBar": {
-    "color": "#909399",
-    "selectedColor": "#409eff",
+    "color": "#94A3B8",
+    "selectedColor": "#0D9488",
     "backgroundColor": "#ffffff",
     "borderStyle": "black",
     "list": [

@@ -77,11 +77,14 @@ export const MEAL_TYPES: MealTypeCfg[] = [
   { code: 4, name: '加餐' }
 ]
 
+/** 餐别 emoji（code 与 MEAL_TYPES 对齐，首页餐次 chip / 记录页餐别头共用，兜底 🍽️） */
+export const MEAL_EMOJI: Record<number, string> = { 1: '🍳', 2: '🍱', 3: '🌙', 4: '🍎' }
+
 /** 三色进度阈值（达成率 %）：80–100 绿 / <80 黄 / >100 红 */
 export const PROGRESS_THRESHOLD = { green: 80, red: 100 } as const
 
-/** 三色进度颜色 */
-export const PROGRESS_COLORS = { green: '#67C23A', yellow: '#E6A23C', red: '#F56C6C' } as const
+/** 三色进度颜色（对齐设计系统 V1.1 充足绿/不足黄/超标红） */
+export const PROGRESS_COLORS = { green: '#22C55E', yellow: '#F59E0B', red: '#EF4444' } as const
 
 /** 微调建议文案（按超标项动态拼接，spec：超标微调建议） */
 export const OVER_ADVICE = {
@@ -119,7 +122,7 @@ export interface CycleDayTypeCfg {
 
 export const CYCLE_DAY_TYPES: Record<number, CycleDayTypeCfg> = {
   1: { code: 1, name: '高碳日', short: '高', color: '#F56C6C', bg: '#FEF0F0' },
-  2: { code: 2, name: '中碳日', short: '中', color: '#409EFF', bg: '#ECF5FF' },
+  2: { code: 2, name: '中碳日', short: '中', color: '#0D9488', bg: '#CCFBF1' },
   3: { code: 3, name: '低碳日', short: '低', color: '#909399', bg: '#F4F4F5' }
 }
 

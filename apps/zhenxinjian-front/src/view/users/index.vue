@@ -5,6 +5,7 @@
  */
 import { reactive, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { View, Edit, Delete } from '@element-plus/icons-vue'
 import { deleteUser, getUserPage } from '@/api/user'
 import type { UserInfo } from '@/api/types'
 import PagePager from '@/component/PagePager.vue'
@@ -91,6 +92,9 @@ async function handleDelete(row: UserInfo) {
     </div>
 
     <el-table v-loading="loading" :data="tableData" stripe border>
+      <template #empty>
+        <el-empty description="暂无用户数据，调整筛选条件或点击右上角「新增用户」" :image-size="120" />
+      </template>
       <el-table-column prop="id" label="ID" width="80" />
       <el-table-column prop="username" label="用户名" min-width="120" />
       <el-table-column prop="nickname" label="昵称" min-width="120" />
@@ -111,9 +115,9 @@ async function handleDelete(row: UserInfo) {
       </el-table-column>
       <el-table-column label="操作" width="220" fixed="right">
         <template #default="{ row }">
-          <el-button link type="primary" @click="openDetail(row)">详情</el-button>
-          <el-button link type="primary" @click="openEdit(row)">编辑</el-button>
-          <el-button link type="danger" @click="handleDelete(row)">删除</el-button>
+          <el-button link type="primary" :icon="View" @click="openDetail(row)">详情</el-button>
+          <el-button link type="primary" :icon="Edit" @click="openEdit(row)">编辑</el-button>
+          <el-button link type="danger" :icon="Delete" @click="handleDelete(row)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>

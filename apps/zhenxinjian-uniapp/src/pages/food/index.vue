@@ -8,6 +8,7 @@ import { computed, ref } from 'vue'
 import { onLoad, onReachBottom, onShow } from '@dcloudio/uni-app'
 import { useFoodStore } from '@/store/food'
 import type { FoodCategoryVO, FoodVO } from '@/api/food'
+import EmptyState from '@/components/EmptyState.vue'
 import { track, trackPage } from '@/utils/track'
 import { TRACK_EVENT } from '@/config/track-events'
 
@@ -171,7 +172,7 @@ onReachBottom(() => {
     <template v-if="showDiscovery">
       <view v-if="historyList.length" class="panel">
         <view class="panel-head">
-          <text class="panel-title">历史搜索</text>
+          <text class="panel-title">🕘 历史搜索</text>
           <text class="panel-clear" @click="clearHistory">清空</text>
         </view>
         <view class="chips">
@@ -180,12 +181,12 @@ onReachBottom(() => {
       </view>
 
       <view class="panel custom-entry" @click="goMyCustom">
-        <text class="custom-entry-text">我的自定义食物</text>
+        <text class="custom-entry-text">⭐ 我的自定义食物</text>
         <text class="custom-entry-arrow">›</text>
       </view>
 
       <view class="panel">
-        <text class="panel-title">热门食物</text>
+        <text class="panel-title">🔥 热门食物</text>
         <view class="food-list">
           <view v-for="f in hotList" :key="f.id" class="food-row" @click="openDetail(f)">
             <view class="food-main">
@@ -223,8 +224,11 @@ onReachBottom(() => {
         <view v-else class="load-more">已加载全部 {{ total }} 条</view>
       </view>
       <view v-else class="empty">
-        <text class="empty-title">未找到相关食物</text>
-        <text class="empty-desc">换个关键字或分类试试</text>
+        <EmptyState
+          type="search"
+          title="未找到相关食物"
+          desc="换个关键字或分类试试"
+        />
       </view>
     </template>
   </view>
@@ -430,20 +434,6 @@ onReachBottom(() => {
 }
 
 .empty {
-  padding: 80rpx 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.empty-title {
-  font-size: 28rpx;
-  color: $zhenxinjian-text;
-  margin-bottom: 12rpx;
-}
-
-.empty-desc {
-  font-size: 24rpx;
-  color: $zhenxinjian-text-secondary;
+  padding: 40rpx 0;
 }
 </style>

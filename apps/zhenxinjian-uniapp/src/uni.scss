@@ -1,12 +1,42 @@
 /**
- * 全局 SCSS 变量（淡蓝 + 灰 + 白，对齐 Web 端）
+ * 全局 SCSS 变量（健康 teal + 活力橙，对齐设计系统 V1.1）
  * 作者: wanglx
  */
 
-$zhenxinjian-primary: #409eff;
-$zhenxinjian-primary-light: #ecf5ff;
-$zhenxinjian-bg: #f5f7fa;
-$zhenxinjian-text: #303133;
-$zhenxinjian-text-secondary: #909399;
-$zhenxinjian-border: #dcdfe6;
+/* 品牌主色 teal */
+$zhenxinjian-primary: #0D9488;
+$zhenxinjian-primary-light: #14B8A6;
+$zhenxinjian-primary-lighter: #5EEAD4;
+$zhenxinjian-primary-bg: #F0FDFA;
+$zhenxinjian-primary-border: #CCFBF1;
+$zhenxinjian-primary-dark: #0F766E;
+
+/* CTA 行动橙 */
+$zhenxinjian-cta: #F97316;
+$zhenxinjian-cta-hover: #FB923C;
+$zhenxinjian-cta-active: #EA580C;
+
+/* 三色语义（PRD §5.6.3 充足/不足/超标） */
+$zhenxinjian-success: #22C55E;
+$zhenxinjian-warning: #F59E0B;
+$zhenxinjian-danger: #EF4444;
+
+/* 中性色 */
+$zhenxinjian-bg: #F0FDFA;
 $zhenxinjian-white: #ffffff;
+$zhenxinjian-text: #134E4A;
+$zhenxinjian-text-regular: #1F2937;
+$zhenxinjian-text-secondary: #475569;
+$zhenxinjian-text-placeholder: #94A3B8;
+$zhenxinjian-border: #CCFBF1;
+$zhenxinjian-border-input: #E2E8F0;
+
+/* 阴影层级 */
+$zhenxinjian-shadow-card: 0 2rpx 8rpx rgba(13, 148, 136, 0.06), 0 8rpx 24rpx rgba(13, 148, 136, 0.08);
+$zhenxinjian-shadow-pop: 0 8rpx 32rpx rgba(15, 23, 42, 0.12);
+$zhenxinjian-shadow-fab: 0 8rpx 24rpx rgba(249, 115, 22, 0.32);
+$zhenxinjian-shadow-hero: 0 12rpx 32rpx rgba(13, 148, 136, 0.18);
+
+/* 渐变 */
+$zhenxinjian-gradient-brand: linear-gradient(160deg, #0D9488, #14B8A6);
+$zhenxinjian-gradient-cta: linear-gradient(160deg, #F97316, #FB923C);

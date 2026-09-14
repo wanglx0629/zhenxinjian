@@ -233,17 +233,25 @@ async function handleSubmit() {
 
 .input {
   height: 80rpx;
-  border: 1rpx solid $zhenxinjian-border;
+  border: 1rpx solid $zhenxinjian-border-input;
   border-radius: 12rpx;
   padding: 0 24rpx;
   font-size: 30rpx;
   color: $zhenxinjian-text;
   box-sizing: border-box;
+  background: $zhenxinjian-white;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input:focus {
+  border-color: $zhenxinjian-primary;
+  box-shadow: 0 0 0 4rpx rgba(13, 148, 136, 0.12);
+  outline: none;
 }
 
 .err {
   font-size: 22rpx;
-  color: #f56c6c;
+  color: $zhenxinjian-danger;
   margin-top: 8rpx;
   display: block;
 }

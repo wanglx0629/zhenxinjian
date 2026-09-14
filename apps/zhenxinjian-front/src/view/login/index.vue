@@ -59,7 +59,7 @@ async function handleLogin() {
       <div class="auth-header">
         <TeLogo />
         <h2>登录 zhenxinjian</h2>
-        <p class="subtitle">wanglx</p>
+        <p class="subtitle">生活化减脂 · 管理后台</p>
       </div>
       <el-form :model="form" label-width="0" @submit.prevent="handleLogin">
         <el-form-item>
@@ -91,15 +91,19 @@ async function handleLogin() {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #ecf5ff 0%, #f5f7fa 50%, #ffffff 100%);
+  background:
+    radial-gradient(1200px 480px at 12% -10%, rgba(13, 148, 136, 0.18), transparent 55%),
+    radial-gradient(900px 420px at 100% 0%, rgba(249, 115, 22, 0.10), transparent 50%),
+    linear-gradient(135deg, #F0FDFA 0%, #CCFBF1 50%, #F0FDFA 100%);
 }
 
 .auth-card {
   width: 400px;
   padding: 40px;
   background: var(--zhenxinjian-white);
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(64, 158, 255, 0.1);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(13, 148, 136, 0.18), 0 2px 8px rgba(13, 148, 136, 0.06);
+  border: 1px solid var(--zhenxinjian-primary-border);
 }
 
 .auth-header {
@@ -111,12 +115,15 @@ async function handleLogin() {
   margin-top: 12px;
   color: var(--zhenxinjian-text);
   font-size: 22px;
+  font-weight: 700;
 }
 
 .subtitle {
-  color: var(--zhenxinjian-text-secondary);
+  color: var(--zhenxinjian-primary);
   font-size: 13px;
-  margin-top: 4px;
+  margin-top: 6px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
 }
 
 .submit-btn {

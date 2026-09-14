@@ -15,7 +15,7 @@
 .te-logo {
   width: 36px;
   height: 36px;
-  background: linear-gradient(135deg, #409eff, #66b1ff);
+  background: linear-gradient(135deg, #0D9488, #14B8A6);
   border-radius: 8px;
   display: flex;
   align-items: center;

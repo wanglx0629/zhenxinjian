@@ -66,6 +66,9 @@ function displayUser(row: { userId: number; userNickname: string | null }) {
     </div>
 
     <el-table v-loading="loading" :data="tableData" stripe border>
+      <template #empty>
+        <el-empty description="暂无饮食记录，调整筛选条件后重试" :image-size="120" />
+      </template>
       <el-table-column label="用户" min-width="120">
         <template #default="{ row }">{{ displayUser(row) }}</template>
       </el-table-column>
