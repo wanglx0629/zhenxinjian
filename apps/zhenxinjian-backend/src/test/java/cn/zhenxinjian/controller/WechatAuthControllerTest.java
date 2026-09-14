@@ -10,11 +10,10 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import cn.zhenxinjian.config.WebMvcTestConfig;
 import org.springframework.context.annotation.Import;
-import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
@@ -31,11 +30,11 @@ class WechatAuthControllerTest {
     @MockBean private WechatAuthService wechatAuthService;
     @MockBean private JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    /** 场景：微信登录 → 正常路径（白名单无需认证） */
+    /** 场景：微信登录 → 正常路径（multipart 表单，code 走普通表单字段，白名单无需认证） */
     @Test
     void wechatLogin_returnsOk() throws Exception {
-        mockMvc.perform(post("/auth/wechat/login").contentType(MediaType.APPLICATION_JSON)
-                .content("{}"))
+        mockMvc.perform(multipart("/auth/wechat/login")
+                        .param("code", "test-code"))
                 .andExpect(status().isOk());
     }
 

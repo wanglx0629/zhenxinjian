@@ -38,8 +38,10 @@ export interface GuestLoginResult extends LoginResult {
   guestKey: string
 }
 
-/** 微信登录请求 */
-export interface WechatLoginRequest {
-  code: string
-  guestKey?: string
+/** 微信授权登录时采集的用户资料（chooseAvatar + nickname input） */
+export interface WechatProfilePayload {
+  /** 微信昵称（input type="nickname" 采集） */
+  nickname: string
+  /** 头像临时路径（button open-type="chooseAvatar" 回调 e.detail.avatarUrl） */
+  avatarPath: string
 }

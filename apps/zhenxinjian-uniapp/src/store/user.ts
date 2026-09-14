@@ -4,7 +4,7 @@
  */
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
-import type { UserInfo } from '@/api/types'
+import type { UserInfo, WechatProfilePayload } from '@/api/types'
 import { createGuest, getCurrentUser, logout as logoutApi, wechatLogin } from '@/api/auth'
 import { TRACK_EVENT } from '@/config/track-events'
 import { useBodyStore } from '@/store/body'
@@ -39,8 +39,13 @@ export const useUserStore = defineStore('user', () => {
    * 微信授权登录全流程（B-T24：uni.login → code → wechatLogin 收敛 store 单一入口）
    * 携带本地 guestKey 触发游客数据迁移（后端幂等）；
    * 成功自动 toast + 跳首页，失败自动 toast + track，页面只需管 loading 与节流
+   *
+   * @param profile 授权页采集的昵称 + 头像本地路径（chooseAvatar / nickname input）
    */
-  async function loginByWechat(opts?: { successText?: string; failText?: string }): Promise<boolean> {
+  async function loginByWechat(
+    profile: WechatProfilePayload,
+    opts?: { successText?: string; failText?: string }
+  ): Promise<boolean> {
     try {
       // 注意：部分平台 Promise 形式返回 [err, res] 数组，需兼容取值
       const result: unknown = await uni.login({ provider: 'weixin' })
@@ -52,7 +57,12 @@ export const useUserStore = defineStore('user', () => {
         return false
       }
       const guestKey = getGuestKey()
-      const loginResult = await wechatLogin(guestKey ? { code, guestKey } : { code })
+      const loginResult = await wechatLogin({
+        code,
+        nickname: profile.nickname,
+        avatarPath: profile.avatarPath,
+        ...(guestKey ? { guestKey } : {})
+      })
       token.value = loginResult.token
       userInfo.value = loginResult.user
       setToken(loginResult.token)

@@ -4,7 +4,7 @@
  * 对应 PRD P01；游客逻辑见 specs/auth/guest-mode
  * 作者: wanglx
  */
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
 import { useUserStore } from '@/store/user'
 import { getToken } from '@/utils/storage'
@@ -14,6 +14,14 @@ import { TRACK_EVENT } from '@/config/track-events'
 
 const userStore = useUserStore()
 const loading = ref(false)
+
+/** chooseAvatar 返回的本地临时头像路径 */
+const avatarPath = ref('')
+/** nickname input 采集的昵称 */
+const nickname = ref('')
+
+/** 是否可发起授权登录（必须头像 + 昵称都已采集） */
+const canLogin = computed(() => !!avatarPath.value && !!nickname.value.trim())
 
 onShow(async () => {
   trackPage('pages/auth/guide')
@@ -33,16 +41,28 @@ onShow(async () => {
   }
 })
 
-/** 微信一键授权登录（B-T24：uni.login → code → wechatLogin 收敛 store，页面只管 loading 与节流） */
+/** 微信 chooseAvatar 回调：e.detail.avatarUrl 为本地临时路径（wxfile:// 或 http://tmp/） */
+function onChooseAvatar(e: { detail: { avatarUrl: string } }) {
+  avatarPath.value = e.detail.avatarUrl
+}
+
+/** 微信一键授权登录（先采集昵称头像，再 uni.login → uploadFile 一次请求落库） */
 async function handleWechatLogin() {
   if (loading.value) return
+  if (!canLogin.value) {
+    uni.showToast({ title: '请先选头像、填昵称', icon: 'none' })
+    return
+  }
   if (!canSubmit()) {
     uni.showToast({ title: '操作过于频繁，请稍后再试', icon: 'none' })
     return
   }
   loading.value = true
   try {
-    await userStore.loginByWechat()
+    await userStore.loginByWechat({
+      nickname: nickname.value.trim(),
+      avatarPath: avatarPath.value
+    })
   } finally {
     loading.value = false
   }
@@ -75,8 +95,35 @@ async function handleGuest() {
       <text class="slogan">生活化减脂，从今天开始</text>
     </view>
 
+    <view class="profile">
+      <!-- 微信头像选择（open-type="chooseAvatar" 触发原生选择器） -->
+      <button class="avatar-btn" open-type="chooseAvatar" @chooseavatar="onChooseAvatar">
+        <image v-if="avatarPath" class="avatar-img" :src="avatarPath" mode="aspectFill" />
+        <view v-else class="avatar-placeholder">
+          <text class="avatar-emoji">😊</text>
+        </view>
+      </button>
+      <text class="profile-tip">{{ avatarPath ? '头像已选好啦，点可换' : '👆 点击选择头像' }}</text>
+
+      <!-- 微信昵称填写（type="nickname" 聚焦拉起带微信昵称建议的键盘） -->
+      <input
+        v-model="nickname"
+        class="nickname-input"
+        type="nickname"
+        placeholder="点击输入昵称"
+        placeholder-class="nickname-placeholder"
+        maxlength="32"
+      />
+    </view>
+
     <view class="actions">
-      <button class="btn-primary" :loading="loading" @click="handleWechatLogin">
+      <button
+        class="btn-primary"
+        :class="{ 'btn-disabled': !canLogin }"
+        :loading="loading"
+        :disabled="!canLogin || loading"
+        @click="handleWechatLogin"
+      >
         微信一键登录
       </button>
       <button class="btn-ghost" :disabled="loading" @click="handleGuest">
@@ -102,7 +149,7 @@ async function handleGuest() {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 120rpx;
+  margin-bottom: 64rpx;
 }
 
 .logo {
@@ -124,6 +171,74 @@ async function handleGuest() {
   color: $zhenxinjian-text-secondary;
 }
 
+/* 头像 + 昵称采集区 */
+.profile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 56rpx;
+}
+
+.avatar-btn {
+  width: 144rpx;
+  height: 144rpx;
+  border-radius: 50%;
+  padding: 0;
+  margin: 0;
+  background: transparent;
+  border: 4rpx dashed $zhenxinjian-border;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &::after {
+    border: none;
+  }
+}
+
+.avatar-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+}
+
+.avatar-placeholder {
+  width: 100%;
+  height: 100%;
+  background: $zhenxinjian-white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.avatar-emoji {
+  font-size: 64rpx;
+}
+
+.profile-tip {
+  margin-top: 16rpx;
+  font-size: 24rpx;
+  color: $zhenxinjian-text-secondary;
+}
+
+.nickname-input {
+  margin-top: 32rpx;
+  width: 100%;
+  height: 88rpx;
+  padding: 0 32rpx;
+  box-sizing: border-box;
+  background: $zhenxinjian-white;
+  border: 2rpx solid $zhenxinjian-border;
+  border-radius: 12rpx;
+  font-size: 30rpx;
+  color: $zhenxinjian-text;
+}
+
+.nickname-placeholder {
+  color: $zhenxinjian-text-secondary;
+}
+
 .actions {
   display: flex;
   flex-direction: column;
@@ -138,6 +253,11 @@ async function handleGuest() {
   color: $zhenxinjian-white;
   border-radius: 12rpx;
   font-size: 30rpx;
+}
+
+.btn-disabled {
+  background: $zhenxinjian-border;
+  color: $zhenxinjian-text-secondary;
 }
 
 .btn-ghost {

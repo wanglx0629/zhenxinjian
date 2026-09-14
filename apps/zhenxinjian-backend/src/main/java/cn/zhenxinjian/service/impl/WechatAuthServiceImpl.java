@@ -15,12 +15,14 @@ import cn.zhenxinjian.common.utils.RedisUtils;
 import cn.zhenxinjian.domain.dto.GuestLoginDTO;
 import cn.zhenxinjian.domain.dto.WechatLoginDTO;
 import cn.zhenxinjian.domain.po.User;
+import cn.zhenxinjian.domain.vo.FileUploadVO;
 import cn.zhenxinjian.domain.vo.GuestLoginResultVO;
 import cn.zhenxinjian.domain.vo.LoginResultVO;
 import cn.zhenxinjian.domain.vo.UserVO;
 import cn.zhenxinjian.mapper.UserMapper;
 import cn.zhenxinjian.service.GuestMigrationOrchestrator;
 import cn.zhenxinjian.service.SessionEvictor;
+import cn.zhenxinjian.service.StorageService;
 import cn.zhenxinjian.service.WechatAuthService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -31,6 +33,7 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.Date;
@@ -51,16 +54,24 @@ public class WechatAuthServiceImpl extends ServiceImpl<UserMapper, User> impleme
     private final SessionEvictor sessionEvictor;
     private final PasswordEncoder passwordEncoder;
     private final GuestMigrationOrchestrator guestMigrationOrchestrator;
+    private final StorageService storageService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public LoginResultVO wechatLogin(WechatLoginDTO dto, String ip) {
+    public LoginResultVO wechatLogin(WechatLoginDTO dto, MultipartFile avatar, String ip) {
         // 1. code2session 换 openid（失败快速返回，不产生半成品用户）
         WxMaJscode2SessionResult session = code2Session(dto.getCode());
         String openid = session.getOpenid();
 
-        // 2. openid 唯一绑定：找/建用户（并发兜底：唯一索引冲突后改查复用）
-        User user = findOrCreateWechatUser(openid, session.getUnionid());
+        // 2. 头像先行上传（有则拿 URL 落库；上传失败整体登录失败，用户重试即可）
+        String avatarUrl = null;
+        if (avatar != null && !avatar.isEmpty()) {
+            FileUploadVO uploadVO = storageService.upload(avatar);
+            avatarUrl = uploadVO.getUrl();
+        }
+
+        // 3. openid 唯一绑定：找/建用户（并发兜底：唯一索引冲突后改查复用），并按需落/更新昵称头像
+        User user = findOrCreateWechatUser(openid, session.getUnionid(), dto.getNickname(), avatarUrl);
         // 非正常状态（冻结/注销）账号拒绝登录（不签发 token）
         if (user.getStatus() == null || UserStatusEnum.of(user.getStatus()) != UserStatusEnum.NORMAL) {
             throw new BusinessException(ExceptionConstant.ACCOUNT_DISABLED);
@@ -185,12 +196,15 @@ public class WechatAuthServiceImpl extends ServiceImpl<UserMapper, User> impleme
 
     /**
      * openid 找/建用户；并发首次登录依赖 uk_wechat_openid_active 唯一索引兜底
+     * <p>昵称头像策略：新用户直接用本次提供值落库（缺省落默认）；老用户若本次提供非空值且与现值不同，
+     * 同步覆盖 nickname/avatar 与微信快照列（C 端暂无改资料入口，登录即唯一同步点）</p>
      */
-    private User findOrCreateWechatUser(String openid, String unionid) {
+    private User findOrCreateWechatUser(String openid, String unionid, String nickname, String avatarUrl) {
         User existing = getOne(new LambdaQueryWrapper<User>()
                 .eq(User::getWechatOpenid, openid)
                 .eq(User::getUserType, CommonConstant.USER_TYPE_WECHAT));
         if (existing != null) {
+            syncProfileIfProvided(existing, nickname, avatarUrl);
             return existing;
         }
         User user = new User();
@@ -200,8 +214,13 @@ public class WechatAuthServiceImpl extends ServiceImpl<UserMapper, User> impleme
         // username/password NOT NULL：占位值（游客同策略）
         user.setUsername(CommonConstant.USERNAME_PREFIX_WECHAT + IdUtil.simpleUUID());
         user.setPassword(passwordEncoder.encode(IdUtil.fastSimpleUUID()));
-        user.setNickname(CommonConstant.NICKNAME_WECHAT_DEFAULT);
-        user.setWechatNickname(CommonConstant.NICKNAME_WECHAT_DEFAULT);
+        String finalNickname = StrUtil.isNotBlank(nickname) ? nickname : CommonConstant.NICKNAME_WECHAT_DEFAULT;
+        user.setNickname(finalNickname);
+        user.setWechatNickname(finalNickname);
+        if (StrUtil.isNotBlank(avatarUrl)) {
+            user.setAvatar(avatarUrl);
+            user.setWechatAvatar(avatarUrl);
+        }
         user.setWechatBindStatus(CommonConstant.WECHAT_BIND_YES);
         user.setWechatBindTime(LocalDateTime.now());
         user.setRole(CommonConstant.ROLE_USER);
@@ -221,6 +240,27 @@ public class WechatAuthServiceImpl extends ServiceImpl<UserMapper, User> impleme
                         ExceptionConstant.WECHAT_OPENID_CONFLICT);
             }
             return concurrent;
+        }
+    }
+
+    /**
+     * 老用户登录同步昵称头像：仅在本次提供非空值且与现值不同时覆盖，避免无变化空跑 update
+     */
+    private void syncProfileIfProvided(User user, String nickname, String avatarUrl) {
+        boolean dirty = false;
+        if (StrUtil.isNotBlank(nickname) && !nickname.equals(user.getNickname())) {
+            user.setNickname(nickname);
+            user.setWechatNickname(nickname);
+            dirty = true;
+        }
+        if (StrUtil.isNotBlank(avatarUrl) && !avatarUrl.equals(user.getAvatar())) {
+            user.setAvatar(avatarUrl);
+            user.setWechatAvatar(avatarUrl);
+            dirty = true;
+        }
+        if (dirty) {
+            updateById(user);
+            userCacheService.evict(user.getId());
         }
     }
 

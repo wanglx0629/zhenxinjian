@@ -19,6 +19,7 @@ import cn.zhenxinjian.domain.vo.LoginResultVO;
 import cn.zhenxinjian.mapper.UserMapper;
 import cn.zhenxinjian.service.GuestMigrationOrchestrator;
 import cn.zhenxinjian.service.SessionEvictor;
+import cn.zhenxinjian.service.StorageService;
 import com.baomidou.mybatisplus.core.MybatisConfiguration;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -67,6 +68,7 @@ class WechatAuthServiceImplTest {
     private RedisUtils redisUtils;
     private JwtUtils jwtUtils;
     private GuestMigrationOrchestrator guestMigrationOrchestrator;
+    private StorageService storageService;
     private WechatAuthServiceImpl service;
 
     @BeforeEach
@@ -97,8 +99,9 @@ class WechatAuthServiceImplTest {
         when(encoder.encode(anyString())).thenReturn("hashed");
 
         guestMigrationOrchestrator = mock(GuestMigrationOrchestrator.class);
+        storageService = mock(StorageService.class);
         service = new WechatAuthServiceImpl(provider, jwtUtils, redisUtils,
-                userCacheService, sessionEvictor, encoder, guestMigrationOrchestrator);
+                userCacheService, sessionEvictor, encoder, guestMigrationOrchestrator, storageService);
         ReflectionTestUtils.setField(service, "baseMapper", userMapper);
     }
 
@@ -115,7 +118,7 @@ class WechatAuthServiceImplTest {
             return 1;
         });
 
-        LoginResultVO result = service.wechatLogin(dto("good-code", null), "127.0.0.1");
+        LoginResultVO result = service.wechatLogin(dto("good-code", null), null, "127.0.0.1");
 
         assertNotNull(result.getToken());
         Claims claims = jwtUtils.parseToken(result.getToken());
@@ -138,7 +141,7 @@ class WechatAuthServiceImplTest {
         WechatLoginDTO dto = dto("bad-code", null);
 
         BusinessException ex = assertThrows(BusinessException.class,
-                () -> service.wechatLogin(dto, "127.0.0.1"));
+                () -> service.wechatLogin(dto, null, "127.0.0.1"));
         assertEquals(CommonConstant.WECHAT_CODE_INVALID_CODE, ex.getCode());
         verify(userMapper, never()).insert(any(User.class));
     }
@@ -149,7 +152,7 @@ class WechatAuthServiceImplTest {
         WechatLoginDTO dto = dto("any-code", null);
 
         BusinessException ex = assertThrows(BusinessException.class,
-                () -> service.wechatLogin(dto, "127.0.0.1"));
+                () -> service.wechatLogin(dto, null, "127.0.0.1"));
         assertEquals(CommonConstant.WECHAT_UNAVAILABLE_CODE, ex.getCode());
         verify(userMapper, never()).insert(any(User.class));
     }
@@ -163,7 +166,7 @@ class WechatAuthServiceImplTest {
         WechatLoginDTO dto = dto("bad-code", null);
 
         BusinessException ex = assertThrows(BusinessException.class,
-                () -> service.wechatLogin(dto, "127.0.0.1"));
+                () -> service.wechatLogin(dto, null, "127.0.0.1"));
         assertEquals(CommonConstant.WECHAT_CODE_INVALID_CODE, ex.getCode());
         assertEquals(ExceptionConstant.WECHAT_CODE_INVALID, ex.getMessage());
         verify(userMapper, never()).insert(any(User.class));
@@ -178,7 +181,7 @@ class WechatAuthServiceImplTest {
         WechatLoginDTO dto = dto("any-code", null);
 
         BusinessException ex = assertThrows(BusinessException.class,
-                () -> service.wechatLogin(dto, "127.0.0.1"));
+                () -> service.wechatLogin(dto, null, "127.0.0.1"));
         assertEquals(CommonConstant.WECHAT_UNAVAILABLE_CODE, ex.getCode());
         assertEquals(ExceptionConstant.WECHAT_UNAVAILABLE, ex.getMessage());
         verify(userMapper, never()).insert(any(User.class));
@@ -193,7 +196,7 @@ class WechatAuthServiceImplTest {
         when(userMapper.selectOne(any(Wrapper.class), anyBoolean())).thenReturn(null, concurrent);
         when(userMapper.insert(any(User.class))).thenThrow(new DuplicateKeyException("uk_wechat_openid_active"));
 
-        LoginResultVO result = service.wechatLogin(dto("good-code", null), "127.0.0.1");
+        LoginResultVO result = service.wechatLogin(dto("good-code", null), null, "127.0.0.1");
 
         assertEquals("200", jwtUtils.parseToken(result.getToken()).getSubject());
     }
@@ -299,7 +302,7 @@ class WechatAuthServiceImplTest {
         // MP 3.5.7 removeById 走 deleteById(Serializable id) 重载
         when(userMapper.deleteById(any(Long.class))).thenReturn(1);
 
-        LoginResultVO result = service.wechatLogin(dto("good-code", GUEST_KEY), "127.0.0.1");
+        LoginResultVO result = service.wechatLogin(dto("good-code", GUEST_KEY), null, "127.0.0.1");
 
         assertEquals("400", jwtUtils.parseToken(result.getToken()).getSubject());
         // 业务数据迁移经编排者统一驱动
@@ -323,7 +326,7 @@ class WechatAuthServiceImplTest {
         guest.setMergedInto(400L);
         stubSelectBy(openid -> formal, guestKey -> guest);
 
-        service.wechatLogin(dto("good-code", GUEST_KEY), "127.0.0.1");
+        service.wechatLogin(dto("good-code", GUEST_KEY), null, "127.0.0.1");
 
         // 幂等：不再重复迁移
         verify(userMapper, never()).deleteById(any(Long.class));
@@ -336,7 +339,7 @@ class WechatAuthServiceImplTest {
         User formal = wechatUser(400L, OPENID);
         stubSelectBy(openid -> formal, guestKey -> null);
 
-        LoginResultVO result = service.wechatLogin(dto("good-code", "guest_unknown"), "127.0.0.1");
+        LoginResultVO result = service.wechatLogin(dto("good-code", "guest_unknown"), null, "127.0.0.1");
 
         assertNotNull(result.getToken());
         verify(userMapper, never()).deleteById(any(Long.class));
