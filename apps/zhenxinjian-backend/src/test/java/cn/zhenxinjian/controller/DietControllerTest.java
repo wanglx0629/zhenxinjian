@@ -8,6 +8,7 @@ import cn.zhenxinjian.domain.vo.DietRecordVO;
 import cn.zhenxinjian.domain.vo.DietSummaryVO;
 import cn.zhenxinjian.security.JwtAuthenticationFilter;
 import cn.zhenxinjian.service.impl.DietRecordService;
+import cn.zhenxinjian.service.impl.DietSummaryService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -50,6 +51,8 @@ class DietControllerTest {
 
     @MockBean
     private DietRecordService dietRecordService;
+    @MockBean
+    private DietSummaryService dietSummaryService;
     @MockBean
     private JwtAuthenticationFilter jwtAuthenticationFilter;
 
@@ -138,7 +141,7 @@ class DietControllerTest {
     @Test
     void summary_returnsSummary() throws Exception {
         DietSummaryVO vo = new DietSummaryVO();
-        when(dietRecordService.summary(any(), any())).thenReturn(vo);
+        when(dietSummaryService.summary(any(), any())).thenReturn(vo);
 
         mockMvc.perform(get("/diet/summary"))
                 .andExpect(status().isOk())
