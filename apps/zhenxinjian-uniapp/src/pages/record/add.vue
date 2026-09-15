@@ -181,6 +181,11 @@ function switchMode(m: 'food' | 'manual') {
   mode.value = m
 }
 
+/** 跳转拍照识别页 */
+function goRecognize() {
+  uni.navigateTo({ url: '/pages/record/recognize' })
+}
+
 /** 提交 */
 async function handleSubmit() {
   if (dietStore.submitting) return
@@ -257,6 +262,16 @@ async function handleSubmit() {
 
 <template>
   <view class="page">
+    <!-- 拍照识别入口 -->
+    <view class="ocr-entry" @click="goRecognize">
+      <text class="ocr-emoji">📸</text>
+      <view class="ocr-text">
+        <text class="ocr-title">拍照识别食物</text>
+        <text class="ocr-desc">拍一张食物图，AI 自动识别营养并记录</text>
+      </view>
+      <text class="ocr-arrow">›</text>
+    </view>
+
     <!-- 餐别选择 -->
     <view class="panel">
       <text class="panel-title">餐别</text>
@@ -378,6 +393,49 @@ async function handleSubmit() {
   border-radius: 16rpx;
   padding: 32rpx;
   margin-bottom: 24rpx;
+}
+
+/* 拍照识别入口 */
+.ocr-entry {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+  background: $zhenxinjian-gradient-cta;
+  border-radius: 16rpx;
+  padding: 28rpx 32rpx;
+  margin-bottom: 24rpx;
+  box-shadow: $zhenxinjian-shadow-fab;
+}
+
+.ocr-entry:active {
+  transform: scale(0.99);
+}
+
+.ocr-emoji {
+  font-size: 52rpx;
+}
+
+.ocr-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.ocr-title {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #fff;
+}
+
+.ocr-desc {
+  font-size: 22rpx;
+  color: rgba(255, 255, 255, 0.85);
+  margin-top: 6rpx;
+}
+
+.ocr-arrow {
+  font-size: 44rpx;
+  color: #fff;
 }
 
 .panel-title {

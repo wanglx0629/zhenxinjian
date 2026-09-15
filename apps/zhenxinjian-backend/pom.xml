@@ -38,6 +38,9 @@
         <aliyun-oss.version>3.18.1</aliyun-oss.version>
         <jetcache.version>2.7.7</jetcache.version>
         <weixin-java.version>4.7.0</weixin-java.version>
+        <!-- 智谱 BigModel 官方 Java SDK（视觉多模态；design 所写 ai.z.openapi:zai-sdk 不存在于 Maven Central，
+             官方实际坐标为 cn.bigmodel.openapi:oapi-java-sdk，V4 系列） -->
+        <zhipu-sdk.version>release-V4-2.4.3</zhipu-sdk.version>
         <!-- lombok.version 由 parent BOM 管理（1.18.46），此处不覆盖；
              annotationProcessorPaths 处的 ${lombok.version} 解析自 BOM -->
     </properties>
@@ -192,6 +195,13 @@
             <groupId>com.github.binarywang</groupId>
             <artifactId>weixin-java-miniapp</artifactId>
             <version>${weixin-java.version}</version>
+        </dependency>
+
+        <!-- 智谱 BigModel SDK（GLM-4.6V-Flash 视觉识别，官方 V4 SDK） -->
+        <dependency>
+            <groupId>cn.bigmodel.openapi</groupId>
+            <artifactId>oapi-java-sdk</artifactId>
+            <version>${zhipu-sdk.version}</version>
         </dependency>
 
         <!-- Lombok（版本由 parent BOM 管理） -->

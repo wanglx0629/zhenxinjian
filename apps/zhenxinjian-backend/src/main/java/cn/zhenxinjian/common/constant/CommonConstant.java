@@ -156,6 +156,18 @@ public final class CommonConstant {
     /** 内容包含敏感词（统一拦截文案） */
     public static final int CONTAINS_SENSITIVE_WORD_CODE = 40909;
 
+    /** AI 识别每日次数已用完 */
+    public static final int AI_DAILY_LIMIT_CODE = 40910;
+
+    /** AI 识别调用/解析失败 */
+    public static final int AI_RECOGNIZE_FAIL_CODE = 40911;
+
+    /** AI 识别功能已关闭（fail-closed） */
+    public static final int AI_SERVICE_DISABLED_CODE = 40912;
+
+    /** AI 识别服务未配置（api-key 缺失） */
+    public static final int AI_CONFIG_MISSING_CODE = 40913;
+
     /** 埋点单批上报上限 */
     public static final int TRACK_BATCH_MAX_SIZE = 50;
 

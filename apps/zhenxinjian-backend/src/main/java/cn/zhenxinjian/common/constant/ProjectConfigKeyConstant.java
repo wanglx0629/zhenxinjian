@@ -29,4 +29,25 @@ public final class ProjectConfigKeyConstant {
 
     /** 敏感词相关配置键前缀（修改后需触发词库重建） */
     public static final String SENSITIVE_FILTER_PREFIX = "sensitive.filter";
+
+    /** OCR 视觉模型名（智谱） */
+    public static final String OCR_MODEL = "ocr.model";
+
+    /** OCR 识别总开关（布尔，false 拒识） */
+    public static final String OCR_ENABLED = "ocr.enabled";
+
+    /** OCR 每用户每日识别次数上限 */
+    public static final String OCR_DAILY_LIMIT = "ocr.daily-limit";
+
+    /** OCR 识别调用超时（秒） */
+    public static final String OCR_TIMEOUT_SECONDS = "ocr.timeout-seconds";
+
+    /** OCR 同图识别结果缓存时长（小时） */
+    public static final String OCR_CACHE_TTL_HOURS = "ocr.cache-ttl-hours";
+
+    /** OCR API 密钥（SECRET，AES 加密落库；种子在 change11 预置，真实值经 admin 后台录入） */
+    public static final String OCR_API_KEY = "ocr.api-key";
+
+    /** OCR 相关配置键前缀（普通配置，改后仅需失效缓存，无词库重建副作用） */
+    public static final String OCR_PREFIX = "ocr";
 }

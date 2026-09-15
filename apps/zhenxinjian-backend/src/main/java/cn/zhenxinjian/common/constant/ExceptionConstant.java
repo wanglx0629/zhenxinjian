@@ -259,6 +259,20 @@ public final class ExceptionConstant {
     /** 敏感词命中，统一拦截文案 */
     public static final String CONTAINS_SENSITIVE_WORD = "内容包含违规词汇，请修改后重试";
 
+    // ==================== AI 识别 ====================
+
+    /** 每日识别次数用完 */
+    public static final String AI_DAILY_LIMIT = "今日识别次数已用完，明天再来吧";
+
+    /** 识别失败（模型超时/输出无法解析等统一文案） */
+    public static final String AI_RECOGNIZE_FAIL = "识别失败，请换张清晰的食物图片重试";
+
+    /** 识别功能关闭 */
+    public static final String AI_SERVICE_DISABLED = "拍照识别功能暂未开放";
+
+    /** 识别服务缺少 api-key 配置 */
+    public static final String AI_CONFIG_MISSING = "识别服务未配置，请联系管理员";
+
     // ==================== 通用 ====================
 
     /** 参数校验失败 */

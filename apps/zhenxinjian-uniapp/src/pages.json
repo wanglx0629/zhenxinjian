@@ -33,6 +33,12 @@
       }
     },
     {
+      "path": "pages/record/recognize",
+      "style": {
+        "navigationBarTitleText": "拍照识别"
+      }
+    },
+    {
       "path": "pages/food/index",
       "style": {
         "navigationBarTitleText": "食物库"

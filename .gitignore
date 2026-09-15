@@ -126,6 +126,12 @@ tools/food-images/out/
 tools/food-images/probe_out/
 
 # ====================
+# 本地运行时产物（Redis 转储 / 本地服务日志，不随 *.log 规则覆盖）
+# ====================
+/dump.rdb
+/server_log.txt
+
+# ====================
 # 其他
 # ====================
 _cleanup.ps1

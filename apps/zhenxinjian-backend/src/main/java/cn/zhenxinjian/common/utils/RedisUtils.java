@@ -114,4 +114,29 @@ public class RedisUtils {
         }
         return count == null ? 0L : count;
     }
+
+    /**
+     * 读取字符串缓存（调用方自行拼完整 key）
+     */
+    public String get(String key) {
+        return redisTemplate.opsForValue().get(key);
+    }
+
+    /**
+     * 写入字符串缓存并设置 TTL
+     */
+    public void setEx(String key, String value, long timeout, TimeUnit unit) {
+        redisTemplate.opsForValue().set(key, value, timeout, unit);
+    }
+
+    /**
+     * 固定窗口计数：INCR，首次（count==1）设置 TTL；返回窗口内当前计数（含本次）
+     */
+    public long incrementWithTtl(String key, long timeout, TimeUnit unit) {
+        Long count = redisTemplate.opsForValue().increment(key);
+        if (count != null && count == 1L) {
+            redisTemplate.expire(key, timeout, unit);
+        }
+        return count == null ? 0L : count;
+    }
 }
