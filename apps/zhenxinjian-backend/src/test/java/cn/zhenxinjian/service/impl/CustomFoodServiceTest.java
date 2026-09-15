@@ -2,6 +2,7 @@ package cn.zhenxinjian.service.impl;
 
 import cn.zhenxinjian.common.constant.CommonConstant;
 import cn.zhenxinjian.common.exception.BusinessException;
+import cn.zhenxinjian.common.sensitive.SensitiveWordFilter;
 import cn.zhenxinjian.domain.dto.CustomFoodSaveDTO;
 import cn.zhenxinjian.domain.po.Food;
 import cn.zhenxinjian.mapper.FoodMapper;
@@ -33,6 +34,7 @@ import static org.mockito.Mockito.when;
 class CustomFoodServiceTest {
 
     private FoodMapper foodMapper;
+    private SensitiveWordFilter sensitiveWordFilter;
     private CustomFoodService service;
 
     @BeforeEach
@@ -42,7 +44,8 @@ class CustomFoodServiceTest {
         TableInfoHelper.initTableInfo(assistant, Food.class);
 
         foodMapper = mock(FoodMapper.class);
-        service = new CustomFoodService(foodMapper);
+        sensitiveWordFilter = mock(SensitiveWordFilter.class);
+        service = new CustomFoodService(foodMapper, sensitiveWordFilter);
     }
 
     /** 场景：能量不守恒（守恒值 170 却标 500）→ 40403 */

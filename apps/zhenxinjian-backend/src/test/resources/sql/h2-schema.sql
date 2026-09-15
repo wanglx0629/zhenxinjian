@@ -127,6 +127,36 @@ CREATE TABLE IF NOT EXISTS foods (
     version INT DEFAULT 0
 );
 
+CREATE TABLE IF NOT EXISTS food_images (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    food_code VARCHAR(50),
+    object_key VARCHAR(255) NOT NULL,
+    url VARCHAR(512),
+    source INT DEFAULT 1,
+    status INT DEFAULT 1,
+    create_by VARCHAR(100),
+    update_by VARCHAR(100),
+    create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    delete_flag INT DEFAULT 0,
+    version INT DEFAULT 0
+);
+
+CREATE TABLE IF NOT EXISTS project_config (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    config_key VARCHAR(100) NOT NULL,
+    config_value CLOB,
+    value_type INT NOT NULL,
+    remark VARCHAR(255),
+    status INT DEFAULT 1,
+    create_by VARCHAR(100),
+    update_by VARCHAR(100),
+    create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    delete_flag INT DEFAULT 0,
+    version INT DEFAULT 0
+);
+
 CREATE TABLE IF NOT EXISTS user_reminders (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     user_id BIGINT NOT NULL,

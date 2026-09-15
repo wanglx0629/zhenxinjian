@@ -6,11 +6,14 @@ import cn.zhenxinjian.common.utils.MacroConsistencyValidator;
 import cn.zhenxinjian.common.utils.UserContext;
 import cn.zhenxinjian.common.enums.FoodSourceEnum;
 import cn.zhenxinjian.common.exception.BusinessException;
+import cn.zhenxinjian.common.sensitive.SensitiveWordFilter;
 import cn.zhenxinjian.domain.dto.AdminFoodSaveDTO;
 import cn.zhenxinjian.domain.po.Food;
+import cn.zhenxinjian.domain.po.FoodImage;
 import cn.zhenxinjian.domain.query.AdminFoodQuery;
 import cn.zhenxinjian.domain.vo.FoodVO;
 import cn.zhenxinjian.domain.vo.LoginUserVO;
+import cn.zhenxinjian.mapper.FoodImageMapper;
 import cn.zhenxinjian.mapper.FoodMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -22,6 +25,9 @@ import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 管理端食物库维护服务（仅内置食物可写；自定义食物只读）
@@ -38,6 +44,9 @@ public class AdminFoodService extends ServiceImpl<FoodMapper, Food> {
     /** 内置食物编号起始（F001-F200 为初始化数据） */
     private static final int BUILTIN_CODE_START = 201;
 
+    private final FoodImageMapper foodImageMapper;
+    private final SensitiveWordFilter sensitiveWordFilter;
+
     /**
      * 分页查询（名称/别名模糊 + 分类/来源/状态筛选）
      */
@@ -51,7 +60,9 @@ public class AdminFoodService extends ServiceImpl<FoodMapper, Food> {
                 .eq(query.getSource() != null, Food::getSource, query.getSource())
                 .eq(query.getStatus() != null, Food::getStatus, query.getStatus())
                 .orderByAsc(Food::getId));
-        return page.convert(this::toVO);
+        IPage<FoodVO> voPage = page.convert(this::toVO);
+        fillImages(voPage.getRecords());
+        return voPage;
     }
 
     /**
@@ -60,6 +71,9 @@ public class AdminFoodService extends ServiceImpl<FoodMapper, Food> {
      * @param dto 入参（同名内置活跃拒收 40903；宏量/守恒 40402/40403）
      */
     public void create(AdminFoodSaveDTO dto) {
+        // 内容安全：名称/别名敏感词统一拦截
+        sensitiveWordFilter.check(dto.getName());
+        sensitiveWordFilter.check(dto.getAlias());
         checkDuplicateName(dto.getName(), null);
         validateMacro(dto);
         Food food = new Food();
@@ -76,6 +90,9 @@ public class AdminFoodService extends ServiceImpl<FoodMapper, Food> {
      */
     public void update(Long id, AdminFoodSaveDTO dto) {
         Food food = requireBuiltin(id);
+        // 内容安全：名称/别名敏感词统一拦截
+        sensitiveWordFilter.check(dto.getName());
+        sensitiveWordFilter.check(dto.getAlias());
         checkDuplicateName(dto.getName(), id);
         validateMacro(dto);
         applyValues(food, dto);
@@ -176,6 +193,31 @@ public class AdminFoodService extends ServiceImpl<FoodMapper, Food> {
         FoodVO vo = new FoodVO();
         BeanUtils.copyProperties(food, vo);
         return vo;
+    }
+
+    /** 批量填充图片 URL（一次查询防 N+1；无图食物 image 保持 null） */
+    private void fillImages(List<FoodVO> list) {
+        if (list == null || list.isEmpty()) {
+            return;
+        }
+        List<String> codes = list.stream()
+                .map(FoodVO::getCode)
+                .filter(StringUtils::hasText)
+                .distinct()
+                .toList();
+        if (codes.isEmpty()) {
+            return;
+        }
+        Map<String, String> urlByCode = foodImageMapper.selectList(Wrappers.<FoodImage>lambdaQuery()
+                        .select(FoodImage::getFoodCode, FoodImage::getUrl)
+                        .in(FoodImage::getFoodCode, codes)
+                        .eq(FoodImage::getStatus, 1))
+                .stream()
+                .filter(img -> StringUtils.hasText(img.getUrl()))
+                .collect(Collectors.toMap(FoodImage::getFoodCode, FoodImage::getUrl, (a, b) -> a));
+        for (FoodVO vo : list) {
+            vo.setImage(urlByCode.get(vo.getCode()));
+        }
     }
 
     /** 操作者标识（审计列，当前管理员用户名） */

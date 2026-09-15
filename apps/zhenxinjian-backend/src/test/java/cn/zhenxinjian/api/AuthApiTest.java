@@ -18,13 +18,13 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 
 /**
- * 认证 API 测试 — 验证登录/注册/当前用户接口
+ * 认证 API 测试 — 验证登录/当前用户接口
  * 作者: wanglx
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("api-test")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class AuthApiTest {
+class AuthApiTest extends ApiTestSupport {
 
     @LocalServerPort
     private int port;
@@ -34,7 +34,6 @@ class AuthApiTest {
 
     private static String token;
     private static final String TEST_USER = "apitest1";
-    private static final String TEST_PASS = "Test@123456";
 
     @BeforeEach
     void setUp() {
@@ -42,10 +41,12 @@ class AuthApiTest {
         RestAssured.basePath = "/api";
     }
 
-    /** 场景：注册 → 登录 → 获取当前用户 → 完整认证流程 */
+    /** 场景：插库用户 → 验证码 → 登录 → 完整认证流程 */
     @Test
     @Order(1)
-    void registerAndLogin_fullFlow() {
+    void loginAndMe_fullFlow() {
+        ensureUser(TEST_USER);
+
         // 1. 获取验证码
         Response captchaResp = given()
                 .contentType("application/json")
@@ -57,28 +58,7 @@ class AuthApiTest {
         String uuid = captchaResp.jsonPath().getString("data.uuid");
         String captchaCode = redisTemplate.opsForValue().get("zhenxinjian:captcha:" + uuid);
 
-        // 2. 注册
-        given()
-                .contentType("application/json")
-                .body(String.format("""
-                        {
-                            "username": "%s",
-                            "password": "%s",
-                            "captcha": "%s",
-                            "captchaUuid": "%s"
-                        }""", TEST_USER, TEST_PASS, captchaCode, uuid))
-                .post("/auth/register")
-                .then().statusCode(200)
-                .body("code", equalTo(200));
-
-        // 3. 登录需要新验证码
-        captchaResp = given()
-                .contentType("application/json")
-                .get("/auth/captcha");
-        String loginUuid = captchaResp.jsonPath().getString("data.uuid");
-        String loginCaptcha = redisTemplate.opsForValue().get("zhenxinjian:captcha:" + loginUuid);
-
-        // 4. 登录
+        // 2. 登录
         Response loginResp = given()
                 .contentType("application/json")
                 .body(String.format("""
@@ -87,7 +67,7 @@ class AuthApiTest {
                             "password": "%s",
                             "captcha": "%s",
                             "captchaUuid": "%s"
-                        }""", TEST_USER, TEST_PASS, loginCaptcha, loginUuid))
+                        }""", TEST_USER, TEST_PASS, captchaCode, uuid))
                 .post("/auth/login");
 
         loginResp.then().statusCode(200)
@@ -127,7 +107,7 @@ class AuthApiTest {
     @Order(3)
     void me_withValidToken_returnsUser() {
         if (token == null) {
-            registerAndLogin_fullFlow();
+            loginAndMe_fullFlow();
         }
         given()
                 .contentType("application/json")

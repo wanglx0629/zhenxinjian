@@ -4,7 +4,6 @@ import cn.zhenxinjian.common.result.Result;
 import cn.zhenxinjian.common.utils.UserContext;
 import cn.zhenxinjian.config.WebMvcTestConfig;
 import cn.zhenxinjian.domain.dto.LoginDTO;
-import cn.zhenxinjian.domain.dto.RegisterDTO;
 import cn.zhenxinjian.domain.vo.CaptchaVO;
 import cn.zhenxinjian.domain.vo.LoginResultVO;
 import cn.zhenxinjian.domain.vo.UserVO;
@@ -104,34 +103,6 @@ class AuthControllerTest {
         LoginDTO dto = new LoginDTO();
 
         mockMvc.perform(post("/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.code").value(500));
-    }
-
-    /** 场景：正常注册 → 200 */
-    @Test
-    void register_validDto_returnsOk() throws Exception {
-        RegisterDTO dto = new RegisterDTO();
-        dto.setUsername("newuser");
-        dto.setPassword("Pass@1234");
-        dto.setCaptcha("abcd");
-        dto.setCaptchaUuid("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-
-        mockMvc.perform(post("/auth/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.code").value(200));
-    }
-
-    /** 场景：注册参数校验失败 → 200 + 错误码（GlobalExceptionHandler 拦截） */
-    @Test
-    void register_invalidDto_returnsError() throws Exception {
-        RegisterDTO dto = new RegisterDTO();
-
-        mockMvc.perform(post("/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isOk())

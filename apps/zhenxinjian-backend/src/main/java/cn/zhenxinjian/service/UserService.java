@@ -1,7 +1,6 @@
 package cn.zhenxinjian.service;
 
 import cn.zhenxinjian.domain.dto.LoginDTO;
-import cn.zhenxinjian.domain.dto.RegisterDTO;
 import cn.zhenxinjian.domain.dto.UserDTO;
 import cn.zhenxinjian.domain.po.User;
 import cn.zhenxinjian.domain.query.UserQuery;
@@ -25,9 +24,6 @@ public interface UserService extends IService<User> {
 
     /** 用户登出 */
     void logout();
-
-    /** 用户注册 */
-    void register(RegisterDTO dto);
 
     /** 分页查询用户 */
     IPage<UserVO> pageUsers(UserQuery query);

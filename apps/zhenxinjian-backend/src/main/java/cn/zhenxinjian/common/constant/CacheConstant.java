@@ -12,6 +12,9 @@ public final class CacheConstant {
     /** JetCache 缓存区域：用户信息 */
     public static final String USER = "user";
 
+    /** JetCache 缓存区域：项目配置（project_config，按 configKey 缓存） */
+    public static final String CONFIG = "config";
+
     /** 空值占位缓存过期时间（秒），防穿透 */
     public static final int NULL_CACHE_EXPIRE_SECONDS = 60;
 

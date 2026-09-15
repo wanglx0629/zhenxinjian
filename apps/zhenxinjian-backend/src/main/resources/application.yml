@@ -53,6 +53,10 @@ zhenxinjian:
     secret: ${JWT_SECRET:}
     expire-minutes: 120
     refresh-threshold-minutes: 30
+  config:
+    # SECRET 类配置值（project_config.value_type=5）的 AES 加密密钥：16/24/32 字符，强制环境变量注入
+    # 未配置时仅密文类配置不可保存/读取，普通配置不受影响；本地开发默认值见 gitignored 的 application-dev.yml
+    aes-key: ${CONFIG_AES_KEY:}
   redis:
     token-prefix: "zhenxinjian:token:"
     captcha-prefix: "zhenxinjian:captcha:"
@@ -71,14 +75,13 @@ zhenxinjian:
   security:
     permit-urls:
       - /auth/login
-      - /auth/register
       - /auth/captcha
       # 小程序认证（微信登录 / 游客签发）
       - /auth/wechat/login
       - /auth/guest
       # 埋点上报（登录态可选）
       - /track/events
-      # Knife4j 文档（dev 基线开箱即通；生产禁用属后续运维 change）
+      # Knife4j 文档（dev 基线开箱即通；prod profile 覆盖禁用，见 application-prod.yml）
       - /doc.html
       - /webjars/**
       - /favicon.ico
@@ -102,8 +105,9 @@ zhenxinjian:
       # 默认关闭，本地未启动 MinIO 时不影响应用启动；需要上传时再开启
       enabled: false
       endpoint: http://127.0.0.1:9000
-      access-key: minioadmin
-      secret-key: minioadmin
+      # 凭据强制环境变量注入（与 JWT_SECRET 同策略；本地开发默认值见 gitignored 的 application-dev.yml）
+      access-key: ${MINIO_ACCESS_KEY:}
+      secret-key: ${MINIO_SECRET_KEY:}
       bucket: zhenxinjian
     oss:
       enabled: false

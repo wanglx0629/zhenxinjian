@@ -10,6 +10,7 @@ import cn.zhenxinjian.common.constant.CommonConstant;
 import cn.zhenxinjian.common.constant.ExceptionConstant;
 import cn.zhenxinjian.common.enums.UserStatusEnum;
 import cn.zhenxinjian.common.exception.BusinessException;
+import cn.zhenxinjian.common.sensitive.SensitiveWordFilter;
 import cn.zhenxinjian.common.utils.JwtUtils;
 import cn.zhenxinjian.common.utils.RedisUtils;
 import cn.zhenxinjian.domain.dto.GuestLoginDTO;
@@ -55,6 +56,7 @@ public class WechatAuthServiceImpl extends ServiceImpl<UserMapper, User> impleme
     private final PasswordEncoder passwordEncoder;
     private final GuestMigrationOrchestrator guestMigrationOrchestrator;
     private final StorageService storageService;
+    private final SensitiveWordFilter sensitiveWordFilter;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -68,6 +70,11 @@ public class WechatAuthServiceImpl extends ServiceImpl<UserMapper, User> impleme
         if (avatar != null && !avatar.isEmpty()) {
             FileUploadVO uploadVO = storageService.upload(avatar);
             avatarUrl = uploadVO.getUrl();
+        }
+
+        // 3. 内容安全：自定义昵称非空时敏感词统一拦截（默认昵称在 findOrCreate 内生成，无需校验）
+        if (StrUtil.isNotBlank(dto.getNickname())) {
+            sensitiveWordFilter.check(dto.getNickname());
         }
 
         // 3. openid 唯一绑定：找/建用户（并发兜底：唯一索引冲突后改查复用），并按需落/更新昵称头像

@@ -12,6 +12,16 @@ public interface StorageService {
     /** 上传文件 */
     FileUploadVO upload(MultipartFile file);
 
+    /**
+     * 按指定 ObjectKey 上传（服务端内部场景，如食物图片启动预热）
+     *
+     * @param objectKey   对象 Key（如 food/F001.jpg）
+     * @param data        文件字节
+     * @param contentType MIME 类型
+     * @return 上传结果（url/objectKey/provider）
+     */
+    FileUploadVO upload(String objectKey, byte[] data, String contentType);
+
     /** 删除文件 */
     void delete(String objectKey);
 }

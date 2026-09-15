@@ -3,11 +3,11 @@ package cn.zhenxinjian.service.impl;
 import cn.zhenxinjian.common.cache.UserCacheService;
 import cn.zhenxinjian.common.enums.UserStatusEnum;
 import cn.zhenxinjian.common.exception.BusinessException;
+import cn.zhenxinjian.common.sensitive.SensitiveWordFilter;
 import cn.zhenxinjian.common.utils.JwtUtils;
 import cn.zhenxinjian.common.utils.RedisUtils;
 import cn.zhenxinjian.config.ZhenxinjianProperties;
 import cn.zhenxinjian.domain.dto.LoginDTO;
-import cn.zhenxinjian.domain.dto.RegisterDTO;
 import cn.zhenxinjian.domain.dto.UserDTO;
 import cn.zhenxinjian.domain.po.User;
 import cn.zhenxinjian.domain.vo.LoginResultVO;
@@ -51,6 +51,7 @@ class UserServiceImplTest {
     private UserCacheService userCacheService;
     private SessionEvictor sessionEvictor;
     private ZhenxinjianProperties zhenxinjianProperties;
+    private SensitiveWordFilter sensitiveWordFilter;
     private UserServiceImpl service;
 
     @BeforeEach
@@ -65,9 +66,10 @@ class UserServiceImplTest {
         userCacheService = mock(UserCacheService.class);
         sessionEvictor = mock(SessionEvictor.class);
         zhenxinjianProperties = mock(ZhenxinjianProperties.class);
+        sensitiveWordFilter = mock(SensitiveWordFilter.class);
 
         UserServiceImpl realService = new UserServiceImpl(passwordEncoder, jwtUtils, redisUtils,
-                userCacheService, sessionEvictor, zhenxinjianProperties);
+                userCacheService, sessionEvictor, zhenxinjianProperties, sensitiveWordFilter);
         // ServiceImpl.baseMapper 是 protected 字段，需反射注入
         ReflectionTestUtils.setField(realService, "baseMapper", userMapper);
         // 用 spy 以便 stub getOne()（绕过 BaseMapper 默认方法问题）
@@ -143,40 +145,6 @@ class UserServiceImplTest {
         assertNotNull(result.getUser());
         verify(redisUtils).clearLoginFail("admin");
         verify(redisUtils).saveToken(anyLong(), anyString());
-    }
-
-    /** 场景：注册重复用户名 → 抛错 */
-    @Test
-    void register_duplicateUsername_throwsException() {
-        RegisterDTO dto = new RegisterDTO();
-        dto.setUsername("testuser");
-        dto.setPassword("123456");
-        dto.setCaptchaUuid("uuid");
-        dto.setCaptcha("A1B2");
-
-        when(redisUtils.getAndRemoveCaptcha("uuid")).thenReturn("A1B2");
-        when(userMapper.selectCount(any())).thenReturn(1L);
-
-        assertThrows(BusinessException.class, () -> service.register(dto));
-    }
-
-    /** 场景：正常注册 → save 调用 */
-    @Test
-    void register_success_savesUser() {
-        RegisterDTO dto = new RegisterDTO();
-        dto.setUsername("newuser");
-        dto.setPassword("123456");
-        dto.setCaptchaUuid("uuid");
-        dto.setCaptcha("A1B2");
-
-        when(redisUtils.getAndRemoveCaptcha("uuid")).thenReturn("A1B2");
-        when(userMapper.selectCount(any())).thenReturn(0L);
-        when(passwordEncoder.encode("123456")).thenReturn("encrypted_pass");
-        when(userMapper.insert(any(User.class))).thenReturn(1);
-
-        service.register(dto);
-
-        verify(userMapper).insert(any(User.class));
     }
 
     /** 场景：登录后账号被禁用 → 拒绝登录 */

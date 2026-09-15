@@ -102,10 +102,16 @@ function goAddRecord() {
     <template v-else-if="food">
       <view class="panel">
         <view class="head">
-          <text class="name">{{ food.name }}</text>
-          <text v-if="food.source === 2" class="tag">自定义</text>
+          <image v-if="food.image" :src="food.image" mode="aspectFill" class="food-hero" />
+          <view v-else class="food-hero food-hero-empty"><text class="food-hero-emoji">🥗</text></view>
+          <view class="head-info">
+            <view class="head-row">
+              <text class="name">{{ food.name }}</text>
+              <text v-if="food.source === 2" class="tag">自定义</text>
+            </view>
+            <text v-if="food.alias" class="alias">{{ food.alias }}</text>
+          </view>
         </view>
-        <text v-if="food.alias" class="alias">{{ food.alias }}</text>
         <text class="category">{{ food.categoryName }} · 每 100g 可食部</text>
 
         <view class="grid">
@@ -193,6 +199,35 @@ function goAddRecord() {
 }
 
 .head {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+}
+
+.food-hero {
+  width: 128rpx;
+  height: 128rpx;
+  border-radius: 16rpx;
+  flex-shrink: 0;
+  background: $zhenxinjian-bg;
+}
+
+.food-hero-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.food-hero-emoji {
+  font-size: 64rpx;
+}
+
+.head-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.head-row {
   display: flex;
   align-items: center;
   gap: 12rpx;

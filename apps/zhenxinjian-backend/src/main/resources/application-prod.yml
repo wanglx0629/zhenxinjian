@@ -1,0 +1,25 @@
+# 后端生产环境配置（SPRING_PROFILES_ACTIVE=prod 时生效）
+# 数据源/Redis/微信/JWT 等敏感项全部走环境变量注入，禁止在仓库写入明文凭据
+# 作者: wanglx
+
+spring:
+  springdoc:
+    api-docs:
+      # 生产关闭 OpenAPI 文档数据源（/v3/api-docs 返回 404）
+      enabled: false
+
+knife4j:
+  # 生产模式：/doc.html 渲染禁用提示页
+  production: true
+
+zhenxinjian:
+  security:
+    # 生产白名单：仅业务必需端点，不含任何文档路径
+    permit-urls:
+      - /auth/login
+      - /auth/captcha
+      # 小程序认证（微信登录 / 游客签发）
+      - /auth/wechat/login
+      - /auth/guest
+      # 埋点上报（登录态可选）
+      - /track/events

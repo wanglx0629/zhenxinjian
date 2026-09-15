@@ -36,6 +36,11 @@
 # 后端（端口 8080，上下文 /api；Swagger: /api/swagger-ui.html）
 cd apps/zhenxinjian-backend && mvn spring-boot:run
 
+# ⚠️ JDK 版本规约（详见 docs/knowledge/code-standard/java/standard.md §1.2）：
+# 本地系统默认 JAVA_HOME=D:\App\java\8，本项目要求 JDK 25（D:\App\java\25）；
+# 若当前 JAVA_HOME ≠ 25，执行 mvn 前必须显式指定：set JAVA_HOME=D:\App\java\25 && mvn ...
+# （多个 Java 项目并存，各项目按各自实际使用的 JDK 版本处理）
+
 # Web 管理后台（端口 5173，/api 代理到 8080）
 cd apps/zhenxinjian-front && npm install && npm run dev
 

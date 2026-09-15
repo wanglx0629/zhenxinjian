@@ -6,6 +6,7 @@ import cn.zhenxinjian.common.enums.DietRecordSourceEnum;
 import cn.zhenxinjian.common.enums.FoodSourceEnum;
 import cn.zhenxinjian.common.enums.MealTypeEnum;
 import cn.zhenxinjian.common.exception.BusinessException;
+import cn.zhenxinjian.common.sensitive.SensitiveWordFilter;
 import cn.zhenxinjian.common.utils.MacroConsistencyValidator;
 import cn.zhenxinjian.common.utils.Numbers;
 import cn.zhenxinjian.common.utils.Operators;
@@ -60,6 +61,8 @@ public class DietRecordService {
 
     private final FoodMapper foodMapper;
 
+    private final SensitiveWordFilter sensitiveWordFilter;
+
     /**
      * 当日该餐别是否已有饮食记录（提醒推送「已记录不重复」判定）
      *
@@ -88,6 +91,9 @@ public class DietRecordService {
         DietRecordSourceEnum source = resolveSource(dto.getSource());
         LocalDate date = resolveDate(dto.getRecordDate());
 
+        // 内容安全：备注与手动输入名称敏感词统一拦截
+        sensitiveWordFilter.check(dto.getRemark());
+
         DietRecord record = new DietRecord();
         record.setUserId(userId);
         record.setRecordDate(date);
@@ -96,6 +102,7 @@ public class DietRecordService {
         record.setCreateBy(Operators.user(userId));
 
         if (DietRecordSourceEnum.MANUAL == source) {
+            sensitiveWordFilter.check(dto.getName());
             applyManual(record, dto.getName(), dto.getCarb(), dto.getProtein(), dto.getFat(), dto.getKcal());
         } else {
             applyFoodSource(userId, record, dto.getFoodId(), dto.getAmountG());
@@ -118,8 +125,11 @@ public class DietRecordService {
         record.setMealType(meal.getCode());
         record.setRemark(dto.getRemark());
         record.setUpdateBy(Operators.user(userId));
+        // 内容安全：备注与手动输入名称敏感词统一拦截
+        sensitiveWordFilter.check(dto.getRemark());
 
         if (DietRecordSourceEnum.MANUAL.getCode().equals(record.getSource())) {
+            sensitiveWordFilter.check(dto.getName());
             applyManual(record, dto.getName(), dto.getCarb(), dto.getProtein(), dto.getFat(), dto.getKcal());
         } else {
             BigDecimal amount = validateAmount(dto.getAmountG());

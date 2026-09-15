@@ -141,7 +141,7 @@
             <version>${knife4j.version}</version>
         </dependency>
 
-        <!-- Hutool 工具包（按需模块：core/json/extra/captcha，替代 hutool-all） -->
+        <!-- Hutool 工具包（按需模块：core/json/extra/captcha/dfa/crypto，替代 hutool-all） -->
         <dependency>
             <groupId>cn.hutool</groupId>
             <artifactId>hutool-core</artifactId>
@@ -160,6 +160,16 @@
         <dependency>
             <groupId>cn.hutool</groupId>
             <artifactId>hutool-captcha</artifactId>
+            <version>${hutool.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-dfa</artifactId>
+            <version>${hutool.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-crypto</artifactId>
             <version>${hutool.version}</version>
         </dependency>
 

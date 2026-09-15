@@ -237,6 +237,28 @@ public final class ExceptionConstant {
     /** 缓存值过大，拒绝写入 */
     public static final String CACHE_VALUE_TOO_LARGE = "缓存数据过大，请缩小查询范围";
 
+    // ==================== 项目配置 ====================
+
+    /** 配置键已存在 */
+    public static final String CONFIG_KEY_DUPLICATE = "该配置键已存在";
+
+    /** 配置键格式非法 */
+    public static final String CONFIG_KEY_INVALID = "配置键须为小写点分格式（如 a.b.c）";
+
+    /** 配置不存在或不可操作 */
+    public static final String CONFIG_NOT_FOUND = "配置不存在或不可操作";
+
+    /** SECRET 值加密密钥未配置或长度非法（16/24/32 字符） */
+    public static final String CONFIG_SECRET_KEY_MISSING = "加密密钥未配置或长度非法，密文类配置不可用";
+
+    /** SECRET 值解密失败 */
+    public static final String CONFIG_SECRET_DECRYPT_FAIL = "配置解密失败，请检查加密密钥";
+
+    // ==================== 内容安全 ====================
+
+    /** 敏感词命中，统一拦截文案 */
+    public static final String CONTAINS_SENSITIVE_WORD = "内容包含违规词汇，请修改后重试";
+
     // ==================== 通用 ====================
 
     /** 参数校验失败 */

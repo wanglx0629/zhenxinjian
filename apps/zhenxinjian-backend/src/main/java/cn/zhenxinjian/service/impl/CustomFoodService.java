@@ -5,6 +5,7 @@ import cn.zhenxinjian.common.constant.ExceptionConstant;
 import cn.zhenxinjian.common.enums.FoodCategoryEnum;
 import cn.zhenxinjian.common.enums.FoodSourceEnum;
 import cn.zhenxinjian.common.exception.BusinessException;
+import cn.zhenxinjian.common.sensitive.SensitiveWordFilter;
 import cn.zhenxinjian.common.utils.MacroConsistencyValidator;
 import cn.zhenxinjian.common.utils.Operators;
 import cn.zhenxinjian.domain.dto.CustomFoodSaveDTO;
@@ -45,6 +46,7 @@ public class CustomFoodService {
     private static final FoodCategoryEnum DEFAULT_CATEGORY = FoodCategoryEnum.OIL_CONDIMENT_DRINK;
 
     private final FoodMapper foodMapper;
+    private final SensitiveWordFilter sensitiveWordFilter;
 
     /**
      * 新增/编辑自定义食物（id 为空新增，非空编辑）
@@ -54,6 +56,9 @@ public class CustomFoodService {
      * @return 保存后的食物
      */
     public FoodVO save(Long userId, CustomFoodSaveDTO dto) {
+        // 内容安全：名称/别名敏感词统一拦截
+        sensitiveWordFilter.check(dto.getName());
+        sensitiveWordFilter.check(dto.getAlias());
         validateMacro(dto);
         FoodCategoryEnum category = resolveCategory(dto.getCategoryCode());
         if (dto.getId() == null) {

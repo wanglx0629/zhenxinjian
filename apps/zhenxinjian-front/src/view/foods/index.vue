@@ -105,6 +105,19 @@ async function handleToggleStatus(row: AdminFood) {
       <el-table-column prop="code" label="编号" width="90">
         <template #default="{ row }">{{ row.code || '-' }}</template>
       </el-table-column>
+      <el-table-column label="图片" width="72" align="center">
+        <template #default="{ row }">
+          <el-image
+            v-if="row.image"
+            :src="row.image"
+            :preview-src-list="[row.image]"
+            preview-teleported
+            fit="cover"
+            class="food-image"
+          />
+          <span v-else>-</span>
+        </template>
+      </el-table-column>
       <el-table-column prop="name" label="名称" min-width="140" />
       <el-table-column label="分类" width="140">
         <template #default="{ row }">{{ dictLabel(FOOD_CATEGORY_OPTIONS, row.categoryCode) }}</template>
@@ -151,5 +164,12 @@ async function handleToggleStatus(row: AdminFood) {
 .readonly-tip {
   color: var(--zhenxinjian-text-sub, #8a8f99);
   font-size: 12px;
+}
+
+.food-image {
+  width: 40px;
+  height: 40px;
+  border-radius: 4px;
+  display: block;
 }
 </style>

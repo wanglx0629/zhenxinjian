@@ -8,6 +8,7 @@ import cn.zhenxinjian.common.constant.CommonConstant;
 import cn.zhenxinjian.common.constant.ExceptionConstant;
 import cn.zhenxinjian.common.enums.UserStatusEnum;
 import cn.zhenxinjian.common.exception.BusinessException;
+import cn.zhenxinjian.common.sensitive.SensitiveWordFilter;
 import cn.zhenxinjian.common.utils.JwtUtils;
 import cn.zhenxinjian.common.utils.RedisUtils;
 import cn.zhenxinjian.config.ZhenxinjianProperties;
@@ -69,6 +70,7 @@ class WechatAuthServiceImplTest {
     private JwtUtils jwtUtils;
     private GuestMigrationOrchestrator guestMigrationOrchestrator;
     private StorageService storageService;
+    private SensitiveWordFilter sensitiveWordFilter;
     private WechatAuthServiceImpl service;
 
     @BeforeEach
@@ -100,8 +102,10 @@ class WechatAuthServiceImplTest {
 
         guestMigrationOrchestrator = mock(GuestMigrationOrchestrator.class);
         storageService = mock(StorageService.class);
+        sensitiveWordFilter = mock(SensitiveWordFilter.class);
         service = new WechatAuthServiceImpl(provider, jwtUtils, redisUtils,
-                userCacheService, sessionEvictor, encoder, guestMigrationOrchestrator, storageService);
+                userCacheService, sessionEvictor, encoder, guestMigrationOrchestrator, storageService,
+                sensitiveWordFilter);
         ReflectionTestUtils.setField(service, "baseMapper", userMapper);
     }
 

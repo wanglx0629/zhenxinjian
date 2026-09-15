@@ -284,6 +284,8 @@ async function handleSubmit() {
     <template v-if="mode === 'food' && food">
       <view class="panel">
         <view class="food-head">
+          <image v-if="food.image" :src="food.image" mode="aspectFill" class="food-thumb" />
+          <view v-else class="food-thumb food-thumb-empty"><text class="food-thumb-emoji">🥗</text></view>
           <text class="food-name">{{ food.name }}</text>
           <text v-if="food.source === 2" class="tag">自定义</text>
         </view>
@@ -437,6 +439,24 @@ async function handleSubmit() {
   display: flex;
   align-items: center;
   gap: 12rpx;
+}
+
+.food-thumb {
+  width: 88rpx;
+  height: 88rpx;
+  border-radius: 12rpx;
+  flex-shrink: 0;
+  background: $zhenxinjian-bg;
+}
+
+.food-thumb-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.food-thumb-emoji {
+  font-size: 44rpx;
 }
 
 .food-name {

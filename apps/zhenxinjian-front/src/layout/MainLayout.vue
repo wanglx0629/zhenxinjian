@@ -40,6 +40,10 @@ function goFoods() {
 function goDietRecords() {
   router.push('/diet-records')
 }
+
+function goConfigs() {
+  router.push('/configs')
+}
 </script>
 
 <template>
@@ -84,6 +88,15 @@ function goDietRecords() {
             @click="goDietRecords"
           >
             饮食记录
+          </a>
+          <a
+            v-if="isAdmin"
+            class="nav-link"
+            :class="{ active: route.path === '/configs' }"
+            href="javascript:void(0)"
+            @click="goConfigs"
+          >
+            系统配置
           </a>
         </nav>
       </div>

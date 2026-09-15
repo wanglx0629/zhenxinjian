@@ -189,6 +189,8 @@ onReachBottom(() => {
         <text class="panel-title">🔥 热门食物</text>
         <view class="food-list">
           <view v-for="f in hotList" :key="f.id" class="food-row" @click="openDetail(f)">
+            <image v-if="f.image" :src="f.image" mode="aspectFill" class="food-thumb" />
+            <view v-else class="food-thumb food-thumb-empty"><text class="food-thumb-emoji">🥗</text></view>
             <view class="food-main">
               <text class="food-name">{{ f.name }}</text>
               <text v-if="f.alias" class="food-alias">{{ f.alias }}</text>
@@ -207,6 +209,8 @@ onReachBottom(() => {
         <text class="panel-title">共 {{ total }} 个结果</text>
         <view class="food-list">
           <view v-for="f in records" :key="f.id" class="food-row" @click="openDetail(f)">
+            <image v-if="f.image" :src="f.image" mode="aspectFill" class="food-thumb" />
+            <view v-else class="food-thumb food-thumb-empty"><text class="food-thumb-emoji">🥗</text></view>
             <view class="food-main">
               <view class="food-name-wrap">
                 <text class="food-name">{{ f.name }}</text>
@@ -374,6 +378,25 @@ onReachBottom(() => {
 
 .food-row:last-child {
   border-bottom: none;
+}
+
+.food-thumb {
+  width: 88rpx;
+  height: 88rpx;
+  border-radius: 12rpx;
+  flex-shrink: 0;
+  margin-right: 20rpx;
+  background: $zhenxinjian-bg;
+}
+
+.food-thumb-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.food-thumb-emoji {
+  font-size: 44rpx;
 }
 
 .food-main {

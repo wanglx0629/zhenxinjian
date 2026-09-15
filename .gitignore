@@ -30,6 +30,8 @@ backup/
 application-*.yml
 application-*.yaml
 application-*.properties
+# 豁免：application-prod.yml 无任何凭据（全环境变量注入），必须入库随版本分发，否则生产部署缺失安全加固
+!application-prod.yml
 # 兜底：其余环境变量文件变体
 .env*
 
@@ -116,6 +118,12 @@ test-results/
 tools/**/*.local.*
 !tools/**/*.example
 tools/db/out/
+
+# ====================
+# 食物图片工具产物（download.js 下载产物不双份入库；正本在 backend resources/food-images/）
+# ====================
+tools/food-images/out/
+tools/food-images/probe_out/
 
 # ====================
 # 其他

@@ -5,10 +5,12 @@ import cn.zhenxinjian.common.enums.FoodCategoryEnum;
 import cn.zhenxinjian.common.enums.FoodSourceEnum;
 import cn.zhenxinjian.common.exception.BusinessException;
 import cn.zhenxinjian.domain.po.Food;
+import cn.zhenxinjian.domain.po.FoodImage;
 import cn.zhenxinjian.domain.query.FoodSearchQuery;
 import cn.zhenxinjian.domain.vo.FoodCalcVO;
 import cn.zhenxinjian.domain.vo.FoodCategoryVO;
 import cn.zhenxinjian.domain.vo.FoodVO;
+import cn.zhenxinjian.mapper.FoodImageMapper;
 import cn.zhenxinjian.mapper.FoodMapper;
 import com.baomidou.mybatisplus.core.MybatisConfiguration;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
@@ -36,15 +38,18 @@ import static org.mockito.Mockito.when;
 class FoodServiceTest {
 
     private FoodMapper foodMapper;
+    private FoodImageMapper foodImageMapper;
     private FoodService service;
 
     @BeforeEach
     void setUp() {
         MapperBuilderAssistant assistant = new MapperBuilderAssistant(new MybatisConfiguration(), "");
         TableInfoHelper.initTableInfo(assistant, Food.class);
+        TableInfoHelper.initTableInfo(assistant, FoodImage.class);
 
         foodMapper = mock(FoodMapper.class);
-        service = new FoodService(foodMapper);
+        foodImageMapper = mock(FoodImageMapper.class);
+        service = new FoodService(foodMapper, foodImageMapper);
     }
 
     /** 场景：空关键字且未选分类 → 返回空分页 */

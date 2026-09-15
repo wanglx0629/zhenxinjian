@@ -18,6 +18,8 @@ export interface AdminFood {
   fat: number
   kcal: number
   serving: number
+  /** 食物图片 URL（内置 200 张预热图；自定义暂无图为空） */
+  image: string | null
   source: number
   status: number
 }

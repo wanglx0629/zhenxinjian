@@ -2,6 +2,7 @@ package cn.zhenxinjian.service.impl;
 
 import cn.zhenxinjian.common.constant.CommonConstant;
 import cn.zhenxinjian.common.exception.BusinessException;
+import cn.zhenxinjian.common.sensitive.SensitiveWordFilter;
 import cn.zhenxinjian.domain.dto.AdminFoodSaveDTO;
 import cn.zhenxinjian.domain.po.Food;
 import cn.zhenxinjian.mapper.FoodMapper;
@@ -35,6 +36,9 @@ class AdminFoodServiceTest {
 
     @Mock
     private FoodMapper foodMapper;
+
+    @Mock
+    private SensitiveWordFilter sensitiveWordFilter;
 
     @InjectMocks
     private AdminFoodService adminFoodService;

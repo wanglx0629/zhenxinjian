@@ -17,12 +17,14 @@ import io.minio.MakeBucketArgs;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import io.minio.RemoveObjectArgs;
+import io.minio.SetBucketPolicyArgs;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Date;
 import java.util.List;
@@ -47,10 +49,25 @@ public class StorageServiceImpl implements StorageService {
         validateFile(file);
         String objectKey = buildObjectKey(file.getOriginalFilename());
         String contentType = StrUtil.blankToDefault(file.getContentType(), "application/octet-stream");
+        return doUpload(objectKey, file.getSize(), contentType, () -> file.getInputStream(),
+                file.getOriginalFilename());
+    }
 
+    @Override
+    public FileUploadVO upload(String objectKey, byte[] data, String contentType) {
+        if (data == null || data.length == 0) {
+            throw new BusinessException(ExceptionConstant.FILE_EMPTY);
+        }
+        return doUpload(objectKey, data.length, StrUtil.blankToDefault(contentType, "application/octet-stream"),
+                () -> new ByteArrayInputStream(data), objectKey);
+    }
+
+    /** 统一上传入口：MinIO 优先，失败自动切换 OSS 保底 */
+    private FileUploadVO doUpload(String objectKey, long size, String contentType,
+                                  InputStreamSupplier supplier, String originalFilename) {
         if (zhenxinjianProperties.getStorage().getMinio().isEnabled()) {
-            try {
-                return uploadToMinio(file, objectKey, contentType);
+            try (InputStream inputStream = supplier.get()) {
+                return uploadToMinio(objectKey, contentType, size, inputStream, originalFilename);
             } catch (BusinessException e) {
                 throw e;
             } catch (Exception e) {
@@ -60,8 +77,8 @@ public class StorageServiceImpl implements StorageService {
         }
 
         if (zhenxinjianProperties.getStorage().getOss().isEnabled()) {
-            try {
-                return uploadToOss(file, objectKey, contentType);
+            try (InputStream inputStream = supplier.get()) {
+                return uploadToOss(objectKey, contentType, size, inputStream, originalFilename);
             } catch (BusinessException e) {
                 throw e;
             } catch (Exception e) {
@@ -70,6 +87,12 @@ public class StorageServiceImpl implements StorageService {
         }
 
         throw new BusinessException(ExceptionConstant.FILE_UPLOAD_FAIL);
+    }
+
+    /** 输入流供应商（支持重复获取，MinIO 失败切 OSS 时重开流） */
+    @FunctionalInterface
+    private interface InputStreamSupplier {
+        InputStream get() throws Exception;
     }
 
     @Override
@@ -139,49 +162,47 @@ public class StorageServiceImpl implements StorageService {
     /**
      * 上传到 MinIO
      */
-    private FileUploadVO uploadToMinio(MultipartFile file, String objectKey, String contentType) throws Exception {
+    private FileUploadVO uploadToMinio(String objectKey, String contentType, long size,
+                                       InputStream inputStream, String originalFilename) throws Exception {
         MinioClient client = minioClientProvider.getIfAvailable();
         if (client == null) {
             throw new BusinessException(ExceptionConstant.FILE_UPLOAD_FAIL);
         }
         ZhenxinjianProperties.Storage.Minio minio = zhenxinjianProperties.getStorage().getMinio();
         ensureMinioBucket(client, minio.getBucket());
-        try (InputStream inputStream = file.getInputStream()) {
-            client.putObject(PutObjectArgs.builder()
-                    .bucket(minio.getBucket())
-                    .object(objectKey)
-                    .stream(inputStream, file.getSize(), -1)
-                    .contentType(contentType)
-                    .build());
-        }
+        client.putObject(PutObjectArgs.builder()
+                .bucket(minio.getBucket())
+                .object(objectKey)
+                .stream(inputStream, size, -1)
+                .contentType(contentType)
+                .build());
         FileUploadVO vo = new FileUploadVO();
         vo.setUrl(buildMinioUrl(minio, objectKey));
         vo.setObjectKey(objectKey);
         vo.setProvider(StorageConstant.PROVIDER_MINIO);
-        vo.setOriginalFilename(file.getOriginalFilename());
+        vo.setOriginalFilename(originalFilename);
         return vo;
     }
 
     /**
      * 上传到 OSS 保底
      */
-    private FileUploadVO uploadToOss(MultipartFile file, String objectKey, String contentType) throws Exception {
+    private FileUploadVO uploadToOss(String objectKey, String contentType, long size,
+                                     InputStream inputStream, String originalFilename) throws Exception {
         OSS client = ossClientProvider.getIfAvailable();
         if (client == null) {
             throw new BusinessException(ExceptionConstant.FILE_UPLOAD_FAIL);
         }
         ZhenxinjianProperties.Storage.Oss oss = zhenxinjianProperties.getStorage().getOss();
         ObjectMetadata metadata = new ObjectMetadata();
-        metadata.setContentLength(file.getSize());
+        metadata.setContentLength(size);
         metadata.setContentType(contentType);
-        try (InputStream inputStream = file.getInputStream()) {
-            client.putObject(oss.getBucket(), objectKey, inputStream, metadata);
-        }
+        client.putObject(oss.getBucket(), objectKey, inputStream, metadata);
         FileUploadVO vo = new FileUploadVO();
         vo.setUrl(buildOssUrl(oss, objectKey));
         vo.setObjectKey(objectKey);
         vo.setProvider(StorageConstant.PROVIDER_OSS);
-        vo.setOriginalFilename(file.getOriginalFilename());
+        vo.setOriginalFilename(originalFilename);
         return vo;
     }
 
@@ -210,13 +231,17 @@ public class StorageServiceImpl implements StorageService {
     }
 
     /**
-     * 确保 MinIO 桶存在
+     * 确保 MinIO 桶存在并开放匿名只读下载（url 直接下发 C 端/后台，须支持未签名 GET；仅放行 GetObject）
      */
     private void ensureMinioBucket(MinioClient client, String bucket) throws Exception {
         boolean exists = client.bucketExists(BucketExistsArgs.builder().bucket(bucket).build());
         if (!exists) {
             client.makeBucket(MakeBucketArgs.builder().bucket(bucket).build());
         }
+        String policy = "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\","
+                + "\"Principal\":{\"AWS\":[\"*\"]},\"Action\":[\"s3:GetObject\"],"
+                + "\"Resource\":[\"arn:aws:s3:::" + bucket + "/*\"]}]}";
+        client.setBucketPolicy(SetBucketPolicyArgs.builder().bucket(bucket).config(policy).build());
     }
 
     /**

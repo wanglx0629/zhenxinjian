@@ -7,11 +7,14 @@ import cn.zhenxinjian.common.enums.FoodCategoryEnum;
 import cn.zhenxinjian.common.enums.FoodSourceEnum;
 import cn.zhenxinjian.common.exception.BusinessException;
 import cn.zhenxinjian.domain.po.Food;
+import cn.zhenxinjian.domain.po.FoodImage;
 import cn.zhenxinjian.domain.query.FoodSearchQuery;
 import cn.zhenxinjian.domain.vo.FoodCalcVO;
 import cn.zhenxinjian.domain.vo.FoodCategoryVO;
 import cn.zhenxinjian.domain.vo.FoodVO;
+import cn.zhenxinjian.mapper.FoodImageMapper;
 import cn.zhenxinjian.mapper.FoodMapper;
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -39,6 +42,8 @@ public class FoodService {
     private static final BigDecimal HUNDRED = new BigDecimal("100");
 
     private final FoodMapper foodMapper;
+
+    private final FoodImageMapper foodImageMapper;
 
     /**
      * 食物搜索：关键字匹配名称或别名（任一命中），可叠加分类筛选，分页（单页 ≤50）
@@ -68,7 +73,9 @@ public class FoodService {
                         .and(!keyword.isEmpty(),
                                 w -> w.like(Food::getName, keyword).or().like(Food::getAlias, keyword))
                         .orderByAsc(Food::getCode).orderByDesc(Food::getId));
-        return result.convert(this::toVO);
+        IPage<FoodVO> voPage = result.convert(this::toVO);
+        fillImages(voPage.getRecords());
+        return voPage;
     }
 
     /**
@@ -102,6 +109,7 @@ public class FoodService {
                 list.add(toVO(food));
             }
         }
+        fillImages(list);
         return list;
     }
 
@@ -114,7 +122,9 @@ public class FoodService {
      */
     public FoodVO detail(Long userId, Long foodId) {
         Food food = selectVisible(userId, foodId);
-        return toVO(food);
+        FoodVO vo = toVO(food);
+        fillImages(List.of(vo));
+        return vo;
     }
 
     /**
@@ -164,5 +174,30 @@ public class FoodService {
         FoodVO vo = new FoodVO();
         BeanUtils.copyProperties(food, vo);
         return vo;
+    }
+
+    /** 批量填充图片 URL（一次查询防 N+1；自定义食物 code 为空或无图时 image 保持 null） */
+    private void fillImages(List<FoodVO> list) {
+        if (list == null || list.isEmpty()) {
+            return;
+        }
+        List<String> codes = list.stream()
+                .map(FoodVO::getCode)
+                .filter(StrUtil::isNotBlank)
+                .distinct()
+                .toList();
+        if (codes.isEmpty()) {
+            return;
+        }
+        Map<String, String> urlByCode = foodImageMapper.selectList(Wrappers.<FoodImage>lambdaQuery()
+                        .select(FoodImage::getFoodCode, FoodImage::getUrl)
+                        .in(FoodImage::getFoodCode, codes)
+                        .eq(FoodImage::getStatus, 1))
+                .stream()
+                .filter(img -> StrUtil.isNotBlank(img.getUrl()))
+                .collect(Collectors.toMap(FoodImage::getFoodCode, FoodImage::getUrl, (a, b) -> a));
+        for (FoodVO vo : list) {
+            vo.setImage(urlByCode.get(vo.getCode()));
+        }
     }
 }

@@ -7,7 +7,6 @@ import cn.zhenxinjian.common.exception.BusinessException;
 import cn.zhenxinjian.common.result.Result;
 import cn.zhenxinjian.common.utils.UserContext;
 import cn.zhenxinjian.domain.dto.LoginDTO;
-import cn.zhenxinjian.domain.dto.RegisterDTO;
 import cn.zhenxinjian.domain.vo.CaptchaVO;
 import cn.zhenxinjian.domain.vo.LoginResultVO;
 import cn.zhenxinjian.domain.vo.UserVO;
@@ -43,13 +42,6 @@ public class AuthController {
     public Result<LoginResultVO> login(@Valid @RequestBody LoginDTO dto, HttpServletRequest request) {
         String ip = JakartaServletUtil.getClientIP(request);
         return Result.ok(userService.login(dto, ip));
-    }
-
-    @Operation(summary = "用户注册")
-    @PostMapping("/register")
-    public Result<Void> register(@Valid @RequestBody RegisterDTO dto) {
-        userService.register(dto);
-        return Result.ok();
     }
 
     @Operation(summary = "用户登出", security = @SecurityRequirement(name = "Bearer"))

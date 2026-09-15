@@ -23,7 +23,7 @@ import static org.hamcrest.Matchers.equalTo;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("api-test")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class BodyApiTest {
+class BodyApiTest extends ApiTestSupport {
 
     @LocalServerPort
     private int port;
@@ -41,17 +41,12 @@ class BodyApiTest {
 
     private void ensureLogin() {
         if (token != null) return;
+        // 插库测试用户 + 验证码登录
+        String user = "bodyuser";
+        ensureUser(user);
         Response captchaResp = given().contentType("application/json").get("/auth/captcha");
         String uuid = captchaResp.jsonPath().getString("data.uuid");
         String captchaCode = redisTemplate.opsForValue().get("zhenxinjian:captcha:" + uuid);
-        String user = "bodyuser";
-        given().contentType("application/json")
-                .body(String.format("{\"username\":\"%s\",\"password\":\"Test@123456\",\"captcha\":\"%s\",\"captchaUuid\":\"%s\"}", user, captchaCode, uuid))
-                .post("/auth/register");
-
-        captchaResp = given().contentType("application/json").get("/auth/captcha");
-        uuid = captchaResp.jsonPath().getString("data.uuid");
-        captchaCode = redisTemplate.opsForValue().get("zhenxinjian:captcha:" + uuid);
         Response loginResp = given().contentType("application/json")
                 .body(String.format("{\"username\":\"%s\",\"password\":\"Test@123456\",\"captcha\":\"%s\",\"captchaUuid\":\"%s\"}", user, captchaCode, uuid))
                 .post("/auth/login");

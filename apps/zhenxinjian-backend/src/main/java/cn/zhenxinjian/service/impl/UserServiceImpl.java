@@ -10,11 +10,11 @@ import cn.zhenxinjian.common.constant.ExceptionConstant;
 import cn.zhenxinjian.common.enums.UserStatusEnum;
 import cn.zhenxinjian.common.exception.BusinessException;
 import cn.zhenxinjian.common.cache.UserCacheService;
+import cn.zhenxinjian.common.sensitive.SensitiveWordFilter;
 import cn.zhenxinjian.common.utils.JwtUtils;
 import cn.zhenxinjian.common.utils.RedisUtils;
 import cn.zhenxinjian.common.utils.UserContext;
 import cn.zhenxinjian.domain.dto.LoginDTO;
-import cn.zhenxinjian.domain.dto.RegisterDTO;
 import cn.zhenxinjian.domain.dto.UserDTO;
 import cn.zhenxinjian.domain.po.User;
 import cn.zhenxinjian.domain.query.UserQuery;
@@ -54,6 +54,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     private final UserCacheService userCacheService;
     private final SessionEvictor sessionEvictor;
     private final ZhenxinjianProperties zhenxinjianProperties;
+    private final SensitiveWordFilter sensitiveWordFilter;
 
     @Override
     public CaptchaVO getCaptcha() {
@@ -110,24 +111,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
-    public void register(RegisterDTO dto) {
-        validateCaptcha(dto.getCaptchaUuid(), dto.getCaptcha());
-        long count = count(new LambdaQueryWrapper<User>().eq(User::getUsername, dto.getUsername()));
-        if (count > 0) {
-            throw new BusinessException(ExceptionConstant.USERNAME_EXISTS);
-        }
-        User user = new User();
-        user.setUsername(dto.getUsername());
-        user.setPassword(passwordEncoder.encode(dto.getPassword()));
-        user.setNickname(StrUtil.blankToDefault(dto.getNickname(), dto.getUsername()));
-        user.setEmail(dto.getEmail());
-        user.setRole(CommonConstant.ROLE_USER);
-        user.setStatus(UserStatusEnum.NORMAL.getCode());
-        user.setCreateBy(CommonConstant.CREATE_BY_REGISTER);
-        save(user);
-    }
-
-    @Override
     public IPage<UserVO> pageUsers(UserQuery query) {
         String keyword = StrUtil.trim(query.getKeyword());
         if (StrUtil.isNotBlank(keyword) && keyword.length() > CommonConstant.MAX_KEYWORD_LENGTH) {
@@ -167,6 +150,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Override
     public void addUser(UserDTO dto) {
+        // 内容安全：昵称/备注敏感词统一拦截
+        sensitiveWordFilter.check(dto.getNickname());
+        sensitiveWordFilter.check(dto.getRemark());
         long count = count(new LambdaQueryWrapper<User>().eq(User::getUsername, dto.getUsername()));
         if (count > 0) {
             throw new BusinessException(ExceptionConstant.USERNAME_EXISTS);
@@ -188,6 +174,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (dto.getId() == null) {
             throw new BusinessException(ExceptionConstant.USER_ID_REQUIRED);
         }
+        // 内容安全：昵称/备注敏感词统一拦截
+        sensitiveWordFilter.check(dto.getNickname());
+        sensitiveWordFilter.check(dto.getRemark());
         User user = getById(dto.getId());
         if (user == null) {
             throw new BusinessException(ExceptionConstant.USER_NOT_FOUND);

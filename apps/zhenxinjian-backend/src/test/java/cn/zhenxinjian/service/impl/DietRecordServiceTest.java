@@ -5,6 +5,7 @@ import cn.zhenxinjian.common.enums.DietRecordSourceEnum;
 import cn.zhenxinjian.common.enums.FoodSourceEnum;
 import cn.zhenxinjian.common.enums.MealTypeEnum;
 import cn.zhenxinjian.common.exception.BusinessException;
+import cn.zhenxinjian.common.sensitive.SensitiveWordFilter;
 import cn.zhenxinjian.domain.dto.DietRecordCreateDTO;
 import cn.zhenxinjian.domain.dto.DietRecordUpdateDTO;
 import cn.zhenxinjian.domain.po.DietRecord;
@@ -42,6 +43,7 @@ class DietRecordServiceTest {
 
     private DietRecordMapper dietRecordMapper;
     private FoodMapper foodMapper;
+    private SensitiveWordFilter sensitiveWordFilter;
     private DietRecordService service;
 
     @BeforeEach
@@ -52,7 +54,8 @@ class DietRecordServiceTest {
 
         dietRecordMapper = mock(DietRecordMapper.class);
         foodMapper = mock(FoodMapper.class);
-        service = new DietRecordService(dietRecordMapper, foodMapper);
+        sensitiveWordFilter = mock(SensitiveWordFilter.class);
+        service = new DietRecordService(dietRecordMapper, foodMapper, sensitiveWordFilter);
     }
 
     /** 场景：150g 鸡胸肉（24.6/1.9/0.6/118 每100g）→ 摄入 36.9/2.9/0.9/177（±0.1g/±1kcal） */

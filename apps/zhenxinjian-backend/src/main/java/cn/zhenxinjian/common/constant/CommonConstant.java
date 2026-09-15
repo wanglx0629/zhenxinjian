@@ -138,6 +138,24 @@ public final class CommonConstant {
     /** 食物维护冲突（同名/非内置写操作） */
     public static final int ADMIN_FOOD_CONFLICT_CODE = 40903;
 
+    /** 项目配置键已存在（活跃唯一） */
+    public static final int CONFIG_KEY_DUPLICATE_CODE = 40904;
+
+    /** 项目配置键格式非法（小写点分，至少两段） */
+    public static final int CONFIG_KEY_INVALID_CODE = 40905;
+
+    /** 项目配置不存在或不可操作 */
+    public static final int CONFIG_NOT_FOUND_CODE = 40906;
+
+    /** SECRET 值加密密钥未配置或长度非法 */
+    public static final int CONFIG_SECRET_KEY_MISSING_CODE = 40907;
+
+    /** SECRET 值解密失败（密钥不匹配/密文损坏） */
+    public static final int CONFIG_SECRET_DECRYPT_FAIL_CODE = 40908;
+
+    /** 内容包含敏感词（统一拦截文案） */
+    public static final int CONTAINS_SENSITIVE_WORD_CODE = 40909;
+
     /** 埋点单批上报上限 */
     public static final int TRACK_BATCH_MAX_SIZE = 50;
 
@@ -217,9 +235,6 @@ public final class CommonConstant {
 
     /** createBy 来源：游客签发 */
     public static final String CREATE_BY_GUEST_LOGIN = "guest-login";
-
-    /** createBy 来源：后台注册 */
-    public static final String CREATE_BY_REGISTER = "register";
 
     /** createBy 来源：系统操作 */
     public static final String CREATE_BY_SYSTEM = "system";

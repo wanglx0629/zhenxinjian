@@ -51,4 +51,7 @@ public class FoodVO {
 
     @Schema(description = "状态:0停用 1有效")
     private Integer status;
+
+    @Schema(description = "图片 URL（内置食物预热图；自定义/无图为空）")
+    private String image;
 }

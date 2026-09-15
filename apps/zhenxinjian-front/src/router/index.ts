@@ -42,6 +42,12 @@ const router = createRouter({
           name: 'DietRecords',
           component: () => import('@/view/diet-records/index.vue'),
           meta: { admin: true, title: '饮食记录' }
+        },
+        {
+          path: 'configs',
+          name: 'Configs',
+          component: () => import('@/view/configs/index.vue'),
+          meta: { admin: true, title: '系统配置' }
         }
       ]
     },

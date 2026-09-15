@@ -20,6 +20,13 @@ public class ZhenxinjianProperties {
     private Cache cache = new Cache();
     private Security security = new Security();
     private Storage storage = new Storage();
+    private Config config = new Config();
+
+    @Data
+    public static class Config {
+        /** SECRET 类配置值 AES 加密密钥（16/24/32 字符，环境变量 CONFIG_AES_KEY；禁止提交真实值） */
+        private String aesKey;
+    }
 
     @Data
     public static class Jwt {
