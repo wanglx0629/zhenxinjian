@@ -29,7 +29,7 @@
 
 ### 验收（小程序）
 
-- [ ] **U-A1** `npm run dev:h5` 跑通，4 个 tab 页 + 我的 + 代谢结果 + 记录页主流程截图对比（需人工跑 dev 验证）
+- [-] **U-A1** `npm run dev:h5` 跑通，4 个 tab 页 + 我的 + 代谢结果 + 记录页主流程截图对比（⏸️ 2026-09-15 暂缓：需人工跑 dev server 截图，代码侧静态验收 U-A2/U-A3 已过）
 - [x] **U-A2** `Grep "#409eff"` 在 `apps/zhenxinjian-uniapp/src` 下无业务代码残留
 - [x] **U-A3** `Grep "👤|🔄|🔔|⚖️|🩸|🔒"` 在 `apps/zhenxinjian-uniapp/src` 下无残留
 
@@ -60,7 +60,7 @@
 
 ### 验收（后台）
 
-- [ ] **A-A1** `npm run dev` 跑通，登录 / 仪表盘 / users / foods / diet-records / 404 截图对比（需人工跑 dev 验证）
+- [-] **A-A1** `npm run dev` 跑通，登录 / 仪表盘 / users / foods / diet-records / 404 截图对比（⏸️ 2026-09-15 暂缓：需人工跑 dev server 截图，代码侧静态验收 A-A2/A-A3 已过）
 - [x] **A-A2** `Grep "#409eff"` 在 `apps/zhenxinjian-front/src` 下无业务代码残留
 - [x] **A-A3** 登录页副标题无「wanglx」字样
 
