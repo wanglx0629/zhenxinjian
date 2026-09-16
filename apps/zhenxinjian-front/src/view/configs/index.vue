@@ -12,8 +12,6 @@ import type { ProjectConfig } from '@/api/adminConfig'
 import PagePager from '@/component/PagePager.vue'
 import { usePageQuery } from '@/composables/usePageQuery'
 
-const SECRET_MASK = '******'
-
 const query = reactive({
   page: 1,
   size: 20,

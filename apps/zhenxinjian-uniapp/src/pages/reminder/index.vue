@@ -207,7 +207,7 @@ async function handleReAuth() {
   <view class="page">
     <!-- 游客提示（D5：可保存不可推送） -->
     <view v-if="userStore.isGuest" class="tip-card">
-      <svg class="tip-icon" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      <svg class="tip-icon" viewBox="0 0 24 24" fill="none" stroke="#FFB020" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
       <view class="tip-main">
         <text class="tip-title">授权登录后才能接收微信推送</text>
         <text class="tip-desc">当前可保存提醒设置，授权登录后自动迁移并开启推送</text>
@@ -216,7 +216,7 @@ async function handleReAuth() {
 
     <!-- 额度耗尽提示（非游客 + 存在开启项 + 额度 0） -->
     <view v-else-if="anyEnabled && subscribeCredit === 0" class="tip-card warning">
-      <svg class="tip-icon" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      <svg class="tip-icon" viewBox="0 0 24 24" fill="none" stroke="#FF4747" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
       <view class="tip-main">
         <text class="tip-title">推送额度已用完</text>
         <text class="tip-desc">点击右侧按钮重新授权即可恢复推送</text>
@@ -231,7 +231,7 @@ async function handleReAuth() {
           <text class="row-title">饮食提醒总开关</text>
           <text class="row-sub">关闭后不再接收任何三餐提醒</text>
         </view>
-        <switch :checked="masterSwitch === 1" color="#0d9488" @change="onMasterChange" />
+        <switch :checked="masterSwitch === 1" color="#00AC7C" @change="onMasterChange" />
       </view>
     </view>
 
@@ -256,7 +256,7 @@ async function handleReAuth() {
         <switch
           :checked="breakfastSwitch === 1"
           :disabled="masterSwitch === 0"
-          color="#0d9488"
+          color="#00AC7C"
           @change="onBreakfastSwitch"
         />
       </view>
@@ -278,7 +278,7 @@ async function handleReAuth() {
         <switch
           :checked="lunchSwitch === 1"
           :disabled="masterSwitch === 0"
-          color="#0d9488"
+          color="#00AC7C"
           @change="onLunchSwitch"
         />
       </view>
@@ -300,7 +300,7 @@ async function handleReAuth() {
         <switch
           :checked="dinnerSwitch === 1"
           :disabled="masterSwitch === 0"
-          color="#0d9488"
+          color="#00AC7C"
           @change="onDinnerSwitch"
         />
       </view>

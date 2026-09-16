@@ -103,7 +103,7 @@ function goProfile() {
 
 /* 今日目标头卡 */
 .today-card {
-  background: linear-gradient(160deg, #0d9488 0%, #14b8a6 100%);
+  background: $zhenxinjian-gradient-brand;
   border: none;
   color: #fff;
 }

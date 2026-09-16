@@ -15,7 +15,7 @@
 .te-logo {
   width: 36px;
   height: 36px;
-  background: linear-gradient(135deg, #0D9488, #14B8A6);
+  background: var(--zhenxinjian-gradient-brand);
   border-radius: 8px;
   display: flex;
   align-items: center;

@@ -92,9 +92,8 @@ async function handleLogin() {
   align-items: center;
   justify-content: center;
   background:
-    radial-gradient(1200px 480px at 12% -10%, rgba(13, 148, 136, 0.18), transparent 55%),
-    radial-gradient(900px 420px at 100% 0%, rgba(249, 115, 22, 0.10), transparent 50%),
-    linear-gradient(135deg, #F0FDFA 0%, #CCFBF1 50%, #F0FDFA 100%);
+    radial-gradient(1200px 480px at 12% -10%, rgba(0, 172, 124, 0.12), transparent 55%),
+    #F4F8F6;
 }
 
 .auth-card {
@@ -102,7 +101,7 @@ async function handleLogin() {
   padding: 40px;
   background: var(--zhenxinjian-white);
   border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(13, 148, 136, 0.18), 0 2px 8px rgba(13, 148, 136, 0.06);
+  box-shadow: 0 8px 32px rgba(0, 172, 124, 0.18), 0 2px 8px rgba(0, 172, 124, 0.06);
   border: 1px solid var(--zhenxinjian-primary-border);
 }
 

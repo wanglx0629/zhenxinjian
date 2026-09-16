@@ -33,26 +33,26 @@ function renderTrend() {
     chart = echarts.init(trendRef.value)
   }
   chart.setOption({
-    color: ['#0D9488', '#F97316'],
+    color: ['#00AC7C', '#FFB020'],
     tooltip: {
       trigger: 'axis',
       backgroundColor: '#fff',
-      borderColor: '#CCFBF1',
-      textStyle: { color: '#134E4A' },
-      extraCssText: 'border-radius: 8px; box-shadow: 0 4px 16px rgba(13,148,136,0.15);'
+      borderColor: '#E3EFE9',
+      textStyle: { color: '#10312B' },
+      extraCssText: 'border-radius: 8px; box-shadow: 0 4px 16px rgba(0,172,124,0.15);'
     },
     legend: { data: ['DAU', '游客'] },
     grid: { left: 40, right: 20, top: 40, bottom: 30 },
     xAxis: {
       type: 'category',
       data: trendData.value.map((d) => d.statDate.slice(5)),
-      axisLine: { lineStyle: { color: '#CCFBF1' } },
+      axisLine: { lineStyle: { color: '#E3EFE9' } },
       axisLabel: { color: '#475569' }
     },
     yAxis: {
       type: 'value',
       minInterval: 1,
-      splitLine: { lineStyle: { color: '#F0FDFA' } },
+      splitLine: { lineStyle: { color: '#F4F8F6' } },
       axisLabel: { color: '#475569' }
     },
     series: [
@@ -65,11 +65,11 @@ function renderTrend() {
         symbolSize: 7,
         data: trendData.value.map((d) => d.dau),
         lineStyle: { width: 3 },
-        itemStyle: { color: '#0D9488' },
+        itemStyle: { color: '#00AC7C' },
         areaStyle: {
           color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-            { offset: 0, color: 'rgba(13,148,136,0.28)' },
-            { offset: 1, color: 'rgba(13,148,136,0)' }
+            { offset: 0, color: 'rgba(0,172,124,0.28)' },
+            { offset: 1, color: 'rgba(0,172,124,0)' }
           ])
         }
       },
@@ -82,11 +82,11 @@ function renderTrend() {
         symbolSize: 7,
         data: trendData.value.map((d) => d.guestDau),
         lineStyle: { width: 3 },
-        itemStyle: { color: '#F97316' },
+        itemStyle: { color: '#FFB020' },
         areaStyle: {
           color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-            { offset: 0, color: 'rgba(249,115,22,0.24)' },
-            { offset: 1, color: 'rgba(249,115,22,0)' }
+            { offset: 0, color: 'rgba(255,176,32,0.24)' },
+            { offset: 1, color: 'rgba(255,176,32,0)' }
           ])
         }
       }
@@ -264,8 +264,8 @@ onBeforeUnmount(() => {
 }
 
 .stat-card-teal .stat-icon {
-  background: linear-gradient(135deg, #0D9488, #14B8A6);
-  box-shadow: 0 4px 12px rgba(13, 148, 136, 0.3);
+  background: linear-gradient(135deg, #00AC7C, #33BD96);
+  box-shadow: 0 4px 12px rgba(0, 172, 124, 0.3);
 }
 
 .stat-card-cyan .stat-icon {
@@ -274,13 +274,13 @@ onBeforeUnmount(() => {
 }
 
 .stat-card-orange .stat-icon {
-  background: linear-gradient(135deg, #F97316, #FB923C);
-  box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+  background: linear-gradient(135deg, #FFB020, #FFC24D);
+  box-shadow: 0 4px 12px rgba(255, 176, 32, 0.3);
 }
 
 .stat-card-green .stat-icon {
-  background: linear-gradient(135deg, #22C55E, #4ADE80);
-  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+  background: linear-gradient(135deg, #00AC7C, #4ADE80);
+  box-shadow: 0 4px 12px rgba(0, 172, 124, 0.3);
 }
 
 .stat-main {

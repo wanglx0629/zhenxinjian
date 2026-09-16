@@ -447,8 +447,8 @@ function goCycleSetting() {
   background: #f1f5f9;
 }
 
-.meal-chip.mc1 { background: #ffedd5; }
-.meal-chip.mc2 { background: #ccfbf1; }
+.meal-chip.mc1 { background: #FFF1D9; }
+.meal-chip.mc2 { background: #E3EFE9; }
 .meal-chip.mc3 { background: #e0e7ff; }
 .meal-chip.mc4 { background: #fef3c7; }
 

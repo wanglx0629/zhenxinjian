@@ -31,7 +31,7 @@ function goHome() {
   align-items: center;
   justify-content: center;
   background:
-    radial-gradient(1200px 480px at 12% -10%, rgba(13, 148, 136, 0.10), transparent 55%),
+    radial-gradient(1200px 480px at 12% -10%, rgba(0, 172, 124, 0.10), transparent 55%),
     var(--zhenxinjian-bg);
   padding: 24px;
 }

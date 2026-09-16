@@ -55,9 +55,9 @@ const kcalRemain = computed(() => kcalTarget.value - kcalActual.value)
 /** 头卡进度条颜色（三色语义：80–100 绿 / <80 黄 / >100 红） */
 const kcalBarColor = computed(() => {
   const rate = summary.value?.kcalRate ?? 0
-  if (rate > 100) return '#EF4444'
-  if (rate >= 80) return '#22C55E'
-  return '#F59E0B'
+  if (rate > 100) return '#FF4747'
+  if (rate >= 80) return '#00AC7C'
+  return '#FFB020'
 })
 
 /** hero 环形进度（r=52，达成率封顶 100%，颜色同三色语义） */
@@ -447,7 +447,7 @@ function goPlan() {
 .hero {
   position: relative;
   overflow: hidden;
-  background: linear-gradient(160deg, #0d9488 0%, #14b8a6 100%);
+  background: $zhenxinjian-gradient-brand;
   border-radius: 20rpx;
   padding: 32rpx;
   margin-bottom: 24rpx;
@@ -586,7 +586,7 @@ function goPlan() {
 }
 
 .hero-remain.over {
-  background: rgba(239, 68, 68, 0.4);
+  background: rgba(255, 71, 71, 0.4);
 }
 
 .hero-mode {
@@ -674,12 +674,12 @@ function goPlan() {
 
 .quick-item.record {
   background: $zhenxinjian-gradient-cta;
-  box-shadow: 0 8rpx 20rpx rgba(249, 115, 22, 0.32);
+  box-shadow: 0 8rpx 20rpx rgba(255, 176, 32, 0.32);
 }
 
 .quick-item.plan {
   background: $zhenxinjian-gradient-brand;
-  box-shadow: 0 8rpx 20rpx rgba(13, 148, 136, 0.32);
+  box-shadow: 0 8rpx 20rpx rgba(0, 172, 124, 0.32);
 }
 
 .quick-emoji {
@@ -754,8 +754,8 @@ function goPlan() {
   background: #f1f5f9;
 }
 
-.meal-chip.mc1 { background: #ffedd5; }
-.meal-chip.mc2 { background: #ccfbf1; }
+.meal-chip.mc1 { background: #FFF1D9; }
+.meal-chip.mc2 { background: #E3EFE9; }
 .meal-chip.mc3 { background: #e0e7ff; }
 .meal-chip.mc4 { background: #fef3c7; }
 

@@ -134,7 +134,7 @@ async function handleSave() {
             <text class="row-title">开启经期管理</text>
             <text class="row-sub">开启后按阶段自动上浮碳水与热量</text>
           </view>
-          <switch :checked="enabled === 1" color="#0d9488" @change="onEnabledChange" />
+          <switch :checked="enabled === 1" color="#00AC7C" @change="onEnabledChange" />
         </view>
       </view>
 
@@ -209,8 +209,8 @@ async function handleSave() {
 
 /* 当前阶段 */
 .phase-card {
-  background: #f0fdfa;
-  border-color: #99f6e4;
+  background: $zhenxinjian-primary-bg;
+  border-color: #B3E7D8;
 }
 
 .phase-title {

@@ -245,7 +245,7 @@ async function handleSubmit() {
 
 .input:focus {
   border-color: $zhenxinjian-primary;
-  box-shadow: 0 0 0 4rpx rgba(13, 148, 136, 0.12);
+  box-shadow: 0 0 0 4rpx rgba(0, 172, 124, 0.12);
   outline: none;
 }
 

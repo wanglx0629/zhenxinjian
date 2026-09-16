@@ -83,8 +83,8 @@ export const MEAL_EMOJI: Record<number, string> = { 1: '🍳', 2: '🍱', 3: '�
 /** 三色进度阈值（达成率 %）：80–100 绿 / <80 黄 / >100 红 */
 export const PROGRESS_THRESHOLD = { green: 80, red: 100 } as const
 
-/** 三色进度颜色（对齐设计系统 V1.1 充足绿/不足黄/超标红） */
-export const PROGRESS_COLORS = { green: '#22C55E', yellow: '#F59E0B', red: '#EF4444' } as const
+/** 三色进度颜色（对齐设计系统 V2.0 充足绿/不足黄/超标红） */
+export const PROGRESS_COLORS = { green: '#00AC7C', yellow: '#FFB020', red: '#FF4747' } as const
 
 /** 微调建议文案（按超标项动态拼接，spec：超标微调建议） */
 export const OVER_ADVICE = {
@@ -122,7 +122,7 @@ export interface CycleDayTypeCfg {
 
 export const CYCLE_DAY_TYPES: Record<number, CycleDayTypeCfg> = {
   1: { code: 1, name: '高碳日', short: '高', color: '#F56C6C', bg: '#FEF0F0' },
-  2: { code: 2, name: '中碳日', short: '中', color: '#0D9488', bg: '#CCFBF1' },
+  2: { code: 2, name: '中碳日', short: '中', color: '#00AC7C', bg: '#E3EFE9' },
   3: { code: 3, name: '低碳日', short: '低', color: '#909399', bg: '#F4F4F5' }
 }
 

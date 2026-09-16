@@ -91,14 +91,14 @@ page {
   border-radius: 12rpx;
   font-size: 30rpx;
   font-weight: 600;
-  box-shadow: 0 4rpx 12rpx rgba(249, 115, 22, 0.24);
+  box-shadow: 0 4rpx 12rpx rgba(255, 176, 32, 0.24);
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .btn-primary:active {
   transform: scale(0.97);
   background: $zhenxinjian-cta-active;
-  box-shadow: 0 2rpx 6rpx rgba(249, 115, 22, 0.18);
+  box-shadow: 0 2rpx 6rpx rgba(255, 176, 32, 0.18);
 }
 
 /* 次级按钮（teal 描边） */

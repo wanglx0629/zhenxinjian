@@ -291,7 +291,7 @@ function handleLogout() {
 .hero {
   position: relative;
   overflow: hidden;
-  background: linear-gradient(160deg, #0d9488 0%, #14b8a6 100%);
+  background: $zhenxinjian-gradient-brand;
   border-radius: 20rpx;
   padding: 32rpx;
   margin-bottom: 24rpx;

@@ -1,0 +1,4 @@
+schema: spec-driven
+created: 2026-09-16
+goal: '"落地范围：design-system文档与双端token源"'
+skip_specs: true

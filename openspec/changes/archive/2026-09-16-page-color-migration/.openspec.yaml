@@ -1,0 +1,4 @@
+schema: spec-driven
+created: 2026-09-16
+goal: '"清除全部旧色硬编码，统一引用或替换为V2.0色值"'
+skip_specs: true
