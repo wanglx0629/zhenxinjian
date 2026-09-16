@@ -139,4 +139,11 @@ public class RedisUtils {
         }
         return count == null ? 0L : count;
     }
+
+    /**
+     * 删除指定 key（调用方自行拼完整 key）
+     */
+    public Boolean delete(String key) {
+        return redisTemplate.delete(key);
+    }
 }

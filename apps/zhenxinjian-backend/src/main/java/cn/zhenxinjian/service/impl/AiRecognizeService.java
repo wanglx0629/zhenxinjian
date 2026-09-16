@@ -4,6 +4,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.digest.DigestUtil;
 import cn.hutool.json.JSONUtil;
+import cn.zhenxinjian.common.ai.AiCallException;
 import cn.zhenxinjian.common.ai.AiChatClient;
 import cn.zhenxinjian.common.ai.AiChatClient.AiImage;
 import cn.zhenxinjian.common.constant.CommonConstant;
@@ -28,6 +29,7 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -62,9 +64,25 @@ public class AiRecognizeService {
 
     private static final String DEFAULT_MODEL = "glm-4.6v-flash";
 
+    private static final int DEFAULT_CIRCUIT_FAIL_THRESHOLD = 3;
+
+    private static final int DEFAULT_CIRCUIT_OPEN_SECONDS = 300;
+
+    /** 熔断阈值/窗口秒数下限 */
+    private static final int MIN_CIRCUIT_VALUE = 1;
+
     private static final String IMAGE_CACHE_KEY_PREFIX = "zhenxinjian:ocr:img:";
 
     private static final String DAILY_COUNT_KEY_PREFIX = "zhenxinjian:ocr:daily:";
+
+    /** 模型连续可转移失败计数 key 前缀（TTL 与熔断窗口对齐） */
+    private static final String MODEL_FAIL_KEY_PREFIX = "zhenxinjian:ocr:modelfail:";
+
+    /** 模型熔断标记 key 前缀（存在即熔断中，TTL 为窗口秒数） */
+    private static final String CIRCUIT_KEY_PREFIX = "zhenxinjian:ocr:circuit:";
+
+    /** 熔断标记值（仅判存在性） */
+    private static final String CIRCUIT_FLAG = "1";
 
     private static final DateTimeFormatter DAY_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd");
 
@@ -119,13 +137,19 @@ public class AiRecognizeService {
             throw new BusinessException(CommonConstant.AI_CONFIG_MISSING_CODE, ExceptionConstant.AI_CONFIG_MISSING);
         }
 
-        // 6-8. 调模型 → 解析 → 守恒重算（失败重试 1 次）
-        String model = StrUtil.blankToDefault(configService.getValue(ProjectConfigKeyConstant.OCR_MODEL), DEFAULT_MODEL);
+        // 6-8. 候选链（主 + 备）逐模型调用：跳过熔断 → 成功清熔断 / 可转移失败计数熔断 / 不可转移立即失败
+        String primaryModel = StrUtil.blankToDefault(configService.getValue(ProjectConfigKeyConstant.OCR_MODEL), DEFAULT_MODEL);
         int timeout = configService.getInt(ProjectConfigKeyConstant.OCR_TIMEOUT_SECONDS, 30);
         String mimeType = resolveMimeType(FileUtil.extName(file.getOriginalFilename()));
         AiImage image = new AiImage(Base64.getEncoder().encodeToString(imageBytes), mimeType);
 
-        List<FoodRecognizeVO> items = invokeWithRetry(model, List.of(image), timeout);
+        int failThreshold = Math.max(MIN_CIRCUIT_VALUE,
+                configService.getInt(ProjectConfigKeyConstant.OCR_CIRCUIT_FAIL_THRESHOLD, DEFAULT_CIRCUIT_FAIL_THRESHOLD));
+        int openSeconds = Math.max(MIN_CIRCUIT_VALUE,
+                configService.getInt(ProjectConfigKeyConstant.OCR_CIRCUIT_OPEN_SECONDS, DEFAULT_CIRCUIT_OPEN_SECONDS));
+        List<String> candidates = buildCandidates(primaryModel, configService.getStringList(ProjectConfigKeyConstant.OCR_FALLBACK_MODELS));
+
+        List<FoodRecognizeVO> items = invokeWithFallback(candidates, List.of(image), timeout, failThreshold, openSeconds);
 
         // 非食物图：返回空，不写缓存、不计次（当日剩余次数不变）
         if (items.isEmpty()) {
@@ -162,25 +186,100 @@ public class AiRecognizeService {
     }
 
     /**
-     * 调用模型并解析，失败重试 1 次（第二次在提示词中强调只输出 JSON）
+     * 候选链逐模型编排：熔断中跳过 → 调用（JSON 解析失败同模型加强提示词重试 1 次）
+     * → 成功清熔断；可转移失败计数并按阈值置熔断后继续下一模型；不可转移立即失败；全耗尽抛繁忙
      */
-    private List<FoodRecognizeVO> invokeWithRetry(String model, List<AiImage> image, int timeout) {
-        try {
-            String output = aiChatClient.chat(model, SYSTEM_PROMPT, image, timeout);
-            return parseAndNormalize(output);
-        } catch (BusinessException e) {
-            throw e;
-        } catch (Exception first) {
-            log.warn("视觉识别首次调用/解析失败，准备重试: {}", first.getMessage());
+    private List<FoodRecognizeVO> invokeWithFallback(List<String> candidates, List<AiImage> image,
+                                                     int timeout, int failThreshold, int openSeconds) {
+        for (String model : candidates) {
+            if (isCircuitOpen(model)) {
+                log.info("模型 {} 熔断中，本次跳过", model);
+                continue;
+            }
             try {
-                String output = aiChatClient.chat(model, SYSTEM_PROMPT + "\n再次强调：只输出 JSON，不要任何解释或 Markdown 围栏。",
-                        image, timeout);
-                return parseAndNormalize(output);
-            } catch (Exception second) {
-                log.warn("视觉识别重试仍失败: {}", second.getMessage());
+                List<FoodRecognizeVO> items = invokeSingleModel(model, image, timeout);
+                // 任一模型成功（含非食物空结果）：清除其失败计数与熔断标记
+                clearCircuit(model);
+                return items;
+            } catch (BusinessException e) {
+                // 同模型两次输出均无法解析：内容质量问题，不转移、不计熔断，沿用识别失败文案
+                throw e;
+            } catch (AiCallException e) {
+                if (!e.isTransferable()) {
+                    // 密钥/参数类错误：立即失败，不切换、不熔断，避免掩盖配置错误
+                    log.warn("模型 {} 返回不可转移错误(httpStatus={})，立即失败: {}", model, e.getHttpStatus(), e.getMessage());
+                    throw new BusinessException(CommonConstant.AI_RECOGNIZE_FAIL_CODE, ExceptionConstant.AI_RECOGNIZE_FAIL);
+                }
+                log.warn("模型 {} 可转移失败(httpStatus={})，准备切换下一候选: {}", model, e.getHttpStatus(), e.getMessage());
+                recordFailure(model, failThreshold, openSeconds);
+            }
+        }
+        throw new BusinessException(CommonConstant.AI_BUSY_CODE, ExceptionConstant.AI_BUSY);
+    }
+
+    /**
+     * 单模型调用并解析：仅模型输出 JSON 解析失败时同模型加强提示词重试 1 次；
+     * 服务端/网络错误（AiCallException）由 chat 直接上抛交由故障转移，不在同模型上浪费配额
+     */
+    private List<FoodRecognizeVO> invokeSingleModel(String model, List<AiImage> image, int timeout) {
+        String output = aiChatClient.chat(model, SYSTEM_PROMPT, image, timeout);
+        try {
+            return parseAndNormalize(output);
+        } catch (IllegalArgumentException first) {
+            log.warn("模型 {} 首次输出无法解析，准备加强提示词重试: {}", model, first.getMessage());
+            String retried = aiChatClient.chat(model,
+                    SYSTEM_PROMPT + "\n再次强调：只输出 JSON，不要任何解释或 Markdown 围栏。", image, timeout);
+            try {
+                return parseAndNormalize(retried);
+            } catch (IllegalArgumentException second) {
+                log.warn("模型 {} 重试输出仍无法解析: {}", model, second.getMessage());
                 throw new BusinessException(CommonConstant.AI_RECOGNIZE_FAIL_CODE, ExceptionConstant.AI_RECOGNIZE_FAIL);
             }
         }
+    }
+
+    /**
+     * 构建候选链：主模型在前、备用保序，去空白去重（同一模型一次请求最多调用一次）
+     */
+    private List<String> buildCandidates(String primaryModel, List<String> fallbackModels) {
+        LinkedHashSet<String> chain = new LinkedHashSet<>();
+        if (StrUtil.isNotBlank(primaryModel)) {
+            chain.add(primaryModel.trim());
+        }
+        if (fallbackModels != null) {
+            for (String fallback : fallbackModels) {
+                if (StrUtil.isNotBlank(fallback)) {
+                    chain.add(fallback.trim());
+                }
+            }
+        }
+        return new ArrayList<>(chain);
+    }
+
+    /**
+     * 熔断标记是否存在（存在即熔断中，跳过该模型）
+     */
+    private boolean isCircuitOpen(String model) {
+        return StrUtil.isNotBlank(redisUtils.get(CIRCUIT_KEY_PREFIX + model));
+    }
+
+    /**
+     * 记录一次可转移失败：计数 +1（计数 TTL 与熔断窗口对齐）；达阈值写熔断标记
+     */
+    private void recordFailure(String model, int failThreshold, int openSeconds) {
+        long failures = redisUtils.incrementWithTtl(MODEL_FAIL_KEY_PREFIX + model, openSeconds, TimeUnit.SECONDS);
+        if (failures >= failThreshold) {
+            redisUtils.setEx(CIRCUIT_KEY_PREFIX + model, CIRCUIT_FLAG, openSeconds, TimeUnit.SECONDS);
+            log.warn("模型 {} 连续失败 {} 次达到阈值，熔断 {} 秒", model, failures, openSeconds);
+        }
+    }
+
+    /**
+     * 模型调用成功：立即清除失败计数与熔断标记
+     */
+    private void clearCircuit(String model) {
+        redisUtils.delete(MODEL_FAIL_KEY_PREFIX + model);
+        redisUtils.delete(CIRCUIT_KEY_PREFIX + model);
     }
 
     /**

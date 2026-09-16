@@ -168,6 +168,9 @@ public final class CommonConstant {
     /** AI 识别服务未配置（api-key 缺失） */
     public static final int AI_CONFIG_MISSING_CODE = 40913;
 
+    /** AI 识别繁忙（主备模型均熔断/可转移错误耗尽） */
+    public static final int AI_BUSY_CODE = 40914;
+
     /** 埋点单批上报上限 */
     public static final int TRACK_BATCH_MAX_SIZE = 50;
 

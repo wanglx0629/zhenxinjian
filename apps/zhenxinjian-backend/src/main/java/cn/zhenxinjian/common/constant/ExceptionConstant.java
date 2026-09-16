@@ -273,6 +273,9 @@ public final class ExceptionConstant {
     /** 识别服务缺少 api-key 配置 */
     public static final String AI_CONFIG_MISSING = "识别服务未配置，请联系管理员";
 
+    /** 识别繁忙（限流/服务端/网络类临时故障，主备模型均不可用） */
+    public static final String AI_BUSY = "识别繁忙，请稍后再试";
+
     // ==================== 通用 ====================
 
     /** 参数校验失败 */

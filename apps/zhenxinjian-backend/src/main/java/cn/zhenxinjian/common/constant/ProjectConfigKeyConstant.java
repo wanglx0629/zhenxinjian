@@ -48,6 +48,15 @@ public final class ProjectConfigKeyConstant {
     /** OCR API 密钥（SECRET，AES 加密落库；种子在 change11 预置，真实值经 admin 后台录入） */
     public static final String OCR_API_KEY = "ocr.api-key";
 
+    /** OCR 有序备用视觉模型列表（JSON 数组；空数组=关闭故障转移） */
+    public static final String OCR_FALLBACK_MODELS = "ocr.fallback-models";
+
+    /** OCR 模型连续可转移失败几次触发熔断（默认 3，下限 1） */
+    public static final String OCR_CIRCUIT_FAIL_THRESHOLD = "ocr.circuit-fail-threshold";
+
+    /** OCR 模型熔断锁定时长（秒，默认 300，下限 1，到期自动试探恢复） */
+    public static final String OCR_CIRCUIT_OPEN_SECONDS = "ocr.circuit-open-seconds";
+
     /** OCR 相关配置键前缀（普通配置，改后仅需失效缓存，无词库重建副作用） */
     public static final String OCR_PREFIX = "ocr";
 }

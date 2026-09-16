@@ -1,5 +1,6 @@
 package cn.zhenxinjian.service.impl;
 
+import cn.zhenxinjian.common.ai.AiCallException;
 import cn.zhenxinjian.common.ai.AiChatClient;
 import cn.zhenxinjian.common.constant.CommonConstant;
 import cn.zhenxinjian.common.constant.ProjectConfigKeyConstant;
@@ -53,9 +54,13 @@ class AiRecognizeServiceTest {
         when(configService.getInt(eq(ProjectConfigKeyConstant.OCR_CACHE_TTL_HOURS), eq(24))).thenReturn(24);
         when(configService.getValue(ProjectConfigKeyConstant.OCR_API_KEY)).thenReturn("kid.secret");
         when(configService.getValue(ProjectConfigKeyConstant.OCR_MODEL)).thenReturn("glm-4.6v-flash");
-        // 默认：指纹缓存未命中、当日未计次
+        when(configService.getStringList(ProjectConfigKeyConstant.OCR_FALLBACK_MODELS)).thenReturn(List.of());
+        when(configService.getInt(eq(ProjectConfigKeyConstant.OCR_CIRCUIT_FAIL_THRESHOLD), eq(3))).thenReturn(3);
+        when(configService.getInt(eq(ProjectConfigKeyConstant.OCR_CIRCUIT_OPEN_SECONDS), eq(300))).thenReturn(300);
+        // 默认：指纹缓存未命中、当日未计次、无模型熔断
         when(redisUtils.get(startsWith("zhenxinjian:ocr:img:"))).thenReturn(null);
         when(redisUtils.get(startsWith("zhenxinjian:ocr:daily:"))).thenReturn(null);
+        when(redisUtils.get(startsWith("zhenxinjian:ocr:circuit:"))).thenReturn(null);
     }
 
     private MockMultipartFile jpeg(String name) {
@@ -160,17 +165,32 @@ class AiRecognizeServiceTest {
         verify(redisUtils).incrementWithTtl(anyString(), anyLong(), ArgumentMatchers.any());
     }
 
-    /** 场景：两次均无法解析 → 识别失败，不计次 */
+    /** 场景：两次输出均无法解析 → 识别失败（不转移），不计次 */
     @Test
-    void recognize_bothCallsFail_throwsRecognizeFailAndNotCounted() {
+    void recognize_bothOutputsUnparseable_throwsRecognizeFailAndNotCounted() {
         when(aiChatClient.chat(anyString(), anyString(), anyList(), anyInt()))
-                .thenThrow(new RuntimeException("timeout"))
-                .thenThrow(new RuntimeException("timeout again"));
+                .thenReturn("抱歉，我无法识别")
+                .thenReturn("还是无法识别");
 
         BusinessException ex = assertThrows(BusinessException.class, () -> service.recognize(1L, jpeg("a.jpg")));
         assertEquals(CommonConstant.AI_RECOGNIZE_FAIL_CODE, ex.getCode());
+        verify(aiChatClient, org.mockito.Mockito.times(2)).chat(anyString(), anyString(), anyList(), anyInt());
         verify(redisUtils, never()).incrementWithTtl(anyString(), anyLong(), ArgumentMatchers.any());
         verify(redisUtils, never()).setEx(anyString(), anyString(), anyLong(), ArgumentMatchers.any());
+    }
+
+    /** 场景：主模型可转移错误（超时）且无备用 → 繁忙文案，失败计数 +1，不计次不写指纹 */
+    @Test
+    void recognize_transferableErrorNoFallback_throwsBusyAndCountedFailureOnce() {
+        when(aiChatClient.chat(anyString(), anyString(), anyList(), anyInt()))
+                .thenThrow(new AiCallException("timeout", 0, true));
+
+        BusinessException ex = assertThrows(BusinessException.class, () -> service.recognize(1L, jpeg("a.jpg")));
+        assertEquals(CommonConstant.AI_BUSY_CODE, ex.getCode());
+        verify(aiChatClient, org.mockito.Mockito.times(1)).chat(anyString(), anyString(), anyList(), anyInt());
+        verify(redisUtils).incrementWithTtl(startsWith("zhenxinjian:ocr:modelfail:"), eq(300L), eq(TimeUnit.SECONDS));
+        verify(redisUtils, never()).incrementWithTtl(startsWith("zhenxinjian:ocr:daily:"), anyLong(), ArgumentMatchers.any());
+        verify(redisUtils, never()).setEx(startsWith("zhenxinjian:ocr:img:"), anyString(), anyLong(), ArgumentMatchers.any());
     }
 
     /** 场景：非食物图返回空 items → 业务成功空列表，不写缓存不计次 */
@@ -223,5 +243,125 @@ class AiRecognizeServiceTest {
         assertEquals(2, result.size());
         assertEquals(137d, result.get(0).getKcal(), 0.01);
         assertEquals(31.6, result.get(1).getKcal(), 0.01);
+    }
+
+    // ==================== 故障转移与熔断（change13） ====================
+
+    private static final String PRIMARY = "glm-4.6v-flash";
+    private static final String FALLBACK = "GLM-4V-Flash";
+
+    /** 场景：主模型 429 → 自动切备用模型成功；主模型失败计数 +1，成功模型清熔断 */
+    @Test
+    void recognize_primary429_fallbackSucceeds() {
+        when(configService.getStringList(ProjectConfigKeyConstant.OCR_FALLBACK_MODELS))
+                .thenReturn(List.of("GLM-4.1V-Thinking-Flash", FALLBACK));
+        when(aiChatClient.chat(eq(PRIMARY), anyString(), anyList(), anyInt()))
+                .thenThrow(new AiCallException("rate limited", 429, true));
+        when(aiChatClient.chat(eq("GLM-4.1V-Thinking-Flash"), anyString(), anyList(), anyInt()))
+                .thenThrow(new AiCallException("rate limited", 429, true));
+        when(aiChatClient.chat(eq(FALLBACK), anyString(), anyList(), anyInt()))
+                .thenReturn("{\"items\":[{\"name\":\"白米饭\",\"carb\":25.9,\"protein\":2.6,\"fat\":0.3}]}");
+
+        List<FoodRecognizeVO> result = service.recognize(1L, jpeg("rice.jpg"));
+
+        assertEquals(1, result.size());
+        assertEquals("白米饭", result.get(0).getName());
+        verify(redisUtils).incrementWithTtl(startsWith("zhenxinjian:ocr:modelfail:" + PRIMARY), eq(300L), eq(TimeUnit.SECONDS));
+        verify(redisUtils).incrementWithTtl(startsWith("zhenxinjian:ocr:modelfail:" + "GLM-4.1V-Thinking-Flash"), eq(300L), eq(TimeUnit.SECONDS));
+        verify(redisUtils).delete(startsWith("zhenxinjian:ocr:modelfail:" + FALLBACK));
+        verify(redisUtils).delete(startsWith("zhenxinjian:ocr:circuit:" + FALLBACK));
+        // 成功仍计当日次数
+        verify(redisUtils).incrementWithTtl(startsWith("zhenxinjian:ocr:daily:"), anyLong(), eq(TimeUnit.SECONDS));
+    }
+
+    /** 场景：主模型熔断中 → 直接跳过主模型，仅调备用模型 */
+    @Test
+    void recognize_primaryCircuitOpen_skipsToFallback() {
+        when(configService.getStringList(ProjectConfigKeyConstant.OCR_FALLBACK_MODELS)).thenReturn(List.of(FALLBACK));
+        when(redisUtils.get(startsWith("zhenxinjian:ocr:circuit:" + PRIMARY))).thenReturn("1");
+        when(aiChatClient.chat(eq(FALLBACK), anyString(), anyList(), anyInt()))
+                .thenReturn("{\"items\":[{\"name\":\"鸡蛋\",\"carb\":1.1,\"protein\":13,\"fat\":9}]}");
+
+        List<FoodRecognizeVO> result = service.recognize(1L, jpeg("egg.jpg"));
+
+        assertEquals(1, result.size());
+        assertEquals("鸡蛋", result.get(0).getName());
+        verify(aiChatClient, never()).chat(eq(PRIMARY), anyString(), anyList(), anyInt());
+        verify(aiChatClient).chat(eq(FALLBACK), anyString(), anyList(), anyInt());
+    }
+
+    /** 场景：主模型 401（密钥错误）→ 立即失败，不调备用，不写熔断，不计次 */
+    @Test
+    void recognize_primary401_failsFastWithoutFallbackOrCircuit() {
+        when(configService.getStringList(ProjectConfigKeyConstant.OCR_FALLBACK_MODELS)).thenReturn(List.of(FALLBACK));
+        when(aiChatClient.chat(eq(PRIMARY), anyString(), anyList(), anyInt()))
+                .thenThrow(new AiCallException("invalid api key", 401, false));
+
+        BusinessException ex = assertThrows(BusinessException.class, () -> service.recognize(1L, jpeg("a.jpg")));
+        assertEquals(CommonConstant.AI_RECOGNIZE_FAIL_CODE, ex.getCode());
+        verify(aiChatClient, never()).chat(eq(FALLBACK), anyString(), anyList(), anyInt());
+        verify(redisUtils, never()).incrementWithTtl(startsWith("zhenxinjian:ocr:modelfail:"), anyLong(), ArgumentMatchers.any());
+        verify(redisUtils, never()).setEx(startsWith("zhenxinjian:ocr:circuit:"), anyString(), anyLong(), ArgumentMatchers.any());
+        verify(redisUtils, never()).incrementWithTtl(startsWith("zhenxinjian:ocr:daily:"), anyLong(), ArgumentMatchers.any());
+    }
+
+    /** 场景：主备全部熔断 → 无任何模型调用，快速返回繁忙，不计次 */
+    @Test
+    void recognize_allCircuitsOpen_fastBusyWithoutModelCall() {
+        when(configService.getStringList(ProjectConfigKeyConstant.OCR_FALLBACK_MODELS)).thenReturn(List.of(FALLBACK));
+        when(redisUtils.get(startsWith("zhenxinjian:ocr:circuit:"))).thenReturn("1");
+
+        BusinessException ex = assertThrows(BusinessException.class, () -> service.recognize(1L, jpeg("a.jpg")));
+        assertEquals(CommonConstant.AI_BUSY_CODE, ex.getCode());
+        verify(aiChatClient, never()).chat(anyString(), anyString(), anyList(), anyInt());
+        verify(redisUtils, never()).incrementWithTtl(startsWith("zhenxinjian:ocr:daily:"), anyLong(), ArgumentMatchers.any());
+    }
+
+    /** 场景：连续可转移失败达到阈值（3）→ 第 3 次写入熔断标记 */
+    @Test
+    void recognize_failuresReachThreshold_setsCircuitFlag() {
+        when(aiChatClient.chat(anyString(), anyString(), anyList(), anyInt()))
+                .thenThrow(new AiCallException("server error", 500, true));
+        when(redisUtils.incrementWithTtl(startsWith("zhenxinjian:ocr:modelfail:"), eq(300L), eq(TimeUnit.SECONDS)))
+                .thenReturn(1L, 2L, 3L);
+
+        for (int i = 0; i < 3; i++) {
+            BusinessException ex = assertThrows(BusinessException.class, () -> service.recognize(1L, jpeg("a.jpg")));
+            assertEquals(CommonConstant.AI_BUSY_CODE, ex.getCode());
+        }
+        // 仅在第 3 次（计数达阈值）写熔断标记
+        verify(redisUtils, org.mockito.Mockito.times(1))
+                .setEx(startsWith("zhenxinjian:ocr:circuit:"), eq("1"), eq(300L), eq(TimeUnit.SECONDS));
+    }
+
+    /** 场景：成功调用清除历史失败计数（未熔断模型恢复） */
+    @Test
+    void recognize_successAfterFailures_clearsFailureCount() {
+        when(aiChatClient.chat(anyString(), anyString(), anyList(), anyInt()))
+                .thenReturn("{\"items\":[{\"name\":\"白米饭\",\"carb\":25.9,\"protein\":2.6,\"fat\":0.3}]}");
+
+        List<FoodRecognizeVO> result = service.recognize(1L, jpeg("rice.jpg"));
+
+        assertEquals(1, result.size());
+        verify(redisUtils).delete(startsWith("zhenxinjian:ocr:modelfail:" + PRIMARY));
+        verify(redisUtils).delete(startsWith("zhenxinjian:ocr:circuit:" + PRIMARY));
+    }
+
+    /** 场景：备用列表去空去重保序（主在前），同一模型一次请求最多调一次 */
+    @Test
+    void recognize_candidatesDedupedAndTrimmed() {
+        when(configService.getStringList(ProjectConfigKeyConstant.OCR_FALLBACK_MODELS))
+                .thenReturn(List.of("  ", PRIMARY, FALLBACK, FALLBACK));
+        when(aiChatClient.chat(eq(PRIMARY), anyString(), anyList(), anyInt()))
+                .thenThrow(new AiCallException("429", 429, true));
+        when(aiChatClient.chat(eq(FALLBACK), anyString(), anyList(), anyInt()))
+                .thenReturn("{\"items\":[{\"name\":\"鸡蛋\",\"carb\":1.1,\"protein\":13,\"fat\":9}]}");
+
+        List<FoodRecognizeVO> result = service.recognize(1L, jpeg("egg.jpg"));
+
+        assertEquals(1, result.size());
+        // 主模型仅 1 次（去重后备用里的同名项被合并），备用 1 次
+        verify(aiChatClient, org.mockito.Mockito.times(1)).chat(eq(PRIMARY), anyString(), anyList(), anyInt());
+        verify(aiChatClient, org.mockito.Mockito.times(1)).chat(eq(FALLBACK), anyString(), anyList(), anyInt());
     }
 }
