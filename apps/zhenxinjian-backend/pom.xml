@@ -41,6 +41,11 @@
         <!-- 智谱 BigModel 官方 Java SDK（视觉多模态；design 所写 ai.z.openapi:zai-sdk 不存在于 Maven Central，
              官方实际坐标为 cn.bigmodel.openapi:oapi-java-sdk，V4 系列） -->
         <zhipu-sdk.version>release-V4-2.4.3</zhipu-sdk.version>
+        <!-- 智谱 SDK V4-2.4.3 静态初始化仍引用 Jackson 旧字段 PropertyNamingStrategy.SNAKE_CASE，
+             该常量在 Jackson 2.20+ 从单数类移除（迁入复数 PropertyNamingStrategies）；
+             Boot 3.5.16 默认 jackson-bom 2.21.4 会导致 ClientV4 构建即 NoSuchFieldError。
+             2.19.0 为 Boot 3.5 大版本同源 Jackson 且保留旧字段，故经此官方属性统一锁回。 -->
+        <jackson-bom.version>2.19.0</jackson-bom.version>
         <!-- lombok.version 由 parent BOM 管理（1.18.46），此处不覆盖；
              annotationProcessorPaths 处的 ${lombok.version} 解析自 BOM -->
     </properties>
