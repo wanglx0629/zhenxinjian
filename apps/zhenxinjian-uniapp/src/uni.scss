@@ -41,3 +41,39 @@ $zhenxinjian-shadow-hero: 0 12rpx 32rpx rgba(0, 172, 124, 0.22);
 /* 能量渐变（品牌 = 语义） */
 $zhenxinjian-gradient-brand: linear-gradient(135deg, #00AC7C, #FFB020);
 $zhenxinjian-gradient-cta: linear-gradient(135deg, #00AC7C, #FFB020);
+
+/* ============ V2.1 增补：语义浅底 / 圆角 / 间距 / 字体 ============ */
+
+/* 三色语义浅底（替换旧 EP 色板 #fef0f0/#fdf6ec/#fff7f7 等） */
+$zhenxinjian-success-bg: #e7f6f0;
+$zhenxinjian-success-border: #b7e4d5;
+$zhenxinjian-warning-bg: #fff5dd;
+$zhenxinjian-warning-border: #fce2ae;
+$zhenxinjian-warning-deep: #9a6b00; // 琥珀小字（白底对比 ≥4.5:1）
+$zhenxinjian-danger-bg: #ffefef;
+$zhenxinjian-danger-border: #fbcaca;
+$zhenxinjian-danger-deep: #d63333; // 警示小字（白底对比 ≥4.5:1）
+
+/* 中性：进度槽 / 分割线（替换 #f0f0f0，冷调微绿） */
+$zhenxinjian-track: #edf1ef;
+$zhenxinjian-divider: #edf1ef;
+
+/* 圆角档位 */
+$zhenxinjian-radius-sm: 8rpx;
+$zhenxinjian-radius-md: 12rpx;
+$zhenxinjian-radius-lg: 16rpx;
+$zhenxinjian-radius-xl: 20rpx;
+$zhenxinjian-radius-pill: 999rpx;
+
+/* 间距档位 */
+$zhenxinjian-sp-1: 8rpx;
+$zhenxinjian-sp-2: 16rpx;
+$zhenxinjian-sp-3: 24rpx;
+$zhenxinjian-sp-4: 32rpx;
+$zhenxinjian-sp-5: 40rpx;
+$zhenxinjian-sp-6: 48rpx;
+$zhenxinjian-sp-8: 64rpx;
+
+/* 数字/展示字体栈（对齐设计系统 §8.5；字体文件落地前自然降级） */
+$zhenxinjian-font-num: 'Space Grotesk', 'DIN Alternate', -apple-system,
+  'PingFang SC', 'Microsoft YaHei', sans-serif;

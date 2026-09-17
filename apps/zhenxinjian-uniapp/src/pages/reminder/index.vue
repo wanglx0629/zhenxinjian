@@ -13,6 +13,10 @@ import { getToken } from '@/utils/storage'
 import { canSubmit } from '@/utils/throttle'
 import { track, trackPage } from '@/utils/track'
 import { TRACK_EVENT } from '@/config/track-events'
+import { iconSrc } from '@/utils/icons'
+
+const warnIcon = iconSrc('bell', '#E69A00')
+const dangerIcon = iconSrc('alert', '#d63333')
 
 const userStore = useUserStore()
 const reminderStore = useReminderStore()
@@ -207,7 +211,7 @@ async function handleReAuth() {
   <view class="page">
     <!-- 游客提示（D5：可保存不可推送） -->
     <view v-if="userStore.isGuest" class="tip-card">
-      <svg class="tip-icon" viewBox="0 0 24 24" fill="none" stroke="#FFB020" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      <image class="tip-icon" :src="warnIcon" />
       <view class="tip-main">
         <text class="tip-title">授权登录后才能接收微信推送</text>
         <text class="tip-desc">当前可保存提醒设置，授权登录后自动迁移并开启推送</text>
@@ -216,12 +220,12 @@ async function handleReAuth() {
 
     <!-- 额度耗尽提示（非游客 + 存在开启项 + 额度 0） -->
     <view v-else-if="anyEnabled && subscribeCredit === 0" class="tip-card warning">
-      <svg class="tip-icon" viewBox="0 0 24 24" fill="none" stroke="#FF4747" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      <image class="tip-icon" :src="dangerIcon" />
       <view class="tip-main">
         <text class="tip-title">推送额度已用完</text>
         <text class="tip-desc">点击右侧按钮重新授权即可恢复推送</text>
       </view>
-      <view class="tip-action" @click="handleReAuth">重新授权</view>
+      <view class="tip-action" hover-class="tip-action-hover" @click="handleReAuth">重新授权</view>
     </view>
 
     <!-- 总开关 -->
@@ -325,9 +329,9 @@ async function handleReAuth() {
 
 /* 提示卡 */
 .tip-card {
-  background: #fffbf0;
-  border: 1rpx solid #f5e6c0;
-  border-radius: 16rpx;
+  background: $zhenxinjian-warning-bg;
+  border: 1rpx solid $zhenxinjian-warning-border;
+  border-radius: $zhenxinjian-radius-lg;
   padding: 24rpx;
   margin-bottom: 24rpx;
   display: flex;
@@ -336,8 +340,8 @@ async function handleReAuth() {
 }
 
 .tip-card.warning {
-  background: #fff5f5;
-  border-color: #fbc4c4;
+  background: $zhenxinjian-danger-bg;
+  border-color: $zhenxinjian-danger-border;
 }
 
 .tip-icon {
@@ -367,18 +371,22 @@ async function handleReAuth() {
 
 .tip-action {
   padding: 10rpx 24rpx;
-  border-radius: 24rpx;
+  border-radius: $zhenxinjian-radius-pill;
   background: $zhenxinjian-primary;
   color: $zhenxinjian-white;
   font-size: 24rpx;
   font-weight: 600;
 }
 
+.tip-action-hover {
+  background: $zhenxinjian-primary-dark;
+}
+
 /* 面板 */
 .panel {
   background: $zhenxinjian-white;
   border: 1rpx solid $zhenxinjian-border;
-  border-radius: 16rpx;
+  border-radius: $zhenxinjian-radius-lg;
   padding: 32rpx;
   margin-bottom: 24rpx;
 }
@@ -401,7 +409,7 @@ async function handleReAuth() {
 
 .meal-row {
   padding: 20rpx 0;
-  border-bottom: 1rpx solid #f0f0f0;
+  border-bottom: 1rpx solid $zhenxinjian-divider;
 }
 
 .meal-row:last-of-type {
@@ -430,7 +438,7 @@ async function handleReAuth() {
   display: inline-block;
   padding: 8rpx 24rpx;
   border: 1rpx solid $zhenxinjian-border;
-  border-radius: 12rpx;
+  border-radius: $zhenxinjian-radius-md;
   font-size: 28rpx;
   color: $zhenxinjian-primary;
   font-weight: 600;
@@ -456,7 +464,7 @@ async function handleReAuth() {
   line-height: 88rpx;
   background: $zhenxinjian-primary;
   color: $zhenxinjian-white;
-  border-radius: 12rpx;
+  border-radius: $zhenxinjian-radius-md;
   font-size: 30rpx;
 }
 </style>

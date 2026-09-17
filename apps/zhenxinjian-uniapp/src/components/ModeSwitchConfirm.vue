@@ -54,8 +54,9 @@ function onCancel() {
 
 .modal {
   width: 560rpx;
-  background: #fff;
-  border-radius: 16rpx;
+  background: $zhenxinjian-white;
+  border-radius: $zhenxinjian-radius-lg;
+  box-shadow: $zhenxinjian-shadow-pop;
   padding: 48rpx 32rpx;
   display: flex;
   flex-direction: column;
@@ -88,7 +89,7 @@ function onCancel() {
   height: 80rpx;
   line-height: 80rpx;
   text-align: center;
-  border-radius: 12rpx;
+  border-radius: $zhenxinjian-radius-md;
   font-size: 28rpx;
 }
 
@@ -98,7 +99,7 @@ function onCancel() {
 }
 
 .modal-btn.confirm {
-  background: #f56c6c;
-  color: #fff;
+  background: $zhenxinjian-danger;
+  color: $zhenxinjian-white;
 }
 </style>

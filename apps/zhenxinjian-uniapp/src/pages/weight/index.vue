@@ -11,6 +11,9 @@ import { ymd } from '@/utils/format'
 import { canSubmit } from '@/utils/throttle'
 import { track, trackPage } from '@/utils/track'
 import { TRACK_EVENT } from '@/config/track-events'
+import { iconSrc } from '@/utils/icons'
+
+const plateauIcon = iconSrc('alert', '#d63333')
 
 const weightStore = useWeightStore()
 
@@ -105,7 +108,7 @@ function cancelDelete() {
   <view class="page">
     <!-- 平台期提示 -->
     <view v-if="weightStore.isPlateau" class="panel plateau-card">
-      <text class="plateau-icon">⚠️</text>
+      <image class="plateau-icon" :src="plateauIcon" />
       <view class="plateau-main">
         <text class="plateau-title">已进入平台期</text>
         <text class="plateau-desc">近 7 天体重波动小于 0.3kg，已触发碳水 −20g / 热量 −80kcal 微调。</text>
@@ -148,7 +151,7 @@ function cancelDelete() {
         <text class="record-date">{{ r.recordDate }}</text>
         <text class="record-weight">{{ displayWeight(r.weight) }} {{ unit === 0 ? 'kg' : '斤' }}</text>
         <text v-if="r.plateau" class="record-flag">平台</text>
-        <text v-if="records.length > 7" class="record-del" @click="handleDelete(r.id)">删除</text>
+        <text v-if="records.length > 7" class="record-del" hover-class="record-del-hover" @click="handleDelete(r.id)">删除</text>
       </view>
     </view>
 
@@ -167,8 +170,8 @@ function cancelDelete() {
         <text class="modal-title">确认删除</text>
         <text class="modal-desc">删除后不可恢复，确定要删除这条记录吗？</text>
         <view class="modal-actions">
-          <view class="modal-btn cancel" @click="cancelDelete">取消</view>
-          <view class="modal-btn confirm" @click="confirmDelete">删除</view>
+          <view class="modal-btn cancel" hover-class="modal-btn-hover" @click="cancelDelete">取消</view>
+          <view class="modal-btn confirm" hover-class="modal-btn-danger-hover" @click="confirmDelete">删除</view>
         </view>
       </view>
     </view>
@@ -186,13 +189,16 @@ function cancelDelete() {
 /* 平台提示 */
 .plateau-card {
   display: flex;
-  gap: 20rpx;
-  background: #fff5f5;
-  border-color: #fbc4c4;
+  align-items: flex-start;
+  gap: 16rpx;
+  background: $zhenxinjian-danger-bg;
+  border: 1rpx solid $zhenxinjian-danger-border;
 }
 
 .plateau-icon {
-  font-size: 40rpx;
+  width: 36rpx;
+  height: 36rpx;
+  flex-shrink: 0;
 }
 
 .plateau-main {
@@ -227,7 +233,7 @@ function cancelDelete() {
   line-height: 72rpx;
   text-align: center;
   border: 1rpx solid $zhenxinjian-border;
-  border-radius: 12rpx;
+  border-radius: $zhenxinjian-radius-md;
   font-size: 28rpx;
   color: $zhenxinjian-text;
 }
@@ -254,7 +260,7 @@ function cancelDelete() {
   height: 80rpx;
   line-height: 80rpx;
   border: 1rpx solid $zhenxinjian-border;
-  border-radius: 12rpx;
+  border-radius: $zhenxinjian-radius-md;
   padding: 0 24rpx;
   font-size: 30rpx;
   color: $zhenxinjian-primary;
@@ -265,7 +271,7 @@ function cancelDelete() {
 .input {
   height: 80rpx;
   border: 1rpx solid $zhenxinjian-border;
-  border-radius: 12rpx;
+  border-radius: $zhenxinjian-radius-md;
   padding: 0 24rpx;
   font-size: 30rpx;
   color: $zhenxinjian-text;
@@ -295,7 +301,7 @@ function cancelDelete() {
   align-items: center;
   gap: 16rpx;
   padding: 20rpx 0;
-  border-bottom: 1rpx solid #f0f0f0;
+  border-bottom: 1rpx solid $zhenxinjian-divider;
 }
 
 .record-row:last-child {
@@ -316,15 +322,19 @@ function cancelDelete() {
 
 .record-flag {
   padding: 2rpx 12rpx;
-  border-radius: 8rpx;
-  background: #fdf6ec;
-  color: #b88230;
+  border-radius: $zhenxinjian-radius-sm;
+  background: $zhenxinjian-warning-bg;
+  color: $zhenxinjian-warning-deep;
   font-size: 20rpx;
 }
 
 .record-del {
   font-size: 24rpx;
-  color: #f56c6c;
+  color: $zhenxinjian-danger;
+}
+
+.record-del-hover {
+  opacity: 0.6;
 }
 
 /* 调碳日志 */
@@ -333,7 +343,7 @@ function cancelDelete() {
   align-items: center;
   gap: 16rpx;
   padding: 20rpx 0;
-  border-bottom: 1rpx solid #f0f0f0;
+  border-bottom: 1rpx solid $zhenxinjian-divider;
 }
 
 .log-row:last-child {
@@ -366,8 +376,8 @@ function cancelDelete() {
 
 .modal {
   width: 560rpx;
-  background: #fff;
-  border-radius: 16rpx;
+  background: $zhenxinjian-white;
+  border-radius: $zhenxinjian-radius-lg;
   padding: 40rpx 32rpx;
   display: flex;
   flex-direction: column;
@@ -399,17 +409,25 @@ function cancelDelete() {
   height: 80rpx;
   line-height: 80rpx;
   text-align: center;
-  border-radius: 12rpx;
+  border-radius: $zhenxinjian-radius-md;
   font-size: 28rpx;
 }
 
 .modal-btn.cancel {
-  background: #f5f7fa;
+  background: $zhenxinjian-track;
   color: $zhenxinjian-text;
 }
 
 .modal-btn.confirm {
-  background: #f56c6c;
-  color: #fff;
+  background: $zhenxinjian-danger;
+  color: $zhenxinjian-white;
+}
+
+.modal-btn-hover {
+  opacity: 0.85;
+}
+
+.modal-btn-danger-hover {
+  background: $zhenxinjian-danger-deep;
 }
 </style>

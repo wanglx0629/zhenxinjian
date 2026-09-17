@@ -28,8 +28,20 @@ const query = reactive({
 })
 
 /** 列表查询骨架（B-T23：loading/数据/分页回调/删后回退收敛 composable） */
-const { loading, tableData, total, load, handleSearch, handlePageChange, reloadAfterDelete } =
-  usePageQuery(query, q =>
+/** 初始筛选快照（重置用） */
+const INITIAL_FILTERS = { keyword: '', status: undefined, role: '' }
+
+const {
+  loading,
+  tableData,
+  total,
+  load,
+  handleSearch,
+  handlePageChange,
+  handleSizeChange,
+  handleReset,
+  reloadAfterDelete
+} = usePageQuery(query, q =>
     getUserPage({
       page: q.page,
       size: q.size,
@@ -77,16 +89,17 @@ async function handleDelete(row: UserInfo) {
           v-model="query.keyword"
           clearable
           placeholder="用户名 / 昵称 / 邮箱"
-          style="width: 220px"
+          class="filter-w-lg"
           @keyup.enter="handleSearch"
         />
-        <el-select v-model="query.status" clearable placeholder="状态" style="width: 120px">
+        <el-select v-model="query.status" clearable placeholder="状态" class="filter-w-sm">
           <el-option v-for="o in USER_STATUS_OPTIONS" :key="o.value" :label="o.label" :value="o.value" />
         </el-select>
-        <el-select v-model="query.role" clearable placeholder="角色" style="width: 120px">
+        <el-select v-model="query.role" clearable placeholder="角色" class="filter-w-sm">
           <el-option v-for="o in USER_ROLE_OPTIONS" :key="o.value" :label="o.label" :value="o.value" />
         </el-select>
         <el-button type="primary" @click="handleSearch">查询</el-button>
+        <el-button @click="handleReset({ ...INITIAL_FILTERS })">重置</el-button>
       </div>
       <el-button type="primary" @click="openCreate">新增用户</el-button>
     </div>
@@ -122,7 +135,13 @@ async function handleDelete(row: UserInfo) {
       </el-table-column>
     </el-table>
 
-    <PagePager :total="total" :page="query.page" :size="query.size" @change="handlePageChange" />
+    <PagePager
+      :total="total"
+      :page="query.page"
+      :size="query.size"
+      @change="handlePageChange"
+      @size-change="handleSizeChange"
+    />
 
     <UserEditDialog ref="editDialogRef" @saved="load" />
     <UserDetailDrawer ref="detailDrawerRef" />

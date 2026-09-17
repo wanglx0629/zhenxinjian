@@ -15,6 +15,20 @@ import { DIET_MODES } from '@/config/constants'
 import { guestLeftText } from '@/utils/format'
 import { getToken } from '@/utils/storage'
 import { trackPage } from '@/utils/track'
+import { iconSrc, type IconName } from '@/utils/icons'
+
+/** 功能列表图标（线性，H5/小程序一致） */
+const LIST_ICONS: Record<string, IconName> = {
+  body: 'body',
+  mode: 'refresh',
+  reminder: 'bell',
+  weight: 'scale',
+  menstrual: 'droplet',
+  privacy: 'lock'
+}
+function listIcon(key: string) {
+  return iconSrc(LIST_ICONS[key], '#00AC7C')
+}
 
 const userStore = useUserStore()
 const bodyStore = useBodyStore()
@@ -145,8 +159,8 @@ function handleLogout() {
   <view class="page">
     <!-- 头部用户卡 -->
     <view class="hero">
-      <text class="hero-deco deco-rainbow">🌈</text>
-      <text class="hero-deco deco-sparkle">✨</text>
+      <image class="hero-deco deco-rainbow" :src="iconSrc('gift', '#ffffff')" />
+      <image class="hero-deco deco-sparkle" :src="iconSrc('sparkles', '#ffffff')" />
       <view class="avatar">
         <image v-if="userStore.userInfo?.avatar" class="avatar-img" :src="userStore.userInfo.avatar" mode="aspectFill" />
         <TeLogo v-else :size="72" />
@@ -156,15 +170,15 @@ function handleLogout() {
           <text class="name">{{ displayName }}</text>
           <text v-if="userStore.isGuest" class="badge">游客</text>
         </view>
-        <text v-if="userStore.isGuest" class="meta">🎁 游客体验中 · 剩 {{ guestLeft }}</text>
+        <text v-if="userStore.isGuest" class="meta">游客体验中 · 剩 {{ guestLeft }}</text>
         <text v-else class="meta">@{{ userStore.userInfo?.username || '-' }}</text>
       </view>
-      <view v-if="userStore.isGuest" class="auth-btn" @click="goAuth">授权登录</view>
+      <view v-if="userStore.isGuest" class="auth-btn" hover-class="auth-btn-hover" @click="goAuth">授权登录</view>
     </view>
 
     <!-- 游客数据迁移提示（F03，仅游客） -->
     <view v-if="userStore.isGuest" class="card migrate-card">
-      <text class="migrate-icon">📦</text>
+      <image class="migrate-icon" :src="iconSrc('package', '#9a6b00')" />
       <view class="migrate-main">
         <text class="migrate-title">体验期数据将自动迁移</text>
         <text class="migrate-desc">
@@ -175,72 +189,75 @@ function handleLogout() {
 
     <!-- 功能列表 -->
     <view class="card list-card">
-      <view class="list-item" @click="goBody">
+      <view class="list-item" hover-class="list-item-hover" @click="goBody">
         <view class="list-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <image class="list-icon-img" :src="listIcon('body')" />
         </view>
         <view class="list-main">
           <text class="list-title">身体数据</text>
           <text class="list-sub">{{ bodyBrief }}</text>
         </view>
-        <text class="list-arrow">›</text>
+        <image class="list-arrow-img" :src="iconSrc('chevronRight', '#94A3B8')" />
       </view>
-      <view class="list-item" @click="goMode">
+      <view class="list-item" hover-class="list-item-hover" @click="goMode">
         <view class="list-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+          <image class="list-icon-img" :src="listIcon('mode')" />
         </view>
         <view class="list-main">
           <text class="list-title">减脂模式</text>
           <text class="list-sub">当前：{{ modeName }}</text>
         </view>
         <text class="list-tag">切换</text>
-        <text class="list-arrow">›</text>
+        <image class="list-arrow-img" :src="iconSrc('chevronRight', '#94A3B8')" />
       </view>
-      <view class="list-item" @click="goReminder">
+      <view class="list-item" hover-class="list-item-hover" @click="goReminder">
         <view class="list-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <image class="list-icon-img" :src="listIcon('reminder')" />
         </view>
         <view class="list-main">
           <text class="list-title">提醒设置</text>
           <text class="list-sub">{{ reminderEnabled ? '已开启' : '已关闭' }}</text>
         </view>
-        <text class="list-arrow">›</text>
+        <image class="list-arrow-img" :src="iconSrc('chevronRight', '#94A3B8')" />
       </view>
-      <view class="list-item" @click="goWeight">
+      <view class="list-item" hover-class="list-item-hover" @click="goWeight">
         <view class="list-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+          <image class="list-icon-img" :src="listIcon('weight')" />
         </view>
         <view class="list-main">
           <text class="list-title">体重记录</text>
           <text class="list-sub">{{ weightBrief }}</text>
         </view>
-        <text class="list-arrow">›</text>
+        <image class="list-arrow-img" :src="iconSrc('chevronRight', '#94A3B8')" />
       </view>
-      <view v-if="showMenstrual" class="list-item" @click="goMenstrual">
+      <view v-if="showMenstrual" class="list-item" hover-class="list-item-hover" @click="goMenstrual">
         <view class="list-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+          <image class="list-icon-img" :src="listIcon('menstrual')" />
         </view>
         <view class="list-main">
           <text class="list-title">月经周期</text>
           <text class="list-sub">{{ menstrualBrief }}</text>
         </view>
-        <text class="list-arrow">›</text>
+        <image class="list-arrow-img" :src="iconSrc('chevronRight', '#94A3B8')" />
       </view>
-      <view class="list-item" @click="showPrivacy">
+      <view class="list-item" hover-class="list-item-hover" @click="showPrivacy">
         <view class="list-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <image class="list-icon-img" :src="listIcon('privacy')" />
         </view>
         <view class="list-main">
           <text class="list-title">隐私与安全</text>
           <text class="list-sub">隐私数据加密存储 · 禁止明文传输</text>
         </view>
-        <text class="list-arrow">›</text>
+        <image class="list-arrow-img" :src="iconSrc('chevronRight', '#94A3B8')" />
       </view>
     </view>
 
     <!-- 数据留存说明（F04/F28） -->
     <view class="card">
-      <text class="card-title">☁️ 数据留存说明</text>
+      <view class="card-title-withicon">
+        <image class="card-title-icon" :src="iconSrc('cloud', '#00AC7C')" />
+        <text class="card-title">数据留存说明</text>
+      </view>
       <view class="note-list">
         <text class="note-item">· 个人资料、减脂模式、周期数据、饮食记录 永久云端留存，不自动清空</text>
         <text class="note-item">· 登录状态持久化，下次打开自动加载个人数据</text>
@@ -251,7 +268,10 @@ function handleLogout() {
 
     <!-- 关于 -->
     <view class="card">
-      <text class="card-title">📌 关于</text>
+      <view class="card-title-withicon">
+        <image class="card-title-icon" :src="iconSrc('info', '#00AC7C')" />
+        <text class="card-title">关于</text>
+      </view>
       <text class="about-text">臻心减 V1.1 · 生活化减脂计算器</text>
       <text class="about-text">计算核心后置，前端参数不可篡改；核心计算响应速度与页面加载满足一期性能标准。</text>
     </view>
@@ -259,7 +279,10 @@ function handleLogout() {
     <!-- 退出登录 -->
     <button class="logout" @click="handleLogout">退出登录</button>
 
-    <text class="disclaimer">📌 本工具所有健康计算结果内置免责声明，仅作生活化减脂参考，非医疗建议。</text>
+    <view class="disclaimer-row">
+      <image class="disclaimer-icon" :src="iconSrc('alert', '#475569')" />
+      <text class="disclaimer">本工具所有健康计算结果内置免责声明，仅作生活化减脂参考，非医疗建议。</text>
+    </view>
   </view>
 </template>
 
@@ -274,17 +297,28 @@ function handleLogout() {
 .card {
   background: $zhenxinjian-white;
   border: 1rpx solid $zhenxinjian-border;
-  border-radius: 16rpx;
+  border-radius: $zhenxinjian-radius-lg;
   padding: 28rpx;
   margin-bottom: 24rpx;
 }
 
 .card-title {
-  display: block;
   font-size: 30rpx;
   font-weight: 600;
   color: $zhenxinjian-text;
+}
+
+/* 标题前线性图标 */
+.card-title-withicon {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
   margin-bottom: 16rpx;
+}
+
+.card-title-icon {
+  width: 34rpx;
+  height: 34rpx;
 }
 
 /* 头部用户卡 */
@@ -292,17 +326,17 @@ function handleLogout() {
   position: relative;
   overflow: hidden;
   background: $zhenxinjian-gradient-brand;
-  border-radius: 20rpx;
+  border-radius: $zhenxinjian-radius-xl;
   padding: 32rpx;
   margin-bottom: 24rpx;
   display: flex;
   align-items: center;
   gap: 24rpx;
-  color: #fff;
+  color: $zhenxinjian-white;
   box-shadow: $zhenxinjian-shadow-hero;
 }
 
-/* 漂浮装饰 emoji */
+/* 漂浮装饰图标 */
 .hero-deco {
   position: absolute;
   opacity: 0.35;
@@ -312,14 +346,15 @@ function handleLogout() {
 .deco-rainbow {
   top: 16rpx;
   right: 28rpx;
-  font-size: 64rpx;
-  transform: rotate(10deg);
+  width: 56rpx;
+  height: 56rpx;
 }
 
 .deco-sparkle {
   bottom: 20rpx;
   right: 140rpx;
-  font-size: 32rpx;
+  width: 32rpx;
+  height: 32rpx;
   opacity: 0.45;
 }
 
@@ -359,7 +394,7 @@ function handleLogout() {
 
 .badge {
   padding: 4rpx 16rpx;
-  border-radius: 8rpx;
+  border-radius: $zhenxinjian-radius-sm;
   background: rgba(255, 255, 255, 0.25);
   font-size: 22rpx;
 }
@@ -371,22 +406,32 @@ function handleLogout() {
 
 .auth-btn {
   padding: 12rpx 24rpx;
-  border-radius: 24rpx;
+  min-height: 64rpx;
+  display: flex;
+  align-items: center;
+  border-radius: $zhenxinjian-radius-pill;
   background: rgba(255, 255, 255, 0.22);
   font-size: 24rpx;
   font-weight: 600;
 }
 
+.auth-btn-hover {
+  background: rgba(255, 255, 255, 0.34);
+}
+
 /* 游客迁移提示卡 */
 .migrate-card {
   display: flex;
+  align-items: flex-start;
   gap: 20rpx;
-  background: #fffbf0;
-  border-color: #f5e6c0;
+  background: $zhenxinjian-warning-bg;
+  border-color: $zhenxinjian-warning-border;
 }
 
 .migrate-icon {
-  font-size: 40rpx;
+  width: 44rpx;
+  height: 44rpx;
+  margin-top: 4rpx;
 }
 
 .migrate-main {
@@ -416,27 +461,31 @@ function handleLogout() {
   display: flex;
   align-items: center;
   gap: 20rpx;
-  padding: 28rpx 0;
-  border-bottom: 1rpx solid #f0f0f0;
+  min-height: 88rpx;
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid $zhenxinjian-divider;
 }
 
 .list-item:last-child {
   border-bottom: none;
 }
 
+.list-item-hover {
+  background: $zhenxinjian-primary-bg;
+}
+
 .list-icon {
-  width: 40rpx;
-  height: 40rpx;
-  color: $zhenxinjian-primary;
+  width: 48rpx;
+  height: 48rpx;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
 }
 
-.list-icon svg {
-  width: 36rpx;
-  height: 36rpx;
+.list-icon-img {
+  width: 44rpx;
+  height: 44rpx;
 }
 
 .list-main {
@@ -458,7 +507,7 @@ function handleLogout() {
 
 .list-tag {
   padding: 4rpx 16rpx;
-  border-radius: 16rpx;
+  border-radius: $zhenxinjian-radius-lg;
   background: $zhenxinjian-primary-light;
   color: $zhenxinjian-primary;
   font-size: 22rpx;
@@ -466,11 +515,11 @@ function handleLogout() {
   margin-right: 8rpx;
 }
 
-.list-arrow {
-  font-size: 32rpx;
-  color: $zhenxinjian-text-secondary;
+.list-arrow-img {
+  width: 28rpx;
+  height: 28rpx;
+  flex-shrink: 0;
 }
-
 /* 留存说明 */
 .note-list {
   display: flex;
@@ -500,15 +549,28 @@ function handleLogout() {
   background: $zhenxinjian-white;
   color: $zhenxinjian-danger;
   border: 1rpx solid $zhenxinjian-border;
-  border-radius: 12rpx;
+  border-radius: $zhenxinjian-radius-md;
   font-size: 30rpx;
 }
 
+.disclaimer-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8rpx;
+  padding: 24rpx 16rpx 0;
+}
+
+.disclaimer-icon {
+  width: 28rpx;
+  height: 28rpx;
+  margin-top: 4rpx;
+  flex-shrink: 0;
+}
+
 .disclaimer {
-  display: block;
+  flex: 1;
   font-size: 22rpx;
   color: $zhenxinjian-text-secondary;
   line-height: 1.6;
-  padding: 24rpx 16rpx 0;
 }
 </style>

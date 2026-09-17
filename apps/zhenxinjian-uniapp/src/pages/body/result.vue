@@ -9,6 +9,12 @@ import { onShow } from '@dcloudio/uni-app'
 import { useBodyStore } from '@/store/body'
 import { trackPage } from '@/utils/track'
 import EmptyState from '@/components/EmptyState.vue'
+import { iconSrc } from '@/utils/icons'
+
+const flameIcon = iconSrc('flame', '#00AC7C')
+const targetIcon = iconSrc('target', '#00AC7C')
+const riskIcon = iconSrc('alert', '#9a6b00')
+const infoIcon = iconSrc('info', '#8a8f99')
 
 const bodyStore = useBodyStore()
 const loading = ref(true)
@@ -65,11 +71,15 @@ function goChooseMode() {
     <template v-else-if="!loading && p?.recorded">
       <!-- 低热量风险提示（按风险标记，仅提示不阻断） -->
       <view v-if="p.lowKcalRisk" class="risk">
+        <image class="risk-icon" :src="riskIcon" />
         <text class="risk-text">当前每日目标热量偏低，长期坚持可能影响基础代谢，建议适度上调或咨询专业人士。</text>
       </view>
 
       <view class="panel">
-        <text class="panel-title">🔥 代谢与热量</text>
+        <view class="panel-title-row">
+          <image class="panel-title-icon" :src="flameIcon" />
+          <text class="panel-title">代谢与热量</text>
+        </view>
         <view class="grid">
           <view class="cell"><text class="num">{{ p.bmr }}</text><text class="label">BMR 基础代谢 kcal</text></view>
           <view class="cell"><text class="num">{{ p.tdee }}</text><text class="label">TDEE 每日消耗 kcal</text></view>
@@ -79,7 +89,10 @@ function goChooseMode() {
       </view>
 
       <view class="panel">
-        <text class="panel-title">🥗 每日营养目标（532 配比）</text>
+        <view class="panel-title-row">
+          <image class="panel-title-icon" :src="targetIcon" />
+          <text class="panel-title">每日营养目标（532 配比）</text>
+        </view>
         <view class="grid">
           <view class="cell"><text class="num">{{ carbs }}</text><text class="label">碳水 g</text></view>
           <view class="cell"><text class="num">{{ protein }}</text><text class="label">蛋白质 g</text></view>
@@ -89,6 +102,7 @@ function goChooseMode() {
 
       <!-- 免责声明：spec 要求内置展示，不可移除 -->
       <view class="disclaimer">
+        <image class="disclaimer-icon" :src="infoIcon" />
         <text class="disclaimer-text">{{ p.disclaimer }}</text>
       </view>
 
@@ -108,6 +122,22 @@ function goChooseMode() {
 
 .grid {
   display: flex;
+}
+
+.panel-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  margin-bottom: 20rpx;
+}
+
+.panel-title-icon {
+  width: 34rpx;
+  height: 34rpx;
+}
+
+.panel-title {
+  margin-bottom: 0;
 }
 
 .cell {
@@ -150,24 +180,46 @@ function goChooseMode() {
 }
 
 .risk {
-  background: #FEF3C7;
-  border: 1rpx solid #FDE68A;
-  border-radius: 12rpx;
+  display: flex;
+  align-items: flex-start;
+  gap: 10rpx;
+  background: $zhenxinjian-warning-bg;
+  border: 1rpx solid $zhenxinjian-warning-border;
+  border-radius: $zhenxinjian-radius-md;
   padding: 20rpx 24rpx;
   margin-bottom: 24rpx;
 }
 
+.risk-icon {
+  width: 30rpx;
+  height: 30rpx;
+  margin-top: 2rpx;
+  flex-shrink: 0;
+}
+
 .risk-text {
+  flex: 1;
   font-size: 24rpx;
-  color: #92400E;
+  color: $zhenxinjian-warning-deep;
   line-height: 1.5;
 }
 
 .disclaimer {
+  display: flex;
+  align-items: flex-start;
+  gap: 8rpx;
   padding: 0 8rpx 24rpx;
 }
 
+.disclaimer-icon {
+  width: 26rpx;
+  height: 26rpx;
+  margin-top: 2rpx;
+  flex-shrink: 0;
+}
+
 .disclaimer-text {
+  flex: 1;
   font-size: 22rpx;
   color: $zhenxinjian-text-secondary;
   line-height: 1.6;
@@ -185,7 +237,7 @@ function goChooseMode() {
   background: $zhenxinjian-white;
   color: $zhenxinjian-text;
   border: 1rpx solid $zhenxinjian-border;
-  border-radius: 12rpx;
+  border-radius: $zhenxinjian-radius-md;
   font-size: 30rpx;
 }
 </style>

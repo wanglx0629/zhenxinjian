@@ -9,6 +9,9 @@ import { onShow } from '@dcloudio/uni-app'
 import { useFoodStore } from '@/store/food'
 import type { FoodVO } from '@/api/food'
 import { trackPage } from '@/utils/track'
+import { iconSrc } from '@/utils/icons'
+
+const plusIcon = iconSrc('plus', '#ffffff')
 
 const foodStore = useFoodStore()
 
@@ -42,7 +45,7 @@ function handleDelete(food: FoodVO) {
   uni.showModal({
     title: '删除食物',
     content: `确定删除「${food.name}」吗？删除后不可再使用该食物记录，已有饮食记录不受影响`,
-    confirmColor: '#f56c6c',
+    confirmColor: '#FF4747',
     success: async (res) => {
       if (!res.confirm) return
       try {
@@ -67,7 +70,10 @@ onShow(() => {
     <view class="panel">
       <view class="panel-head">
         <text class="panel-title">我的自定义食物</text>
-        <view class="add-btn" @click="goAdd">+ 新增</view>
+        <view class="add-btn" hover-class="add-btn-hover" @click="goAdd">
+          <image class="add-btn-icon" :src="plusIcon" />
+          <text>新增</text>
+        </view>
       </view>
 
       <view v-if="list.length" class="food-list">
@@ -78,8 +84,8 @@ onShow(() => {
             <text class="food-sub">碳 {{ f.carb }} / 蛋 {{ f.protein }} / 脂 {{ f.fat }}</text>
           </view>
           <view class="food-actions">
-            <view class="action" @click="goEdit(f)">编辑</view>
-            <view class="action danger" @click="handleDelete(f)">删除</view>
+            <view class="action" hover-class="action-hover" @click="goEdit(f)">编辑</view>
+            <view class="action danger" hover-class="action-danger-hover" @click="handleDelete(f)">删除</view>
           </view>
         </view>
       </view>
@@ -104,7 +110,7 @@ onShow(() => {
 .panel {
   background: $zhenxinjian-white;
   border: 1rpx solid $zhenxinjian-border;
-  border-radius: 16rpx;
+  border-radius: $zhenxinjian-radius-lg;
   padding: 32rpx;
 }
 
@@ -122,11 +128,23 @@ onShow(() => {
 }
 
 .add-btn {
+  display: flex;
+  align-items: center;
+  gap: 6rpx;
   padding: 10rpx 24rpx;
-  border-radius: 24rpx;
+  border-radius: $zhenxinjian-radius-pill;
   background: $zhenxinjian-primary;
   color: $zhenxinjian-white;
   font-size: 24rpx;
+}
+
+.add-btn-hover {
+  background: $zhenxinjian-primary-dark;
+}
+
+.add-btn-icon {
+  width: 22rpx;
+  height: 22rpx;
 }
 
 .food-list {
@@ -139,7 +157,7 @@ onShow(() => {
   justify-content: space-between;
   align-items: center;
   padding: 20rpx 0;
-  border-bottom: 1rpx solid $zhenxinjian-bg;
+  border-bottom: 1rpx solid $zhenxinjian-divider;
 }
 
 .food-row:last-child {
@@ -171,15 +189,26 @@ onShow(() => {
 
 .action {
   padding: 10rpx 20rpx;
-  border-radius: 12rpx;
+  border-radius: $zhenxinjian-radius-md;
   border: 1rpx solid $zhenxinjian-border;
   color: $zhenxinjian-text;
   font-size: 24rpx;
 }
 
+.action-hover {
+  background: $zhenxinjian-primary-bg;
+  border-color: $zhenxinjian-primary;
+  color: $zhenxinjian-primary;
+}
+
 .action.danger {
-  border-color: #f56c6c;
-  color: #f56c6c;
+  border-color: $zhenxinjian-danger-border;
+  color: $zhenxinjian-danger;
+}
+
+.action-danger-hover {
+  background: $zhenxinjian-danger-bg;
+  border-color: $zhenxinjian-danger;
 }
 
 .empty {
@@ -207,7 +236,7 @@ onShow(() => {
   line-height: 88rpx;
   background: $zhenxinjian-primary;
   color: $zhenxinjian-white;
-  border-radius: 12rpx;
+  border-radius: $zhenxinjian-radius-md;
   font-size: 30rpx;
 }
 </style>

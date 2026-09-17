@@ -165,7 +165,7 @@ async function handleSubmit() {
   line-height: 72rpx;
   text-align: center;
   border: 1rpx solid $zhenxinjian-border;
-  border-radius: 12rpx;
+  border-radius: $zhenxinjian-radius-md;
   font-size: 40rpx;
   color: $zhenxinjian-text;
 }
@@ -191,7 +191,7 @@ async function handleSubmit() {
   line-height: 72rpx;
   text-align: center;
   border: 1rpx solid $zhenxinjian-border;
-  border-radius: 12rpx;
+  border-radius: $zhenxinjian-radius-md;
   font-size: 28rpx;
   color: $zhenxinjian-text;
 }
@@ -213,7 +213,7 @@ async function handleSubmit() {
   width: 160rpx;
   padding: 16rpx 0;
   border: 1rpx solid $zhenxinjian-border;
-  border-radius: 12rpx;
+  border-radius: $zhenxinjian-radius-md;
   display: flex;
   flex-direction: column;
   align-items: center;

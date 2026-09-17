@@ -43,6 +43,19 @@ export function usePageQuery<T, Q extends PageQueryBase>(
     load()
   }
 
+  /** 每页条数变更（回到第一页重新查询） */
+  function handleSizeChange(size: number) {
+    query.size = size
+    query.page = 1
+    load()
+  }
+
+  /** 重置筛选（恢复初始查询条件后回到第一页） */
+  function handleReset(resetQuery: Partial<Q>) {
+    Object.assign(query, resetQuery, { page: 1 })
+    load()
+  }
+
   /** 删后重载（当前页最后一条被删且非首页时回退一页，避免空页滞留） */
   async function reloadAfterDelete() {
     if (tableData.value.length === 1 && query.page > 1) {
@@ -53,5 +66,15 @@ export function usePageQuery<T, Q extends PageQueryBase>(
 
   onMounted(load)
 
-  return { loading, tableData, total, load, handleSearch, handlePageChange, reloadAfterDelete }
+  return {
+    loading,
+    tableData,
+    total,
+    load,
+    handleSearch,
+    handlePageChange,
+    handleSizeChange,
+    handleReset,
+    reloadAfterDelete
+  }
 }

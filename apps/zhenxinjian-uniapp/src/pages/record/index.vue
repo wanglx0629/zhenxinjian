@@ -8,13 +8,20 @@ import { onShow } from '@dcloudio/uni-app'
 import { useDietStore } from '@/store/diet'
 import { useBodyStore } from '@/store/body'
 import { useCycleStore } from '@/store/cycle'
-import { MEAL_EMOJI, OVER_ADVICE, CYCLE_DAY_TYPES } from '@/config/constants'
+import { OVER_ADVICE, CYCLE_DAY_TYPES } from '@/config/constants'
 import { ymd, md, week } from '@/utils/format'
 import { buildProgressItems, buildAdviceList } from '@/utils/macro'
 import type { DietRecordVO } from '@/api/diet'
 import EmptyState from '@/components/EmptyState.vue'
 import { track, trackPage } from '@/utils/track'
 import { TRACK_EVENT } from '@/config/track-events'
+import { iconSrc, type IconName } from '@/utils/icons'
+
+/** 餐别线性图标（替换原 emoji） */
+const MEAL_ICONS: Record<number, IconName> = { 1: 'breakfast', 2: 'bowl', 3: 'moon', 4: 'apple' }
+function mealIcon(code: number) {
+  return iconSrc(MEAL_ICONS[code] || 'bowl', '#10312B')
+}
 
 const dietStore = useDietStore()
 const bodyStore = useBodyStore()
@@ -148,15 +155,15 @@ function goCycleSetting() {
   <view class="page">
     <!-- 日期导航 -->
     <view class="date-nav">
-      <view class="nav-arrow" @click="prevDay">
-        <text class="arrow-icon">‹</text>
+      <view class="nav-arrow" hover-class="nav-arrow-hover" @click="prevDay">
+        <image class="nav-arrow-icon" :src="iconSrc('chevronLeft', '#10312B')" />
       </view>
-      <view class="date-center" @click="goToday">
+      <view class="date-center" hover-class="date-center-hover" @click="goToday">
         <text class="date-label">{{ dateLabel }}</text>
         <text class="date-sub">{{ dietStore.currentDate }}</text>
       </view>
-      <view class="nav-arrow" :class="{ disabled: isToday }" @click="nextDay">
-        <text class="arrow-icon">›</text>
+      <view class="nav-arrow" :class="{ disabled: isToday }" hover-class="nav-arrow-hover" @click="nextDay">
+        <image class="nav-arrow-icon" :src="iconSrc('chevronRight', isToday ? '#94A3B8' : '#10312B')" />
       </view>
     </view>
 
@@ -202,23 +209,35 @@ function goCycleSetting() {
 
     <!-- 超标建议卡 -->
     <view v-if="adviceList.length" class="panel advice-card">
-      <text class="panel-title">微调建议</text>
-      <text v-for="(advice, i) in adviceList" :key="i" class="advice-text">{{ advice }}</text>
-      <text class="advice-disclaimer">{{ OVER_ADVICE.disclaimer }}</text>
+      <view class="advice-title-row">
+        <image class="advice-title-icon" :src="iconSrc('alert', '#9a6b00')" />
+        <text class="panel-title advice-title">微调建议</text>
+      </view>
+      <view v-for="(advice, i) in adviceList" :key="i" class="advice-item">
+        <image class="advice-bullet" :src="iconSrc('sparkles', '#9a6b00')" />
+        <text class="advice-text">{{ advice }}</text>
+      </view>
+      <view class="advice-disclaimer-row">
+        <image class="advice-disclaimer-icon" :src="iconSrc('info', '#8a8f99')" />
+        <text class="advice-disclaimer">{{ OVER_ADVICE.disclaimer }}</text>
+      </view>
     </view>
 
     <!-- 餐别分组列表 -->
     <view v-for="group in dietStore.dayData?.meals" :key="group.mealType" class="panel">
       <view class="meal-header">
         <view class="meal-title-wrap">
-          <view class="meal-chip" :class="'mc' + group.mealType">{{ MEAL_EMOJI[group.mealType] ?? '🍽️' }}</view>
+          <view class="meal-chip" :class="'mc' + group.mealType">
+            <image class="meal-chip-icon" :src="mealIcon(group.mealType)" />
+          </view>
           <text class="meal-name">{{ group.mealName }}</text>
         </view>
         <text v-if="group.records.length" class="meal-sub">{{ group.kcal }}kcal</text>
       </view>
 
       <view v-if="!group.records.length" class="meal-empty">
-        <text class="meal-empty-text">🍽️ 暂无记录，点右下角 + 添加</text>
+        <image class="meal-empty-icon" :src="iconSrc('utensils', '#8a8f99')" />
+        <text class="meal-empty-text">暂无记录，点右下角 + 添加</text>
       </view>
 
       <view v-for="record in group.records" :key="record.id" class="record-item">
@@ -233,8 +252,14 @@ function goCycleSetting() {
         <view class="record-right">
           <text class="record-kcal">{{ record.kcal }}kcal</text>
           <view class="record-actions">
-            <text class="action-btn" @click="handleEdit(record)">编辑</text>
-            <text class="action-btn delete" @click="handleDelete(record.id)">删除</text>
+            <view class="action-btn" hover-class="action-btn-hover" @click="handleEdit(record)">
+              <image class="action-btn-icon" :src="iconSrc('edit', '#00AC7C')" />
+              <text class="action-btn-text edit">编辑</text>
+            </view>
+            <view class="action-btn" hover-class="action-btn-hover" @click="handleDelete(record.id)">
+              <image class="action-btn-icon" :src="iconSrc('trash', '#d63333')" />
+              <text class="action-btn-text delete">删除</text>
+            </view>
           </view>
         </view>
       </view>
@@ -258,8 +283,8 @@ function goCycleSetting() {
     </view>
 
     <!-- 添加按钮 -->
-    <view class="fab" @click="goAddManual">
-      <text class="fab-icon">+</text>
+    <view class="fab fab-safe" hover-class="fab-hover" @click="goAddManual">
+      <image class="fab-icon-img" :src="iconSrc('plus', '#ffffff')" />
     </view>
 
     <!-- 删除确认弹窗 -->
@@ -268,8 +293,8 @@ function goCycleSetting() {
         <text class="modal-title">确认删除</text>
         <text class="modal-desc">删除后不可恢复，确定要删除这条记录吗？</text>
         <view class="modal-actions">
-          <view class="modal-btn cancel" @click="cancelDelete">取消</view>
-          <view class="modal-btn confirm" @click="confirmDelete">删除</view>
+          <view class="modal-btn cancel" hover-class="modal-btn-hover" @click="cancelDelete">取消</view>
+          <view class="modal-btn confirm" hover-class="modal-btn-danger-hover" @click="confirmDelete">删除</view>
         </view>
       </view>
     </view>
@@ -299,21 +324,32 @@ function goCycleSetting() {
   display: flex;
   align-items: center;
   justify-content: center;
+  border-radius: 50%;
+}
+
+.nav-arrow-hover {
+  background: $zhenxinjian-primary-bg;
 }
 
 .nav-arrow.disabled {
   opacity: 0.3;
 }
 
-.arrow-icon {
-  font-size: 36rpx;
-  color: $zhenxinjian-text;
+.nav-arrow-icon {
+  width: 36rpx;
+  height: 36rpx;
 }
 
 .date-center {
   display: flex;
   flex-direction: column;
   align-items: center;
+  padding: 8rpx 24rpx;
+  border-radius: $zhenxinjian-radius-md;
+}
+
+.date-center-hover {
+  background: $zhenxinjian-primary-bg;
 }
 
 .date-label {
@@ -369,14 +405,14 @@ function goCycleSetting() {
 
 .progress-bar {
   height: 16rpx;
-  background: #f0f0f0;
-  border-radius: 8rpx;
+  background: $zhenxinjian-track;
+  border-radius: $zhenxinjian-radius-pill;
   overflow: hidden;
 }
 
 .progress-fill {
   height: 100%;
-  border-radius: 8rpx;
+  border-radius: $zhenxinjian-radius-pill;
   transition: width 0.3s;
 }
 
@@ -395,25 +431,68 @@ function goCycleSetting() {
   font-weight: 600;
 }
 
-/* 建议卡 */
+/* 建议卡（琥珀浅底，warning token） */
 .advice-card {
-  background: #fffbe6;
-  border-color: #ffe58f;
+  background: $zhenxinjian-warning-bg;
+  border-color: $zhenxinjian-warning-border;
+}
+
+.advice-title-row {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  margin-bottom: 16rpx;
+}
+
+.advice-title-icon {
+  width: 32rpx;
+  height: 32rpx;
+}
+
+.advice-title {
+  margin-bottom: 0;
+}
+
+.advice-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12rpx;
+  margin-bottom: 12rpx;
+}
+
+.advice-bullet {
+  width: 28rpx;
+  height: 28rpx;
+  margin-top: 4rpx;
+  flex-shrink: 0;
 }
 
 .advice-text {
+  flex: 1;
   font-size: 24rpx;
   color: $zhenxinjian-text;
-  display: block;
-  margin-bottom: 12rpx;
   line-height: 1.6;
 }
 
+.advice-disclaimer-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8rpx;
+  margin-top: 16rpx;
+}
+
+.advice-disclaimer-icon {
+  width: 24rpx;
+  height: 24rpx;
+  margin-top: 2rpx;
+  flex-shrink: 0;
+}
+
 .advice-disclaimer {
+  flex: 1;
   font-size: 20rpx;
   color: $zhenxinjian-text-secondary;
-  display: block;
-  margin-top: 16rpx;
+  line-height: 1.5;
 }
 
 /* 餐别分组 */
@@ -437,20 +516,24 @@ function goCycleSetting() {
 }
 
 .meal-chip {
-  width: 48rpx;
-  height: 48rpx;
+  width: 56rpx;
+  height: 56rpx;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 26rpx;
-  background: #f1f5f9;
+  background: $zhenxinjian-track;
 }
 
-.meal-chip.mc1 { background: #FFF1D9; }
-.meal-chip.mc2 { background: #E3EFE9; }
-.meal-chip.mc3 { background: #e0e7ff; }
-.meal-chip.mc4 { background: #fef3c7; }
+.meal-chip-icon {
+  width: 32rpx;
+  height: 32rpx;
+}
+
+.meal-chip.mc1 { background: $zhenxinjian-warning-bg; }
+.meal-chip.mc2 { background: $zhenxinjian-primary-border; }
+.meal-chip.mc3 { background: $zhenxinjian-primary-bg; }
+.meal-chip.mc4 { background: $zhenxinjian-warning-border; }
 
 .meal-sub {
   font-size: 22rpx;
@@ -460,7 +543,14 @@ function goCycleSetting() {
 .meal-empty {
   padding: 32rpx 0;
   display: flex;
+  align-items: center;
   justify-content: center;
+  gap: 10rpx;
+}
+
+.meal-empty-icon {
+  width: 28rpx;
+  height: 28rpx;
 }
 
 .meal-empty-text {
@@ -473,7 +563,7 @@ function goCycleSetting() {
   display: flex;
   justify-content: space-between;
   padding: 20rpx 0;
-  border-bottom: 1rpx solid #f0f0f0;
+  border-bottom: 1rpx solid $zhenxinjian-divider;
 }
 
 .record-item:last-child {
@@ -522,23 +612,44 @@ function goCycleSetting() {
 
 .record-actions {
   display: flex;
-  gap: 16rpx;
+  gap: 8rpx;
 }
 
 .action-btn {
+  display: flex;
+  align-items: center;
+  gap: 4rpx;
+  min-height: 56rpx;
+  padding: 0 12rpx;
+  border-radius: $zhenxinjian-radius-sm;
+}
+
+.action-btn-hover {
+  background: $zhenxinjian-primary-bg;
+}
+
+.action-btn-icon {
+  width: 24rpx;
+  height: 24rpx;
+}
+
+.action-btn-text {
   font-size: 22rpx;
+}
+
+.action-btn-text.edit {
   color: $zhenxinjian-primary;
 }
 
-.action-btn.delete {
-  color: #f56c6c;
+.action-btn-text.delete {
+  color: $zhenxinjian-danger;
 }
 
 /* 小计 */
 .meal-total {
   margin-top: 16rpx;
   padding-top: 16rpx;
-  border-top: 1rpx solid #f0f0f0;
+  border-top: 1rpx solid $zhenxinjian-divider;
 }
 
 .meal-total-text {
@@ -569,7 +680,6 @@ function goCycleSetting() {
 .fab {
   position: fixed;
   right: 32rpx;
-  bottom: 120rpx;
   width: 96rpx;
   height: 96rpx;
   border-radius: 50%;
@@ -581,10 +691,13 @@ function goCycleSetting() {
   z-index: 10;
 }
 
-.fab-icon {
-  font-size: 48rpx;
-  color: #fff;
-  font-weight: 300;
+.fab-hover {
+  transform: scale(0.94);
+}
+
+.fab-icon-img {
+  width: 44rpx;
+  height: 44rpx;
 }
 
 /* 弹窗 */
@@ -603,8 +716,8 @@ function goCycleSetting() {
 
 .modal {
   width: 560rpx;
-  background: #fff;
-  border-radius: 16rpx;
+  background: $zhenxinjian-white;
+  border-radius: $zhenxinjian-radius-lg;
   padding: 48rpx 32rpx;
   display: flex;
   flex-direction: column;
@@ -635,7 +748,7 @@ function goCycleSetting() {
   height: 80rpx;
   line-height: 80rpx;
   text-align: center;
-  border-radius: 12rpx;
+  border-radius: $zhenxinjian-radius-md;
   font-size: 28rpx;
 }
 
@@ -645,7 +758,15 @@ function goCycleSetting() {
 }
 
 .modal-btn.confirm {
-  background: #f56c6c;
-  color: #fff;
+  background: $zhenxinjian-danger;
+  color: $zhenxinjian-white;
+}
+
+.modal-btn-hover {
+  background: $zhenxinjian-primary-bg;
+}
+
+.modal-btn-danger-hover {
+  background: $zhenxinjian-danger-deep;
 }
 </style>

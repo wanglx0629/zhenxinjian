@@ -1,5 +1,6 @@
 /**
- * 全局样式 - 能量引擎：叶绿 + 琥珀光（对齐设计系统 V2.0）
+ * 全局样式 - 能量引擎 V2.1：叶绿 + 琥珀光（对齐设计系统 V2.0）
+ * 后台视觉语言：浅色科技风（细网格 / HUD 角标 / 辉光 / 等宽数字），不做暗色模式
  * 能量渐变 = 品牌渐变 = 语义渐变（充足→不足）；超标独立警示红
  * 作者: wanglx
  */
@@ -22,20 +23,64 @@
   --zhenxinjian-warning: #FFB020;
   --zhenxinjian-danger: #FF4747;
 
+  /* 语义浅底 / 描边 / 深字（科技底专用，保证对比度） */
+  --zhenxinjian-success-bg: #e7f6f0;
+  --zhenxinjian-success-border: #b7e4d5;
+  --zhenxinjian-warning-bg: #fff5dd;
+  --zhenxinjian-warning-border: #fce2ae;
+  --zhenxinjian-warning-deep: #9a6b00;
+  --zhenxinjian-danger-bg: #ffefef;
+  --zhenxinjian-danger-border: #fbcaca;
+  --zhenxinjian-danger-deep: #d63333;
+
   /* 中性色 */
   --zhenxinjian-bg: #F4F8F6;
   --zhenxinjian-white: #ffffff;
   --zhenxinjian-text: #10312B;
   --zhenxinjian-text-regular: #1F2937;
   --zhenxinjian-text-secondary: #475569;
+  --zhenxinjian-text-placeholder: #94A3B8;
   --zhenxinjian-border: #E3EFE9;
+  --zhenxinjian-border-input: #E2E8F0;
+  --zhenxinjian-track: #edf1ef;
+  --zhenxinjian-divider: #edf1ef;
+
+  /* 科技辅助色（仅后台：数据可视化 / HUD 点缀，不作品牌行动色） */
+  --zhenxinjian-tech-cyan: #0891B2;
+  --zhenxinjian-tech-cyan-light: #22D3EE;
+  --zhenxinjian-tech-ink: #0b2a25;
 
   /* 阴影 */
   --zhenxinjian-shadow-card: 0 2px 8px rgba(0, 172, 124, 0.05), 0 8px 24px rgba(16, 49, 43, 0.06);
   --zhenxinjian-shadow-pop: 0 8px 32px rgba(16, 49, 43, 0.14);
+  --zhenxinjian-shadow-glow: 0 0 0 1px rgba(0, 172, 124, 0.18),
+    0 4px 18px rgba(0, 172, 124, 0.14);
+
+  /* 辉光（科技元素） */
+  --zhenxinjian-glow-primary: 0 0 12px rgba(0, 172, 124, 0.35);
+  --zhenxinjian-glow-cyan: 0 0 12px rgba(8, 145, 178, 0.3);
 
   /* 能量渐变（品牌 = 语义） */
   --zhenxinjian-gradient-brand: linear-gradient(135deg, #00AC7C, #FFB020);
+
+  /* 字号 / 数字字体 */
+  --zhenxinjian-font-num: 'Space Grotesk', 'DIN Alternate', 'Segoe UI', -apple-system,
+    'PingFang SC', 'Microsoft YaHei', sans-serif;
+
+  /* 圆角档位 */
+  --zhenxinjian-radius-sm: 6px;
+  --zhenxinjian-radius-md: 8px;
+  --zhenxinjian-radius-lg: 12px;
+  --zhenxinjian-radius-xl: 16px;
+
+  /* 间距档位 */
+  --zhenxinjian-sp-1: 4px;
+  --zhenxinjian-sp-2: 8px;
+  --zhenxinjian-sp-3: 12px;
+  --zhenxinjian-sp-4: 16px;
+  --zhenxinjian-sp-5: 20px;
+  --zhenxinjian-sp-6: 24px;
+  --zhenxinjian-sp-8: 32px;
 
   /* ============ Element Plus 主题定制 ============ */
   --el-color-primary: #00AC7C;
@@ -51,6 +96,14 @@
   --el-color-danger: #FF4747;
   --el-color-error: #FF4747;
 
+  --el-text-color-primary: #10312B;
+  --el-text-color-regular: #1F2937;
+  --el-text-color-secondary: #475569;
+  --el-text-color-placeholder: #94A3B8;
+
+  --el-border-color: #E3EFE9;
+  --el-border-color-light: #E3EFE9;
+  --el-border-color-lighter: #edf1ef;
   --el-border-radius-base: 8px;
   --el-border-radius-small: 6px;
   --el-border-radius-round: 24px;
@@ -68,7 +121,8 @@
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    'PingFang SC', 'Microsoft YaHei', sans-serif;
   background:
     radial-gradient(1200px 480px at 12% -10%, rgba(0, 172, 124, 0.08), transparent 55%),
     var(--zhenxinjian-bg);
@@ -81,12 +135,86 @@ a {
   color: var(--zhenxinjian-primary);
 }
 
-/* 列表页公共布局（B-T23 自 users/foods/diet-records 三页 scoped 副本收敛） */
+/* ============ 科技风通用工具 ============ */
+
+/* 细点阵网格背景（科技面板） */
+.tech-grid {
+  background-image: radial-gradient(rgba(16, 49, 43, 0.1) 1px, transparent 1px);
+  background-size: 18px 18px;
+}
+
+/* 顶部能量线（科技头卡顶部 2px 渐变线） */
+.tech-topline {
+  position: relative;
+}
+
+.tech-topline::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  border-radius: 2px 2px 0 0;
+  background: linear-gradient(90deg, #00AC7C, rgba(255, 176, 32, 0.6));
+}
+
+/* HUD 角标（四角 L 形描边） */
+.hud-corners {
+  position: relative;
+}
+
+.hud-corners::before,
+.hud-corners::after {
+  content: '';
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border-color: var(--zhenxinjian-primary);
+  border-style: solid;
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.hud-corners::before {
+  top: 8px;
+  left: 8px;
+  border-width: 1.5px 0 0 1.5px;
+}
+
+.hud-corners::after {
+  bottom: 8px;
+  right: 8px;
+  border-width: 0 1.5px 1.5px 0;
+}
+
+/* 数字 / 展示字体 */
+.num {
+  font-family: var(--zhenxinjian-font-num);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+/* 可点击卡片统一指针与过渡 */
+.clickable {
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease,
+    background-color 0.2s ease;
+}
+
+/* ============ 焦点可见（键盘导航） ============ */
+:focus-visible {
+  outline: 2px solid var(--zhenxinjian-primary);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ============ 列表页公共布局 ============ */
 .list-page {
   background: var(--zhenxinjian-white);
   border: 1px solid var(--zhenxinjian-border);
-  border-radius: 12px;
-  padding: 20px;
+  border-radius: var(--zhenxinjian-radius-lg);
+  padding: var(--zhenxinjian-sp-5);
   box-shadow: var(--zhenxinjian-shadow-card);
 }
 
@@ -94,8 +222,8 @@ a {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 16px;
+  gap: var(--zhenxinjian-sp-4);
+  margin-bottom: var(--zhenxinjian-sp-4);
   flex-wrap: wrap;
 }
 
@@ -104,4 +232,33 @@ a {
   align-items: center;
   gap: 10px;
   flex-wrap: wrap;
+}
+
+/* 筛选控件统一宽度修饰 */
+.filter-w-sm {
+  width: 120px;
+}
+
+.filter-w-md {
+  width: 160px;
+}
+
+.filter-w-lg {
+  width: 220px;
+}
+
+/* 表格行 hover 高亮（科技底） */
+.el-table tbody tr:hover > td.el-table__cell {
+  background-color: rgba(0, 172, 124, 0.05) !important;
+}
+
+/* ============ 动效节制 ============ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

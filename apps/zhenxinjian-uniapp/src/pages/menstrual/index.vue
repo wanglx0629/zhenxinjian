@@ -210,7 +210,7 @@ async function handleSave() {
 /* 当前阶段 */
 .phase-card {
   background: $zhenxinjian-primary-bg;
-  border-color: #B3E7D8;
+  border-color: $zhenxinjian-primary-border;
 }
 
 .phase-title {
@@ -271,7 +271,7 @@ async function handleSave() {
   height: 80rpx;
   line-height: 80rpx;
   border: 1rpx solid $zhenxinjian-border;
-  border-radius: 12rpx;
+  border-radius: $zhenxinjian-radius-md;
   padding: 0 24rpx;
   font-size: 30rpx;
   color: $zhenxinjian-primary;
@@ -297,7 +297,7 @@ async function handleSave() {
   line-height: 72rpx;
   text-align: center;
   border: 1rpx solid $zhenxinjian-border;
-  border-radius: 12rpx;
+  border-radius: $zhenxinjian-radius-md;
   font-size: 40rpx;
   color: $zhenxinjian-text;
 }

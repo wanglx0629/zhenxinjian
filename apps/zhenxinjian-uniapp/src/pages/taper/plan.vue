@@ -105,7 +105,7 @@ function goProfile() {
 .today-card {
   background: $zhenxinjian-gradient-brand;
   border: none;
-  color: #fff;
+  color: $zhenxinjian-white;
 }
 
 .today-head {
@@ -123,14 +123,14 @@ function goProfile() {
 
 .tag {
   padding: 4rpx 16rpx;
-  border-radius: 8rpx;
+  border-radius: $zhenxinjian-radius-sm;
   font-size: 22rpx;
   background: rgba(255, 255, 255, 0.25);
 }
 
 .tag.adjusted {
-  background: #fdf6ec;
-  color: #b88230;
+  background: $zhenxinjian-warning-bg;
+  color: $zhenxinjian-warning-deep;
 }
 
 .tag.phase {
@@ -154,7 +154,7 @@ function goProfile() {
 }
 
 .num.highlight {
-  color: #fff8e1;
+  color: $zhenxinjian-white;
 }
 
 .label {
@@ -184,7 +184,7 @@ function goProfile() {
   height: 64rpx;
   line-height: 64rpx;
   text-align: center;
-  border-radius: 12rpx;
+  border-radius: $zhenxinjian-radius-md;
   background: $zhenxinjian-primary-light;
   color: $zhenxinjian-primary;
   font-size: 32rpx;
@@ -193,8 +193,8 @@ function goProfile() {
 }
 
 .stage-badge.trigger {
-  background: #fdf6ec;
-  color: #b88230;
+  background: $zhenxinjian-warning-bg;
+  color: $zhenxinjian-warning-deep;
 }
 
 .stage-title-wrap {
@@ -223,14 +223,14 @@ function goProfile() {
 }
 
 .delta.neg {
-  color: #b88230;
+  color: $zhenxinjian-warning-deep;
 }
 
 .trigger-tag {
   padding: 2rpx 12rpx;
-  border-radius: 8rpx;
-  background: #fdf6ec;
-  color: #b88230;
+  border-radius: $zhenxinjian-radius-sm;
+  background: $zhenxinjian-warning-bg;
+  color: $zhenxinjian-warning-deep;
   font-size: 20rpx;
 }
 

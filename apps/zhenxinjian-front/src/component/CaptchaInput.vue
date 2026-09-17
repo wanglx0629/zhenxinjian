@@ -4,6 +4,7 @@
  * 作者: wanglx
  */
 import { ref, onMounted } from 'vue'
+import { Loading } from '@element-plus/icons-vue'
 import { getCaptcha } from '@/api/auth'
 
 const captcha = defineModel<string>({ default: '' })
@@ -53,7 +54,10 @@ defineExpose({ loadCaptcha })
         class="captcha-img"
         alt="验证码"
       />
-      <span v-else class="captcha-placeholder">{{ loading ? '加载中' : '点击刷新' }}</span>
+      <span v-else class="captcha-placeholder">
+        <el-icon v-if="loading" class="is-spinning"><Loading /></el-icon>
+        <template v-else>点击刷新</template>
+      </span>
     </div>
   </div>
 </template>
@@ -80,7 +84,7 @@ defineExpose({ loadCaptcha })
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  border-radius: 4px;
+  border-radius: var(--zhenxinjian-radius-sm);
   border: 1px solid var(--zhenxinjian-border);
   background: var(--zhenxinjian-white);
   overflow: hidden;
@@ -105,5 +109,15 @@ defineExpose({ loadCaptcha })
 .captcha-placeholder {
   font-size: 12px;
   color: var(--zhenxinjian-text-secondary);
+}
+
+.is-spinning {
+  animation: captcha-rotate 1s linear infinite;
+}
+
+@keyframes captcha-rotate {
+  to {
+    transform: rotate(360deg);
+  }
 }
 </style>

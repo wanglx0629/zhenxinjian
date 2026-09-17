@@ -57,14 +57,14 @@ const items = computed(() => buildProgressItems(props.summary))
 
 .progress-bar {
   height: 16rpx;
-  background: #f0f0f0;
-  border-radius: 8rpx;
+  background: $zhenxinjian-track;
+  border-radius: $zhenxinjian-radius-pill;
   overflow: hidden;
 }
 
 .progress-fill {
   height: 100%;
-  border-radius: 8rpx;
+  border-radius: $zhenxinjian-radius-pill;
   transition: width 0.3s;
 }
 

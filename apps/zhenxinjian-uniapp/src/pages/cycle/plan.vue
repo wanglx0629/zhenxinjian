@@ -181,7 +181,7 @@ function handleTerminate() {
   height: 64rpx;
   line-height: 64rpx;
   text-align: center;
-  border-radius: 12rpx;
+  border-radius: $zhenxinjian-radius-md;
   font-size: 30rpx;
   font-weight: 600;
 }
@@ -210,13 +210,13 @@ function handleTerminate() {
 
 .tag {
   padding: 4rpx 16rpx;
-  border-radius: 8rpx;
+  border-radius: $zhenxinjian-radius-sm;
   font-size: 22rpx;
 }
 
 .tag.sport {
-  background: #fdf6ec;
-  color: #b88230;
+  background: $zhenxinjian-warning-bg;
+  color: $zhenxinjian-warning-deep;
 }
 
 .tag.today-tag {
@@ -279,9 +279,9 @@ function handleTerminate() {
   height: 88rpx;
   line-height: 88rpx;
   background: $zhenxinjian-white;
-  color: #f56c6c;
+  color: $zhenxinjian-danger;
   border: 1rpx solid $zhenxinjian-border;
-  border-radius: 12rpx;
+  border-radius: $zhenxinjian-radius-md;
   font-size: 30rpx;
 }
 </style>

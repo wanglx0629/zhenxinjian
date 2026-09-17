@@ -121,9 +121,9 @@ export interface CycleDayTypeCfg {
 }
 
 export const CYCLE_DAY_TYPES: Record<number, CycleDayTypeCfg> = {
-  1: { code: 1, name: '高碳日', short: '高', color: '#F56C6C', bg: '#FEF0F0' },
+  1: { code: 1, name: '高碳日', short: '高', color: '#FF4747', bg: '#ffefef' },
   2: { code: 2, name: '中碳日', short: '中', color: '#00AC7C', bg: '#E3EFE9' },
-  3: { code: 3, name: '低碳日', short: '低', color: '#909399', bg: '#F4F4F5' }
+  3: { code: 3, name: '低碳日', short: '低', color: '#475569', bg: '#edf1ef' }
 }
 
 /** 周期天数区间（运动日多选随天数裁剪上限） */

@@ -15,8 +15,8 @@ function goHome() {
 
 <template>
   <div class="not-found">
-    <div class="nf-card">
-      <div class="nf-code">404</div>
+    <div class="nf-card hud-corners tech-topline">
+      <div class="nf-code num">404</div>
       <div class="nf-title">页面不存在或已被移除</div>
       <div class="nf-desc">请检查地址是否正确，或返回首页继续操作</div>
       <el-button type="primary" :icon="ArrowLeft" @click="goHome">返回首页</el-button>
@@ -30,18 +30,16 @@ function goHome() {
   display: flex;
   align-items: center;
   justify-content: center;
-  background:
-    radial-gradient(1200px 480px at 12% -10%, rgba(0, 172, 124, 0.10), transparent 55%),
-    var(--zhenxinjian-bg);
   padding: 24px;
 }
 
 .nf-card {
+  position: relative;
   text-align: center;
   background: var(--zhenxinjian-white);
   border: 1px solid var(--zhenxinjian-border);
-  border-radius: 16px;
-  padding: 64px 48px;
+  border-radius: var(--zhenxinjian-radius-xl);
+  padding: 60px 48px;
   box-shadow: var(--zhenxinjian-shadow-card);
   max-width: 420px;
 }

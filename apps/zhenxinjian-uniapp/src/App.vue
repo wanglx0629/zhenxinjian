@@ -63,32 +63,42 @@ page {
     sans-serif;
 }
 
-/* 公共样式层（B-T29）：面板/面板标题/主按钮全局单一真源；
-   页面漂移属性经 scoped 覆盖（scoped 选择器优先级高于全局），漂移覆盖处附注释 */
+/* ========== 卡片面板（全局单一真源） ========== */
 .panel {
   background: $zhenxinjian-white;
   border: 1rpx solid $zhenxinjian-border;
-  border-radius: 16rpx;
-  padding: 32rpx;
-  margin-bottom: 24rpx;
+  border-radius: $zhenxinjian-radius-lg;
+  padding: $zhenxinjian-sp-4;
+  margin-bottom: $zhenxinjian-sp-3;
+  box-shadow: $zhenxinjian-shadow-card;
+}
+
+/* 紧凑卡（首页/我的/食物库） */
+.card {
+  background: $zhenxinjian-white;
+  border: 1rpx solid $zhenxinjian-border;
+  border-radius: $zhenxinjian-radius-lg;
+  padding: 28rpx;
+  margin-bottom: $zhenxinjian-sp-3;
   box-shadow: $zhenxinjian-shadow-card;
 }
 
 .panel-title {
-  font-size: 32rpx;
+  font-size: 30rpx;
   font-weight: 600;
   color: $zhenxinjian-text;
-  margin-bottom: 24rpx;
+  margin-bottom: $zhenxinjian-sp-3;
   display: block;
 }
 
+/* ========== 按钮体系（高 88rpx） ========== */
 .btn-primary {
   width: 100%;
   height: 88rpx;
   line-height: 88rpx;
   background: $zhenxinjian-gradient-cta;
   color: $zhenxinjian-white;
-  border-radius: 12rpx;
+  border-radius: $zhenxinjian-radius-md;
   font-size: 30rpx;
   font-weight: 600;
   box-shadow: 0 4rpx 12rpx rgba(255, 176, 32, 0.24);
@@ -101,7 +111,12 @@ page {
   box-shadow: 0 2rpx 6rpx rgba(255, 176, 32, 0.18);
 }
 
-/* 次级按钮（teal 描边） */
+.btn-primary.disabled,
+.btn-primary[disabled] {
+  opacity: 0.55;
+}
+
+/* 次级按钮（叶绿描边） */
 .btn-secondary {
   width: 100%;
   height: 88rpx;
@@ -109,12 +124,126 @@ page {
   background: $zhenxinjian-white;
   color: $zhenxinjian-primary;
   border: 1rpx solid $zhenxinjian-primary;
-  border-radius: 12rpx;
+  border-radius: $zhenxinjian-radius-md;
   font-size: 30rpx;
   font-weight: 600;
+  transition: background 0.15s ease;
 }
 
 .btn-secondary:active {
   background: $zhenxinjian-primary-bg;
+}
+
+/* 危险按钮（白底红描边） */
+.btn-danger {
+  width: 100%;
+  height: 88rpx;
+  line-height: 88rpx;
+  background: $zhenxinjian-white;
+  color: $zhenxinjian-danger;
+  border: 1rpx solid $zhenxinjian-danger;
+  border-radius: $zhenxinjian-radius-md;
+  font-size: 30rpx;
+  font-weight: 600;
+}
+
+.btn-danger:active {
+  background: $zhenxinjian-danger-bg;
+}
+
+/* ========== 通用工具类 ========== */
+
+/* 可点击区域：统一按压缩放反馈（配合 hover-class 使用） */
+.tap {
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.tap-active {
+  transform: scale(0.97);
+}
+
+/* 文字操作按钮：保证 ≥56rpx 触控目标（编辑/删除等） */
+.action-text {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 64rpx;
+  min-height: 56rpx;
+  padding: 0 12rpx;
+  font-size: 24rpx;
+  border-radius: $zhenxinjian-radius-sm;
+}
+
+/* 数字/展示字体 + 等宽数字 */
+.num {
+  font-family: $zhenxinjian-font-num;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 底部分割线 */
+.hairline {
+  height: 1rpx;
+  background: $zhenxinjian-divider;
+}
+
+/* 页面底部安全区间距 */
+.safe-bottom {
+  padding-bottom: calc(48rpx + constant(safe-area-inset-bottom));
+  padding-bottom: calc(48rpx + env(safe-area-inset-bottom));
+}
+
+/* 固定 FAB 底部安全区 */
+.fab-safe {
+  bottom: calc(180rpx + constant(safe-area-inset-bottom));
+  bottom: calc(180rpx + env(safe-area-inset-bottom));
+}
+
+/* ========== 动效 ========== */
+
+/* 弹窗进出场 */
+.modal-mask-enter-active,
+.modal-mask-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.modal-mask-enter-from,
+.modal-mask-leave-to {
+  opacity: 0;
+}
+
+.modal-pop-enter-active {
+  transition: opacity 0.22s ease, transform 0.22s ease;
+}
+
+.modal-pop-leave-active {
+  transition: opacity 0.16s ease, transform 0.16s ease;
+}
+
+.modal-pop-enter-from {
+  opacity: 0;
+  transform: scale(0.94) translateY(12rpx);
+}
+
+.modal-pop-leave-to {
+  opacity: 0;
+  transform: scale(0.97);
+}
+
+/* 骨架屏微光（仅在加载时短暂出现） */
+@keyframes skeleton-shimmer {
+  0% {
+    opacity: 0.65;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.65;
+  }
+}
+
+.skeleton-block {
+  background: $zhenxinjian-track;
+  animation: skeleton-shimmer 1.4s ease-in-out infinite;
 }
 </style>

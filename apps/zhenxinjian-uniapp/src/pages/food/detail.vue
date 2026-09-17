@@ -10,6 +10,10 @@ import { useFoodStore } from '@/store/food'
 import type { FoodCalcVO, FoodVO } from '@/api/food'
 import { track, trackPage } from '@/utils/track'
 import { TRACK_EVENT } from '@/config/track-events'
+import { iconSrc } from '@/utils/icons'
+
+const foodPlaceholder = iconSrc('bowl', '#94A3B8')
+const calcIcon = iconSrc('target', '#00AC7C')
 
 const foodStore = useFoodStore()
 
@@ -103,7 +107,7 @@ function goAddRecord() {
       <view class="panel">
         <view class="head">
           <image v-if="food.image" :src="food.image" mode="aspectFill" class="food-hero" />
-          <view v-else class="food-hero food-hero-empty"><text class="food-hero-emoji">🥗</text></view>
+          <view v-else class="food-hero food-hero-empty"><image class="food-hero-img" :src="foodPlaceholder" /></view>
           <view class="head-info">
             <view class="head-row">
               <text class="name">{{ food.name }}</text>
@@ -135,7 +139,10 @@ function goAddRecord() {
       </view>
 
       <view class="panel">
-        <text class="panel-title">份量试算</text>
+        <view class="panel-title-row">
+          <image class="panel-title-icon" :src="calcIcon" />
+          <text class="panel-title">份量试算</text>
+        </view>
         <view class="grams-row">
           <input
             v-model="gramsInput"
@@ -145,13 +152,13 @@ function goAddRecord() {
             @input="handleGramsInput"
           />
           <text class="grams-unit">g</text>
-          <view class="serving-btn" @click="useServing">常用单份 {{ food.serving }}g</view>
+          <view class="serving-btn" hover-class="serving-btn-hover" @click="useServing">常用单份 {{ food.serving }}g</view>
         </view>
         <view class="quick">
-          <view class="quick-item" @click="setGrams(50)">50g</view>
-          <view class="quick-item" @click="setGrams(100)">100g</view>
-          <view class="quick-item" @click="setGrams(150)">150g</view>
-          <view class="quick-item" @click="setGrams(200)">200g</view>
+          <view class="quick-item" hover-class="quick-item-hover" @click="setGrams(50)">50g</view>
+          <view class="quick-item" hover-class="quick-item-hover" @click="setGrams(100)">100g</view>
+          <view class="quick-item" hover-class="quick-item-hover" @click="setGrams(150)">150g</view>
+          <view class="quick-item" hover-class="quick-item-hover" @click="setGrams(200)">200g</view>
         </view>
         <text v-if="calcErr" class="err">{{ calcErr }}</text>
 
@@ -176,7 +183,7 @@ function goAddRecord() {
       </view>
 
       <view class="add-record-area">
-        <view class="add-record-btn" @click="goAddRecord">加入记录</view>
+        <view class="add-record-btn" hover-class="add-record-btn-hover" @click="goAddRecord">加入记录</view>
       </view>
     </template>
   </view>
@@ -193,7 +200,7 @@ function goAddRecord() {
 .panel {
   background: $zhenxinjian-white;
   border: 1rpx solid $zhenxinjian-border;
-  border-radius: 16rpx;
+  border-radius: $zhenxinjian-radius-lg;
   padding: 32rpx;
   margin-bottom: 24rpx;
 }
@@ -207,7 +214,7 @@ function goAddRecord() {
 .food-hero {
   width: 128rpx;
   height: 128rpx;
-  border-radius: 16rpx;
+  border-radius: $zhenxinjian-radius-lg;
   flex-shrink: 0;
   background: $zhenxinjian-bg;
 }
@@ -216,10 +223,12 @@ function goAddRecord() {
   display: flex;
   align-items: center;
   justify-content: center;
+  background: $zhenxinjian-primary-bg;
 }
 
-.food-hero-emoji {
-  font-size: 64rpx;
+.food-hero-img {
+  width: 60rpx;
+  height: 60rpx;
 }
 
 .head-info {
@@ -242,8 +251,8 @@ function goAddRecord() {
 .tag {
   font-size: 20rpx;
   color: $zhenxinjian-primary;
-  background: $zhenxinjian-primary-light;
-  border-radius: 8rpx;
+  background: $zhenxinjian-primary-bg;
+  border-radius: $zhenxinjian-radius-sm;
   padding: 2rpx 10rpx;
 }
 
@@ -300,6 +309,22 @@ function goAddRecord() {
   display: block;
 }
 
+.panel-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  margin-bottom: 20rpx;
+}
+
+.panel-title-row .panel-title {
+  margin-bottom: 0;
+}
+
+.panel-title-icon {
+  width: 32rpx;
+  height: 32rpx;
+}
+
 .grams-row {
   display: flex;
   align-items: center;
@@ -310,7 +335,7 @@ function goAddRecord() {
   flex: 1;
   height: 80rpx;
   border: 1rpx solid $zhenxinjian-border;
-  border-radius: 12rpx;
+  border-radius: $zhenxinjian-radius-md;
   padding: 0 24rpx;
   font-size: 30rpx;
   color: $zhenxinjian-text;
@@ -324,10 +349,14 @@ function goAddRecord() {
 
 .serving-btn {
   padding: 14rpx 20rpx;
-  border-radius: 12rpx;
-  background: $zhenxinjian-primary-light;
+  border-radius: $zhenxinjian-radius-md;
+  background: $zhenxinjian-primary-bg;
   color: $zhenxinjian-primary;
   font-size: 24rpx;
+}
+
+.serving-btn-hover {
+  background: $zhenxinjian-primary-border;
 }
 
 .quick {
@@ -342,14 +371,20 @@ function goAddRecord() {
   line-height: 64rpx;
   text-align: center;
   border: 1rpx solid $zhenxinjian-border;
-  border-radius: 12rpx;
+  border-radius: $zhenxinjian-radius-md;
   font-size: 24rpx;
   color: $zhenxinjian-text;
 }
 
+.quick-item-hover {
+  border-color: $zhenxinjian-primary;
+  color: $zhenxinjian-primary;
+  background: $zhenxinjian-primary-bg;
+}
+
 .err {
   font-size: 22rpx;
-  color: #f56c6c;
+  color: $zhenxinjian-danger;
   margin-top: 12rpx;
   display: block;
 }
@@ -362,11 +397,17 @@ function goAddRecord() {
   height: 88rpx;
   line-height: 88rpx;
   text-align: center;
-  background: $zhenxinjian-primary;
-  color: #fff;
+  background: $zhenxinjian-gradient-cta;
+  color: $zhenxinjian-white;
   font-size: 30rpx;
   font-weight: 600;
-  border-radius: 12rpx;
+  border-radius: $zhenxinjian-radius-md;
+  box-shadow: 0 4rpx 12rpx rgba(255, 176, 32, 0.24);
+}
+
+.add-record-btn-hover {
+  background: $zhenxinjian-cta-active;
+  transform: scale(0.98);
 }
 
 .empty {

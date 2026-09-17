@@ -1,11 +1,19 @@
 <script setup lang="ts">
 /**
- * 主布局 - 上导航栏
+ * 主布局 - 顶部导航（浅色科技风：能量指示线 / 响应式抽屉菜单）
  * 作者: wanglx
  */
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ArrowDown } from '@element-plus/icons-vue'
+import {
+  ArrowDown,
+  DataAnalysis,
+  User,
+  Apple,
+  Document,
+  Setting,
+  Menu
+} from '@element-plus/icons-vue'
 import { useUserStore } from '@/store/user'
 import TeLogo from '@/component/TeLogo.vue'
 
@@ -15,34 +23,34 @@ const userStore = useUserStore()
 
 const isAdmin = computed(() => userStore.userInfo?.role === 'ADMIN')
 
+/** 导航项（图标统一 16px 线性） */
+const navItems = [
+  { path: '/dashboard', title: '数据看板', icon: DataAnalysis },
+  { path: '/users', title: '用户管理', icon: User },
+  { path: '/foods', title: '食物库', icon: Apple },
+  { path: '/diet-records', title: '饮食记录', icon: Document },
+  { path: '/configs', title: '系统配置', icon: Setting }
+]
+
+/** 移动端抽屉菜单 */
+const drawerOpen = ref(false)
+
+watch(
+  () => route.fullPath,
+  () => {
+    drawerOpen.value = false
+  }
+)
+
 onMounted(() => {
-  userStore.fetchUserInfo()
+  if (!userStore.userInfo?.id) {
+    userStore.fetchUserInfo()
+  }
 })
 
 async function handleLogout() {
   await userStore.logout()
-  // 导航属页面职责（store 不感知 router）
   router.push('/login')
-}
-
-function goDashboard() {
-  router.push('/dashboard')
-}
-
-function goUsers() {
-  router.push('/users')
-}
-
-function goFoods() {
-  router.push('/foods')
-}
-
-function goDietRecords() {
-  router.push('/diet-records')
-}
-
-function goConfigs() {
-  router.push('/configs')
 }
 </script>
 
@@ -50,54 +58,25 @@ function goConfigs() {
   <div class="layout">
     <header class="navbar">
       <div class="navbar-left">
-        <TeLogo />
-        <span class="brand">zhenxinjian</span>
+        <el-icon class="menu-btn" @click="drawerOpen = true"><Menu /></el-icon>
+        <router-link to="/dashboard" class="brand-box">
+          <TeLogo />
+          <span class="brand">臻心减</span>
+          <span class="brand-sub">运营控制台</span>
+        </router-link>
         <nav class="nav-links">
-          <a
-            v-if="isAdmin"
+          <router-link
+            v-for="item in navItems"
+            v-show="isAdmin"
+            :key="item.path"
+            :to="item.path"
             class="nav-link"
-            :class="{ active: route.path === '/dashboard' }"
-            href="javascript:void(0)"
-            @click="goDashboard"
+            :class="{ active: route.path.startsWith(item.path) }"
           >
-            数据看板
-          </a>
-          <a
-            v-if="isAdmin"
-            class="nav-link"
-            :class="{ active: route.path === '/users' }"
-            href="javascript:void(0)"
-            @click="goUsers"
-          >
-            用户管理
-          </a>
-          <a
-            v-if="isAdmin"
-            class="nav-link"
-            :class="{ active: route.path === '/foods' }"
-            href="javascript:void(0)"
-            @click="goFoods"
-          >
-            食物库
-          </a>
-          <a
-            v-if="isAdmin"
-            class="nav-link"
-            :class="{ active: route.path === '/diet-records' }"
-            href="javascript:void(0)"
-            @click="goDietRecords"
-          >
-            饮食记录
-          </a>
-          <a
-            v-if="isAdmin"
-            class="nav-link"
-            :class="{ active: route.path === '/configs' }"
-            href="javascript:void(0)"
-            @click="goConfigs"
-          >
-            系统配置
-          </a>
+            <el-icon><component :is="item.icon" /></el-icon>
+            <span>{{ item.title }}</span>
+            <i class="nav-indicator" />
+          </router-link>
         </nav>
       </div>
       <div class="navbar-right">
@@ -114,10 +93,28 @@ function goConfigs() {
         </el-dropdown>
       </div>
     </header>
+
+    <!-- 移动端抽屉 -->
+    <el-drawer v-model="drawerOpen" title="导航" direction="ltr" size="240px">
+      <div class="drawer-nav">
+        <router-link
+          v-for="item in navItems"
+          v-show="isAdmin"
+          :key="item.path"
+          :to="item.path"
+          class="drawer-link"
+          :class="{ active: route.path.startsWith(item.path) }"
+        >
+          <el-icon><component :is="item.icon" /></el-icon>
+          <span>{{ item.title }}</span>
+        </router-link>
+      </div>
+    </el-drawer>
+
     <main class="main-content">
       <div v-if="route.meta?.title" class="breadcrumb">
         <el-breadcrumb separator="/">
-          <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
+          <el-breadcrumb-item :to="{ path: '/dashboard' }">首页</el-breadcrumb-item>
           <el-breadcrumb-item>{{ route.meta.title }}</el-breadcrumb-item>
         </el-breadcrumb>
       </div>
@@ -134,46 +131,101 @@ function goConfigs() {
 }
 
 .navbar {
-  height: 56px;
-  background: var(--zhenxinjian-white);
+  height: 60px;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(8px);
   border-bottom: 1px solid var(--zhenxinjian-border);
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 24px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 
 .navbar-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.menu-btn {
+  display: none;
+  font-size: 22px;
+  cursor: pointer;
+  color: var(--zhenxinjian-text);
+}
+
+.brand-box {
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
 .brand {
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--zhenxinjian-primary);
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--zhenxinjian-text);
+}
+
+.brand-sub {
+  font-size: 12px;
+  color: var(--zhenxinjian-text-secondary);
+  padding: 2px 8px;
+  border: 1px solid var(--zhenxinjian-border);
+  border-radius: 999px;
 }
 
 .nav-links {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-left: 20px;
+  gap: 4px;
+  margin-left: 28px;
 }
 
 .nav-link {
-  padding: 6px 12px;
-  border-radius: 4px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: var(--zhenxinjian-radius-md);
   font-size: 14px;
-  color: var(--zhenxinjian-text);
+  color: var(--zhenxinjian-text-secondary);
+  transition: color 0.2s ease, background-color 0.2s ease;
 }
 
-.nav-link:hover,
+.nav-link .el-icon {
+  font-size: 15px;
+}
+
+.nav-link:hover {
+  color: var(--zhenxinjian-primary);
+  background: var(--zhenxinjian-primary-bg);
+}
+
 .nav-link.active {
   color: var(--zhenxinjian-primary);
-  background: var(--zhenxinjian-primary-light);
+  background: var(--zhenxinjian-primary-bg);
+  font-weight: 600;
+}
+
+/* active 底部能量指示线 */
+.nav-indicator {
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  bottom: -16px;
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, #00AC7C, rgba(255, 176, 32, 0.7));
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.nav-link.active .nav-indicator {
+  opacity: 1;
 }
 
 .navbar-right {
@@ -185,28 +237,69 @@ function goConfigs() {
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
   color: var(--zhenxinjian-text);
   font-size: 14px;
+  padding: 6px 10px;
+  border-radius: var(--zhenxinjian-radius-md);
+  transition: background-color 0.2s ease;
+}
+
+.user-name:hover {
+  background: var(--zhenxinjian-primary-bg);
 }
 
 .main-content {
   flex: 1;
-  padding: 20px 32px 40px;
+  padding: 20px 28px 40px;
   width: 100%;
+  max-width: 1600px;
+  margin: 0 auto;
 }
 
 .breadcrumb {
   margin-bottom: 16px;
 }
 
-@media (max-width: 768px) {
-  .navbar {
-    padding: 0 14px;
+.drawer-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0 12px;
+}
+
+.drawer-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 14px;
+  border-radius: var(--zhenxinjian-radius-md);
+  font-size: 15px;
+  color: var(--zhenxinjian-text-secondary);
+}
+
+.drawer-link:hover {
+  background: var(--zhenxinjian-primary-bg);
+  color: var(--zhenxinjian-primary);
+}
+
+.drawer-link.active {
+  background: var(--zhenxinjian-primary-bg);
+  color: var(--zhenxinjian-primary);
+  font-weight: 600;
+}
+
+@media (max-width: 900px) {
+  .menu-btn {
+    display: inline-flex;
   }
 
   .nav-links {
-    margin-left: 10px;
+    display: none;
+  }
+
+  .brand-sub {
+    display: none;
   }
 
   .main-content {

@@ -11,6 +11,9 @@ import { getToken } from '@/utils/storage'
 import { canSubmit } from '@/utils/throttle'
 import { track, trackPage } from '@/utils/track'
 import { TRACK_EVENT } from '@/config/track-events'
+import { iconSrc } from '@/utils/icons'
+
+const avatarPlaceholderIcon = iconSrc('body', '#94A3B8')
 
 const userStore = useUserStore()
 const loading = ref(false)
@@ -100,10 +103,10 @@ async function handleGuest() {
       <button class="avatar-btn" open-type="chooseAvatar" @chooseavatar="onChooseAvatar">
         <image v-if="avatarPath" class="avatar-img" :src="avatarPath" mode="aspectFill" />
         <view v-else class="avatar-placeholder">
-          <text class="avatar-emoji">😊</text>
+          <image class="avatar-placeholder-icon" :src="avatarPlaceholderIcon" />
         </view>
       </button>
-      <text class="profile-tip">{{ avatarPath ? '头像已选好啦，点可换' : '👆 点击选择头像' }}</text>
+      <text class="profile-tip">{{ avatarPath ? '头像已选好啦，点可换' : '点击选择头像' }}</text>
 
       <!-- 微信昵称填写（type="nickname" 聚焦拉起带微信昵称建议的键盘） -->
       <input
@@ -212,8 +215,9 @@ async function handleGuest() {
   justify-content: center;
 }
 
-.avatar-emoji {
-  font-size: 64rpx;
+.avatar-placeholder-icon {
+  width: 64rpx;
+  height: 64rpx;
 }
 
 .profile-tip {
@@ -230,7 +234,7 @@ async function handleGuest() {
   box-sizing: border-box;
   background: $zhenxinjian-white;
   border: 2rpx solid $zhenxinjian-border;
-  border-radius: 12rpx;
+  border-radius: $zhenxinjian-radius-md;
   font-size: 30rpx;
   color: $zhenxinjian-text;
 }
@@ -251,7 +255,7 @@ async function handleGuest() {
   line-height: 88rpx;
   background: $zhenxinjian-primary;
   color: $zhenxinjian-white;
-  border-radius: 12rpx;
+  border-radius: $zhenxinjian-radius-md;
   font-size: 30rpx;
 }
 
@@ -266,7 +270,7 @@ async function handleGuest() {
   background: $zhenxinjian-white;
   color: $zhenxinjian-primary;
   border: 1rpx solid $zhenxinjian-primary;
-  border-radius: 12rpx;
+  border-radius: $zhenxinjian-radius-md;
   font-size: 30rpx;
 }
 

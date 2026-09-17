@@ -29,9 +29,20 @@ const query = reactive({
   status: undefined as number | undefined
 })
 
-/** 列表查询骨架（B-T23：loading/数据/分页回调/删后回退收敛 composable） */
-const { loading, tableData, total, load, handleSearch, handlePageChange, reloadAfterDelete } =
-  usePageQuery(query, q =>
+/** 初始筛选快照（重置用） */
+const INITIAL_FILTERS = { keyword: '', categoryCode: '', source: undefined, status: undefined }
+
+const {
+  loading,
+  tableData,
+  total,
+  load,
+  handleSearch,
+  handlePageChange,
+  handleSizeChange,
+  handleReset,
+  reloadAfterDelete
+} = usePageQuery(query, q =>
     getFoodPage({
       page: q.page,
       size: q.size,
@@ -81,19 +92,20 @@ async function handleToggleStatus(row: AdminFood) {
           v-model="query.keyword"
           clearable
           placeholder="名称 / 别名"
-          style="width: 200px"
+          class="filter-w-md"
           @keyup.enter="handleSearch"
         />
-        <el-select v-model="query.categoryCode" clearable placeholder="分类" style="width: 160px">
+        <el-select v-model="query.categoryCode" clearable placeholder="分类" class="filter-w-md">
           <el-option v-for="o in FOOD_CATEGORY_OPTIONS" :key="o.value" :label="o.label" :value="o.value" />
         </el-select>
-        <el-select v-model="query.source" clearable placeholder="来源" style="width: 120px">
+        <el-select v-model="query.source" clearable placeholder="来源" class="filter-w-sm">
           <el-option v-for="o in FOOD_SOURCE_OPTIONS" :key="o.value" :label="o.label" :value="o.value" />
         </el-select>
-        <el-select v-model="query.status" clearable placeholder="状态" style="width: 120px">
+        <el-select v-model="query.status" clearable placeholder="状态" class="filter-w-sm">
           <el-option v-for="o in FOOD_STATUS_OPTIONS" :key="o.value" :label="o.label" :value="o.value" />
         </el-select>
         <el-button type="primary" @click="handleSearch">查询</el-button>
+        <el-button @click="handleReset({ ...INITIAL_FILTERS })">重置</el-button>
       </div>
       <el-button type="primary" @click="openCreate">新增内置食物</el-button>
     </div>
@@ -154,7 +166,13 @@ async function handleToggleStatus(row: AdminFood) {
       </el-table-column>
     </el-table>
 
-    <PagePager :total="total" :page="query.page" :size="query.size" @change="handlePageChange" />
+    <PagePager
+      :total="total"
+      :page="query.page"
+      :size="query.size"
+      @change="handlePageChange"
+      @size-change="handleSizeChange"
+    />
 
     <FoodEditDialog ref="editDialogRef" @saved="load" />
   </div>
@@ -162,14 +180,14 @@ async function handleToggleStatus(row: AdminFood) {
 
 <style scoped>
 .readonly-tip {
-  color: var(--zhenxinjian-text-sub, #8a8f99);
+  color: var(--zhenxinjian-text-placeholder);
   font-size: 12px;
 }
 
 .food-image {
   width: 40px;
   height: 40px;
-  border-radius: 4px;
+  border-radius: var(--zhenxinjian-radius-sm);
   display: block;
 }
 </style>

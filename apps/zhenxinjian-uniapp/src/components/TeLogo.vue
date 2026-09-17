@@ -17,14 +17,14 @@ defineProps<{
 <style scoped lang="scss">
 .te-logo {
   background: linear-gradient(135deg, $zhenxinjian-primary, $zhenxinjian-primary-light);
-  border-radius: 16rpx;
+  border-radius: $zhenxinjian-radius-lg;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .te-text {
-  color: #fff;
+  color: $zhenxinjian-white;
   font-size: 28rpx;
   font-weight: 700;
   letter-spacing: -2rpx;

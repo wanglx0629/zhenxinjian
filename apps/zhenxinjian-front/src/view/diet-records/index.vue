@@ -23,7 +23,15 @@ const query = reactive({
 })
 
 /** 列表查询骨架（B-T23：loading/数据/分页回调收敛 composable；只读页无删后回退） */
-const { loading, tableData, total, handleSearch, handlePageChange } = usePageQuery(query, q =>
+const {
+  loading,
+  tableData,
+  total,
+  handleSearch,
+  handlePageChange,
+  handleSizeChange,
+  handleReset
+} = usePageQuery(query, q =>
   getDietRecordPage({
     page: q.page,
     size: q.size,
@@ -33,6 +41,12 @@ const { loading, tableData, total, handleSearch, handlePageChange } = usePageQue
     mealType: q.mealType
   })
 )
+
+/** 重置（日期范围独立于 query，需一并清空） */
+function resetAll() {
+  dateRange.value = null
+  handleReset({ userKeyword: '', mealType: undefined })
+}
 
 function displayUser(row: { userId: number; userNickname: string | null }) {
   return row.userNickname || `用户#${row.userId}`
@@ -47,7 +61,7 @@ function displayUser(row: { userId: number; userNickname: string | null }) {
           v-model="query.userKeyword"
           clearable
           placeholder="用户 ID / 昵称"
-          style="width: 180px"
+          class="filter-w-md"
           @keyup.enter="handleSearch"
         />
         <el-date-picker
@@ -58,10 +72,11 @@ function displayUser(row: { userId: number; userNickname: string | null }) {
           start-placeholder="开始日期"
           end-placeholder="结束日期"
         />
-        <el-select v-model="query.mealType" clearable placeholder="餐别" style="width: 120px">
+        <el-select v-model="query.mealType" clearable placeholder="餐别" class="filter-w-sm">
           <el-option v-for="o in MEAL_TYPE_OPTIONS" :key="o.value" :label="o.label" :value="o.value" />
         </el-select>
         <el-button type="primary" @click="handleSearch">查询</el-button>
+        <el-button @click="resetAll">重置</el-button>
       </div>
     </div>
 
@@ -92,7 +107,13 @@ function displayUser(row: { userId: number; userNickname: string | null }) {
       <el-table-column prop="createTime" label="记录时间" width="170" />
     </el-table>
 
-    <PagePager :total="total" :page="query.page" :size="query.size" @change="handlePageChange" />
+    <PagePager
+      :total="total"
+      :page="query.page"
+      :size="query.size"
+      @change="handlePageChange"
+      @size-change="handleSizeChange"
+    />
   </div>
 </template>
 

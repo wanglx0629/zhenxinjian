@@ -9,6 +9,10 @@ import { onBackPress, onShow } from '@dcloudio/uni-app'
 import { useUserStore } from '@/store/user'
 import { canSubmit } from '@/utils/throttle'
 import { trackPage } from '@/utils/track'
+import { iconSrc } from '@/utils/icons'
+
+const expireIcon = iconSrc('alarm', '#E69A00')
+const avatarPlaceholderIcon = iconSrc('body', '#94A3B8')
 
 const userStore = useUserStore()
 const loading = ref(false)
@@ -77,7 +81,7 @@ function handleAbandon() {
 <template>
   <view class="page">
     <view class="panel">
-      <text class="icon">&#9200;</text>
+      <image class="icon" :src="expireIcon" />
       <text class="title">体验期已结束</text>
       <text class="desc">你的 3 天免费体验已到期。授权微信登录即可继续使用，体验期内的数据将自动保留到你的账号。</text>
 
@@ -86,10 +90,10 @@ function handleAbandon() {
         <button class="avatar-btn" open-type="chooseAvatar" @chooseavatar="onChooseAvatar">
           <image v-if="avatarPath" class="avatar-img" :src="avatarPath" mode="aspectFill" />
           <view v-else class="avatar-placeholder">
-            <text class="avatar-emoji">😊</text>
+            <image class="avatar-emoji" :src="avatarPlaceholderIcon" />
           </view>
         </button>
-        <text class="profile-tip">{{ avatarPath ? '头像已选好啦，点可换' : '👆 点击选择头像' }}</text>
+        <text class="profile-tip">{{ avatarPath ? '头像已选好啦，点可换' : '点击选择头像' }}</text>
 
         <!-- 微信昵称填写（type="nickname" 聚焦拉起带微信昵称建议的键盘） -->
         <input
@@ -132,7 +136,7 @@ function handleAbandon() {
   width: 100%;
   background: $zhenxinjian-white;
   border: 1rpx solid $zhenxinjian-border;
-  border-radius: 16rpx;
+  border-radius: $zhenxinjian-radius-lg;
   padding: 64rpx 48rpx;
   display: flex;
   flex-direction: column;
@@ -140,7 +144,8 @@ function handleAbandon() {
 }
 
 .icon {
-  font-size: 96rpx;
+  width: 96rpx;
+  height: 96rpx;
   margin-bottom: 24rpx;
 }
 
@@ -201,7 +206,8 @@ function handleAbandon() {
 }
 
 .avatar-emoji {
-  font-size: 56rpx;
+  width: 56rpx;
+  height: 56rpx;
 }
 
 .profile-tip {
@@ -218,7 +224,7 @@ function handleAbandon() {
   box-sizing: border-box;
   background: $zhenxinjian-bg;
   border: 2rpx solid $zhenxinjian-border;
-  border-radius: 12rpx;
+  border-radius: $zhenxinjian-radius-md;
   font-size: 30rpx;
   color: $zhenxinjian-text;
 }
@@ -239,9 +245,9 @@ function handleAbandon() {
   margin-top: 24rpx;
   margin-bottom: 0;
   background: $zhenxinjian-white;
-  color: #f56c6c;
+  color: $zhenxinjian-danger;
   border: 1rpx solid $zhenxinjian-border;
-  border-radius: 12rpx;
+  border-radius: $zhenxinjian-radius-md;
   font-size: 30rpx;
 }
 </style>

@@ -154,7 +154,7 @@ function onCancelSwitch() {
 .mode-card {
   background: $zhenxinjian-white;
   border: 2rpx solid $zhenxinjian-border;
-  border-radius: 16rpx;
+  border-radius: $zhenxinjian-radius-lg;
   padding: 32rpx;
   margin-bottom: 24rpx;
 }
@@ -179,7 +179,7 @@ function onCancelSwitch() {
 
 .mode-badge {
   padding: 4rpx 16rpx;
-  border-radius: 8rpx;
+  border-radius: $zhenxinjian-radius-sm;
   background: $zhenxinjian-primary;
   color: $zhenxinjian-white;
   font-size: 22rpx;

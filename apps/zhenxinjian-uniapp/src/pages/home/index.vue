@@ -13,11 +13,18 @@ import { useMenstrualStore } from '@/store/menstrual'
 import MacroProgress from '@/components/MacroProgress.vue'
 import OverLimitCard from '@/components/OverLimitCard.vue'
 import EmptyState from '@/components/EmptyState.vue'
-import { CYCLE_DAY_TYPES, MEAL_TYPES, MEAL_EMOJI } from '@/config/constants'
+import { CYCLE_DAY_TYPES, MEAL_TYPES } from '@/config/constants'
 import { greeting, guestLeftText, mdWeek, ymd } from '@/utils/format'
 import { getToken } from '@/utils/storage'
 import { track, trackPage } from '@/utils/track'
 import { TRACK_EVENT } from '@/config/track-events'
+import { iconSrc, ringSrc, type IconName } from '@/utils/icons'
+
+/** 餐别线性图标（替换原 emoji，H5/小程序一致） */
+const MEAL_ICONS: Record<number, IconName> = { 1: 'breakfast', 2: 'bowl', 3: 'moon', 4: 'apple' }
+function mealIcon(code: number) {
+  return iconSrc(MEAL_ICONS[code] || 'bowl', '#10312B')
+}
 
 const userStore = useUserStore()
 const dietStore = useDietStore()
@@ -60,14 +67,6 @@ const kcalBarColor = computed(() => {
   return '#FFB020'
 })
 
-/** hero 环形进度（r=52，达成率封顶 100%，颜色同三色语义） */
-const RING_LEN = 2 * Math.PI * 52
-const ringLen = RING_LEN
-const ringOffset = computed(() => {
-  const rate = Math.min(summary.value?.kcalRate ?? 0, 100) / 100
-  return RING_LEN * (1 - rate)
-})
-
 /** 模式标签：532 碳水渐降 / 碳循环 · 今日X碳日 */
 const modeTag = computed(() => {
   if (!isCycle.value) return '当前模式：532 碳水渐降'
@@ -100,11 +99,6 @@ const mealRows = computed(() => {
     return { code: m.code, name: m.name, count: g?.records.length ?? 0, kcal: g?.kcal ?? 0 }
   })
 })
-
-/** 餐别 emoji（共享自 constants，兜底 🍽️） */
-function mealEmoji(code: number) {
-  return MEAL_EMOJI[code] ?? '🍽️'
-}
 
 /** 快捷入口副文案 */
 const recordSub = computed(() => {
@@ -215,17 +209,17 @@ function goPlan() {
     <template v-else>
       <!-- 顶部渐变头卡 -->
       <view class="hero">
-        <!-- 漂浮装饰 emoji -->
-        <text class="hero-deco deco-avocado">🥑</text>
-        <text class="hero-deco deco-sparkle">✨</text>
-        <text class="hero-deco deco-clover">🍀</text>
+        <!-- 漂浮装饰图标 -->
+        <image class="hero-deco deco-avocado" :src="iconSrc('avocado', '#ffffff')" />
+        <image class="hero-deco deco-sparkle" :src="iconSrc('sparkles', '#ffffff')" />
+        <image class="hero-deco deco-clover" :src="iconSrc('leaf', '#ffffff')" />
         <view class="hero-top">
           <view class="hero-title">
             <text class="hero-date">{{ mdWeek(new Date()) }} · {{ greeting() }}</text>
             <text class="hero-hello">{{ displayName }}，今天也要好好吃饭</text>
           </view>
           <view v-if="userStore.isGuest" class="guest-badge" @click="goAuth">
-            <text class="guest-badge-label">🎁 游客体验</text>
+            <text class="guest-badge-label">游客体验</text>
             <text class="guest-badge-value">剩 {{ guestLeft }}</text>
           </view>
         </view>
@@ -234,15 +228,7 @@ function goPlan() {
           <!-- 三色环形进度 -->
           <view class="ring-wrap">
             <view class="ring-box">
-              <svg class="ring-svg" viewBox="0 0 120 120">
-                <circle cx="60" cy="60" r="52" fill="none" stroke="rgba(255,255,255,0.25)" stroke-width="10"/>
-                <circle
-                  cx="60" cy="60" r="52" fill="none"
-                  :stroke="kcalBarColor" stroke-width="10" stroke-linecap="round"
-                  :stroke-dasharray="ringLen" :stroke-dashoffset="ringOffset"
-                  transform="rotate(-90 60 60)" class="ring-progress"
-                />
-              </svg>
+              <image class="ring-svg" :src="ringSrc(summary?.kcalRate ?? 0, kcalBarColor)" />
               <view class="ring-center">
                 <text class="ring-label">已摄入</text>
                 <text class="ring-num">{{ kcalActual }}</text>
@@ -250,12 +236,12 @@ function goPlan() {
               </view>
             </view>
             <view class="hero-remain" :class="{ over: kcalRemain < 0 }">
-              {{ kcalRemain >= 0 ? `还可吃 ${kcalRemain} kcal 😋` : `已超标 ${-kcalRemain} kcal 😅` }}
+              {{ kcalRemain >= 0 ? `还可吃 ${kcalRemain} kcal` : `已超标 ${-kcalRemain} kcal` }}
             </view>
           </view>
           <text class="hero-mode">{{ modeTag }}</text>
           <text v-if="periodPhase" class="hero-period">
-            <svg class="period-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.7l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+            <image class="period-icon" :src="iconSrc('droplet', '#ffffff')" />
             {{ periodPhase }}
           </text>
         </template>
@@ -287,14 +273,20 @@ function goPlan() {
         <!-- 今日宏量进度（F09/F26） -->
         <view class="card">
           <view class="card-title-row">
-            <text class="card-title">📊 今日宏量进度</text>
+            <view class="card-title-withicon">
+              <image class="title-icon" :src="iconSrc('chart', '#00AC7C')" />
+              <text class="card-title">今日宏量进度</text>
+            </view>
             <text class="mode-switch" @click="goMode">换模式</text>
           </view>
           <MacroProgress :summary="summary" />
-          <view class="body-row" @click="goBody">
-            <svg class="body-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <view class="body-row" hover-class="body-row-hover" @click="goBody">
+            <image class="body-icon" :src="iconSrc('body', '#475569')" />
             <text class="body-brief">身体数据：{{ bodyBrief }}</text>
-            <text class="body-edit">修改 ›</text>
+            <view class="body-edit">
+              <text class="body-edit-text">修改</text>
+              <image class="body-edit-icon" :src="iconSrc('chevronRight', '#00AC7C')" />
+            </view>
           </view>
         </view>
 
@@ -315,30 +307,35 @@ function goPlan() {
 
       <!-- 快捷入口 -->
       <view class="quick-grid">
-        <view class="quick-item record" @click="goRecord">
-          <text class="quick-emoji">🍚</text>
+        <view class="quick-item record" hover-class="quick-hover" @click="goRecord">
+          <image class="quick-icon" :src="iconSrc('bowl', '#ffffff')" />
           <view class="quick-text">
             <text class="quick-label">记饮食</text>
             <text class="quick-sub">{{ recordSub }}</text>
           </view>
-          <text class="quick-arrow">›</text>
+          <image class="quick-arrow" :src="iconSrc('chevronRight', '#ffffff')" />
         </view>
-        <view class="quick-item plan" @click="goPlan">
-          <text class="quick-emoji">📅</text>
+        <view class="quick-item plan" hover-class="quick-hover" @click="goPlan">
+          <image class="quick-icon" :src="iconSrc('calendar', '#ffffff')" />
           <view class="quick-text">
             <text class="quick-label">看计划</text>
             <text class="quick-sub">{{ planSub }}</text>
           </view>
-          <text class="quick-arrow">›</text>
+          <image class="quick-arrow" :src="iconSrc('chevronRight', '#ffffff')" />
         </view>
       </view>
 
       <!-- 今日餐次 -->
-      <view class="card meals-card" @click="goRecord">
-        <text class="card-title">🍽️ 今日餐次</text>
+      <view class="card meals-card" hover-class="card-hover" @click="goRecord">
+        <view class="card-title-withicon">
+          <image class="title-icon" :src="iconSrc('utensils', '#00AC7C')" />
+          <text class="card-title">今日餐次</text>
+        </view>
         <view v-for="meal in mealRows" :key="meal.code" class="meal-row">
           <view class="meal-left">
-            <view class="meal-chip" :class="'mc' + meal.code">{{ mealEmoji(meal.code) }}</view>
+            <view class="meal-chip" :class="'mc' + meal.code">
+              <image class="meal-chip-icon" :src="mealIcon(meal.code)" />
+            </view>
             <text class="meal-name">{{ meal.name }}</text>
           </view>
           <text v-if="meal.count > 0" class="meal-val">{{ meal.kcal }} kcal · {{ meal.count }} 条</text>
@@ -348,7 +345,10 @@ function goPlan() {
     </template>
 
     <!-- 健康免责声明（常驻所有状态，不可移除） -->
-    <text class="disclaimer">📌 {{ disclaimerText }}</text>
+    <view class="disclaimer-row">
+      <image class="disclaimer-icon" :src="iconSrc('alert', '#475569')" />
+      <text class="disclaimer">{{ disclaimerText }}</text>
+    </view>
   </view>
 </template>
 
@@ -363,7 +363,7 @@ function goPlan() {
 .card {
   background: $zhenxinjian-white;
   border: 1rpx solid $zhenxinjian-border;
-  border-radius: 16rpx;
+  border-radius: $zhenxinjian-radius-lg;
   padding: 28rpx;
   margin-bottom: 24rpx;
 }
@@ -381,9 +381,21 @@ function goPlan() {
   color: $zhenxinjian-text;
 }
 
+/* 标题前线性图标 */
+.card-title-withicon {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+}
+
+.title-icon {
+  width: 34rpx;
+  height: 34rpx;
+}
+
 .mode-switch {
   padding: 6rpx 20rpx;
-  border-radius: 20rpx;
+  border-radius: $zhenxinjian-radius-pill;
   background: $zhenxinjian-primary-light;
   color: $zhenxinjian-primary;
   font-size: 22rpx;
@@ -396,14 +408,14 @@ function goPlan() {
 }
 
 .skeleton {
-  background: #e8ecef;
-  border-radius: 12rpx;
+  background: $zhenxinjian-track;
+  border-radius: $zhenxinjian-radius-md;
   margin-bottom: 20rpx;
 }
 
 .skeleton-hero {
   height: 260rpx;
-  border-radius: 16rpx;
+  border-radius: $zhenxinjian-radius-lg;
 }
 
 .skeleton-block {
@@ -438,9 +450,9 @@ function goPlan() {
 .error-btn {
   padding: 16rpx 48rpx;
   background: $zhenxinjian-primary;
-  color: #fff;
+  color: $zhenxinjian-white;
   font-size: 26rpx;
-  border-radius: 12rpx;
+  border-radius: $zhenxinjian-radius-md;
 }
 
 /* 顶部渐变头卡 */
@@ -448,14 +460,14 @@ function goPlan() {
   position: relative;
   overflow: hidden;
   background: $zhenxinjian-gradient-brand;
-  border-radius: 20rpx;
+  border-radius: $zhenxinjian-radius-xl;
   padding: 32rpx;
   margin-bottom: 24rpx;
-  color: #fff;
+  color: $zhenxinjian-white;
   box-shadow: $zhenxinjian-shadow-hero;
 }
 
-/* 漂浮装饰 emoji */
+/* 漂浮装饰图标 */
 .hero-deco {
   position: absolute;
   opacity: 0.4;
@@ -465,23 +477,24 @@ function goPlan() {
 .deco-avocado {
   top: 24rpx;
   right: 32rpx;
-  font-size: 60rpx;
-  transform: rotate(12deg);
+  width: 60rpx;
+  height: 60rpx;
 }
 
 .deco-sparkle {
   top: 110rpx;
   right: 140rpx;
-  font-size: 32rpx;
+  width: 32rpx;
+  height: 32rpx;
   opacity: 0.5;
 }
 
 .deco-clover {
   bottom: 24rpx;
   left: 24rpx;
-  font-size: 44rpx;
+  width: 44rpx;
+  height: 44rpx;
   opacity: 0.3;
-  transform: rotate(-14deg);
 }
 
 .hero-top {
@@ -509,7 +522,7 @@ function goPlan() {
 
 .guest-badge {
   background: rgba(255, 255, 255, 0.2);
-  border-radius: 16rpx;
+  border-radius: $zhenxinjian-radius-lg;
   padding: 10rpx 20rpx;
   display: flex;
   flex-direction: column;
@@ -544,10 +557,6 @@ function goPlan() {
   height: 100%;
 }
 
-.ring-progress {
-  transition: stroke-dashoffset 0.6s ease, stroke 0.3s ease;
-}
-
 .ring-center {
   position: absolute;
   top: 0;
@@ -579,7 +588,7 @@ function goPlan() {
 .hero-remain {
   margin-top: 16rpx;
   padding: 8rpx 28rpx;
-  border-radius: 28rpx;
+  border-radius: $zhenxinjian-radius-pill;
   background: rgba(255, 255, 255, 0.22);
   font-size: 24rpx;
   font-weight: 600;
@@ -604,7 +613,7 @@ function goPlan() {
   margin: 12rpx auto 0;
   width: fit-content;
   padding: 4rpx 16rpx;
-  border-radius: 20rpx;
+  border-radius: $zhenxinjian-radius-pill;
   background: rgba(255, 255, 255, 0.22);
   font-size: 22rpx;
   font-weight: 600;
@@ -621,8 +630,13 @@ function goPlan() {
   align-items: center;
   gap: 16rpx;
   margin-top: 24rpx;
-  padding-top: 20rpx;
-  border-top: 1rpx solid #eef2f1;
+  padding: 12rpx 8rpx;
+  border-top: 1rpx solid $zhenxinjian-divider;
+  border-radius: $zhenxinjian-radius-sm;
+}
+
+.body-row-hover {
+  background: $zhenxinjian-primary-bg;
 }
 
 .body-brief {
@@ -634,14 +648,24 @@ function goPlan() {
 .body-icon {
   width: 26rpx;
   height: 26rpx;
-  color: $zhenxinjian-text-secondary;
   flex-shrink: 0;
 }
 
 .body-edit {
+  display: flex;
+  align-items: center;
+  gap: 4rpx;
+}
+
+.body-edit-text {
   font-size: 22rpx;
   color: $zhenxinjian-primary;
   font-weight: 600;
+}
+
+.body-edit-icon {
+  width: 22rpx;
+  height: 22rpx;
 }
 
 /* 空态（插画与按钮收敛至 EmptyState 组件） */
@@ -658,18 +682,22 @@ function goPlan() {
 
 .quick-item {
   flex: 1;
-  border-radius: 20rpx;
+  border-radius: $zhenxinjian-radius-xl;
   padding: 28rpx 24rpx;
   display: flex;
   flex-direction: row;
   align-items: center;
   gap: 16rpx;
-  color: #fff;
+  color: $zhenxinjian-white;
   transition: transform 0.15s ease;
 }
 
-.quick-item:active {
+.quick-hover {
   transform: scale(0.96);
+}
+
+.card-hover {
+  background: $zhenxinjian-primary-bg;
 }
 
 .quick-item.record {
@@ -682,9 +710,10 @@ function goPlan() {
   box-shadow: 0 8rpx 20rpx rgba(0, 172, 124, 0.32);
 }
 
-.quick-emoji {
-  font-size: 56rpx;
-  line-height: 1;
+.quick-icon {
+  width: 48rpx;
+  height: 48rpx;
+  flex-shrink: 0;
 }
 
 .quick-text {
@@ -697,7 +726,7 @@ function goPlan() {
 .quick-label {
   font-size: 30rpx;
   font-weight: 700;
-  color: #fff;
+  color: $zhenxinjian-white;
 }
 
 .quick-sub {
@@ -706,8 +735,8 @@ function goPlan() {
 }
 
 .quick-arrow {
-  font-size: 40rpx;
-  color: rgba(255, 255, 255, 0.8);
+  width: 32rpx;
+  height: 32rpx;
 }
 
 /* 今日餐次 */
@@ -724,8 +753,9 @@ function goPlan() {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20rpx 0;
-  border-bottom: 1rpx solid #f0f0f0;
+  min-height: 88rpx;
+  padding: 12rpx 0;
+  border-bottom: 1rpx solid $zhenxinjian-divider;
 }
 
 .meal-row:last-child {
@@ -744,20 +774,24 @@ function goPlan() {
 }
 
 .meal-chip {
-  width: 52rpx;
-  height: 52rpx;
+  width: 60rpx;
+  height: 60rpx;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 28rpx;
-  background: #f1f5f9;
+  background: $zhenxinjian-primary-bg;
 }
 
-.meal-chip.mc1 { background: #FFF1D9; }
-.meal-chip.mc2 { background: #E3EFE9; }
-.meal-chip.mc3 { background: #e0e7ff; }
-.meal-chip.mc4 { background: #fef3c7; }
+.meal-chip-icon {
+  width: 36rpx;
+  height: 36rpx;
+}
+
+.meal-chip.mc1 { background: $zhenxinjian-warning-bg; }
+.meal-chip.mc2 { background: $zhenxinjian-primary-border; }
+.meal-chip.mc3 { background: $zhenxinjian-primary-bg; }
+.meal-chip.mc4 { background: $zhenxinjian-warning-border; }
 
 .meal-val {
   font-size: 24rpx;
@@ -771,11 +805,24 @@ function goPlan() {
 }
 
 /* 免责声明 */
+.disclaimer-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8rpx;
+  padding: 8rpx 16rpx 0;
+}
+
+.disclaimer-icon {
+  width: 28rpx;
+  height: 28rpx;
+  margin-top: 4rpx;
+  flex-shrink: 0;
+}
+
 .disclaimer {
-  display: block;
+  flex: 1;
   font-size: 22rpx;
   color: $zhenxinjian-text-secondary;
   line-height: 1.6;
-  padding: 8rpx 16rpx 0;
 }
 </style>

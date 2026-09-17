@@ -11,6 +11,13 @@ import type { FoodCategoryVO, FoodVO } from '@/api/food'
 import EmptyState from '@/components/EmptyState.vue'
 import { track, trackPage } from '@/utils/track'
 import { TRACK_EVENT } from '@/config/track-events'
+import { iconSrc } from '@/utils/icons'
+
+const historyIcon = iconSrc('history', '#00AC7C')
+const starIcon = iconSrc('star', '#00AC7C')
+const flameIcon = iconSrc('flame', '#00AC7C')
+const foodPlaceholder = iconSrc('bowl', '#94A3B8')
+const entryArrow = iconSrc('chevronRight', '#94A3B8')
 
 const foodStore = useFoodStore()
 
@@ -172,25 +179,34 @@ onReachBottom(() => {
     <template v-if="showDiscovery">
       <view v-if="historyList.length" class="panel">
         <view class="panel-head">
-          <text class="panel-title">🕘 历史搜索</text>
-          <text class="panel-clear" @click="clearHistory">清空</text>
+          <view class="panel-title-withicon">
+            <image class="panel-title-icon" :src="historyIcon" />
+            <text class="panel-title">历史搜索</text>
+          </view>
+          <text class="panel-clear" hover-class="panel-clear-hover" @click="clearHistory">清空</text>
         </view>
         <view class="chips">
-          <view v-for="h in historyList" :key="h" class="chip" @click="tapHistory(h)">{{ h }}</view>
+          <view v-for="h in historyList" :key="h" class="chip" hover-class="chip-hover" @click="tapHistory(h)">{{ h }}</view>
         </view>
       </view>
 
-      <view class="panel custom-entry" @click="goMyCustom">
-        <text class="custom-entry-text">⭐ 我的自定义食物</text>
-        <text class="custom-entry-arrow">›</text>
+      <view class="panel custom-entry" hover-class="custom-entry-hover" @click="goMyCustom">
+        <view class="custom-entry-left">
+          <image class="custom-entry-icon" :src="starIcon" />
+          <text class="custom-entry-text">我的自定义食物</text>
+        </view>
+        <image class="custom-entry-arrow" :src="entryArrow" />
       </view>
 
       <view class="panel">
-        <text class="panel-title">🔥 热门食物</text>
+        <view class="panel-title-withicon">
+          <image class="panel-title-icon" :src="flameIcon" />
+          <text class="panel-title">热门食物</text>
+        </view>
         <view class="food-list">
-          <view v-for="f in hotList" :key="f.id" class="food-row" @click="openDetail(f)">
+          <view v-for="f in hotList" :key="f.id" class="food-row" hover-class="food-row-hover" @click="openDetail(f)">
             <image v-if="f.image" :src="f.image" mode="aspectFill" class="food-thumb" />
-            <view v-else class="food-thumb food-thumb-empty"><text class="food-thumb-emoji">🥗</text></view>
+            <view v-else class="food-thumb food-thumb-empty"><image class="food-thumb-img" :src="foodPlaceholder" /></view>
             <view class="food-main">
               <text class="food-name">{{ f.name }}</text>
               <text v-if="f.alias" class="food-alias">{{ f.alias }}</text>
@@ -208,9 +224,9 @@ onReachBottom(() => {
       <view v-if="records.length" class="panel">
         <text class="panel-title">共 {{ total }} 个结果</text>
         <view class="food-list">
-          <view v-for="f in records" :key="f.id" class="food-row" @click="openDetail(f)">
+          <view v-for="f in records" :key="f.id" class="food-row" hover-class="food-row-hover" @click="openDetail(f)">
             <image v-if="f.image" :src="f.image" mode="aspectFill" class="food-thumb" />
-            <view v-else class="food-thumb food-thumb-empty"><text class="food-thumb-emoji">🥗</text></view>
+            <view v-else class="food-thumb food-thumb-empty"><image class="food-thumb-img" :src="foodPlaceholder" /></view>
             <view class="food-main">
               <view class="food-name-wrap">
                 <text class="food-name">{{ f.name }}</text>
@@ -254,7 +270,7 @@ onReachBottom(() => {
   height: 80rpx;
   background: $zhenxinjian-white;
   border: 1rpx solid $zhenxinjian-border;
-  border-radius: 40rpx;
+  border-radius: $zhenxinjian-radius-pill;
   padding: 0 32rpx;
   font-size: 28rpx;
   color: $zhenxinjian-text;
@@ -281,7 +297,7 @@ onReachBottom(() => {
 .cat-item {
   display: inline-block;
   padding: 12rpx 24rpx;
-  border-radius: 32rpx;
+  border-radius: $zhenxinjian-radius-pill;
   background: $zhenxinjian-white;
   border: 1rpx solid $zhenxinjian-border;
   font-size: 24rpx;
@@ -296,9 +312,9 @@ onReachBottom(() => {
 
 .degrade-tip {
   padding: 16rpx 24rpx;
-  background: $zhenxinjian-primary-light;
+  background: $zhenxinjian-primary-bg;
   color: $zhenxinjian-primary;
-  border-radius: 12rpx;
+  border-radius: $zhenxinjian-radius-md;
   font-size: 24rpx;
   margin-bottom: 20rpx;
 }
@@ -307,7 +323,7 @@ onReachBottom(() => {
 .panel {
   background: $zhenxinjian-white;
   border: 1rpx solid $zhenxinjian-border;
-  border-radius: 16rpx;
+  border-radius: $zhenxinjian-radius-lg;
   padding: 28rpx;
   margin-bottom: 24rpx;
 }
@@ -318,20 +334,47 @@ onReachBottom(() => {
   align-items: center;
 }
 
+.custom-entry-hover {
+  background: $zhenxinjian-primary-bg;
+}
+
+.custom-entry-left {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.custom-entry-icon {
+  width: 32rpx;
+  height: 32rpx;
+}
+
 .custom-entry-text {
   font-size: 28rpx;
   color: $zhenxinjian-text;
 }
 
 .custom-entry-arrow {
-  font-size: 32rpx;
-  color: $zhenxinjian-text-secondary;
+  width: 28rpx;
+  height: 28rpx;
 }
 
 .panel-head {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 20rpx;
+}
+
+.panel-title-withicon {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+}
+
+.panel-title-icon {
+  width: 32rpx;
+  height: 32rpx;
 }
 
 /* B-T29 漂移覆盖：margin-bottom 20rpx 区别于全局 24rpx */
@@ -343,9 +386,18 @@ onReachBottom(() => {
   display: block;
 }
 
+.panel-title-withicon .panel-title {
+  margin-bottom: 0;
+}
+
 .panel-clear {
   font-size: 24rpx;
   color: $zhenxinjian-text-secondary;
+  padding: 8rpx 12rpx;
+}
+
+.panel-clear-hover {
+  color: $zhenxinjian-danger;
 }
 
 .chips {
@@ -356,11 +408,17 @@ onReachBottom(() => {
 
 .chip {
   padding: 10rpx 24rpx;
-  border-radius: 24rpx;
+  border-radius: $zhenxinjian-radius-pill;
   background: $zhenxinjian-bg;
   border: 1rpx solid $zhenxinjian-border;
   color: $zhenxinjian-text;
   font-size: 24rpx;
+}
+
+.chip-hover {
+  background: $zhenxinjian-primary-bg;
+  border-color: $zhenxinjian-primary;
+  color: $zhenxinjian-primary;
 }
 
 .food-list {
@@ -372,18 +430,23 @@ onReachBottom(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20rpx 0;
-  border-bottom: 1rpx solid $zhenxinjian-bg;
+  padding: 20rpx 8rpx;
+  border-bottom: 1rpx solid $zhenxinjian-divider;
+  border-radius: $zhenxinjian-radius-sm;
 }
 
 .food-row:last-child {
   border-bottom: none;
 }
 
+.food-row-hover {
+  background: $zhenxinjian-primary-bg;
+}
+
 .food-thumb {
   width: 88rpx;
   height: 88rpx;
-  border-radius: 12rpx;
+  border-radius: $zhenxinjian-radius-md;
   flex-shrink: 0;
   margin-right: 20rpx;
   background: $zhenxinjian-bg;
@@ -395,8 +458,9 @@ onReachBottom(() => {
   justify-content: center;
 }
 
-.food-thumb-emoji {
-  font-size: 44rpx;
+.food-thumb-img {
+  width: 44rpx;
+  height: 44rpx;
 }
 
 .food-main {
@@ -420,8 +484,8 @@ onReachBottom(() => {
 .food-tag {
   font-size: 20rpx;
   color: $zhenxinjian-primary;
-  background: $zhenxinjian-primary-light;
-  border-radius: 8rpx;
+  background: $zhenxinjian-primary-bg;
+  border-radius: $zhenxinjian-radius-sm;
   padding: 2rpx 10rpx;
 }
 

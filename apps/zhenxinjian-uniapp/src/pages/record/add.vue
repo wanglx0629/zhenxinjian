@@ -13,6 +13,11 @@ import { ymd } from '@/utils/format'
 import { checkKcalConsistency } from '@/utils/validate'
 import { track, trackPage } from '@/utils/track'
 import { TRACK_EVENT } from '@/config/track-events'
+import { iconSrc } from '@/utils/icons'
+
+const cameraIcon = iconSrc('camera', '#ffffff')
+const ocrArrow = iconSrc('chevronRight', '#ffffff')
+const foodPlaceholder = iconSrc('bowl', '#94A3B8')
 
 const dietStore = useDietStore()
 const foodStore = useFoodStore()
@@ -263,13 +268,13 @@ async function handleSubmit() {
 <template>
   <view class="page">
     <!-- 拍照识别入口 -->
-    <view class="ocr-entry" @click="goRecognize">
-      <text class="ocr-emoji">📸</text>
+    <view class="ocr-entry" hover-class="ocr-entry-hover" @click="goRecognize">
+      <image class="ocr-icon" :src="cameraIcon" />
       <view class="ocr-text">
         <text class="ocr-title">拍照识别食物</text>
         <text class="ocr-desc">拍一张食物图，AI 自动识别营养并记录</text>
       </view>
-      <text class="ocr-arrow">›</text>
+      <image class="ocr-arrow" :src="ocrArrow" />
     </view>
 
     <!-- 餐别选择 -->
@@ -300,7 +305,7 @@ async function handleSubmit() {
       <view class="panel">
         <view class="food-head">
           <image v-if="food.image" :src="food.image" mode="aspectFill" class="food-thumb" />
-          <view v-else class="food-thumb food-thumb-empty"><text class="food-thumb-emoji">🥗</text></view>
+          <view v-else class="food-thumb food-thumb-empty"><image class="food-thumb-img" :src="foodPlaceholder" /></view>
           <text class="food-name">{{ food.name }}</text>
           <text v-if="food.source === 2" class="tag">自定义</text>
         </view>
@@ -372,7 +377,7 @@ async function handleSubmit() {
 
     <!-- 提交 -->
     <view class="submit-area">
-      <view class="submit-btn" :class="{ disabled: dietStore.submitting }" @click="handleSubmit">
+      <view class="submit-btn" hover-class="submit-btn-hover" :class="{ disabled: dietStore.submitting }" @click="handleSubmit">
         {{ dietStore.submitting ? '提交中...' : (editId ? '确认修改' : '确认记录') }}
       </view>
     </view>
@@ -390,7 +395,7 @@ async function handleSubmit() {
 .panel {
   background: $zhenxinjian-white;
   border: 1rpx solid $zhenxinjian-border;
-  border-radius: 16rpx;
+  border-radius: $zhenxinjian-radius-lg;
   padding: 32rpx;
   margin-bottom: 24rpx;
 }
@@ -401,18 +406,20 @@ async function handleSubmit() {
   align-items: center;
   gap: 20rpx;
   background: $zhenxinjian-gradient-cta;
-  border-radius: 16rpx;
+  border-radius: $zhenxinjian-radius-lg;
   padding: 28rpx 32rpx;
   margin-bottom: 24rpx;
   box-shadow: $zhenxinjian-shadow-fab;
 }
 
-.ocr-entry:active {
+.ocr-entry-hover {
   transform: scale(0.99);
 }
 
-.ocr-emoji {
-  font-size: 52rpx;
+.ocr-icon {
+  width: 52rpx;
+  height: 52rpx;
+  flex-shrink: 0;
 }
 
 .ocr-text {
@@ -424,7 +431,7 @@ async function handleSubmit() {
 .ocr-title {
   font-size: 30rpx;
   font-weight: 600;
-  color: #fff;
+  color: $zhenxinjian-white;
 }
 
 .ocr-desc {
@@ -434,8 +441,9 @@ async function handleSubmit() {
 }
 
 .ocr-arrow {
-  font-size: 44rpx;
-  color: #fff;
+  width: 36rpx;
+  height: 36rpx;
+  flex-shrink: 0;
 }
 
 .panel-title {
@@ -458,14 +466,14 @@ async function handleSubmit() {
   line-height: 72rpx;
   text-align: center;
   border: 1rpx solid $zhenxinjian-border;
-  border-radius: 12rpx;
+  border-radius: $zhenxinjian-radius-md;
   font-size: 26rpx;
   color: $zhenxinjian-text;
 }
 
 .meal-tab.active {
   background: $zhenxinjian-primary;
-  color: #fff;
+  color: $zhenxinjian-white;
   border-color: $zhenxinjian-primary;
 }
 
@@ -481,14 +489,14 @@ async function handleSubmit() {
   line-height: 72rpx;
   text-align: center;
   border: 1rpx solid $zhenxinjian-border;
-  border-radius: 12rpx;
+  border-radius: $zhenxinjian-radius-md;
   font-size: 26rpx;
   color: $zhenxinjian-text;
 }
 
 .mode-tab.active {
   background: $zhenxinjian-primary;
-  color: #fff;
+  color: $zhenxinjian-white;
   border-color: $zhenxinjian-primary;
 }
 
@@ -502,7 +510,7 @@ async function handleSubmit() {
 .food-thumb {
   width: 88rpx;
   height: 88rpx;
-  border-radius: 12rpx;
+  border-radius: $zhenxinjian-radius-md;
   flex-shrink: 0;
   background: $zhenxinjian-bg;
 }
@@ -511,10 +519,12 @@ async function handleSubmit() {
   display: flex;
   align-items: center;
   justify-content: center;
+  background: $zhenxinjian-primary-bg;
 }
 
-.food-thumb-emoji {
-  font-size: 44rpx;
+.food-thumb-img {
+  width: 44rpx;
+  height: 44rpx;
 }
 
 .food-name {
@@ -526,8 +536,8 @@ async function handleSubmit() {
 .tag {
   font-size: 20rpx;
   color: $zhenxinjian-primary;
-  background: $zhenxinjian-primary-light;
-  border-radius: 8rpx;
+  background: $zhenxinjian-primary-bg;
+  border-radius: $zhenxinjian-radius-sm;
   padding: 2rpx 10rpx;
 }
 
@@ -579,7 +589,7 @@ async function handleSubmit() {
   flex: 1;
   height: 80rpx;
   border: 1rpx solid $zhenxinjian-border;
-  border-radius: 12rpx;
+  border-radius: $zhenxinjian-radius-md;
   padding: 0 24rpx;
   font-size: 30rpx;
   color: $zhenxinjian-text;
@@ -621,7 +631,7 @@ async function handleSubmit() {
 .field-input {
   height: 80rpx;
   border: 1rpx solid $zhenxinjian-border;
-  border-radius: 12rpx;
+  border-radius: $zhenxinjian-radius-md;
   padding: 0 24rpx;
   font-size: 28rpx;
   color: $zhenxinjian-text;
@@ -631,7 +641,7 @@ async function handleSubmit() {
 
 .err {
   font-size: 22rpx;
-  color: #f56c6c;
+  color: $zhenxinjian-danger;
   margin-top: 12rpx;
   display: block;
 }
@@ -653,10 +663,14 @@ async function handleSubmit() {
   line-height: 88rpx;
   text-align: center;
   background: $zhenxinjian-primary;
-  color: #fff;
+  color: $zhenxinjian-white;
   font-size: 30rpx;
   font-weight: 600;
-  border-radius: 12rpx;
+  border-radius: $zhenxinjian-radius-md;
+}
+
+.submit-btn-hover {
+  background: $zhenxinjian-primary-dark;
 }
 
 .submit-btn.disabled {

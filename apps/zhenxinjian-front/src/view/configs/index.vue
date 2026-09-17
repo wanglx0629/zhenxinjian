@@ -18,7 +18,16 @@ const query = reactive({
   keyword: ''
 })
 
-const { loading, tableData, total, load, handleSearch, handlePageChange } = usePageQuery(
+const {
+  loading,
+  tableData,
+  total,
+  load,
+  handleSearch,
+  handlePageChange,
+  handleSizeChange,
+  handleReset
+} = usePageQuery(
   query,
   q => getConfigPage({ page: q.page, size: q.size, keyword: q.keyword || undefined })
 )
@@ -121,10 +130,11 @@ async function handleToggleStatus(row: ProjectConfig) {
           v-model="query.keyword"
           clearable
           placeholder="配置键 / 备注"
-          style="width: 220px"
+          class="filter-w-lg"
           @keyup.enter="handleSearch"
         />
         <el-button type="primary" @click="handleSearch">查询</el-button>
+        <el-button @click="handleReset({ keyword: '' })">重置</el-button>
       </div>
       <el-button type="primary" @click="openCreate">新增配置</el-button>
     </div>
@@ -158,7 +168,13 @@ async function handleToggleStatus(row: ProjectConfig) {
       </el-table-column>
     </el-table>
 
-    <PagePager :total="total" :page="query.page" :size="query.size" @change="handlePageChange" />
+    <PagePager
+      :total="total"
+      :page="query.page"
+      :size="query.size"
+      @change="handlePageChange"
+      @size-change="handleSizeChange"
+    />
 
     <el-dialog v-model="dialogVisible" :title="dialogTitle" width="520px" destroy-on-close>
       <el-form ref="formRef" :model="form" :rules="rules" label-width="90px">
@@ -197,7 +213,7 @@ async function handleToggleStatus(row: ProjectConfig) {
 
 <style scoped>
 .secret-value {
-  color: var(--zhenxinjian-text-sub, #8a8f99);
+  color: var(--zhenxinjian-text-placeholder);
   letter-spacing: 2px;
 }
 </style>

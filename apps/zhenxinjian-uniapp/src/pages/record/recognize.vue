@@ -12,6 +12,10 @@ import { MEAL_TYPES } from '@/config/constants'
 import { track, trackPage } from '@/utils/track'
 import { TRACK_EVENT } from '@/config/track-events'
 import EmptyState from '@/components/EmptyState.vue'
+import { iconSrc } from '@/utils/icons'
+
+const cameraIcon = iconSrc('camera', '#008A63')
+const checkIcon = iconSrc('check', '#ffffff')
 
 const dietStore = useDietStore()
 
@@ -163,7 +167,7 @@ async function handleSave() {
     <view class="panel picker-panel" @click="chooseImage">
       <image v-if="imagePath && phase !== 'idle'" :src="imagePath" mode="aspectFill" class="preview-img" />
       <view v-else class="picker-placeholder">
-        <text class="picker-emoji">📸</text>
+        <image class="picker-icon" :src="cameraIcon" />
         <text class="picker-text">拍照 / 从相册选一张食物图</text>
         <text class="picker-hint">支持 jpg、png、webp，≤10MB</text>
       </view>
@@ -196,7 +200,7 @@ async function handleSave() {
       <view v-for="(item, idx) in candidates" :key="idx" class="panel candidate-card">
         <view class="candidate-head" @click="item.checked = !item.checked">
           <view class="checkbox" :class="{ checked: item.checked }">
-            <text v-if="item.checked" class="checkbox-tick">✓</text>
+            <image v-if="item.checked" class="checkbox-tick" :src="checkIcon" />
           </view>
           <text class="candidate-name">{{ item.name }}</text>
         </view>
@@ -234,7 +238,7 @@ async function handleSave() {
 
       <view class="submit-bar">
         <text class="submit-count">已选 {{ selectedItems.length }} 项</text>
-        <view class="submit-btn" :class="{ disabled: dietStore.submitting || selectedItems.length === 0 }" @click="handleSave">
+        <view class="submit-btn" hover-class="submit-btn-hover" :class="{ disabled: dietStore.submitting || selectedItems.length === 0 }" @click="handleSave">
           {{ dietStore.submitting ? '保存中...' : '加入今日记录' }}
         </view>
       </view>
@@ -253,7 +257,7 @@ async function handleSave() {
 .panel {
   background: $zhenxinjian-white;
   border: 1rpx solid $zhenxinjian-border;
-  border-radius: 16rpx;
+  border-radius: $zhenxinjian-radius-lg;
   padding: 32rpx;
   margin-bottom: 24rpx;
   box-shadow: $zhenxinjian-shadow-card;
@@ -279,14 +283,14 @@ async function handleSave() {
   line-height: 72rpx;
   text-align: center;
   border: 1rpx solid $zhenxinjian-border-input;
-  border-radius: 12rpx;
+  border-radius: $zhenxinjian-radius-md;
   font-size: 26rpx;
   color: $zhenxinjian-text;
 }
 
 .meal-tab.active {
   background: $zhenxinjian-gradient-brand;
-  color: #fff;
+  color: $zhenxinjian-white;
   border-color: $zhenxinjian-primary;
 }
 
@@ -309,12 +313,13 @@ async function handleSave() {
   align-items: center;
   padding: 64rpx 32rpx;
   border: 2rpx dashed $zhenxinjian-primary-lighter;
-  border-radius: 12rpx;
+  border-radius: $zhenxinjian-radius-md;
   background: $zhenxinjian-primary-bg;
 }
 
-.picker-emoji {
-  font-size: 72rpx;
+.picker-icon {
+  width: 72rpx;
+  height: 72rpx;
   margin-bottom: 16rpx;
 }
 
@@ -350,9 +355,9 @@ async function handleSave() {
   right: 20rpx;
   bottom: 20rpx;
   padding: 10rpx 28rpx;
-  border-radius: 28rpx;
+  border-radius: $zhenxinjian-radius-pill;
   background: rgba(0, 172, 124, 0.88);
-  color: #fff;
+  color: $zhenxinjian-white;
   font-size: 24rpx;
 }
 
@@ -380,9 +385,8 @@ async function handleSave() {
 }
 
 .checkbox-tick {
-  color: #fff;
-  font-size: 24rpx;
-  font-weight: 700;
+  width: 24rpx;
+  height: 24rpx;
 }
 
 .candidate-name {
@@ -446,7 +450,7 @@ async function handleSave() {
   flex: 1;
   height: 72rpx;
   border: 1rpx solid $zhenxinjian-border-input;
-  border-radius: 12rpx;
+  border-radius: $zhenxinjian-radius-md;
   padding: 0 24rpx;
   font-size: 28rpx;
   color: $zhenxinjian-text;
@@ -497,14 +501,14 @@ async function handleSave() {
   line-height: 88rpx;
   text-align: center;
   background: $zhenxinjian-gradient-cta;
-  color: #fff;
+  color: $zhenxinjian-white;
   font-size: 30rpx;
   font-weight: 600;
-  border-radius: 44rpx;
+  border-radius: $zhenxinjian-radius-pill;
   box-shadow: $zhenxinjian-shadow-fab;
 }
 
-.submit-btn:active {
+.submit-btn-hover {
   background: $zhenxinjian-cta-active;
 }
 

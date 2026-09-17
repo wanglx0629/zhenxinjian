@@ -190,6 +190,33 @@ P01 游客引导 · P02 首页总览 · P03 身体数据 · P04 代谢结果 · 
 - 页面/组件内旧色硬编码已于 `2026-09-16-page-color-migration` 全量清除（双端 `Grep` V1.1 色值零残留）；能量环组件实现、Space Grotesk 字体文件仍列入后续变更
 - 回滚 = `git revert`
 
+## 9. V2.1 增量 — 令牌补全与图标线性化（2026-09-17）
+
+> 背景：V2.0 只换了主色板，页面仍残留 EP 时代的语义浅底（`#fef0f0/#fdf6ec/#fff7f7`）、裸圆角数值（8/12/16/20rpx）与 emoji 充当图标。V2.1 补齐语义浅底 / 圆角 / 间距 / 字体令牌，并以统一线性 SVG 图标库替换全部 emoji。落地见本次「能量引擎双端 token 与页面迁移」。
+
+### 9.1 语义浅底 / 中性令牌（`uni.scss`）
+
+| Token | 值 | 用途 |
+| ---- | ---- | ---- |
+| success-bg / -border | `#e7f6f0` / `#b7e4d5` | 充足浅底/描边 |
+| warning-bg / -border / -deep | `#fff5dd` / `#fce2ae` / `#9a6b00` | 不足浅底/描边/深字（白底对比 ≥4.5:1） |
+| danger-bg / -border / -deep | `#ffefef` / `#fbcaca` / `#d63333` | 超标浅底/描边/深字（白底对比 ≥4.5:1） |
+| track / divider | `#edf1ef` | 进度槽 / 分割线（冷调微绿，替换 `#f0f0f0`） |
+
+### 9.2 圆角 / 间距 / 字体档位
+
+- 圆角：`radius-sm 8rpx`（标签）· `radius-md 12rpx`（按钮/输入/小控件）· `radius-lg 16rpx`（卡片/面板）· `radius-xl 20rpx`（hero/彩砖）· `radius-pill 999rpx`（胶囊 chip、半高圆按钮、进度槽、搜索框、FAB）
+- 间距：`sp-1 8` · `sp-2 16` · `sp-3 24` · `sp-4 32` · `sp-5 40` · `sp-6 48` · `sp-8 64`（rpx）
+- 数字字体：`$zhenxinjian-font-num`（Space Grotesk 栈，字体文件落地前自然降级）
+- 规则：`<style>` 内禁止裸写 8/12/16/20rpx 圆角与品牌色 hex，一律引用令牌；唯一例外是品牌 App 图标（guide 页 160rpx logo 的 40rpx 大圆角，超出卡片圆角档位，刻意保留）
+
+### 9.3 线性图标库（`src/utils/icons.ts`）
+
+- `iconSrc(name, color, sw)`：统一 24 viewBox / round 线帽 SVG，经 `encodeURIComponent` 编为 data-uri，由 `<image>` 渲染；mp-weixin 不支持内联 `<svg>`，data-uri 方案 H5/小程序双端兼容，带缓存
+- `ringSrc(percent, color)`：三色环形进度 data-uri（0–100 封顶）
+- 全量替换页面/组件中的 emoji 与 HTML 实体字形（📸🥗›&#9200; 等）；空态插画仍由 `EmptyState.vue` 内置多色 SVG 承担
+- SCSS 变量在 `<script>` 不可用，故 JS 侧图标着色直接写 V2 色值：品牌 `#00AC7C`、白底 `#ffffff`、深警示 `#d63333`、深琥珀 `#9a6b00`、次要灰 `#8a8f99/#94A3B8/#475569`；`<switch color="#00AC7C">` 等原生属性同理（取值与令牌严格一致）
+
 ***
 
-> **文档版本**：V2.0　**最后更新**：2026-09-16　**维护**：臻心减项目组
+> **文档版本**：V2.1　**最后更新**：2026-09-17　**维护**：臻心减项目组

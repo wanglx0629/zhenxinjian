@@ -1,6 +1,6 @@
 <script setup lang="ts">
 /**
- * 登录页
+ * 登录页（浅色科技风：点阵网格 + 能量光晕 + HUD 角标）
  * 作者: wanglx
  */
 import { ref } from 'vue'
@@ -55,18 +55,30 @@ async function handleLogin() {
 
 <template>
   <div class="auth-page">
-    <div class="auth-card">
+    <!-- 科技装饰层 -->
+    <div class="bg-grid" />
+    <div class="bg-glow glow-1" />
+    <div class="bg-glow glow-2" />
+
+    <div class="auth-card hud-corners tech-topline">
       <div class="auth-header">
-        <TeLogo />
-        <h2>登录 zhenxinjian</h2>
-        <p class="subtitle">生活化减脂 · 管理后台</p>
+        <TeLogo :size="40" />
+        <h2>臻心减 运营控制台</h2>
+        <p class="subtitle">生活化减脂 · 数据驱动的健康管理</p>
       </div>
       <el-form :model="form" label-width="0" @submit.prevent="handleLogin">
         <el-form-item>
-          <el-input v-model="form.username" placeholder="用户名" prefix-icon="User" />
+          <el-input v-model="form.username" placeholder="用户名" :prefix-icon="'User'" size="large" />
         </el-form-item>
         <el-form-item>
-          <el-input v-model="form.password" type="password" placeholder="密码" prefix-icon="Lock" show-password />
+          <el-input
+            v-model="form.password"
+            type="password"
+            placeholder="密码"
+            :prefix-icon="'Lock'"
+            show-password
+            size="large"
+          />
         </el-form-item>
         <el-form-item>
           <CaptchaInput
@@ -76,8 +88,15 @@ async function handleLogin() {
           />
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" :loading="loading" :disabled="loading" native-type="submit" class="submit-btn">
-            登录
+          <el-button
+            type="primary"
+            :loading="loading"
+            :disabled="loading"
+            native-type="submit"
+            size="large"
+            class="submit-btn"
+          >
+            登 录
           </el-button>
         </el-form-item>
       </el-form>
@@ -87,52 +106,80 @@ async function handleLogin() {
 
 <style scoped>
 .auth-page {
+  position: relative;
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  background:
-    radial-gradient(1200px 480px at 12% -10%, rgba(0, 172, 124, 0.12), transparent 55%),
-    #F4F8F6;
+  padding: 20px;
+  overflow: hidden;
+  background: var(--zhenxinjian-bg);
+}
+
+/* 点阵网格 */
+.bg-grid {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(16, 49, 43, 0.12) 1px, transparent 1px);
+  background-size: 22px 22px;
+  mask-image: radial-gradient(ellipse 80% 70% at 50% 45%, black 30%, transparent 75%);
+}
+
+/* 能量光晕 */
+.bg-glow {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+}
+
+.glow-1 {
+  width: 420px;
+  height: 420px;
+  background: rgba(0, 172, 124, 0.14);
+  top: -120px;
+  left: -80px;
+}
+
+.glow-2 {
+  width: 380px;
+  height: 380px;
+  background: rgba(255, 176, 32, 0.1);
+  bottom: -120px;
+  right: -60px;
 }
 
 .auth-card {
+  position: relative;
   width: 400px;
-  padding: 40px;
-  background: var(--zhenxinjian-white);
-  border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(0, 172, 124, 0.18), 0 2px 8px rgba(0, 172, 124, 0.06);
+  max-width: 100%;
+  padding: 38px 36px 28px;
+  background: rgba(255, 255, 255, 0.96);
+  border-radius: var(--zhenxinjian-radius-xl);
+  box-shadow: var(--zhenxinjian-shadow-glow);
   border: 1px solid var(--zhenxinjian-primary-border);
 }
 
 .auth-header {
   text-align: center;
-  margin-bottom: 32px;
+  margin-bottom: 28px;
 }
 
 .auth-header h2 {
-  margin-top: 12px;
+  margin-top: 14px;
   color: var(--zhenxinjian-text);
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 700;
 }
 
 .subtitle {
-  color: var(--zhenxinjian-primary);
+  color: var(--zhenxinjian-text-secondary);
   font-size: 13px;
-  margin-top: 6px;
-  font-weight: 500;
-  letter-spacing: 0.5px;
+  margin-top: 8px;
 }
 
 .submit-btn {
   width: 100%;
-}
-
-.auth-footer {
-  text-align: center;
-  margin-top: 16px;
-  font-size: 14px;
-  color: var(--zhenxinjian-text-secondary);
+  font-weight: 600;
+  letter-spacing: 2px;
 }
 </style>
