@@ -6,6 +6,7 @@
 import { onLaunch } from '@dcloudio/uni-app'
 import { getToken } from '@/utils/storage'
 import { startTrackFlushTimer } from '@/utils/track'
+import { preloadMpPages } from '@/utils/preload'
 
 // #ifdef MP-WEIXIN
 /** 微信隐私授权检查（B-T34 发布就绪）：未授权时触发微信官方隐私授权弹窗；
@@ -47,6 +48,7 @@ onLaunch(() => {
   // #ifdef MP-WEIXIN
   initPrivacyAuth()
   checkAppUpdate()
+  preloadMpPages()
   // #endif
   // pages.json 首页为 auth/guide（P01）；已登录（游客或正式）直接进首页
   if (getToken()) {
