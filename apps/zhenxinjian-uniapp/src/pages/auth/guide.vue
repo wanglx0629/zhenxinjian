@@ -49,6 +49,16 @@ function onChooseAvatar(e: { detail: { avatarUrl: string } }) {
   avatarPath.value = e.detail.avatarUrl
 }
 
+/** chooseAvatar 失败兜底：多为隐私授权被拒，重新拉起官方授权弹窗 */
+function onChooseAvatarFail() {
+  // #ifdef MP-WEIXIN
+  if (typeof uni.requirePrivacyAuthorize === 'function') {
+    uni.requirePrivacyAuthorize({})
+  }
+  // #endif
+  uni.showToast({ title: '请先同意隐私协议后再选择头像', icon: 'none' })
+}
+
 /** 微信一键授权登录（先采集昵称头像，再 uni.login → uploadFile 一次请求落库） */
 async function handleWechatLogin() {
   if (loading.value) return
@@ -100,7 +110,12 @@ async function handleGuest() {
 
     <view class="profile">
       <!-- 微信头像选择（open-type="chooseAvatar" 触发原生选择器） -->
-      <button class="avatar-btn" open-type="chooseAvatar" @chooseavatar="onChooseAvatar">
+      <button
+        class="avatar-btn"
+        open-type="chooseAvatar"
+        @chooseavatar="onChooseAvatar"
+        @error="onChooseAvatarFail"
+      >
         <image v-if="avatarPath" class="avatar-img" :src="avatarPath" mode="aspectFill" />
         <view v-else class="avatar-placeholder">
           <image class="avatar-placeholder-icon" :src="avatarPlaceholderIcon" />
