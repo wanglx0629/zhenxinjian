@@ -24,7 +24,7 @@ const bulletIcon = iconSrc('sparkles', '#d63333')
 </script>
 
 <template>
-  <view class="over-card">
+  <view v-if="overItems.length" class="over-card">
     <view class="over-title-row">
       <image class="over-title-icon" :src="alertIcon" />
       <text class="over-title">今日摄入超标</text>
