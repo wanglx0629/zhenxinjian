@@ -5,9 +5,10 @@
 
 | 目录 | 内容 | 快速入口 |
 | ---- | ---- | -------- |
+| 根 `start-infra.cmd` | 一键确保 MySQL + Redis 已启动（后端前置依赖） | `tools\start-infra.cmd` |
 | [env/](./env/) | JDK25 切换（系统默认 JAVA_HOME=JDK8，本项目必须 25） | `tools\env\mvn25.cmd <mvn 参数>` |
-| [db/](./db/) | MySQL 连接与 SQL 执行器（JDBC 单文件，无需客户端） | `tools\db\run-sql.cmd <sql文件> [--allow-error]` |
-| [redis/](./redis/) | Redis 连接经验 | `D:\App\Redis\redis-cli.exe -a <密码>` |
+| [db/](./db/) | MySQL 启动（服务 MySQL80）+ 连接与 SQL 执行器（JDBC 单文件，无需客户端） | `tools\db\start-mysql.cmd` / `tools\db\run-sql.cmd <sql文件> [--allow-error]` |
+| [redis/](./redis/) | Redis 启动（绿色版控制台进程）与连接经验 | `tools\redis\start-redis.cmd` / `D:\App\Redis\redis-cli.exe -a <密码>` |
 | [http/](./http/) | HTTP 接口测试（api-test.ps1 + BodyFile，curl/内联引号全踩坑） | `powershell -File tools\http\api-test.ps1 -Method Post -Path /auth/guest -BodyFile tools\http\bodies\empty.json` |
 | [browser/](./browser/) | 浏览器/小程序自动化测试方案（首次任务补充实证） | — |
 
@@ -17,9 +18,10 @@
 | ---- | ---- |
 | JDK25 | `D:\App\Java\jdk-25.0.4.1`（版本化目录；PATH 上 java 经 Oracle javapath shim 解析；Maven 只认 JAVA_HOME，用 `tools\env\mvn25.cmd`） |
 | Maven 本地仓库 | `D:\App\apache-maven-3.9.15\repository`（实证 `help:evaluate settings.localRepository`） |
-| MySQL 服务 | 127.0.0.1:3306，库 `zhenxinjian`；客户端 `D:\App\MySQL\MySQLServer8\bin\mysql.exe` |
+| MySQL 服务 | Windows 服务 `MySQL80`（自启），127.0.0.1:3306，库 `zhenxinjian`；安装/客户端 `D:\App\MySQL\MySQLServer8\bin\`；`tools\db\start-mysql.cmd` |
 | MySQL 驱动 jar | `<maven仓库>\com\mysql\mysql-connector-j\9.7.0\mysql-connector-j-9.7.0.jar` |
-| Redis | 127.0.0.1:6379 db0；客户端 `D:\App\Redis\redis-cli.exe` |
+| Redis | 绿色版无服务，127.0.0.1:6379 db0；安装 `D:\App\Redis\`；`tools\redis\start-redis.cmd`；密码见 `tools\redis\redis.local.txt`（gitignored） |
+| 本机口令 | MySQL root 与 Redis 同口令（见 `application-dev.yml` / `tools\redis\redis.local.txt`，均 gitignored），勿写入提交件 |
 | 凭据真源 | `apps/zhenxinjian-backend/src/main/resources/application-dev.yml`（gitignored） |
 
 ## 本 shell 环境踩坑清单（必读）

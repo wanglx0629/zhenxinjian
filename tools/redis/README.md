@@ -1,9 +1,17 @@
-# redis/ — Redis 连接经验
+# redis/ — Redis 启动与连接经验
+
+## 启动（本机绿色版，无 Windows 服务）
+
+- 安装目录：`D:\App\Redis`（控制台进程，重启电脑后需手动拉起）
+- 一键启动：`tools\redis\start-redis.cmd`（已监听则直接跳过；在新窗口起 `redis-server.exe redis.windows-service.conf`，最多等 15s 探活）
+- 也可经 `tools\start-infra.cmd` 与 MySQL 一起拉起
+- 配置文件：`D:\App\Redis\redis.windows-service.conf`（`requirepass` 为密码真源之一）
+- 关闭窗口即停服；如需停服：`D:\App\Redis\redis-cli.exe -a <密码> shutdown nosave`
 
 ## 连接信息
 
-- 服务：`127.0.0.1:6379`，db `0`，Windows 服务运行（配置 `redis.windows-service.conf` 的 requirepass）
-- 密码真源：`apps/zhenxinjian-backend/src/main/resources/application-dev.yml`（gitignored）
+- 服务：`127.0.0.1:6379`，db `0`
+- 密码：同目录 `redis.local.txt`（gitignored，仅一行密码；与 `requirepass`、`application-dev.yml` 一致）
 - 客户端：`D:\App\Redis\redis-cli.exe`
 
 ## 常用命令

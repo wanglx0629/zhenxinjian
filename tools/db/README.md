@@ -1,9 +1,18 @@
-# db/ — MySQL 连接与 SQL 执行经验
+# db/ — MySQL 启动、连接与 SQL 执行经验
+
+## 启动（Windows 服务 MySQL80，默认开机自启）
+
+- 服务名：`MySQL80`（StartMode=Auto；另有一个停用的 MySQL97，勿用）
+- 一键确保启动：`tools\db\start-mysql.cmd`（端口已监听则跳过；未监听则 `net start MySQL80`，失败提示用管理员身份重跑）
+- 也可经 `tools\start-infra.cmd` 与 Redis 一起拉起
+- 手工命令：`net start MySQL80` / `net stop MySQL80`（需管理员）
+- 安装目录：`D:\App\MySQL\MySQLServer8`（mysqld 8.0.45，数据目录 `D:\App\MySQL\MySQLServer8\data`）
+- 注意：同机不要手工再起一个指向同一 datadir 的 `mysqld.exe --console`，会因 ibdata1 被占用报 `must be writable` 退出（属正常互斥，不影响服务）
 
 ## 连接信息
 
 - 服务：`127.0.0.1:3306`，库 `zhenxinjian`（utf8mb4）
-- 凭据真源：`apps/zhenxinjian-backend/src/main/resources/application-dev.yml`（gitignored）
+- 账号：`root`；密码与 Redis 相同，真源 `apps/zhenxinjian-backend/src/main/resources/application-dev.yml`（gitignored）
 - 本工具凭据：同目录 `db.local.properties`（gitignored；缺失时复制 `db.local.properties.example` 填真实值）
 
 ## 三种执行方式
@@ -11,7 +20,7 @@
 | 方式 | 命令 | 适用 |
 | ---- | ---- | ---- |
 | 本工具（推荐） | `tools\db\run-sql.cmd sql\change3_user_body.sql` | 迁移脚本/验证查询，输出整洁，无需客户端 |
-| 原生客户端 | `D:\App\Mysql\MySQL Server 8.4\bin\mysql.exe -h127.0.0.1 -uroot -p zhenxinjian` | 交互式探查 |
+| 原生客户端 | `D:\App\MySQL\MySQLServer8\bin\mysql.exe -h127.0.0.1 -uroot -p zhenxinjian` | 交互式探查 |
 | 容错执行 | ~~`--allow-error`~~（已移除） | 失败即终止（exit 2）；需容忍报错的验证请改用幂等守卫或信息查询 |
 
 ## SqlRunner 特性
