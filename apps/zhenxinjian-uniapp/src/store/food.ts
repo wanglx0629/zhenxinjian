@@ -11,6 +11,18 @@ import {
   type CustomFoodSaveRequest, type FoodCalcVO, type FoodCategoryVO,
   type FoodSearchParams, type FoodVO, type PageVO
 } from '@/api/food'
+import { BASE_URL } from '@/api/request'
+
+/**
+ * 真机调试适配：图片 MinIO 地址按 API host 重写
+ * （开发库种子数据为 127.0.0.1，真机上 localhost 指手机自身不可达；生产域名不匹配正则原样返回）
+ */
+function resolveImage(url?: string): string | undefined {
+  if (!url) return url
+  const m = BASE_URL.match(/^https?:\/\/([^/:]+)/)
+  if (!m) return url
+  return url.replace(/^(https?:\/\/)(?:127\.0\.0\.1|localhost)(?=:\d+)/, `$1${m[1]}`)
+}
 
 /** 本地合成ID：降级模式下食物用负数索引标识（-1 对应 FOODS[0]） */
 function localId(index: number) {
@@ -65,6 +77,7 @@ export const useFoodStore = defineStore('food', () => {
     loading.value = true
     try {
       const page = await searchFoods(params)
+      page.records.forEach((vo) => { vo.image = resolveImage(vo.image) })
       degraded.value = false
       return page
     } catch {
@@ -91,6 +104,7 @@ export const useFoodStore = defineStore('food', () => {
   async function fetchHot(): Promise<FoodVO[]> {
     try {
       const list = await getHotFoods()
+      list.forEach((vo) => { vo.image = resolveImage(vo.image) })
       degraded.value = false
       return list
     } catch {
@@ -108,6 +122,7 @@ export const useFoodStore = defineStore('food', () => {
     }
     try {
       const vo = await getFoodDetail(id)
+      vo.image = resolveImage(vo.image)
       degraded.value = false
       return vo
     } catch (e) {
@@ -170,7 +185,9 @@ export const useFoodStore = defineStore('food', () => {
 
   /** 我的自定义列表 */
   async function fetchMyCustom() {
-    return listMyCustomFoods()
+    const list = await listMyCustomFoods()
+    list.forEach((vo) => { vo.image = resolveImage(vo.image) })
+    return list
   }
 
   /** 删除自定义食物（软删） */
