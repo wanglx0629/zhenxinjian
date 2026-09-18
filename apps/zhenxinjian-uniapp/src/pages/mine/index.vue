@@ -76,13 +76,16 @@ const menstrualBrief = computed(() => {
 /** 是否展示月经周期入口（仅女性） */
 const showMenstrual = computed(() => menstrualStore.applicable)
 
+/** 页面显示时按需拉取（store 已加载/已为当日数据则跳过，避免切 tab 重复请求与重渲染） */
 onShow(() => {
   if (!getToken()) {
     uni.reLaunch({ url: '/pages/auth/guide' })
     return
   }
   trackPage('pages/mine/index')
-  userStore.fetchUserInfo().catch(() => undefined)
+  if (!userStore.userInfo) {
+    userStore.fetchUserInfo().catch(() => undefined)
+  }
   if (!bodyStore.loaded) {
     bodyStore.fetchProfile().catch(() => undefined)
   }
@@ -92,13 +95,19 @@ onShow(() => {
 
 /** 同步体重与经期入口副标题（失败静默不阻塞页面） */
 function syncWeightAndMenstrual() {
-  weightStore.fetchRecords().catch(() => undefined)
-  menstrualStore.fetch().catch(() => undefined)
+  if (!weightStore.loaded) {
+    weightStore.fetchRecords().catch(() => undefined)
+  }
+  if (!menstrualStore.freshToday) {
+    menstrualStore.fetch().catch(() => undefined)
+  }
 }
 
 /** 同步提醒设置副标题（以总开关为准；失败静默不阻塞页面） */
 function syncReminderStatus() {
-  reminderStore.fetch().catch(() => undefined)
+  if (!reminderStore.loaded) {
+    reminderStore.fetch().catch(() => undefined)
+  }
 }
 
 /** 授权登录（游客 → 复用引导页完整授权流程） */

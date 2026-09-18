@@ -123,26 +123,30 @@ onShow(() => {
   loadAll()
 })
 
-/** 并行拉取：当日记录+累计（peekDay 不改记录页查看日期）/ 身体档案 / 用户信息；碳循环再拉当前周期（失败不阻塞） */
+/** 并行拉取：当日记录+累计（peekDay 不改记录页查看日期）/ 身体档案 / 用户信息；碳循环再拉当前周期（失败不阻塞）
+ *  store 数据已为当日/已加载则跳过对应请求（增删改已回流 store），切 tab 不再重复请求与重渲染 */
 async function loadAll() {
   // 仅首次进入展示骨架屏；tab 切回静默刷新（旧数据先渲染，新数据返回即更新）
   loading.value = !firstLoaded.value
   loadError.value = false
+  const today = ymd(new Date())
   try {
     await Promise.all([
-      dietStore.peekDay(ymd(new Date())),
-      bodyStore.fetchProfile(),
-      userStore.fetchUserInfo()
+      dietStore.dayDataDate === today ? Promise.resolve() : dietStore.peekDay(today),
+      bodyStore.loaded ? Promise.resolve() : bodyStore.fetchProfile(),
+      userStore.userInfo ? Promise.resolve() : userStore.fetchUserInfo()
     ])
-    if (isCycle.value) {
+    if (isCycle.value && !cycleStore.freshToday) {
       try {
         await cycleStore.fetchCurrent()
       } catch {
         // 周期拉取失败不阻塞首页主数据
       }
     }
-    // 经期阶段徽标（仅女性且已开启时返回阶段；失败静默不阻塞首页）
-    menstrualStore.fetch().catch(() => undefined)
+    // 经期阶段徽标（仅女性且已开启时返回阶段；失败静默不阻塞首页；当日已拉取跳过）
+    if (!menstrualStore.freshToday) {
+      menstrualStore.fetch().catch(() => undefined)
+    }
   } catch {
     loadError.value = !firstLoaded.value
   } finally {

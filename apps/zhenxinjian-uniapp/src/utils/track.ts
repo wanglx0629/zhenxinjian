@@ -24,6 +24,10 @@ let timer: ReturnType<typeof setInterval> | null = null
 let flushing = false
 /** 饱和告警已发标记（回落至阈值下复位，避免每 10s 重复告警） */
 let saturatedAlerted = false
+/** 上次持久化时刻（入队路径节流，避免每条事件同步写存储阻塞主线程） */
+let lastPersistAt = 0
+/** 入队路径持久化最小间隔 */
+const PERSIST_INTERVAL = 2_000
 
 function loadQueue() {
   try {
@@ -34,7 +38,16 @@ function loadQueue() {
   }
 }
 
-function persistQueue() {
+/**
+ * 持久化队列（默认节流：距上次 <2s 跳过，崩溃至多丢 2s 内事件；
+ * immediate=true 用于 flush 成功/饱和告警等必须落盘场景）
+ */
+function persistQueue(immediate = false) {
+  const ts = Date.now()
+  if (!immediate && ts - lastPersistAt < PERSIST_INTERVAL) {
+    return
+  }
+  lastPersistAt = ts
   try {
     uni.setStorageSync(QUEUE_KEY, queue)
   } catch {
@@ -58,7 +71,7 @@ function checkSaturation() {
         extra: { queueSize: queue.length, queueMax: QUEUE_MAX },
         clientTime: now()
       })
-      persistQueue()
+      persistQueue(true)
     }
   } else if (saturatedAlerted) {
     saturatedAlerted = false
@@ -108,7 +121,7 @@ export function flushTrackQueue() {
   reportEvents(batch)
     .then(() => {
       queue = queue.slice(batch.length)
-      persistQueue()
+      persistQueue(true)
       checkSaturation()
     })
     .catch(() => undefined)

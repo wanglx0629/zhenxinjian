@@ -65,20 +65,22 @@ const targetLabel = computed(() => {
 const showBodyEmpty = computed(() => dietStore.showBodyEmpty)
 const showCycleEmpty = computed(() => dietStore.showCycleEmpty)
 
-/** 页面显示时拉取数据 */
+/** 页面显示时拉取数据（store 数据仍对应当前查看日期则跳过；增删改已在 store 内重拉，避免切 tab 重复请求） */
 onShow(async () => {
   trackPage('pages/record/index')
-  try {
-    await dietStore.fetchDay()
-  } catch {
-    // 请求失败已由 request.ts toast
+  if (dietStore.dayDataDate !== dietStore.currentDate) {
+    try {
+      await dietStore.fetchDay()
+    } catch {
+      // 请求失败已由 request.ts toast
+    }
   }
   // 同步拉取身体档案（判断空态）
   if (!bodyStore.loaded) {
     try { await bodyStore.fetchProfile() } catch { /* ignore */ }
   }
-  // 碳循环模式拉取当前周期（今日日型标签）
-  if (isCycle.value) {
+  // 碳循环模式拉取当前周期（今日日型标签；当日已拉取则跳过）
+  if (isCycle.value && !cycleStore.freshToday) {
     try { await cycleStore.fetchCurrent() } catch { /* ignore */ }
   }
 })

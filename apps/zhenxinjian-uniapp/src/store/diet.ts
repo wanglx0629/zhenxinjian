@@ -29,6 +29,8 @@ export const useDietStore = defineStore('diet', () => {
   const loaded = ref(false)
   /** 提交中（防重复点击） */
   const submitting = ref(false)
+  /** dayData/summary 当前对应的日期（fetchDay/peekDay 写入；tab 切回据此跳过重复拉取） */
+  const dayDataDate = ref('')
 
   /** 未建档空态标记（summary.recorded=false 涵盖未建档与碳循环无周期两口径） */
   const noProfile = computed(() => loaded.value && summary.value !== null && !summary.value.recorded)
@@ -51,6 +53,7 @@ export const useDietStore = defineStore('diet', () => {
     dayData.value = day
     summary.value = sum
     loaded.value = true
+    dayDataDate.value = d
   }
 
   /** 拉取指定日期数据但不切换当前查看日期（首页强制当日，不污染记录页历史日期） */
@@ -59,6 +62,7 @@ export const useDietStore = defineStore('diet', () => {
     dayData.value = day
     summary.value = sum
     loaded.value = true
+    dayDataDate.value = date
   }
 
   /** 新增记录（成功后重拉） */
@@ -102,6 +106,7 @@ export const useDietStore = defineStore('diet', () => {
     summary.value = null
     loaded.value = false
     submitting.value = false
+    dayDataDate.value = ''
   }
 
   return {
@@ -110,6 +115,7 @@ export const useDietStore = defineStore('diet', () => {
     summary,
     loaded,
     submitting,
+    dayDataDate,
     noProfile,
     showBodyEmpty,
     showCycleEmpty,

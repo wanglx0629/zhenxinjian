@@ -5,12 +5,15 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import { getMenstrual, saveMenstrual, type MenstrualSaveRequest, type MenstrualVO } from '@/api/menstrual'
+import { ymd } from '@/utils/format'
 
 export const useMenstrualStore = defineStore('menstrual', () => {
   /** 经期设置视图（男性/未建档 applicable=false） */
   const vo = ref<MenstrualVO | null>(null)
   /** 是否已请求过（区分「未加载」与「已加载但空态」） */
   const loaded = ref(false)
+  /** 数据所属日期（阶段徽标服务端按拉取日计算，跨天即失效需重拉） */
+  const loadedDate = ref('')
   /** 提交中（防重复点击） */
   const submitting = ref(false)
 
@@ -23,10 +26,14 @@ export const useMenstrualStore = defineStore('menstrual', () => {
     vo.value?.applicable && vo.value?.enabled === 1 ? vo.value?.phaseName || '' : ''
   )
 
+  /** 数据已为当日新鲜（tab 切回据此跳过重拉；跨天自动失效） */
+  const freshToday = computed(() => loaded.value && loadedDate.value === ymd(new Date()))
+
   /** 拉取经期设置（男性/未建档返回空态，不抛错） */
   async function fetch() {
     vo.value = await getMenstrual()
     loaded.value = true
+    loadedDate.value = ymd(new Date())
     return vo.value
   }
 
@@ -36,6 +43,7 @@ export const useMenstrualStore = defineStore('menstrual', () => {
     try {
       vo.value = await saveMenstrual(data)
       loaded.value = true
+      loadedDate.value = ymd(new Date())
       return vo.value
     } finally {
       submitting.value = false
@@ -46,12 +54,14 @@ export const useMenstrualStore = defineStore('menstrual', () => {
   function reset() {
     vo.value = null
     loaded.value = false
+    loadedDate.value = ''
     submitting.value = false
   }
 
   return {
     vo,
     loaded,
+    freshToday,
     submitting,
     applicable,
     enabled,
