@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -27,5 +28,11 @@ public class Taper532Controller {
     @GetMapping("/plan")
     public Result<Taper532VO> plan() {
         return Result.ok(taper532Service.plan(UserContext.getUserId()));
+    }
+
+    @Operation(summary = "生成/确认当期 532 计划", description = "幂等：档案打标生成时间并返回实时公式口径计划；未建档 40601 拦截（前端引导身体数据页）；重复生成不产生重复计划")
+    @PostMapping("/generate")
+    public Result<Taper532VO> generate() {
+        return Result.ok(taper532Service.generate(UserContext.getUserId()));
     }
 }

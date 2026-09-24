@@ -2,8 +2,10 @@ package cn.zhenxinjian.controller;
 
 import cn.zhenxinjian.common.result.Result;
 import cn.zhenxinjian.domain.dto.AdminFoodSaveDTO;
+import cn.zhenxinjian.domain.dto.FoodAuditDTO;
 import cn.zhenxinjian.domain.query.AdminFoodQuery;
 import cn.zhenxinjian.domain.vo.FoodVO;
+import cn.zhenxinjian.service.impl.AdminFoodAuditService;
 import cn.zhenxinjian.service.impl.AdminFoodService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.v3.oas.annotations.Operation;
@@ -40,8 +42,9 @@ import org.springframework.web.bind.annotation.RestController;
 public class AdminFoodController {
 
     private final AdminFoodService adminFoodService;
+    private final AdminFoodAuditService adminFoodAuditService;
 
-    @Operation(summary = "分页查询食物（关键词/分类/来源/状态）")
+    @Operation(summary = "分页查询食物（关键词/分类/来源/状态/审核状态/AI 结论）")
     @GetMapping
     public Result<IPage<FoodVO>> page(@Valid @ParameterObject AdminFoodQuery query) {
         return Result.ok(adminFoodService.page(query));
@@ -73,6 +76,28 @@ public class AdminFoodController {
     public Result<Void> changeStatus(@PathVariable Long id,
                                      @RequestParam @Min(0) @Max(1) Integer status) {
         adminFoodService.changeStatus(id, status);
+        return Result.ok();
+    }
+
+    @Operation(summary = "审核共建食物（APPROVE 通过 / REJECT 驳回必填原因 / ADMIN_FIX 修正后通过）")
+    @PostMapping("/{id}/audit")
+    public Result<Void> audit(@PathVariable Long id, @Valid @RequestBody FoodAuditDTO dto) {
+        adminFoodAuditService.audit(id, dto);
+        return Result.ok();
+    }
+
+    @Operation(summary = "停用/启用已通过的共建食物（维护入口；基础食物走 /status）")
+    @PutMapping("/{id}/custom-status")
+    public Result<Void> changeCustomStatus(@PathVariable Long id,
+                                           @RequestParam @Min(0) @Max(1) Integer status) {
+        adminFoodAuditService.changeCustomStatus(id, status);
+        return Result.ok();
+    }
+
+    @Operation(summary = "软删已通过的共建食物（维护入口；逻辑删除不断链）")
+    @DeleteMapping("/{id}/custom")
+    public Result<Void> removeCustom(@PathVariable Long id) {
+        adminFoodAuditService.removeCustom(id);
         return Result.ok();
     }
 }

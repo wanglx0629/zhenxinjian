@@ -50,4 +50,16 @@ public class CyclePlanVO implements Serializable {
 
     @Schema(description = "今日日序（今日在周期内时返回 1..N；否则为 null）")
     private Integer todayIndex;
+
+    @Schema(description = "总天数 N（周期摘要：切换确认 F15 用）")
+    private Integer totalDays;
+
+    @Schema(description = "当前第几天（今日在周期内 1..N；否则为 null）")
+    private Integer dayIndex;
+
+    @Schema(description = "周期碳水总量 g（碳水池）")
+    private Double carbPoolTotal;
+
+    @Schema(description = "周期内已消耗碳水 g（周期日期范围内饮食记录碳水累计；无记录 0）")
+    private Double consumedCarb;
 }

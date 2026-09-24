@@ -8,13 +8,16 @@ import cn.zhenxinjian.common.exception.BusinessException;
 import cn.zhenxinjian.domain.dto.CyclePlanCreateDTO;
 import cn.zhenxinjian.domain.po.CarbCycleDay;
 import cn.zhenxinjian.domain.po.CarbCyclePlan;
+import cn.zhenxinjian.domain.po.DietRecord;
 import cn.zhenxinjian.domain.po.UserBody;
 import cn.zhenxinjian.domain.vo.CyclePlanVO;
 import cn.zhenxinjian.mapper.CarbCycleDayMapper;
 import cn.zhenxinjian.mapper.CarbCyclePlanMapper;
+import cn.zhenxinjian.mapper.DietRecordMapper;
 import cn.zhenxinjian.mapper.UserBodyMapper;
 import com.baomidou.mybatisplus.core.MybatisConfiguration;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.TableInfoHelper;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,7 +42,8 @@ import static org.mockito.Mockito.when;
 
 /**
  * 碳循环周期服务单元测试
- * （创建顶替旧周期 / 未建档 40601 / 参数与运动日校验 / 终止幂等 / 模式切换双向 / 历史详情越权 40605）
+ * （创建顶替旧周期 / 未建档 40601 / 参数与运动日校验 / 终止幂等 / 模式切换双向 / 历史详情越权 40605
+ *   / PART2 周期摘要：totalDays/dayIndex/carbPoolTotal/consumedCarb）
  * 作者: wanglx
  */
 class CyclePlanServiceTest {
@@ -47,6 +51,7 @@ class CyclePlanServiceTest {
     private CarbCyclePlanMapper planMapper;
     private CarbCycleDayMapper dayMapper;
     private UserBodyMapper userBodyMapper;
+    private DietRecordMapper dietRecordMapper;
     private CyclePlanService service;
 
     private final AtomicLong planIdSeq = new AtomicLong(100L);
@@ -59,11 +64,16 @@ class CyclePlanServiceTest {
         TableInfoHelper.initTableInfo(assistant, CarbCyclePlan.class);
         TableInfoHelper.initTableInfo(assistant, CarbCycleDay.class);
         TableInfoHelper.initTableInfo(assistant, UserBody.class);
+        TableInfoHelper.initTableInfo(assistant, DietRecord.class);
 
         planMapper = mock(CarbCyclePlanMapper.class);
         dayMapper = mock(CarbCycleDayMapper.class);
         userBodyMapper = mock(UserBodyMapper.class);
-        service = new CyclePlanService(planMapper, dayMapper, userBodyMapper, new CycleCalcService());
+        dietRecordMapper = mock(DietRecordMapper.class);
+        service = new CyclePlanService(planMapper, dayMapper, userBodyMapper, dietRecordMapper,
+                new CycleCalcService());
+        // 周期摘要默认无饮食记录（consumedCarb 0）；具体用例按需覆盖
+        when(dietRecordMapper.selectList(any(Wrapper.class))).thenReturn(List.of());
 
         when(planMapper.insert(any(CarbCyclePlan.class))).thenAnswer(inv -> {
             ((CarbCyclePlan) inv.getArgument(0)).setId(planIdSeq.incrementAndGet());
@@ -230,6 +240,61 @@ class CyclePlanServiceTest {
         assertEquals(CommonConstant.CYCLE_NOT_PROFILED_CODE, e2.getCode());
     }
 
+    /** 周期摘要（F15 切换确认）：第 3/7 天、碳水池总量、周期内饮食记录碳水累计 + 日期范围过滤 */
+    @Test
+    void getCurrent_summary_carbConsumedAggregated() {
+        CarbCyclePlan plan = activePlan(50L, 1L);
+        LocalDate start = LocalDate.now().minusDays(2);
+        LocalDate end = start.plusDays(6);
+        plan.setStartDate(start);
+        plan.setEndDate(end);
+        plan.setCarbPool(new java.math.BigDecimal("1703.0"));
+        when(planMapper.selectOne(any(Wrapper.class))).thenReturn(plan);
+        when(dayMapper.selectList(any(Wrapper.class))).thenReturn(List.of(
+                day(51L, plan.getId(), 1, start, CycleDayTypeEnum.HIGH),
+                day(52L, plan.getId(), 2, start.plusDays(1), CycleDayTypeEnum.MEDIUM),
+                day(53L, plan.getId(), 3, LocalDate.now(), CycleDayTypeEnum.LOW)));
+        when(dietRecordMapper.selectList(any(Wrapper.class))).thenReturn(List.of(
+                dietRecord(start, 300.0),
+                dietRecord(LocalDate.now(), 312.0)));
+
+        CyclePlanVO vo = service.getCurrent(1L);
+
+        assertEquals(7, vo.getTotalDays());
+        assertEquals(3, vo.getDayIndex());
+        assertEquals(1703.0, vo.getCarbPoolTotal(), 0.001);
+        assertEquals(612.0, vo.getConsumedCarb(), 0.001);
+
+        // 汇总口径：本人 + 周期起止日期闭区间
+        ArgumentCaptor<Wrapper<DietRecord>> captor = ArgumentCaptor.forClass((Class) Wrapper.class);
+        verify(dietRecordMapper).selectList(captor.capture());
+        LambdaQueryWrapper<DietRecord> wrapper = (LambdaQueryWrapper<DietRecord>) captor.getValue();
+        assertTrue(wrapper.getSqlSegment().contains("record_date"));
+        java.util.Map<String, Object> params = wrapper.getParamNameValuePairs();
+        assertTrue(params.containsValue(1L));
+        assertTrue(params.containsValue(start));
+        assertTrue(params.containsValue(end));
+    }
+
+    /** 周期摘要边界：尚无饮食记录 consumedCarb=0；今日不在周期内 dayIndex=null */
+    @Test
+    void getCurrent_summary_noRecords_todayOutOfRange() {
+        CarbCyclePlan plan = activePlan(50L, 1L);
+        plan.setStartDate(LocalDate.now().minusDays(9));
+        plan.setEndDate(LocalDate.now().minusDays(3));
+        plan.setCarbPool(new java.math.BigDecimal("962.5"));
+        when(planMapper.selectOne(any(Wrapper.class))).thenReturn(plan);
+        when(dayMapper.selectList(any(Wrapper.class))).thenReturn(List.of());
+        // dietRecordMapper 维持 setUp 默认空列表
+
+        CyclePlanVO vo = service.getCurrent(1L);
+
+        assertEquals(7, vo.getTotalDays());
+        assertNull(vo.getDayIndex());
+        assertEquals(962.5, vo.getCarbPoolTotal(), 0.001);
+        assertEquals(0.0, vo.getConsumedCarb(), 0.001);
+    }
+
     /** 构造并 stub 活跃档案 */
     private UserBody stubBody(Long userId, double weight, double targetWeight, Integer mode) {
         UserBody body = new UserBody();
@@ -257,6 +322,15 @@ class CyclePlanServiceTest {
         plan.setEndDate(LocalDate.now().plusDays(6));
         plan.setStatus(CyclePlanStatusEnum.ACTIVE.getCode());
         return plan;
+    }
+
+    /** 构造饮食记录（仅日期与碳水摄入参与汇总断言） */
+    private DietRecord dietRecord(LocalDate recordDate, double carbG) {
+        DietRecord record = new DietRecord();
+        record.setUserId(1L);
+        record.setRecordDate(recordDate);
+        record.setCarbG(carbG);
+        return record;
     }
 
     /** 构造日计划行 */

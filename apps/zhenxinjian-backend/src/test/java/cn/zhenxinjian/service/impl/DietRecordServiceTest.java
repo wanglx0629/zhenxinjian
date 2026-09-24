@@ -2,6 +2,7 @@ package cn.zhenxinjian.service.impl;
 
 import cn.zhenxinjian.common.constant.CommonConstant;
 import cn.zhenxinjian.common.enums.DietRecordSourceEnum;
+import cn.zhenxinjian.common.enums.FoodAuditStatusEnum;
 import cn.zhenxinjian.common.enums.FoodSourceEnum;
 import cn.zhenxinjian.common.enums.MealTypeEnum;
 import cn.zhenxinjian.common.exception.BusinessException;
@@ -93,14 +94,48 @@ class DietRecordServiceTest {
         assertEquals(36.9, vo.getProteinG(), 0.001);
     }
 
-    /** 场景：他人自定义食物 → 40506（不泄露存在性） */
+    /** 场景：他人待审核(0)的共建食物 → 40506（不泄露存在性） */
     @Test
     void create_othersCustomFood_throws40506() {
         Food others = food(12L, FoodSourceEnum.CUSTOM.getCode(), 2L, "10", "10", "10", 170);
+        others.setAuditStatus(FoodAuditStatusEnum.PENDING.getCode());
         when(foodMapper.selectById(12L)).thenReturn(others);
 
         BusinessException e = assertThrows(BusinessException.class,
                 () -> service.create(1L, foodDto(12L, "100")));
+        assertEquals(CommonConstant.DIET_FOOD_INVALID_CODE, e.getCode());
+        verify(dietRecordMapper, never()).insert(any(DietRecord.class));
+    }
+
+    /** 场景：他人已通过(1)的共建食物 → 可记录（公共 ∪ 本人全部可达） */
+    @Test
+    void create_othersApprovedCustomFood_recordable() {
+        Food others = food(13L, FoodSourceEnum.CUSTOM.getCode(), 2L, "10", "10", "10", 170);
+        others.setAuditStatus(FoodAuditStatusEnum.APPROVED.getCode());
+        when(foodMapper.selectById(13L)).thenReturn(others);
+        when(dietRecordMapper.insert(any(DietRecord.class))).thenAnswer(inv -> {
+            ((DietRecord) inv.getArgument(0)).setId(99L);
+            return 1;
+        });
+        when(dietRecordMapper.selectById(99L)).thenAnswer(inv -> persisted(inv.getArgument(0)));
+
+        service.create(1L, foodDto(13L, "100"));
+
+        org.mockito.ArgumentCaptor<DietRecord> captor = org.mockito.ArgumentCaptor.forClass(DietRecord.class);
+        verify(dietRecordMapper).insert(captor.capture());
+        assertEquals(DietRecordSourceEnum.CUSTOM_FOOD.getCode(), captor.getValue().getSource());
+        assertEquals(13L, captor.getValue().getFoodId());
+    }
+
+    /** 场景：停用食物（管理员停用）→ 40506 不可记录 */
+    @Test
+    void create_disabledFood_throws40506() {
+        Food disabled = food(14L, FoodSourceEnum.BUILT_IN.getCode(), null, "0.6", "24.6", "1.9", 118);
+        disabled.setStatus(0);
+        when(foodMapper.selectById(14L)).thenReturn(disabled);
+
+        BusinessException e = assertThrows(BusinessException.class,
+                () -> service.create(1L, foodDto(14L, "100")));
         assertEquals(CommonConstant.DIET_FOOD_INVALID_CODE, e.getCode());
         verify(dietRecordMapper, never()).insert(any(DietRecord.class));
     }
@@ -239,6 +274,7 @@ class DietRecordServiceTest {
         food.setName("鸡胸肉");
         food.setSource(source);
         food.setUserId(userId);
+        food.setStatus(1);
         food.setCarb(new BigDecimal(carb));
         food.setProtein(new BigDecimal(protein));
         food.setFat(new BigDecimal(fat));

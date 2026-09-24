@@ -43,9 +43,16 @@ export interface Taper532Plan {
   stages: Taper532Stage[]
   /** 今日目标（未建档为空） */
   today: Taper532Today | null
+  /** 是否已生成/确认当期计划（已建档未生成为 false，页面空态） */
+  generated?: boolean | null
 }
 
 /** 查询 532 四阶段计划卡与今日目标 */
 export function getTaper532Plan() {
   return http.get<Taper532Plan>('/taper-532/plan')
+}
+
+/** 生成/确认当期 532 计划（幂等；未建档 40601，页面引导身体数据页） */
+export function generateTaper532Plan() {
+  return http.post<Taper532Plan>('/taper-532/generate')
 }

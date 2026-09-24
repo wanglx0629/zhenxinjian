@@ -175,10 +175,10 @@ function goCycleSetting() {
   uni.navigateTo({ url: '/pages/cycle/setting' })
 }
 
-/** 记饮食（记录 tab） */
+/** 记饮食（直达食物库 tab，从食物发起记录） */
 function goRecord() {
   track(TRACK_EVENT.HOME_QUICK_ENTRY, { target: 'record' })
-  uni.switchTab({ url: '/pages/record/index' })
+  uni.switchTab({ url: '/pages/food/index' })
 }
 
 /** 看计划：碳循环 → P07；532 → P08 四阶段计划卡 */

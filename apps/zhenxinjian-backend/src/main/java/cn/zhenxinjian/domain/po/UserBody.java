@@ -83,6 +83,9 @@ public class UserBody implements Serializable {
     @Schema(description = "触发下调的参考体重kg（下调生效时记录，恢复清除）")
     private Double triggerWeight;
 
+    @Schema(description = "532 当期计划生成/确认时间（NULL=未生成，计划页空态）")
+    private LocalDateTime taperPlanTime;
+
     @Schema(description = "状态:0停用 1有效")
     private Integer status;
 

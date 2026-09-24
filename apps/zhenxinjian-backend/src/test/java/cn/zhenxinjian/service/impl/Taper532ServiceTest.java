@@ -1,6 +1,8 @@
 package cn.zhenxinjian.service.impl;
 
+import cn.zhenxinjian.common.constant.CommonConstant;
 import cn.zhenxinjian.common.enums.GenderEnum;
+import cn.zhenxinjian.common.exception.BusinessException;
 import cn.zhenxinjian.domain.po.UserBody;
 import cn.zhenxinjian.domain.po.UserMenstrual;
 import cn.zhenxinjian.domain.vo.Taper532VO;
@@ -12,19 +14,25 @@ import com.baomidou.mybatisplus.core.metadata.TableInfoHelper;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
@@ -175,6 +183,68 @@ class Taper532ServiceTest {
 
         Taper532VO.StageItem stage2 = result.getStages().get(1);
         assertTrue(stage2.getDesc().contains("第 " + phase.dayIdx() + " 天"));
+    }
+
+    /** 场景：生成当期计划 — 未建档 40601 拦截，不落库（前端引导身体数据页） */
+    @Test
+    void generate_noBody_40601() {
+        when(userBodyMapper.selectOne(any(Wrapper.class))).thenReturn(null);
+
+        BusinessException e = assertThrows(BusinessException.class, () -> service.generate(1L));
+        assertEquals(CommonConstant.CYCLE_NOT_PROFILED_CODE, e.getCode());
+        verify(userBodyMapper, never()).updateById(any(UserBody.class));
+    }
+
+    /** 场景：生成当期计划 — 打标生成时间并返回实时公式口径（数值与 plan() 一致） */
+    @Test
+    void generate_withBody_marksAndReturnsPlan() {
+        UserBody body = body(1L, 180.0, 90.0, 45.0, 1600, 0);
+        when(userBodyMapper.selectOne(any(Wrapper.class))).thenReturn(body);
+        when(userMenstrualMapper.selectOne(any(Wrapper.class))).thenReturn(null);
+
+        Taper532VO vo = service.generate(1L);
+
+        assertNotNull(vo.getToday());
+        assertEquals(180.0, vo.getToday().getCarb(), 0.01);
+        assertEquals(90.0, vo.getToday().getProtein(), 0.01);
+        assertEquals(1600, vo.getToday().getKcal());
+        assertEquals(4, vo.getStages().size());
+        assertTrue(vo.getGenerated());
+        ArgumentCaptor<UserBody> captor = ArgumentCaptor.forClass(UserBody.class);
+        verify(userBodyMapper).updateById(captor.capture());
+        assertNotNull(captor.getValue().getTaperPlanTime());
+    }
+
+    /** 场景：重复生成幂等 — 已有计划态再次生成仅刷新标记，不产生重复计划 */
+    @Test
+    void generate_repeat_idempotent() {
+        UserBody body = body(1L, 180.0, 90.0, 45.0, 1600, 0);
+        body.setTaperPlanTime(LocalDateTime.now().minusDays(1));
+        when(userBodyMapper.selectOne(any(Wrapper.class))).thenReturn(body);
+        when(userMenstrualMapper.selectOne(any(Wrapper.class))).thenReturn(null);
+
+        Taper532VO first = service.generate(1L);
+        Taper532VO second = service.generate(1L);
+
+        assertTrue(first.getGenerated());
+        assertTrue(second.getGenerated());
+        // 幂等：档案单行打标刷新，无第二行插入，两次均返回同一口径计划
+        verify(userBodyMapper, times(2)).updateById(any(UserBody.class));
+    }
+
+    /** 场景：plan 返回 generated 标记（未打标 false / 已打标 true / 未建档 false） */
+    @Test
+    void plan_generatedFlag() {
+        UserBody body = body(1L, 180.0, 90.0, 45.0, 1600, 0);
+        when(userBodyMapper.selectOne(any(Wrapper.class))).thenReturn(body);
+        when(userMenstrualMapper.selectOne(any(Wrapper.class))).thenReturn(null);
+        assertFalse(service.plan(1L).getGenerated());
+
+        body.setTaperPlanTime(LocalDateTime.now());
+        assertTrue(service.plan(1L).getGenerated());
+
+        when(userBodyMapper.selectOne(any(Wrapper.class))).thenReturn(null);
+        assertFalse(service.plan(1L).getGenerated());
     }
 
     private UserBody body(Long userId, double targetCarb, double targetProtein, double targetFat,

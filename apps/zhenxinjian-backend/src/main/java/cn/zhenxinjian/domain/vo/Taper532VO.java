@@ -20,6 +20,9 @@ public class Taper532VO implements Serializable {
     @Schema(description = "今日 532 目标（基线 + 平台下调 + 经期上浮）")
     private TodayTarget today;
 
+    @Schema(description = "是否已生成/确认当期计划（已建档未生成时为 false，页面空态）")
+    private Boolean generated;
+
     @Data
     @Schema(description = "532 阶段计划项")
     public static class StageItem implements Serializable {

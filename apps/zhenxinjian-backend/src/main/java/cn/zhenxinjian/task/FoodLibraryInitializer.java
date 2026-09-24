@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Component;
@@ -26,9 +27,11 @@ import java.util.List;
  *
  * 口径: docsFile/projectFile/04-食物库数据字典.md（每 100g 可食部、干重不泡发、生熟分列）
  * 幂等: 内置食物数 ≥200 跳过；逐条插入并按 code 唯一约束捕获冲突（仅补缺，不覆盖）
+ * 顺序: 先于 TFDA 导入（@Order(1)）——就绪检查按 source=1 计数，若 TFDA 先导入会把内置 200 误判为已就绪
  */
 @Slf4j
 @Component
+@Order(1)
 @RequiredArgsConstructor
 public class FoodLibraryInitializer implements ApplicationRunner {
 

@@ -30,4 +30,11 @@ public class AdminFoodQuery extends PageQuery {
 
     @Schema(description = "状态:0停用 1有效，缺省全部")
     private Integer status;
+
+    @Schema(description = "审核状态：0待审核 1已通过 2已驳回 3无需审核，缺省全部")
+    private Integer auditStatus;
+
+    @Size(max = 16, message = "AI结论非法")
+    @Schema(description = "AI结论：pass/suspect/reject/none，缺省全部")
+    private String aiVerdict;
 }

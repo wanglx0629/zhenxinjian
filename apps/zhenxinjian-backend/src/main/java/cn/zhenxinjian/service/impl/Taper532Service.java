@@ -1,8 +1,12 @@
 package cn.zhenxinjian.service.impl;
 
+import cn.zhenxinjian.common.constant.CommonConstant;
+import cn.zhenxinjian.common.constant.ExceptionConstant;
 import cn.zhenxinjian.common.enums.GenderEnum;
 import cn.zhenxinjian.common.enums.MenstrualPhaseEnum;
+import cn.zhenxinjian.common.exception.BusinessException;
 import cn.zhenxinjian.common.utils.Numbers;
+import cn.zhenxinjian.common.utils.Operators;
 import cn.zhenxinjian.domain.po.UserBody;
 import cn.zhenxinjian.domain.po.UserMenstrual;
 import cn.zhenxinjian.domain.vo.Taper532VO;
@@ -12,10 +16,12 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -58,14 +64,43 @@ public class Taper532Service {
             Taper532VO vo = new Taper532VO();
             vo.setStages(List.of());
             vo.setToday(null);
+            vo.setGenerated(false);
             return vo;
         }
+        return buildPlan(body);
+    }
 
+    /**
+     * 生成/确认当期 532 计划（幂等，PART2 空态入口）：
+     * 档案缺失 40601 拦截（前端引导身体数据页）；
+     * 计划态以 user_body.taper_plan_time 打标（单行刷新，重复生成不产生重复计划），
+     * 数值仍按档案实时公式口径（基线 + 下调 + 经期上浮），不引入新计算
+     *
+     * @param userId 当前用户ID
+     * @return 生成后的计划卡视图
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public Taper532VO generate(Long userId) {
+        UserBody body = userBodyMapper.selectOne(
+                Wrappers.<UserBody>lambdaQuery().eq(UserBody::getUserId, userId));
+        if (body == null) {
+            throw new BusinessException(CommonConstant.CYCLE_NOT_PROFILED_CODE,
+                    ExceptionConstant.CYCLE_NOT_PROFILED);
+        }
+        body.setTaperPlanTime(LocalDateTime.now());
+        body.setUpdateBy(Operators.user(userId));
+        userBodyMapper.updateById(body);
+        log.info("[Taper532] 当期计划生成/确认: userId={}", userId);
+        return buildPlan(body);
+    }
+
+    /** 按档案构建计划卡（数值实时口径；generated 取计划态打标） */
+    private Taper532VO buildPlan(UserBody body) {
         MenstrualCalcService.PhaseResult phase = resolvePhase(body);
-
         Taper532VO vo = new Taper532VO();
         vo.setStages(buildStages(phase));
         vo.setToday(buildToday(body, phase));
+        vo.setGenerated(body.getTaperPlanTime() != null);
         return vo;
     }
 

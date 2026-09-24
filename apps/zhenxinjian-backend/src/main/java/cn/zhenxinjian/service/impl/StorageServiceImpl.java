@@ -230,6 +230,26 @@ public class StorageServiceImpl implements StorageService {
         client.deleteObject(bucket, objectKey);
     }
 
+    @Override
+    public String publicUrl(String objectKey) {
+        String key = StrUtil.trimToNull(objectKey);
+        if (key == null) {
+            return null;
+        }
+        // 存量绝对 URL（预热图/历史数据）原样透传，不做二次拼接
+        if (StrUtil.startWithIgnoreCase(key, "http://") || StrUtil.startWithIgnoreCase(key, "https://")) {
+            return key;
+        }
+        ZhenxinjianProperties.Storage storage = zhenxinjianProperties.getStorage();
+        if (storage.getMinio().isEnabled()) {
+            return buildMinioUrl(storage.getMinio(), key);
+        }
+        if (storage.getOss().isEnabled()) {
+            return buildOssUrl(storage.getOss(), key);
+        }
+        return key;
+    }
+
     /**
      * 确保 MinIO 桶存在并开放匿名只读下载（url 直接下发 C 端/后台，须支持未签名 GET；仅放行 GetObject）
      */

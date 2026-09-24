@@ -74,6 +74,9 @@ public final class CommonConstant {
     /** 试算克数超区间（1-10000） */
     public static final int FOOD_GRAMS_INVALID_CODE = 40406;
 
+    /** 已通过公共食物只读（原作者不可编辑/删除，仅管理员可维护） */
+    public static final int FOOD_PUBLIC_READONLY_CODE = 40407;
+
     // ==================== 饮食记录错误码（405xx） ====================
 
     /** 份量克数非法（>0 且 ≤5000） */
@@ -170,6 +173,15 @@ public final class CommonConstant {
 
     /** AI 识别繁忙（主备模型均熔断/可转移错误耗尽） */
     public static final int AI_BUSY_CODE = 40914;
+
+    /** 管理审核目标非法（仅用户共建食物可执行审核动作） */
+    public static final int ADMIN_FOOD_AUDIT_TARGET_INVALID_CODE = 40915;
+
+    /** 管理员驳回原因必填 */
+    public static final int ADMIN_FOOD_REJECT_REASON_REQUIRED_CODE = 40916;
+
+    /** 管理员修正值非法（区间/守恒校验未通过） */
+    public static final int ADMIN_FOOD_FIX_INVALID_CODE = 40917;
 
     /** 埋点单批上报上限 */
     public static final int TRACK_BATCH_MAX_SIZE = 50;

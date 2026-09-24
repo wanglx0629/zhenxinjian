@@ -10,11 +10,14 @@ import cn.zhenxinjian.common.sensitive.SensitiveWordFilter;
 import cn.zhenxinjian.domain.dto.AdminFoodSaveDTO;
 import cn.zhenxinjian.domain.po.Food;
 import cn.zhenxinjian.domain.po.FoodImage;
+import cn.zhenxinjian.domain.po.User;
 import cn.zhenxinjian.domain.query.AdminFoodQuery;
 import cn.zhenxinjian.domain.vo.FoodVO;
 import cn.zhenxinjian.domain.vo.LoginUserVO;
 import cn.zhenxinjian.mapper.FoodImageMapper;
 import cn.zhenxinjian.mapper.FoodMapper;
+import cn.zhenxinjian.mapper.UserMapper;
+import cn.zhenxinjian.service.StorageService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -25,8 +28,10 @@ import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -45,10 +50,12 @@ public class AdminFoodService extends ServiceImpl<FoodMapper, Food> {
     private static final int BUILTIN_CODE_START = 201;
 
     private final FoodImageMapper foodImageMapper;
+    private final UserMapper userMapper;
     private final SensitiveWordFilter sensitiveWordFilter;
+    private final StorageService storageService;
 
     /**
-     * 分页查询（名称/别名模糊 + 分类/来源/状态筛选）
+     * 分页查询（名称/别名模糊 + 分类/来源/状态/审核状态/AI 结论筛选；共建行带提交人昵称）
      */
     public IPage<FoodVO> page(AdminFoodQuery query) {
         IPage<Food> page = page(query.toPage(), Wrappers.<Food>lambdaQuery()
@@ -59,8 +66,11 @@ public class AdminFoodService extends ServiceImpl<FoodMapper, Food> {
                 .eq(StringUtils.hasText(query.getCategoryCode()), Food::getCategoryCode, query.getCategoryCode())
                 .eq(query.getSource() != null, Food::getSource, query.getSource())
                 .eq(query.getStatus() != null, Food::getStatus, query.getStatus())
+                .eq(query.getAuditStatus() != null, Food::getAuditStatus, query.getAuditStatus())
+                .eq(StringUtils.hasText(query.getAiVerdict()), Food::getAiVerdict, query.getAiVerdict())
                 .orderByAsc(Food::getId));
-        IPage<FoodVO> voPage = page.convert(this::toVO);
+        Map<Long, String> nicknameMap = loadSubmitterNicknames(page.getRecords());
+        IPage<FoodVO> voPage = page.convert(food -> toVO(food, nicknameMap));
         fillImages(voPage.getRecords());
         return voPage;
     }
@@ -195,29 +205,62 @@ public class AdminFoodService extends ServiceImpl<FoodMapper, Food> {
         return vo;
     }
 
-    /** 批量填充图片 URL（一次查询防 N+1；无图食物 image 保持 null） */
+    /** PO → VO（共建行带提交人昵称兜底「用户#ID」；基础食物 submitterName 为空） */
+    private FoodVO toVO(Food food, Map<Long, String> nicknameMap) {
+        FoodVO vo = toVO(food);
+        if (FoodSourceEnum.CUSTOM.getCode().equals(food.getSource()) && food.getUserId() != null) {
+            vo.setSubmitterName(nicknameMap.getOrDefault(food.getUserId(), "用户#" + food.getUserId()));
+        }
+        return vo;
+    }
+
+    /** 批量加载本页共建食物提交人昵称（避免 N+1） */
+    private Map<Long, String> loadSubmitterNicknames(List<Food> foods) {
+        Set<Long> ids = foods.stream()
+                .filter(f -> FoodSourceEnum.CUSTOM.getCode().equals(f.getSource()))
+                .map(Food::getUserId)
+                .collect(Collectors.toSet());
+        if (ids.isEmpty()) {
+            return Map.of();
+        }
+        return userMapper.selectBatchIds(ids).stream()
+                .collect(Collectors.toMap(User::getId, User::getNickname, (a, b) -> a));
+    }
+
+    /** 批量填充图片 URL（一次查询防 N+1；foods.image 共建用户上传图优先，空值回退 food_images 预热图） */
     private void fillImages(List<FoodVO> list) {
         if (list == null || list.isEmpty()) {
             return;
         }
+        Map<String, String> urlByCode = loadWarmImages(list);
+        for (FoodVO vo : list) {
+            // foods.image（共建用户上传）优先；仅空值回退内置预热图，避免覆盖
+            if (!StringUtils.hasText(vo.getImage())) {
+                vo.setImage(urlByCode.get(vo.getCode()));
+            }
+            // 共建图存相对 objectKey → 按当前存储配置解析为公网地址；预热图等绝对 URL 原样透传
+            vo.setImage(storageService.publicUrl(vo.getImage()));
+        }
+    }
+
+    /** 内置预热图映射（一码一图，无内置编码时返回空集不查库） */
+    private Map<String, String> loadWarmImages(List<FoodVO> list) {
         List<String> codes = list.stream()
                 .map(FoodVO::getCode)
                 .filter(StringUtils::hasText)
                 .distinct()
                 .toList();
         if (codes.isEmpty()) {
-            return;
+            // 空码场景返回可容忍 null 键的 HashMap：共建食物 code 为空时 get(null) 不得抛 NPE
+            return new HashMap<>();
         }
-        Map<String, String> urlByCode = foodImageMapper.selectList(Wrappers.<FoodImage>lambdaQuery()
+        return foodImageMapper.selectList(Wrappers.<FoodImage>lambdaQuery()
                         .select(FoodImage::getFoodCode, FoodImage::getUrl)
                         .in(FoodImage::getFoodCode, codes)
                         .eq(FoodImage::getStatus, 1))
                 .stream()
                 .filter(img -> StringUtils.hasText(img.getUrl()))
                 .collect(Collectors.toMap(FoodImage::getFoodCode, FoodImage::getUrl, (a, b) -> a));
-        for (FoodVO vo : list) {
-            vo.setImage(urlByCode.get(vo.getCode()));
-        }
     }
 
     /** 操作者标识（审计列，当前管理员用户名） */

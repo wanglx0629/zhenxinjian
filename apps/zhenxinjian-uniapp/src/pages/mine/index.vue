@@ -283,6 +283,7 @@ function handleLogout() {
       </view>
       <text class="about-text">臻心减 V1.1 · 生活化减脂计算器</text>
       <text class="about-text">计算核心后置，前端参数不可篡改；核心计算响应速度与页面加载满足一期性能标准。</text>
+      <text class="about-text">数据来源：卫生福利部食品药物管理署（OGL）</text>
     </view>
 
     <!-- 退出登录 -->

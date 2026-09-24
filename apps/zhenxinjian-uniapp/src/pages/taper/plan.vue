@@ -1,11 +1,13 @@
 <script setup lang="ts">
 /**
  * P08 532 四阶段计划卡：四阶段说明 + 今日目标（基线 + 平台下调 + 经期上浮）
+ * 空态二分支：未建档引导身体数据页；已建档未生成展示「生成周期计划」
  * 作者: wanglx
  */
 import { computed, ref } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
 import { useTaperStore } from '@/store/taper'
+import { generateTaper532Plan } from '@/api/taper'
 import { track, trackPage } from '@/utils/track'
 import { TRACK_EVENT } from '@/config/track-events'
 import { getToken } from '@/utils/storage'
@@ -17,7 +19,15 @@ const plan = computed(() => taperStore.plan)
 
 const stages = computed(() => plan.value?.stages ?? [])
 const today = computed(() => plan.value?.today ?? null)
+/** 未建档空态（stages 空） */
 const isEmpty = computed(() => !loading.value && (!plan.value || !plan.value.stages.length))
+/** 已建档未生成空态（PART2 生成入口） */
+const needGenerate = computed(
+  () => !loading.value && !!plan.value && !!plan.value.stages.length && plan.value.generated === false
+)
+
+/** 生成按钮提交态 */
+const generating = ref(false)
 
 onShow(async () => {
   if (!getToken()) {
@@ -46,6 +56,21 @@ function deltaText(n: number): string {
 function goProfile() {
   uni.redirectTo({ url: '/pages/body/profile' })
 }
+
+/** 生成/确认当期计划（幂等；失败 toast 由 request.ts 统一处理） */
+async function handleGenerate() {
+  if (generating.value) return
+  generating.value = true
+  try {
+    await generateTaper532Plan()
+    uni.showToast({ title: '已生成当期计划', icon: 'success' })
+    await taperStore.fetch()
+  } catch {
+    // request.ts 已统一 toast
+  } finally {
+    generating.value = false
+  }
+}
 </script>
 
 <template>
@@ -55,6 +80,15 @@ function goProfile() {
       <text class="empty-title">还没有身体数据</text>
       <text class="empty-desc">录入身体数据后，这里会展示 532 四阶段计划与今日目标。</text>
       <button class="btn-primary" @click="goProfile">去录入</button>
+    </view>
+
+    <!-- 空态：已建档未生成（生成周期计划入口） -->
+    <view v-else-if="needGenerate" class="panel empty">
+      <text class="empty-title">还没有生成当期计划</text>
+      <text class="empty-desc">生成后按你的身体档案计算 532 四阶段计划与今日目标，档案更新数值自动跟随。</text>
+      <button class="btn-primary" :disabled="generating" @click="handleGenerate">
+        {{ generating ? '生成中…' : '生成周期计划' }}
+      </button>
     </view>
 
     <template v-else-if="!loading">

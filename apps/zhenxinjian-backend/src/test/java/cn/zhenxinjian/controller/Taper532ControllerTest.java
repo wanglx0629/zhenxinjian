@@ -16,7 +16,9 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -47,5 +49,13 @@ class Taper532ControllerTest {
     void plan_returnsPlan() throws Exception {
         mockMvc.perform(get("/taper-532/plan"))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.code").value(200));
+    }
+
+    /** 场景：生成/确认当期 532 计划 → 200，透传当前用户 */
+    @Test
+    void generate_returnsPlan() throws Exception {
+        mockMvc.perform(post("/taper-532/generate"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.code").value(200));
+        verify(taper532Service).generate(1L);
     }
 }

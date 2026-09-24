@@ -9,6 +9,7 @@ import { onLoad, onReachBottom, onShow } from '@dcloudio/uni-app'
 import { useFoodStore } from '@/store/food'
 import type { FoodCategoryVO, FoodVO } from '@/api/food'
 import EmptyState from '@/components/EmptyState.vue'
+import FoodThumb from '@/components/FoodThumb.vue'
 import { track, trackPage } from '@/utils/track'
 import { TRACK_EVENT } from '@/config/track-events'
 import { iconSrc } from '@/utils/icons'
@@ -16,7 +17,6 @@ import { iconSrc } from '@/utils/icons'
 const historyIcon = iconSrc('history', '#00AC7C')
 const starIcon = iconSrc('star', '#00AC7C')
 const flameIcon = iconSrc('flame', '#00AC7C')
-const foodPlaceholder = iconSrc('bowl', '#94A3B8')
 const entryArrow = iconSrc('chevronRight', '#94A3B8')
 
 const foodStore = useFoodStore()
@@ -97,6 +97,22 @@ function handleInput() {
   debounceTimer = setTimeout(() => doSearch(1), 300)
 }
 
+/** 是否处于搜索态（有关键字/分类或已出结果时显示「取消」） */
+const inSearch = computed(() => !!keyword.value || !!categoryCode.value || searched.value)
+
+/** 取消搜索：清空关键字与分类、收起键盘、退出搜索态回发现页 */
+function cancelSearch() {
+  if (debounceTimer) clearTimeout(debounceTimer)
+  keyword.value = ''
+  categoryCode.value = ''
+  uni.hideKeyboard()
+  records.value = []
+  total.value = 0
+  pages.value = 0
+  page.value = 1
+  searched.value = false
+}
+
 function selectCategory(code: string) {
   categoryCode.value = categoryCode.value === code ? '' : code
   doSearch(1)
@@ -153,6 +169,7 @@ onReachBottom(() => {
         @input="handleInput"
         @confirm="doSearch(1)"
       />
+      <text v-if="inSearch" class="search-cancel" hover-class="search-cancel-hover" @click="cancelSearch">取消</text>
     </view>
 
     <scroll-view scroll-x class="category-scroll">
@@ -205,8 +222,7 @@ onReachBottom(() => {
         </view>
         <view class="food-list">
           <view v-for="f in hotList" :key="f.id" class="food-row" hover-class="food-row-hover" @click="openDetail(f)">
-            <image v-if="f.image" :src="f.image" mode="aspectFill" class="food-thumb" />
-            <view v-else class="food-thumb food-thumb-empty"><image class="food-thumb-img" :src="foodPlaceholder" /></view>
+            <FoodThumb :image="f.image" :category-code="f.categoryCode" />
             <view class="food-main">
               <text class="food-name">{{ f.name }}</text>
               <text v-if="f.alias" class="food-alias">{{ f.alias }}</text>
@@ -225,8 +241,7 @@ onReachBottom(() => {
         <text class="panel-title">共 {{ total }} 个结果</text>
         <view class="food-list">
           <view v-for="f in records" :key="f.id" class="food-row" hover-class="food-row-hover" @click="openDetail(f)">
-            <image v-if="f.image" :src="f.image" mode="aspectFill" class="food-thumb" />
-            <view v-else class="food-thumb food-thumb-empty"><image class="food-thumb-img" :src="foodPlaceholder" /></view>
+            <FoodThumb :image="f.image" :category-code="f.categoryCode" />
             <view class="food-main">
               <view class="food-name-wrap">
                 <text class="food-name">{{ f.name }}</text>
@@ -263,10 +278,14 @@ onReachBottom(() => {
 }
 
 .search-bar {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
   margin-bottom: 20rpx;
 }
 
 .search-input {
+  flex: 1;
   height: 80rpx;
   background: $zhenxinjian-white;
   border: 1rpx solid $zhenxinjian-border;
@@ -275,6 +294,16 @@ onReachBottom(() => {
   font-size: 28rpx;
   color: $zhenxinjian-text;
   box-sizing: border-box;
+}
+
+.search-cancel {
+  flex-shrink: 0;
+  font-size: 28rpx;
+  color: $zhenxinjian-text-secondary;
+}
+
+.search-cancel-hover {
+  color: $zhenxinjian-primary;
 }
 
 .category-scroll {
@@ -443,30 +472,12 @@ onReachBottom(() => {
   background: $zhenxinjian-primary-bg;
 }
 
-.food-thumb {
-  width: 88rpx;
-  height: 88rpx;
-  border-radius: $zhenxinjian-radius-md;
-  flex-shrink: 0;
-  margin-right: 20rpx;
-  background: $zhenxinjian-bg;
-}
-
-.food-thumb-empty {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.food-thumb-img {
-  width: 44rpx;
-  height: 44rpx;
-}
-
 .food-main {
   display: flex;
   flex-direction: column;
   flex: 1;
+  min-width: 0;
+  margin-left: 20rpx;
   margin-right: 16rpx;
 }
 

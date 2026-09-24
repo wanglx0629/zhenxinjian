@@ -82,12 +82,30 @@ export const FOOD_CATEGORY_OPTIONS: DictItem<string>[] = [
 ]
 export const FOOD_CATEGORY_MAP = dictMap(FOOD_CATEGORY_OPTIONS)
 
-/** 食物来源（1内置 2自定义） */
+/** 食物来源（1基础食物 2用户共建；后台统一表述，见 change design §6） */
 export const FOOD_SOURCE_OPTIONS: DictItem[] = [
-  { value: 1, label: '内置', type: 'success' },
-  { value: 2, label: '自定义', type: 'info' }
+  { value: 1, label: '基础食物', type: 'success' },
+  { value: 2, label: '用户共建', type: 'primary' }
 ]
 export const FOOD_SOURCE_MAP = dictMap(FOOD_SOURCE_OPTIONS)
+
+/** 食物审核状态（后端 FoodAuditStatusEnum：0待审核 1已通过 2已驳回 3无需审核） */
+export const FOOD_AUDIT_STATUS_OPTIONS: DictItem[] = [
+  { value: 0, label: '待审核', type: 'warning' },
+  { value: 1, label: '已通过', type: 'success' },
+  { value: 2, label: '已驳回', type: 'danger' },
+  { value: 3, label: '无需审核', type: 'info' }
+]
+export const FOOD_AUDIT_STATUS_MAP = dictMap(FOOD_AUDIT_STATUS_OPTIONS)
+
+/** AI 校验结论（后端 FoodAiVerdictEnum：pass合理/suspect存疑/reject明显不符/none未校验） */
+export const FOOD_AI_VERDICT_OPTIONS: DictItem<string>[] = [
+  { value: 'pass', label: '合理', type: 'success' },
+  { value: 'suspect', label: '存疑', type: 'warning' },
+  { value: 'reject', label: '明显不符', type: 'danger' },
+  { value: 'none', label: '未校验', type: 'info' }
+]
+export const FOOD_AI_VERDICT_MAP = dictMap(FOOD_AI_VERDICT_OPTIONS)
 
 /** 食物状态（1有效 0停用） */
 export const FOOD_STATUS_OPTIONS: DictItem[] = [

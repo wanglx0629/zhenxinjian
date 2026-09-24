@@ -1,24 +1,32 @@
 <script setup lang="ts">
 /**
  * P07 碳循环周期计划页：池总量头卡 + 逐日日型卡片（色块/三宏/kcal/运动标）+ 今日高亮
- * 空态引导 P06；支持手动终止周期
+ * 空态引导 P06；「提前结束/切换模式」经 F15 弹窗确认后调既有切换接口
  * 作者: wanglx
  */
 import { computed, ref } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
+import { useBodyStore } from '@/store/body'
 import { useCycleStore } from '@/store/cycle'
 import { CYCLE_DAY_TYPES } from '@/config/constants'
 import { md, week } from '@/utils/format'
+import ModeSwitchConfirm from '@/components/ModeSwitchConfirm.vue'
 import { track, trackPage } from '@/utils/track'
 import { TRACK_EVENT } from '@/config/track-events'
 import type { CycleDayVO } from '@/api/cycle'
 
 const cycleStore = useCycleStore()
+const bodyStore = useBodyStore()
 const loading = ref(true)
 
 const plan = computed(() => cycleStore.currentPlan)
 const days = computed(() => cycleStore.days)
 const todayIndex = computed(() => cycleStore.todayIndex)
+
+/** F15 切换确认弹窗显隐 */
+const showConfirm = ref(false)
+/** 切换提交中（防重复点击） */
+const switching = ref(false)
 
 onShow(async () => {
   trackPage('pages/cycle/plan')
@@ -38,31 +46,58 @@ function typeCfg(day: CycleDayVO) {
   return CYCLE_DAY_TYPES[day.dayType] ?? CYCLE_DAY_TYPES[2]
 }
 
+/** 自定义返回（页面栈空时兜底回首页 tab） */
+function goBack() {
+  const pages = getCurrentPages()
+  if (pages.length > 1) {
+    uni.navigateBack()
+  } else {
+    uni.switchTab({ url: '/pages/home/index' })
+  }
+}
+
 /** 空态引导：去 P06 创建周期 */
 function goSetting() {
   uni.redirectTo({ url: '/pages/cycle/setting' })
 }
 
-/** 终止周期（二次确认，终止后回空态） */
-function handleTerminate() {
-  uni.showModal({
-    title: '终止周期',
-    content: '终止后当期进度清空，历史周期仍可查看。确认终止当前周期？',
-    success: async (res) => {
-      if (!res.confirm) return
-      try {
-        await cycleStore.terminate()
-        uni.showToast({ title: '已终止', icon: 'none' })
-      } catch {
-        // request.ts 已统一 toast
-      }
-    }
-  })
+/** 打开「提前结束/切换模式」F15 确认弹窗（展示周期摘要，确认后才执行） */
+function openSwitchConfirm() {
+  showConfirm.value = true
+}
+
+/** F15 确认：调既有切换接口（切 532 自动终止进行中周期并清空进度） */
+async function onConfirmSwitch() {
+  showConfirm.value = false
+  if (switching.value) return
+  switching.value = true
+  try {
+    await cycleStore.switchMode(1)
+    track(TRACK_EVENT.MODE_SWITCH, { mode: 1 })
+    await bodyStore.fetchProfile()
+    uni.showToast({ title: '已切换为 532 模式', icon: 'none' })
+    uni.redirectTo({ url: '/pages/taper/plan' })
+  } catch {
+    // request.ts 已统一 toast
+  } finally {
+    switching.value = false
+  }
+}
+
+/** F15 取消：关闭弹窗，周期不变 */
+function onCancelSwitch() {
+  showConfirm.value = false
 }
 </script>
 
 <template>
   <view class="page">
+    <!-- 自定义返回入口 -->
+    <view class="back-row" hover-class="back-row-hover" @click="goBack">
+      <text class="back-icon">‹</text>
+      <text class="back-text">返回</text>
+    </view>
+
     <!-- 空态：无进行中周期 -->
     <view v-if="!loading && cycleStore.noPlan" class="panel empty">
       <text class="empty-title">还没有进行中的碳循环</text>
@@ -114,8 +149,16 @@ function handleTerminate() {
         </view>
       </view>
 
-      <button class="btn-ghost" @click="handleTerminate">终止当前周期</button>
+      <button class="btn-ghost" :disabled="switching" @click="openSwitchConfirm">提前结束/切换模式</button>
     </template>
+
+    <!-- F15 切换确认弹窗（周期摘要 + 不可恢复警示） -->
+    <ModeSwitchConfirm
+      :visible="showConfirm"
+      :plan="plan"
+      @confirm="onConfirmSwitch"
+      @cancel="onCancelSwitch"
+    />
   </view>
 </template>
 
@@ -125,6 +168,31 @@ function handleTerminate() {
   padding: 24rpx 32rpx 64rpx;
   box-sizing: border-box;
   background: $zhenxinjian-bg;
+}
+
+/* 自定义返回入口 */
+.back-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 4rpx;
+  padding: 8rpx 20rpx 8rpx 12rpx;
+  margin-bottom: 20rpx;
+  border-radius: $zhenxinjian-radius-pill;
+}
+
+.back-row-hover {
+  background: $zhenxinjian-primary-bg;
+}
+
+.back-icon {
+  font-size: 36rpx;
+  line-height: 1;
+  color: $zhenxinjian-text;
+}
+
+.back-text {
+  font-size: 26rpx;
+  color: $zhenxinjian-text;
 }
 
 .grid {

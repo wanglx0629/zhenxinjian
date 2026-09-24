@@ -79,6 +79,9 @@ public final class ExceptionConstant {
     /** 40406 试算克数超区间 */
     public static final String FOOD_GRAMS_INVALID = "试算克数须在1-10000之间";
 
+    /** 40407 已通过公共食物只读（原作者不可编辑/删除） */
+    public static final String FOOD_PUBLIC_READONLY = "该食物已通过审核进入公共库，仅管理员可维护";
+
     // ==================== 饮食记录（405xx） ====================
 
     /** 40501 份量克数非法 */
@@ -148,6 +151,15 @@ public final class ExceptionConstant {
 
     /** 40903 食物维护冲突 */
     public static final String ADMIN_FOOD_CONFLICT = "食物名称已存在或维护冲突";
+
+    /** 40915 管理审核目标非法（仅用户共建食物可审核） */
+    public static final String ADMIN_FOOD_AUDIT_TARGET_INVALID = "仅用户共建食物支持审核操作";
+
+    /** 40916 管理员驳回原因必填 */
+    public static final String ADMIN_FOOD_REJECT_REASON_REQUIRED = "驳回原因不能为空";
+
+    /** 40917 管理员修正值非法 */
+    public static final String ADMIN_FOOD_FIX_INVALID = "修正值未通过校验，请检查宏量与能量";
 
     // ==================== 用户业务 ====================
 

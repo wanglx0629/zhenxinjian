@@ -24,6 +24,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -153,6 +154,48 @@ class StorageServiceImplTest {
         assertNotNull(result);
         assertEquals(StorageConstant.PROVIDER_MINIO, result.getProvider());
         assertTrue(result.getUrl().contains("test-uuid"));
+    }
+
+    /** 场景：相对 objectKey → 按当前 MinIO 配置拼公网地址 */
+    @Test
+    void publicUrl_relativeKey_returnsMinioUrl() {
+        ZhenxinjianProperties.Storage storage = storageConfig();
+        storage.getMinio().setEnabled(true);
+        storage.getOss().setEnabled(false);
+        when(zhenxinjianProperties.getStorage()).thenReturn(storage);
+
+        String url = service.publicUrl("upload/2026/09/24/a.jpg");
+
+        assertEquals("http://localhost:9000/zhenxinjian/upload/2026/09/24/a.jpg", url);
+    }
+
+    /** 场景：绝对 URL（预热图/存量）原样透传 */
+    @Test
+    void publicUrl_absoluteUrl_returnsAsIs() {
+        ZhenxinjianProperties.Storage storage = storageConfig();
+        when(zhenxinjianProperties.getStorage()).thenReturn(storage);
+
+        assertEquals("https://img.example.com/F001.jpg",
+                service.publicUrl("https://img.example.com/F001.jpg"));
+    }
+
+    /** 场景：MinIO 未启用 → OSS 兜底拼地址 */
+    @Test
+    void publicUrl_minioDisabled_returnsOssUrl() {
+        ZhenxinjianProperties.Storage storage = storageConfig();
+        storage.getMinio().setEnabled(false);
+        storage.getOss().setEnabled(true);
+        when(zhenxinjianProperties.getStorage()).thenReturn(storage);
+
+        assertEquals("https://zhenxinjian.oss-cn-hangzhou.aliyuncs.com/upload/a.jpg",
+                service.publicUrl("upload/a.jpg"));
+    }
+
+    /** 场景：空 key → null */
+    @Test
+    void publicUrl_blankKey_returnsNull() {
+        assertNull(service.publicUrl(null));
+        assertNull(service.publicUrl(" "));
     }
 
     /** 场景：MinIO 上传抛非 BusinessException → 切 OSS 保底 */

@@ -122,6 +122,7 @@ function onCancelSwitch() {
 
     <ModeSwitchConfirm
       :visible="showConfirm"
+      :plan="cycleStore.currentPlan"
       @confirm="onConfirmSwitch"
       @cancel="onCancelSwitch"
     />

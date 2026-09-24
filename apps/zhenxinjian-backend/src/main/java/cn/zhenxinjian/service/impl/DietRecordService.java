@@ -3,6 +3,7 @@ package cn.zhenxinjian.service.impl;
 import cn.zhenxinjian.common.constant.CommonConstant;
 import cn.zhenxinjian.common.constant.ExceptionConstant;
 import cn.zhenxinjian.common.enums.DietRecordSourceEnum;
+import cn.zhenxinjian.common.enums.FoodAuditStatusEnum;
 import cn.zhenxinjian.common.enums.FoodSourceEnum;
 import cn.zhenxinjian.common.enums.MealTypeEnum;
 import cn.zhenxinjian.common.exception.BusinessException;
@@ -220,12 +221,21 @@ public class DietRecordService {
             throw new BusinessException(CommonConstant.DIET_FOOD_INVALID_CODE,
                     ExceptionConstant.DIET_FOOD_INVALID);
         }
-        // 来源归属：内置全局可用；自定义仅本人可用（他人自定义按不存在处理，不泄露）
+        // 可达性（公共 ∪ 本人全部）：内置 status=1 全员可用；
+        // 共建食物本人 0/1/2 全可用、他人仅已通过(1)可用，停用食物不可记
+        if (!Integer.valueOf(1).equals(food.getStatus())) {
+            throw new BusinessException(CommonConstant.DIET_FOOD_INVALID_CODE,
+                    ExceptionConstant.DIET_FOOD_INVALID);
+        }
         if (FoodSourceEnum.BUILT_IN.getCode().equals(food.getSource())) {
             record.setSource(DietRecordSourceEnum.BUILT_IN_FOOD.getCode());
         } else if (userId.equals(food.getUserId())) {
             record.setSource(DietRecordSourceEnum.CUSTOM_FOOD.getCode());
+        } else if (FoodAuditStatusEnum.APPROVED.getCode().equals(food.getAuditStatus())) {
+            // 他人已通过转公共的共建食物，与基础食物同样可用于记录（foodId 不变不断链）
+            record.setSource(DietRecordSourceEnum.CUSTOM_FOOD.getCode());
         } else {
+            // 他人待审/已驳回按不存在处理，不泄露存在性
             throw new BusinessException(CommonConstant.DIET_FOOD_INVALID_CODE,
                     ExceptionConstant.DIET_FOOD_INVALID);
         }

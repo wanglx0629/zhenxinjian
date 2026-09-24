@@ -8,11 +8,11 @@ import { computed, ref } from 'vue'
 import { onLoad, onShow } from '@dcloudio/uni-app'
 import { useFoodStore } from '@/store/food'
 import type { FoodCalcVO, FoodVO } from '@/api/food'
+import FoodThumb from '@/components/FoodThumb.vue'
 import { track, trackPage } from '@/utils/track'
 import { TRACK_EVENT } from '@/config/track-events'
 import { iconSrc } from '@/utils/icons'
 
-const foodPlaceholder = iconSrc('bowl', '#94A3B8')
 const calcIcon = iconSrc('target', '#00AC7C')
 
 const foodStore = useFoodStore()
@@ -106,8 +106,7 @@ function goAddRecord() {
     <template v-else-if="food">
       <view class="panel">
         <view class="head">
-          <image v-if="food.image" :src="food.image" mode="aspectFill" class="food-hero" />
-          <view v-else class="food-hero food-hero-empty"><image class="food-hero-img" :src="foodPlaceholder" /></view>
+          <FoodThumb size="lg" :image="food.image" :category-code="food.categoryCode" />
           <view class="head-info">
             <view class="head-row">
               <text class="name">{{ food.name }}</text>
@@ -209,26 +208,6 @@ function goAddRecord() {
   display: flex;
   align-items: center;
   gap: 20rpx;
-}
-
-.food-hero {
-  width: 128rpx;
-  height: 128rpx;
-  border-radius: $zhenxinjian-radius-lg;
-  flex-shrink: 0;
-  background: $zhenxinjian-bg;
-}
-
-.food-hero-empty {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: $zhenxinjian-primary-bg;
-}
-
-.food-hero-img {
-  width: 60rpx;
-  height: 60rpx;
 }
 
 .head-info {

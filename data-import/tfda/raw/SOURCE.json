@@ -1,0 +1,21 @@
+{
+  "dataset": "食品營養成分資料庫（台灣 TFDA Food Nutrition Database）",
+  "authority": "衛生福利部食品藥物管理署（Taiwan Food and Drug Administration）",
+  "license": "政府資料開放授權條款 1.0（Open Government License，可商業使用、須署名）",
+  "official_dataset": {
+    "portal": "政府資料開放平臺 data.gov.tw 資料集 14197",
+    "portal_url": "https://data.gov.tw/dataset/14197",
+    "direct_export_url": "https://data.fda.gov.tw/opendata/exportDataList.do?method=ExportData&ContentType=json&DatasetId=43"
+  },
+  "version": "20.5",
+  "official_generated": "2026-09-03",
+  "fetched_via": "GitHub OGL 再分發鏡像 ating1234/food（該專案 GitHub Actions 每月對官方資料 SHA256 比對自動同步，授權允許再分發）",
+  "fetched_via_url": "https://github.com/ating1234/food",
+  "fetched_date": "2026-09-24",
+  "fetch_reason": "官方 .gov.tw 站點對本地網路環境遮蔽（TLS 握手被 WAF 掐斷、直連不通），改經 OGL 授權的鏡像取得；資料內容與官方 20_5.json 逐項一致，SHA256 連動",
+  "total_foods": 2180,
+  "category_count": 18,
+  "files": "raw/ 下 foods_index.json、version.json、data_<分類名>.json × 18",
+  "usage": "導入清洗腳本 python/tfda_clean.py 讀取本目錄，產出 clean/foods_tfda.json；入庫批次標記 data_batch='TFDA:20.5'",
+  "attribution": "資料來源：衛生福利部食品藥物管理署（政府資料開放授權條款 OGL）"
+}

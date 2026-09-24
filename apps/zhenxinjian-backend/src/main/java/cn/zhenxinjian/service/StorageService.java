@@ -24,4 +24,13 @@ public interface StorageService {
 
     /** 删除文件 */
     void delete(String objectKey);
+
+    /**
+     * 相对 objectKey → 公网访问地址（MinIO 优先、OSS 兜底，按当前存储配置拼接）
+     * 绝对 http(s) URL 原样透传（兼容预热图/存量数据）；空返回 null
+     *
+     * @param objectKey 对象 Key 或存量绝对 URL
+     * @return 可直接访问的地址；入参为空返回 null
+     */
+    String publicUrl(String objectKey);
 }

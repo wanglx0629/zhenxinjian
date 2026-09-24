@@ -45,9 +45,22 @@ public class CustomFoodSaveDTO {
     @NotNull(message = "脂肪不能为空")
     private BigDecimal fat;
 
-    @Schema(description = "能量 kcal/100g（0-900）", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotNull(message = "能量不能为空")
+    @Schema(description = "能量 kcal/100g（0-900；与 kj 至少一项非空，缺省按 kj÷4.184 换算，kcal 为入库基准）")
     private Integer kcal;
+
+    @Schema(description = "能量千焦 kJ/100g（0-3800；与 kcal 至少一项非空，后端以 kcal 为入库基准）")
+    private Integer kj;
+
+    @Schema(description = "能量录入单位：KJ 或 KCAL（缺省 KCAL；KJ 时前端按 4.184 联动换算出 kcal 后提交）")
+    private String energyUnit;
+
+    @Schema(description = "填报单位（份/个/杯/包…，可空）")
+    @Size(max = 16, message = "单位过长")
+    private String unit;
+
+    @Schema(description = "食物图片相对路径（可选，经统一文件上传返回的 key）")
+    @Size(max = 512, message = "图片路径过长")
+    private String image;
 
     @Schema(description = "常用单份克数（5-1000，缺省100）")
     private BigDecimal serving;

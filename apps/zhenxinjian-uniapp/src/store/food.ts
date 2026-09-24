@@ -17,7 +17,7 @@ import { BASE_URL } from '@/api/request'
  * 真机调试适配：图片 MinIO 地址按 API host 重写
  * （开发库种子数据为 127.0.0.1，真机上 localhost 指手机自身不可达；生产域名不匹配正则原样返回）
  */
-function resolveImage(url?: string): string | undefined {
+export function resolveImage(url?: string): string | undefined {
   if (!url) return url
   const m = BASE_URL.match(/^https?:\/\/([^/:]+)/)
   if (!m) return url

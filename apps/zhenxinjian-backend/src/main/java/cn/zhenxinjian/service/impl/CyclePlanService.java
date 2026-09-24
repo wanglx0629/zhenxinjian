@@ -6,15 +6,18 @@ import cn.zhenxinjian.common.enums.CycleDayTypeEnum;
 import cn.zhenxinjian.common.enums.CyclePlanStatusEnum;
 import cn.zhenxinjian.common.enums.DietModeEnum;
 import cn.zhenxinjian.common.exception.BusinessException;
+import cn.zhenxinjian.common.utils.Numbers;
 import cn.zhenxinjian.common.utils.Operators;
 import cn.zhenxinjian.domain.dto.CyclePlanCreateDTO;
 import cn.zhenxinjian.domain.po.CarbCycleDay;
 import cn.zhenxinjian.domain.po.CarbCyclePlan;
+import cn.zhenxinjian.domain.po.DietRecord;
 import cn.zhenxinjian.domain.po.UserBody;
 import cn.zhenxinjian.domain.vo.CycleDayVO;
 import cn.zhenxinjian.domain.vo.CyclePlanVO;
 import cn.zhenxinjian.mapper.CarbCycleDayMapper;
 import cn.zhenxinjian.mapper.CarbCyclePlanMapper;
+import cn.zhenxinjian.mapper.DietRecordMapper;
 import cn.zhenxinjian.mapper.UserBodyMapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -55,6 +59,8 @@ public class CyclePlanService {
     private final CarbCycleDayMapper carbCycleDayMapper;
 
     private final UserBodyMapper userBodyMapper;
+
+    private final DietRecordMapper dietRecordMapper;
 
     private final CycleCalcService cycleCalcService;
 
@@ -263,7 +269,7 @@ public class CyclePlanService {
         log.info("[CyclePlan] 周期终止: userId={}, planId={}", userId, active.getId());
     }
 
-    /** PO + days → VO（今日在周期内时回填 todayIndex） */
+    /** PO + days → VO（今日在周期内时回填 todayIndex；周期摘要：totalDays/dayIndex/carbPoolTotal/consumedCarb） */
     private CyclePlanVO toVO(CarbCyclePlan plan, List<CarbCycleDay> days) {
         CyclePlanVO vo = new CyclePlanVO();
         vo.setId(plan.getId());
@@ -277,6 +283,15 @@ public class CyclePlanService {
         vo.setStatus(plan.getStatus());
 
         LocalDate today = LocalDate.now();
+        vo.setTotalDays(plan.getCycleDays());
+        vo.setCarbPoolTotal(plan.getCarbPool() == null ? null : plan.getCarbPool().doubleValue());
+        if (plan.getStartDate() != null && plan.getEndDate() != null) {
+            if (!today.isBefore(plan.getStartDate()) && !today.isAfter(plan.getEndDate())) {
+                vo.setDayIndex((int) ChronoUnit.DAYS.between(plan.getStartDate(), today) + 1);
+            }
+            vo.setConsumedCarb(sumConsumedCarb(plan.getUserId(), plan.getStartDate(), plan.getEndDate()));
+        }
+
         List<CycleDayVO> dayVOs = new ArrayList<>(days.size());
         for (CarbCycleDay day : days) {
             CycleDayVO d = new CycleDayVO();
@@ -297,5 +312,25 @@ public class CyclePlanService {
         }
         vo.setDays(dayVOs);
         return vo;
+    }
+
+    /**
+     * 周期内已消耗碳水：周期起止日期闭区间内该用户饮食记录碳水累计
+     * （复用饮食汇总口径：按记录 carbG 求和，软删由 @TableLogic 过滤；无记录 0）
+     */
+    private double sumConsumedCarb(Long userId, LocalDate startDate, LocalDate endDate) {
+        List<DietRecord> records = dietRecordMapper.selectList(
+                Wrappers.<DietRecord>lambdaQuery()
+                        .select(DietRecord::getCarbG)
+                        .eq(DietRecord::getUserId, userId)
+                        .ge(DietRecord::getRecordDate, startDate)
+                        .le(DietRecord::getRecordDate, endDate));
+        double total = 0;
+        for (DietRecord record : records) {
+            if (record.getCarbG() != null) {
+                total += record.getCarbG();
+            }
+        }
+        return Numbers.round1(total);
     }
 }

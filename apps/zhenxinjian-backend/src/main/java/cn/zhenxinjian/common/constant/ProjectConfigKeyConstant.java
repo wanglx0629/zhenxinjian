@@ -59,4 +59,7 @@ public final class ProjectConfigKeyConstant {
 
     /** OCR 相关配置键前缀（普通配置，改后仅需失效缓存，无词库重建副作用） */
     public static final String OCR_PREFIX = "ocr";
+
+    /** 共建食物 AI 营养合理性校验使用的纯文本模型名（智谱，与 OCR 同 api-key；空值=关闭 AI 校验） */
+    public static final String AI_FOOD_AUDIT_MODEL = "ai.food-audit-model";
 }

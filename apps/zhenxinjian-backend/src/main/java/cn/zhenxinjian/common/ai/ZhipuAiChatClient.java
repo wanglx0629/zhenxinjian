@@ -34,6 +34,25 @@ public class ZhipuAiChatClient implements AiChatClient {
 
     @Override
     public String chat(String model, String systemPrompt, List<AiImage> images, int timeoutSeconds) {
+        List<ChatMessage> messages = new ArrayList<>(2);
+        messages.add(new ChatMessage(ChatMessageRole.SYSTEM.value(), systemPrompt));
+        messages.add(new ChatMessage(ChatMessageRole.USER.value(), buildImageContent(images)));
+        return invoke(model, messages, timeoutSeconds);
+    }
+
+    @Override
+    public String chatText(String model, String systemPrompt, String userText, int timeoutSeconds) {
+        List<ChatMessage> messages = new ArrayList<>(2);
+        messages.add(new ChatMessage(ChatMessageRole.SYSTEM.value(), systemPrompt));
+        // 纯文本消息：content 直接用字符串，不放 image_url 数据块
+        messages.add(new ChatMessage(ChatMessageRole.USER.value(), userText));
+        return invoke(model, messages, timeoutSeconds);
+    }
+
+    /**
+     * 公共调用链：懒构建客户端（key/超时后台改即时生效）→ 调用 → 错误分类透出
+     */
+    private String invoke(String model, List<ChatMessage> messages, int timeoutSeconds) {
         String apiKey = configService.getValue(ProjectConfigKeyConstant.OCR_API_KEY);
         if (StrUtil.isBlank(apiKey)) {
             throw new AiCallException("zhipu api-key not configured", 0, false);
@@ -43,10 +62,6 @@ public class ZhipuAiChatClient implements AiChatClient {
                 .disableTokenCache()
                 .networkConfig(timeoutSeconds, timeoutSeconds, timeoutSeconds, timeoutSeconds, TimeUnit.SECONDS)
                 .build();
-
-        List<ChatMessage> messages = new ArrayList<>(2);
-        messages.add(new ChatMessage(ChatMessageRole.SYSTEM.value(), systemPrompt));
-        messages.add(new ChatMessage(ChatMessageRole.USER.value(), buildImageContent(images)));
 
         ChatCompletionRequest request = ChatCompletionRequest.builder()
                 .model(model)
@@ -61,11 +76,11 @@ public class ZhipuAiChatClient implements AiChatClient {
             response = client.invokeModelApi(request);
         } catch (RuntimeException e) {
             // 网络/IO/超时等 SDK 运行时异常：可能是临时抖动，按可转移错误处理
-            log.warn("智谱视觉识别网络/SDK 异常: {}", e.getMessage());
+            log.warn("智谱模型调用网络/SDK 异常: {}", e.getMessage());
             throw new AiCallException("zhipu chat invoke error: " + e.getMessage(), e, 0, true);
         }
         if (response == null) {
-            log.warn("智谱视觉识别调用失败: null response");
+            log.warn("智谱模型调用失败: null response");
             throw new AiCallException("zhipu chat failed: null response", 0, true);
         }
         if (!response.isSuccess()) {
@@ -73,12 +88,12 @@ public class ZhipuAiChatClient implements AiChatClient {
             int httpStatus = response.getCode();
             String detail = response.getError() != null && response.getError().getMessage() != null
                     ? response.getError().getMessage() : response.getMsg();
-            log.warn("智谱视觉识别调用失败: httpStatus={}, msg={}", httpStatus, detail);
+            log.warn("智谱模型调用失败: httpStatus={}, msg={}", httpStatus, detail);
             throw new AiCallException("zhipu chat failed: " + detail, httpStatus,
                     AiCallException.isTransferableStatus(httpStatus));
         }
         if (response.getData() == null) {
-            log.warn("智谱视觉识别调用失败: data 缺失");
+            log.warn("智谱模型调用失败: data 缺失");
             throw new AiCallException("zhipu chat failed: data missing", 0, true);
         }
         return extractContent(response.getData());

@@ -54,11 +54,38 @@ public class Food implements Serializable {
     @Schema(description = "能量 kcal/100g（按4/4/9换算参考值）")
     private Integer kcal;
 
+    @Schema(description = "能量千焦 kJ/100g（可空；入库基准为 kcal，kj 用于录入联动/展示）")
+    private Integer kj;
+
     @Schema(description = "常用单份克数（默认100）")
     private BigDecimal serving;
 
+    @Schema(description = "填报单位（份/个/杯/包…，可空）")
+    private String unit;
+
+    @Schema(description = "食物图片相对路径（共建用户上传；内置食物为空走 food_images）")
+    private String image;
+
     @Schema(description = "来源：1内置 2自定义")
     private Integer source;
+
+    @Schema(description = "审核状态：0待审核 1已通过 2已驳回 3无需审核")
+    private Integer auditStatus;
+
+    @Schema(description = "最近一次驳回原因（重提清空，历史在 food_audit_log）")
+    private String auditRemark;
+
+    @Schema(description = "AI校验结论：pass/suspect/reject/none")
+    private String aiVerdict;
+
+    @Schema(description = "AI校验建议（含建议修正值的短文本/JSON）")
+    private String aiSuggestion;
+
+    @Schema(description = "最近一次提交/重提时间")
+    private LocalDateTime submitTime;
+
+    @Schema(description = "数据批次（TFDA导入填 TFDA:<版本>）")
+    private String dataBatch;
 
     @Schema(description = "归属用户ID（仅自定义食物）")
     private Long userId;

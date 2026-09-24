@@ -3,6 +3,7 @@ package cn.zhenxinjian.service.impl;
 import cn.zhenxinjian.common.constant.CommonConstant;
 import cn.zhenxinjian.common.constant.ExceptionConstant;
 import cn.zhenxinjian.common.constant.FoodHotConstant;
+import cn.zhenxinjian.common.enums.FoodAuditStatusEnum;
 import cn.zhenxinjian.common.enums.FoodCategoryEnum;
 import cn.zhenxinjian.common.enums.FoodSourceEnum;
 import cn.zhenxinjian.common.exception.BusinessException;
@@ -14,6 +15,7 @@ import cn.zhenxinjian.domain.vo.FoodCategoryVO;
 import cn.zhenxinjian.domain.vo.FoodVO;
 import cn.zhenxinjian.mapper.FoodImageMapper;
 import cn.zhenxinjian.mapper.FoodMapper;
+import cn.zhenxinjian.service.StorageService;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -25,13 +27,15 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- * 食物库查询服务（搜索/分类/热门/详情/试算；可见范围 = 全部内置 + 当前用户自定义）
+ * 食物库查询服务（搜索/分类/热门/详情/试算）
+ * 可见范围 = 内置(status=1) ∪ 已通过共建(audit_status=1) ∪ 本人全部共建(0/1/2)；停用食物全员不可见
  * 作者: wanglx
  */
 @Service
@@ -44,6 +48,8 @@ public class FoodService {
     private final FoodMapper foodMapper;
 
     private final FoodImageMapper foodImageMapper;
+
+    private final StorageService storageService;
 
     /**
      * 食物搜索：关键字匹配名称或别名（任一命中），可叠加分类筛选，分页（单页 ≤50）
@@ -65,10 +71,17 @@ public class FoodService {
         }
         IPage<Food> result = foodMapper.selectPage(page,
                 Wrappers.<Food>lambdaQuery()
+                        // 可见性收敛：(内置,status=1) ∪ (共建,已通过,status=1) ∪ (本人共建,status=1)
+                        // —— 待审核(0)/已驳回(2)仅本人可达；停用食物全员不可见
                         .and(w -> w
-                                .or().eq(Food::getSource, FoodSourceEnum.BUILT_IN.getCode())
+                                .or(o -> o.eq(Food::getSource, FoodSourceEnum.BUILT_IN.getCode())
+                                        .eq(Food::getStatus, 1))
                                 .or(o -> o.eq(Food::getSource, FoodSourceEnum.CUSTOM.getCode())
-                                        .eq(Food::getUserId, userId)))
+                                        .eq(Food::getAuditStatus, FoodAuditStatusEnum.APPROVED.getCode())
+                                        .eq(Food::getStatus, 1))
+                                .or(o -> o.eq(Food::getSource, FoodSourceEnum.CUSTOM.getCode())
+                                        .eq(Food::getUserId, userId)
+                                        .eq(Food::getStatus, 1)))
                         .eq(!categoryCode.isEmpty(), Food::getCategoryCode, categoryCode)
                         .and(!keyword.isEmpty(),
                                 w -> w.like(Food::getName, keyword).or().like(Food::getAlias, keyword))
@@ -99,6 +112,7 @@ public class FoodService {
         List<Food> foods = foodMapper.selectList(
                 Wrappers.<Food>lambdaQuery()
                         .eq(Food::getSource, FoodSourceEnum.BUILT_IN.getCode())
+                        .eq(Food::getStatus, 1)
                         .in(Food::getCode, FoodHotConstant.HOT_FOOD_CODES));
         Map<String, Food> byCode = foods.stream()
                 .collect(Collectors.toMap(Food::getCode, Function.identity(), (a, b) -> a));
@@ -154,17 +168,23 @@ public class FoodService {
         return vo;
     }
 
-    /** 查可见食物（内置全员 / 自定义本人），不存在或不可见返回 40404 */
+    /**
+     * 查可见食物（添加记录可达 = 公共 ∪ 本人全部）：
+     * 内置 status=1 全员可见；共建仅「已通过(1)」或「本人 0/1/2」且 status=1 可见；其余 40404
+     */
     private Food selectVisible(Long userId, Long foodId) {
         Food food = foodMapper.selectById(foodId);
-        if (food == null) {
+        if (food == null || !Integer.valueOf(1).equals(food.getStatus())) {
             throw new BusinessException(CommonConstant.FOOD_NOT_FOUND_CODE,
                     ExceptionConstant.FOOD_NOT_FOUND);
         }
-        if (FoodSourceEnum.CUSTOM.getCode().equals(food.getSource())
-                && !food.getUserId().equals(userId)) {
-            throw new BusinessException(CommonConstant.FOOD_NOT_FOUND_CODE,
-                    ExceptionConstant.FOOD_NOT_FOUND);
+        if (FoodSourceEnum.CUSTOM.getCode().equals(food.getSource())) {
+            boolean own = food.getUserId() != null && food.getUserId().equals(userId);
+            boolean approved = FoodAuditStatusEnum.APPROVED.getCode().equals(food.getAuditStatus());
+            if (!own && !approved) {
+                throw new BusinessException(CommonConstant.FOOD_NOT_FOUND_CODE,
+                        ExceptionConstant.FOOD_NOT_FOUND);
+            }
         }
         return food;
     }
@@ -176,28 +196,39 @@ public class FoodService {
         return vo;
     }
 
-    /** 批量填充图片 URL（一次查询防 N+1；自定义食物 code 为空或无图时 image 保持 null） */
+    /** 批量填充图片 URL（一次查询防 N+1；foods.image 优先，空值回退 food_images 预热图） */
     private void fillImages(List<FoodVO> list) {
         if (list == null || list.isEmpty()) {
             return;
         }
+        Map<String, String> urlByCode = loadWarmImages(list);
+        for (FoodVO vo : list) {
+            // foods.image（共建用户上传）优先；仅空值回退内置预热图
+            if (StrUtil.isBlank(vo.getImage())) {
+                vo.setImage(urlByCode.get(vo.getCode()));
+            }
+            // 共建图存相对 objectKey → 按当前存储配置解析为公网地址；预热图等绝对 URL 原样透传
+            vo.setImage(storageService.publicUrl(vo.getImage()));
+        }
+    }
+
+    /** 内置预热图映射（一码一图，无内置编码时返回空集不查库） */
+    private Map<String, String> loadWarmImages(List<FoodVO> list) {
         List<String> codes = list.stream()
                 .map(FoodVO::getCode)
                 .filter(StrUtil::isNotBlank)
                 .distinct()
                 .toList();
         if (codes.isEmpty()) {
-            return;
+            // 空码场景返回可容忍 null 键的 HashMap：共建食物 code 为空时 get(null) 不得抛 NPE
+            return new HashMap<>();
         }
-        Map<String, String> urlByCode = foodImageMapper.selectList(Wrappers.<FoodImage>lambdaQuery()
+        return foodImageMapper.selectList(Wrappers.<FoodImage>lambdaQuery()
                         .select(FoodImage::getFoodCode, FoodImage::getUrl)
                         .in(FoodImage::getFoodCode, codes)
                         .eq(FoodImage::getStatus, 1))
                 .stream()
                 .filter(img -> StrUtil.isNotBlank(img.getUrl()))
                 .collect(Collectors.toMap(FoodImage::getFoodCode, FoodImage::getUrl, (a, b) -> a));
-        for (FoodVO vo : list) {
-            vo.setImage(urlByCode.get(vo.getCode()));
-        }
     }
 }
