@@ -52,7 +52,7 @@ function toLocalVO(item: FoodItem, index: number): FoodVO {
 /** 预映射本地全量食物（200 条） */
 const LOCAL_VOS: FoodVO[] = FOODS.map(toLocalVO)
 
-/** 本地分类列表（与后端枚举同序 01–10） */
+/** 本地分类列表（与后端枚举同序 01–18） */
 const LOCAL_CATEGORIES: FoodCategoryVO[] = LOCAL_VOS.reduce<FoodCategoryVO[]>((acc, vo) => {
   if (!acc.some((c) => c.code === vo.categoryCode)) {
     acc.push({ code: vo.categoryCode, name: vo.categoryName })

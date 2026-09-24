@@ -26,7 +26,7 @@ public class AdminFoodSaveDTO {
     private String name;
 
     @NotBlank(message = "必填参数缺失")
-    @Schema(description = "分类编号：01-10")
+    @Schema(description = "分类编号：01-18")
     private String categoryCode;
 
     @NotBlank(message = "必填参数缺失")

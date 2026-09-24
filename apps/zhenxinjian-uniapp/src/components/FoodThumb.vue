@@ -9,7 +9,7 @@ import { computed } from 'vue'
 const props = withDefaults(defineProps<{
   /** 图片 URL（空则按分类占位） */
   image?: string
-  /** 分类编号 01–10 */
+  /** 分类编号 01–18 */
   categoryCode?: string
   /** 尺寸：sm 88rpx 列表 / lg 128rpx 详情头图 */
   size?: 'sm' | 'lg'
@@ -19,18 +19,26 @@ const props = withDefaults(defineProps<{
   size: 'sm'
 })
 
-/** 分类占位配色（bg 浅色块 + text 深色字 + 品类简称） */
+/** 分类占位配色（bg 浅色块 + text 深色字 + 品类简称，TFDA 18 类） */
 const CATEGORY_STYLE: Record<string, { bg: string; text: string; label: string }> = {
-  '01': { bg: '#F3EAD9', text: '#7A4E1D', label: '主食' },
-  '02': { bg: '#FDECEC', text: '#D63333', label: '肉类' },
-  '03': { bg: '#FFF4D6', text: '#9A6B00', label: '蛋奶' },
-  '04': { bg: '#E7F3F7', text: '#1F6E85', label: '水产' },
-  '05': { bg: '#EAF6E9', text: '#3E7E3A', label: '豆类' },
-  '06': { bg: '#E6F5EF', text: '#008A63', label: '蔬菜' },
-  '07': { bg: '#E0F2EF', text: '#0F766E', label: '菌藻' },
-  '08': { bg: '#FFF1E3', text: '#C2410C', label: '水果' },
-  '09': { bg: '#F1EAE2', text: '#8A5A2B', label: '坚果' },
-  '10': { bg: '#EDF1EF', text: '#475569', label: '油脂' }
+  '01': { bg: '#F3EAD9', text: '#7A4E1D', label: '淀粉' },
+  '02': { bg: '#F7EFD0', text: '#8A6A15', label: '谷物' },
+  '03': { bg: '#FDECEC', text: '#D63333', label: '肉' },
+  '04': { bg: '#E7F3F7', text: '#1F6E85', label: '鱼贝' },
+  '05': { bg: '#FFF4D6', text: '#9A6B00', label: '蛋' },
+  '06': { bg: '#EEF3F9', text: '#4C6890', label: '乳' },
+  '07': { bg: '#EAF6E9', text: '#3E7E3A', label: '豆' },
+  '08': { bg: '#E6F5EF', text: '#008A63', label: '蔬菜' },
+  '09': { bg: '#EFEAE4', text: '#6E5140', label: '菇' },
+  '10': { bg: '#E0F2EF', text: '#0F766E', label: '藻' },
+  '11': { bg: '#FFF1E3', text: '#C2410C', label: '水果' },
+  '12': { bg: '#F1EAE2', text: '#8A5A2B', label: '坚果' },
+  '13': { bg: '#F4F2E0', text: '#6B7A1E', label: '油脂' },
+  '14': { bg: '#FCE9F4', text: '#B53D8F', label: '糖' },
+  '15': { bg: '#FBE5EC', text: '#B03A5C', label: '糕点' },
+  '16': { bg: '#F1EAF8', text: '#6D4BA0', label: '调味' },
+  '17': { bg: '#E7F1FA', text: '#2E6DA8', label: '饮料' },
+  '18': { bg: '#EDF1EF', text: '#475569', label: '加工' }
 }
 
 /** 兜底（分类缺失/非法时） */

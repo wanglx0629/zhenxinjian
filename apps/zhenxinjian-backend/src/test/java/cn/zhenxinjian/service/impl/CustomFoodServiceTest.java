@@ -152,6 +152,54 @@ class CustomFoodServiceTest {
         assertEquals(502, inserted.getKj());
     }
 
+    /** 场景：分类编号 18（加工调理食品及其他类）→ 合法入库 */
+    @Test
+    void save_category18_accepted() {
+        CustomFoodSaveDTO dto = validDto("燕麦碗", "10", "10", "10", 170);
+        dto.setCategoryCode("18");
+        when(foodMapper.insert(any(Food.class))).thenAnswer(inv -> {
+            ((Food) inv.getArgument(0)).setId(11L);
+            return 1;
+        });
+        when(foodMapper.selectById(11L)).thenReturn(customFood(11L, 1L, "燕麦碗"));
+
+        service.save(1L, dto);
+
+        ArgumentCaptor<Food> captor = ArgumentCaptor.forClass(Food.class);
+        verify(foodMapper).insert(captor.capture());
+        assertEquals("18", captor.getValue().getCategoryCode());
+        assertEquals("加工调理食品及其他类", captor.getValue().getCategoryName());
+    }
+
+    /** 场景：分类编号非法（19 越界）→ 40402 拒绝，不入库 */
+    @Test
+    void save_invalidCategoryCode_throws40402() {
+        CustomFoodSaveDTO dto = validDto("燕麦碗", "10", "10", "10", 170);
+        dto.setCategoryCode("19");
+        BusinessException e = assertThrows(BusinessException.class, () -> service.save(1L, dto));
+        assertEquals(CommonConstant.FOOD_MACRO_INVALID_CODE, e.getCode());
+        verify(foodMapper, never()).insert(any(Food.class));
+    }
+
+    /** 场景：分类编号缺省 → 默认 18 加工调理食品及其他类（共建典型为自制复合食物） */
+    @Test
+    void save_categoryMissing_defaultsProcessed18() {
+        CustomFoodSaveDTO dto = validDto("燕麦碗", "10", "10", "10", 170);
+        dto.setCategoryCode(null);
+        when(foodMapper.insert(any(Food.class))).thenAnswer(inv -> {
+            ((Food) inv.getArgument(0)).setId(11L);
+            return 1;
+        });
+        when(foodMapper.selectById(11L)).thenReturn(customFood(11L, 1L, "燕麦碗"));
+
+        service.save(1L, dto);
+
+        ArgumentCaptor<Food> captor = ArgumentCaptor.forClass(Food.class);
+        verify(foodMapper).insert(captor.capture());
+        assertEquals("18", captor.getValue().getCategoryCode());
+        assertEquals("加工调理食品及其他类", captor.getValue().getCategoryName());
+    }
+
     /** 场景：kj 超 3800 → 40402 */
     @Test
     void save_kjOverMax_throws40402() {

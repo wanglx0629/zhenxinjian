@@ -29,7 +29,7 @@ public class CustomFoodSaveDTO {
     @Size(max = 100, message = "别名过长")
     private String alias;
 
-    @Schema(description = "分类编号：01-10，缺省默认10（油脂·调味·饮品）")
+    @Schema(description = "分类编号：01-18，缺省默认18（加工调理食品及其他类）")
     @Size(max = 2, message = "分类编号非法")
     private String categoryCode;
 

@@ -11,7 +11,7 @@ import lombok.Data;
 @Schema(description = "食物分类响应")
 public class FoodCategoryVO {
 
-    @Schema(description = "分类编号：01-10")
+    @Schema(description = "分类编号：01-18")
     private String code;
 
     @Schema(description = "分类名称")

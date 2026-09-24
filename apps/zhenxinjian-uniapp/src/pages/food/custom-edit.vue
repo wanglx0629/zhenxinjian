@@ -49,7 +49,7 @@ const ENERGY_UNIT_OPTIONS = ['kcal（千卡）', 'kJ（千焦）']
 const form = reactive({
   name: '',
   alias: '',
-  categoryCode: '10',
+  categoryCode: '18',
   carb: '',
   protein: '',
   fat: '',
@@ -111,7 +111,7 @@ onLoad(async (options) => {
     const food = await foodStore.detail(id)
     form.name = food.name
     form.alias = food.alias || ''
-    form.categoryCode = food.categoryCode || '10'
+    form.categoryCode = food.categoryCode || '18'
     form.carb = String(food.carb)
     form.protein = String(food.protein)
     form.fat = String(food.fat)

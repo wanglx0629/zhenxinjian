@@ -194,6 +194,34 @@ class AdminFoodAuditServiceTest {
         assertEquals(CommonConstant.ADMIN_FOOD_FIX_INVALID_CODE, e.getCode());
     }
 
+    /** 场景：ADMIN_FIX 修正分类为 18（加工调理食品及其他类）→ 编号/名称一并落库 */
+    @Test
+    void audit_adminFix_category18_applied() {
+        when(foodMapper.selectById(21L)).thenReturn(customFood(21L, 0));
+        FoodAuditDTO.Fix fix = new FoodAuditDTO.Fix();
+        fix.setCategoryCode("18");
+
+        service.audit(21L, dto("ADMIN_FIX", "归类修正", fix));
+
+        ArgumentCaptor<Food> captor = ArgumentCaptor.forClass(Food.class);
+        verify(foodMapper).updateById(captor.capture());
+        assertEquals("18", captor.getValue().getCategoryCode());
+        assertEquals("加工调理食品及其他类", captor.getValue().getCategoryName());
+    }
+
+    /** 场景：ADMIN_FIX 修正分类编号非法（19 越界）→ 40917 */
+    @Test
+    void audit_adminFix_invalidCategoryCode_throws40917() {
+        when(foodMapper.selectById(21L)).thenReturn(customFood(21L, 0));
+        FoodAuditDTO.Fix fix = new FoodAuditDTO.Fix();
+        fix.setCategoryCode("19");
+
+        BusinessException e = assertThrows(BusinessException.class,
+                () -> service.audit(21L, dto("ADMIN_FIX", null, fix)));
+        assertEquals(CommonConstant.ADMIN_FOOD_FIX_INVALID_CODE, e.getCode());
+        verify(foodMapper, never()).updateById(any(Food.class));
+    }
+
     /** 场景：审核基础食物（source=1）→ 40915 目标非法 */
     @Test
     void audit_builtinTarget_throws40915() {
@@ -295,8 +323,8 @@ class AdminFoodAuditServiceTest {
         food.setStatus(1);
         food.setAuditStatus(auditStatus);
         food.setName("燕麦碗");
-        food.setCategoryCode("10");
-        food.setCategoryName("油脂·调味·饮品");
+        food.setCategoryCode("18");
+        food.setCategoryName("加工调理食品及其他类");
         food.setCarb(new BigDecimal("60"));
         food.setProtein(new BigDecimal("12"));
         food.setFat(new BigDecimal("6"));

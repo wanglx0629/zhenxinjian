@@ -56,8 +56,8 @@ public class CustomFoodService {
     private static final BigDecimal SERVING_MIN = new BigDecimal("5");
     private static final BigDecimal SERVING_MAX = new BigDecimal("1000");
 
-    /** 自定义食物默认分类（10 油脂·调味·饮品） */
-    private static final FoodCategoryEnum DEFAULT_CATEGORY = FoodCategoryEnum.OIL_CONDIMENT_DRINK;
+    /** 自定义食物默认分类（18 加工调理食品及其他类，共建典型为自制复合食物） */
+    private static final FoodCategoryEnum DEFAULT_CATEGORY = FoodCategoryEnum.PROCESSED;
 
     private final FoodMapper foodMapper;
     private final SensitiveWordFilter sensitiveWordFilter;

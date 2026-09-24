@@ -138,4 +138,4 @@
 - [ ] 13.2 自查 SQL/枚举/Result/异常码/注释/软删/status 等规约；准备 verify 与提交（提交信息 `feature：...`，不主动 push）
   - 自查通过：change14/15 SQL（幂等/软删+status/utf8mb4/无软删普通 UNIQUE/版本账）、三枚举（code+desc+of）、控制器全 `Result` 返回、异常文案走 `ExceptionConstant`（40407/40915/40916/40917）、注释 `作者: wanglx`
   - 本地环境复核：库 v13–15 齐、foods 审核列 9 列齐、TFDA:20.5 已入库 1730 条（后端 8080 为最新代码启动时自导入）、临时探针脚本与测试日志已清理
-  - 待办：全量 `mvn test` 终验 → 12.2/12.3 手测 → verify → 提交
+  - 待办：12.2/12.3 手测并入 `food-category-tfda-18` §6.2 合并执行（分类 UI 大改后需按 18 类重测，先归档以解 delta 叠加依赖；全量 `mvn test` 终验已于 2026-09-24 复跑 458 场景全绿，代码已随 7fd693d 提交）

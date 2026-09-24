@@ -6,7 +6,7 @@
 输出: data-import/tfda/clean/foods_tfda.json（后端 TfdaFoodInitializer 导入源）
       clean/abnormal.json（异常清单）  clean/report.txt（导入统计）
 流程: 营养提取与校验 → OpenCC 繁转简 → 名称归一/别名补充 → 与内置 200/TFDA 内部去重
-      → 18 大类映射 01–10 → kcal/kJ 对齐每 100g
+      → 18 大类直读映射 01–18（raw category 字段即分类，不做压缩）
 依赖: pip install opencc-python-reimplemented
 """
 import json
@@ -25,43 +25,19 @@ DATA_BATCH = 'TFDA:20.5'
 VERSION = '20.5'
 T2S = OpenCC('t2s')
 
-# ---------- 01–10 分类映射（内置 200 口径：土豆/红薯→01、黄油/糖/可乐→10） ----------
-# 固定映射类目
-CATEGORY_MAP = {
-    '穀物類': '01', '澱粉類': '01', '肉類': '02', '蛋類': '03', '乳品類': '03',
-    '魚貝類': '04', '蔬菜類': '06', '菇類': '07', '藻類': '07', '水果類': '08',
-    '堅果及種子類': '09', '油脂類': '10', '糖類': '10', '調味料及香辛料類': '10', '飲料類': '10',
+# ---------- 18 大类直读映射（raw category 字段 → 系统编码 01–18，与 builtin_recat.py 同一口径） ----------
+CATEGORY_18 = {
+    '澱粉類': '01', '穀物類': '02', '肉類': '03', '魚貝類': '04', '蛋類': '05',
+    '乳品類': '06', '豆類': '07', '蔬菜類': '08', '菇類': '09', '藻類': '10',
+    '水果類': '11', '堅果及種子類': '12', '油脂類': '13', '糖類': '14',
+    '糕餅點心類': '15', '調味料及香辛料類': '16', '飲料類': '17', '加工調理食品及其他類': '18',
 }
 CATEGORY_NAME = {
-    '01': '谷薯杂豆·主食', '02': '畜禽肉及制品', '03': '蛋奶及制品', '04': '水产及制品',
-    '05': '大豆及制品', '06': '蔬菜', '07': '菌藻', '08': '水果', '09': '坚果·种子',
-    '10': '油脂·调味·饮品',
+    '01': '淀粉类', '02': '谷物类', '03': '肉类', '04': '鱼贝类', '05': '蛋类',
+    '06': '乳品类', '07': '豆类', '08': '蔬菜类', '09': '菇类', '10': '藻类',
+    '11': '水果类', '12': '坚果及种子类', '13': '油脂类', '14': '糖类',
+    '15': '糕饼点心类', '16': '调味料及香辛料类', '17': '饮料类', '18': '加工调理食品及其他类',
 }
-# 豆类拆分：荚用菜豆→06 蔬菜；大豆及制品→05；其余杂豆→01（内置口径：绿豆/红豆归 01、黄豆芽归 05）
-BEAN_SOY = ['黄豆', '黑豆', '毛豆', '豆浆', '豆腐', '豆花', '天贝', '面肠', '素肉', '豆芽',
-            '豆皮', '腐皮', '腐竹', '味噌', '豆瓣']
-# 糕饼点心默认 10（零食甜点），面包类→01（内置「面包」口径）——见 resolve_category
-# 加工调理食品：按主成分关键词有序匹配，未命中默认 10
-PROCESSED_RULES = [
-    ('09', ['瓜子', '瓜仁', '杏仁', '花生', '芝麻', '核桃', '腰果', '开心果', '栗子',
-            '莲子', '种仁', '扁桃仁', '松子', '葵花', '夏威夷豆']),
-    ('01', ['面', '米粉', '米苔目', '通心', '西谷米', '冬粉', '粄', '河粉', '馒头', '年糕',
-            '米浆', '粥', '麦', '饼', '包', '盒子', '粿', '条', '饭', '烧卖', '皮',
-            '蚕豆', '甘纳豆', '豌豆', '花豆', '红豆', '玉米', '饺', '米糕', '银丝卷',
-            '宽粉', '麸', '花卷', '馄饨', '春卷', '粉圆', '芋圆', '粽']),
-    ('05', ['豆浆', '豆腐', '豆干', '豆丝', '豆花', '天贝', '面肠', '素肉', '豆皮', '腐皮',
-            '味噌', '豆瓣酱', '豆豉', '腐乳', '豆枣', '豆奶', '黑豆']),
-    ('06', ['酸菜', '榨菜', '梅干菜', '菜干', '腌渍', '泡菜', '萝卜干', '冬菜', '甘蓝干',
-            '笋', '洋葱', '薤', '辣椒']),
-    ('07', ['菇', '银耳', '木耳', '藻']),
-    ('04', ['鱼', '虾', '海苔', '蜇', '花枝', '蚵', '鲔', '干贝', '蟹', '小卷', '鲱']),
-    ('02', ['肉', '鸡', '猪', '牛', '鸭', '火腿', '香肠', '培根', '肘子', '丸', '鹅',
-            '胆肝', '热狗']),
-    ('03', ['蛋', '奶酪', '优格', '优酪']),
-    ('08', ['果酱', '果干']),
-    ('10', ['茶', '咖啡', '果汁', '酒', '酱', '糖', '醋', '油', '盐', '沙拉酱', '蜂蜜',
-            '味素', '汤', '口含']),
-]
 # 台湾常用词 → 大陆同义词（追加进 alias，提升简体搜索命中）
 MAINLAND_ALIAS = [
     ('马铃薯', ['土豆', '洋芋']),
@@ -107,27 +83,9 @@ def cap_alias(aliases, limit):
     return '、'.join(kept)
 
 
-def resolve_category(tfda_cat, name):
-    """TFDA 18 类 → 本系统 01–10（固定映射 + 豆类/糕饼/加工调理条件规则）"""
-    name_s = to_simplified(name)
-    if tfda_cat in CATEGORY_MAP:
-        return CATEGORY_MAP[tfda_cat]
-    if tfda_cat == '豆類':
-        if '荚' in name_s:
-            return '06'
-        if any(k in name_s for k in BEAN_SOY):
-            return '05'
-        return '01'
-    if tfda_cat == '糕餅點心類':
-        if any(k in name_s for k in ('面包', '吐司')):
-            return '01'
-        return '10'
-    if tfda_cat == '加工調理食品及其他類':
-        for code, words in PROCESSED_RULES:
-            if any(w in name_s for w in words):
-                return code
-        return '10'
-    return None
+def resolve_category(tfda_cat):
+    """TFDA raw category 字段 → 系统编码 01–18（直读，不做压缩）"""
+    return CATEGORY_18.get(tfda_cat)
 
 
 def find_nutrient(food, group, names):
@@ -179,7 +137,6 @@ def main():
     skipped_builtin = []
     seen_codes = set()
     cat_counter = Counter()
-    rule10_defaults = []
     undetected_zero = []
 
     raw_files = sorted(fn for fn in os.listdir(RAW_DIR)
@@ -235,13 +192,11 @@ def main():
                 aliases = [a for a in aliases if a != '土豆']
             desc = to_simplified(food.get('desc') or '')
 
-            # 分类映射
-            code10 = resolve_category(tfda_cat, food['name'])
-            if code10 is None:
+            # 分类映射（raw category 直读 01–18）
+            code18 = resolve_category(tfda_cat)
+            if code18 is None:
                 abnormal.append({'code': code, 'name': name, 'reason': f'未知分类: {tfda_cat}'})
                 continue
-            if tfda_cat == '加工調理食品及其他類' and code10 == '10':
-                rule10_defaults.append(name)
 
             # 别名补充：大陆同义词 + 口径标注
             for tw, mainland in MAINLAND_ALIAS:
@@ -253,7 +208,7 @@ def main():
 
             candidates[norm_key(food['name'])].append({
                 'code': code,
-                'category': f'{code10} {CATEGORY_NAME[code10]}',
+                'category': f'{code18} {CATEGORY_NAME[code18]}',
                 'name': name,
                 # 别名列宽 100（foods.alias VARCHAR(100)）：超限逐个丢弃尾部别名
                 'alias': cap_alias(dict.fromkeys(aliases), 100),
@@ -309,8 +264,6 @@ def main():
     ]
     for k in sorted(cat_counter):
         lines.append(f'  {k}: {cat_counter[k]}')
-    lines.append('')
-    lines.append(f'加工调理默认归 10 的条目（{len(rule10_defaults)}）: ' + '、'.join(rule10_defaults[:30]))
     lines.append('')
     lines.append('与内置重复样例（前 30）: ' + '、'.join(x['name'] for x in skipped_builtin[:30]))
     lines.append('')

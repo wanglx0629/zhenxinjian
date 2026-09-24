@@ -71,11 +71,11 @@ class TfdaFoodInitializerTest {
         initializer.run(null);
 
         assertEquals(total, inserted.size());
-        // 抽样对拍真源：A05002 稉米平均值（碳水 77.8 / 蛋白 7.0 / 脂肪 0.7 / 352kcal / 1473kJ）
+        // 抽样对拍真源：A05002 稉米平均值（碳水 77.8 / 蛋白 7.0 / 脂肪 0.7 / 352kcal / 1473kJ / 18 类口径 02 谷物类）
         Food rice = inserted.stream().filter(f -> "A05002".equals(f.getCode())).findFirst().orElseThrow();
         assertEquals("稉米平均值", rice.getName());
-        assertEquals("01", rice.getCategoryCode());
-        assertEquals("谷薯杂豆·主食", rice.getCategoryName());
+        assertEquals("02", rice.getCategoryCode());
+        assertEquals("谷物类", rice.getCategoryName());
         assertEquals("77.8", rice.getCarb().toPlainString());
         assertEquals("7.0", rice.getProtein().toPlainString());
         assertEquals("0.7", rice.getFat().toPlainString());

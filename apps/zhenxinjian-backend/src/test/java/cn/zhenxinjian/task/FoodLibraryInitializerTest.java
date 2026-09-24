@@ -91,7 +91,7 @@ class FoodLibraryInitializerTest {
         verify(foodMapper, never()).insert(any(Food.class));
     }
 
-    /** 抽样对拍：真源 F001 大米碳水 77.9 / F002 米饭碳水 25.9 */
+    /** 抽样对拍：真源 F001 大米碳水 77.9 / F002 米饭碳水 25.9；18 类口径 F001 为 02 谷物类 */
     @Test
     void importSource_sampleValuesMatch() throws Exception {
         when(foodMapper.selectCount(any(Wrapper.class))).thenReturn(0L);
@@ -106,6 +106,8 @@ class FoodLibraryInitializerTest {
         assertEquals(200, inserted.size());
         Food f001 = inserted.stream().filter(f -> "F001".equals(f.getCode())).findFirst().orElseThrow();
         Food f002 = inserted.stream().filter(f -> "F002".equals(f.getCode())).findFirst().orElseThrow();
+        assertEquals("02", f001.getCategoryCode());
+        assertEquals("谷物类", f001.getCategoryName());
         assertEquals("77.9", f001.getCarb().toPlainString());
         assertEquals("25.9", f002.getCarb().toPlainString());
     }

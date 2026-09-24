@@ -106,7 +106,7 @@ export function searchFoods(params: FoodSearchParams) {
   return http.get<PageVO<FoodVO>>('/food/search', params)
 }
 
-/** 分类列表（10 大分类，顺序固定） */
+/** 分类列表（18 大分类，顺序固定） */
 export function getFoodCategories() {
   return http.get<FoodCategoryVO[]>('/food/categories')
 }

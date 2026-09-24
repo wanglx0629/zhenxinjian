@@ -2,7 +2,6 @@ package cn.zhenxinjian.service.impl;
 
 import cn.zhenxinjian.common.constant.CommonConstant;
 import cn.zhenxinjian.common.enums.FoodAuditStatusEnum;
-import cn.zhenxinjian.common.enums.FoodCategoryEnum;
 import cn.zhenxinjian.common.enums.FoodSourceEnum;
 import cn.zhenxinjian.common.exception.BusinessException;
 import cn.zhenxinjian.domain.po.Food;
@@ -168,14 +167,17 @@ class FoodServiceTest {
                 result.getRecords().get(0).getImage());
     }
 
-    /** 场景：分类列表 → 返回所有 FoodCategoryEnum 枚举值 */
+    /** 场景：分类列表 → 返回 TFDA 口径 18 大类（design D1 顺序固定 01–18，首尾对拍） */
     @Test
     void categories_returnsAllCategories() {
         List<FoodCategoryVO> result = service.categories();
 
         assertNotNull(result);
-        assertEquals(FoodCategoryEnum.values().length, result.size());
+        assertEquals(18, result.size());
         assertEquals("01", result.get(0).getCode());
+        assertEquals("淀粉类", result.get(0).getName());
+        assertEquals("18", result.get(17).getCode());
+        assertEquals("加工调理食品及其他类", result.get(17).getName());
     }
 
     /** 场景：详情查询内置食物 → 返回 VO */

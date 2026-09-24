@@ -43,7 +43,7 @@ public class FoodController {
         return Result.ok(foodService.search(UserContext.getUserId(), query));
     }
 
-    @Operation(summary = "分类列表", description = "10 大分类，顺序固定 01–10")
+    @Operation(summary = "分类列表", description = "18 大分类，顺序固定 01–18")
     @GetMapping("/categories")
     public Result<List<FoodCategoryVO>> categories() {
         return Result.ok(foodService.categories());

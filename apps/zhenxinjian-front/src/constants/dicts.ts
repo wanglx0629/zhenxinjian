@@ -67,18 +67,26 @@ export const PLAN_STATUS_OPTIONS: DictItem[] = [
 ]
 export const PLAN_STATUS_MAP = dictMap(PLAN_STATUS_OPTIONS)
 
-/** 食物分类（后端 FoodCategoryEnum，01–10 顺序固定） */
+/** 食物分类（后端 FoodCategoryEnum，TFDA 18 大类，01–18 顺序固定） */
 export const FOOD_CATEGORY_OPTIONS: DictItem<string>[] = [
-  { value: '01', label: '谷薯杂豆·主食' },
-  { value: '02', label: '畜禽肉及制品' },
-  { value: '03', label: '蛋奶及制品' },
-  { value: '04', label: '水产及制品' },
-  { value: '05', label: '大豆及制品' },
-  { value: '06', label: '蔬菜' },
-  { value: '07', label: '菌藻' },
-  { value: '08', label: '水果' },
-  { value: '09', label: '坚果·种子' },
-  { value: '10', label: '油脂·调味·饮品' }
+  { value: '01', label: '淀粉类' },
+  { value: '02', label: '谷物类' },
+  { value: '03', label: '肉类' },
+  { value: '04', label: '鱼贝类' },
+  { value: '05', label: '蛋类' },
+  { value: '06', label: '乳品类' },
+  { value: '07', label: '豆类' },
+  { value: '08', label: '蔬菜类' },
+  { value: '09', label: '菇类' },
+  { value: '10', label: '藻类' },
+  { value: '11', label: '水果类' },
+  { value: '12', label: '坚果及种子类' },
+  { value: '13', label: '油脂类' },
+  { value: '14', label: '糖类' },
+  { value: '15', label: '糕饼点心类' },
+  { value: '16', label: '调味料及香辛料类' },
+  { value: '17', label: '饮料类' },
+  { value: '18', label: '加工调理食品及其他类' }
 ]
 export const FOOD_CATEGORY_MAP = dictMap(FOOD_CATEGORY_OPTIONS)
 
