@@ -52,6 +52,7 @@
 
 - [x] 6.1 后端 `mvn test` 全绿（JDK 25）；含 3.x 新改用例
   - 2026-09-24：73 个测试类 463 用例全绿（Failures/Errors/Skipped 均 0）；受影响 5 类计数：FoodServiceTest 22 / CustomFoodServiceTest 26 / AdminFoodAuditServiceTest 18 / FoodLibraryInitializerTest 5 / TfdaFoodInitializerTest 4
-- [ ] 6.2 三端手测清单：分类条 18 项切换与横滑、搜索叠加分类、投稿分类选择（18 项/默认加工调理）、无图食物 18 类占位色块、后台分类筛选与审核流、离线兜底数据分类正确；并入 part2 遗留手测项（投稿全链路/后台审核/OCR/引用断链/游客迁移）
+- [x] 6.2 三端手测清单：分类条 18 项切换与横滑、搜索叠加分类、投稿分类选择（18 项/默认加工调理）、无图食物 18 类占位色块、后台分类筛选与审核流、离线兜底数据分类正确；并入 part2 遗留手测项（投稿全链路/后台审核/OCR/引用断链/游客迁移）
+  - 2026-09-28：用户拍板跳过手测直接归档；手测项并入日常回归（18 类 UI 为数据驱动改造，自动化测试 + 三端 build 均已覆盖编译与数据一致性）
 - [x] 6.3 `openspec validate food-category-tfda-18` 通过；自查规约（枚举 code+desc+of/Result/注释/SQL 软删幂等/版本账）后提交（`feature：...`，不主动 push），手测通过后归档
   - 2026-09-24：validate 通过；规约自查通过（FoodCategoryEnum code+desc+of 齐备；错误码沿用 40402/40917 进 ExceptionConstant 未新增裸文案；改动文件均带 `作者: wanglx` 头注释；change16 重放幂等 + v16 版本账已验证）；uniapp type-check/build 与 front build 均过；离线兜底 foods.ts 200 条与后端 foods_200.json 逐条比对一致
