@@ -5,6 +5,17 @@
  * 作者: wanglx
  */
 
+/* ============ Space Grotesk 数字字体（本地打包，禁止 CDN 拉取） ============ */
+/* 可变字体 latin 子集 wght 300–700，来源 google/fonts（OFL 1.1，许可副本见 assets/fonts/OFL.txt） */
+/* 作者: wanglx */
+@font-face {
+  font-family: 'Space Grotesk';
+  font-style: normal;
+  font-weight: 300 700;
+  font-display: swap;
+  src: url('../assets/fonts/SpaceGrotesk-Variable.woff2') format('woff2');
+}
+
 :root {
   /* 品牌 叶绿（= 充足态） */
   --zhenxinjian-primary: #00AC7C;

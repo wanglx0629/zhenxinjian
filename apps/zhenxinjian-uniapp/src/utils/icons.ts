@@ -2,6 +2,7 @@
  * 图标库：统一线性 SVG（24 viewBox / round 线帽），经 data-uri 由 <image> 渲染
  * 背景：mp-weixin 不支持内联 <svg> 节点；data-uri 方案 H5/小程序双端兼容
  * 用法：iconSrc('camera') 或 iconSrc('camera', '#00AC7C')
+ * （环形进度已收敛至 components/EnergyRing.vue，design-system-v2-p0）
  * 作者: wanglx
  */
 
@@ -107,31 +108,5 @@ export function iconSrc(name: IconName, color = '#10312B', sw = 2): string {
     `stroke-linejoin="round">${PATHS[name]}</svg>`
   const uri = `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`
   cache.set(key, uri)
-  return uri
-}
-
-const ringCache = new Map<string, string>()
-
-/**
- * 环形进度 data-uri（动态达成率/颜色，经 <image> 渲染，H5 与 mp-weixin 通用）
- * @param percent 达成率 0-100（内部封顶 100）
- * @param color 进度描边色
- */
-export function ringSrc(percent: number, color: string): string {
-  const pct = Math.max(0, Math.min(100, Math.round(percent)))
-  const key = `${pct}|${color}`
-  const hit = ringCache.get(key)
-  if (hit) return hit
-  const r = 52
-  const len = 2 * Math.PI * r
-  const offset = len * (1 - pct / 100)
-  const svg =
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">` +
-    `<circle cx="60" cy="60" r="${r}" fill="none" stroke="rgba(255,255,255,0.25)" stroke-width="10"/>` +
-    `<circle cx="60" cy="60" r="${r}" fill="none" stroke="${color}" stroke-width="10" ` +
-    `stroke-linecap="round" stroke-dasharray="${len}" stroke-dashoffset="${offset}" ` +
-    `transform="rotate(-90 60 60)"/></svg>`
-  const uri = `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`
-  ringCache.set(key, uri)
   return uri
 }

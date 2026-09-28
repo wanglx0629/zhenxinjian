@@ -13,12 +13,13 @@ import { useMenstrualStore } from '@/store/menstrual'
 import MacroProgress from '@/components/MacroProgress.vue'
 import OverLimitCard from '@/components/OverLimitCard.vue'
 import EmptyState from '@/components/EmptyState.vue'
+import EnergyRing from '@/components/EnergyRing.vue'
 import { CYCLE_DAY_TYPES, MEAL_TYPES } from '@/config/constants'
 import { greeting, guestLeftText, mdWeek, ymd } from '@/utils/format'
 import { getToken } from '@/utils/storage'
 import { track, trackPage } from '@/utils/track'
 import { TRACK_EVENT } from '@/config/track-events'
-import { iconSrc, ringSrc, type IconName } from '@/utils/icons'
+import { iconSrc, type IconName } from '@/utils/icons'
 
 /** 餐别线性图标（替换原 emoji，H5/小程序一致） */
 const MEAL_ICONS: Record<number, IconName> = { 1: 'breakfast', 2: 'bowl', 3: 'moon', 4: 'apple' }
@@ -59,13 +60,8 @@ const isCycle = computed(() => bodyStore.isCycleMode)
 const kcalTarget = computed(() => summary.value?.kcalTarget ?? 0)
 const kcalActual = computed(() => summary.value?.kcalActual ?? 0)
 const kcalRemain = computed(() => kcalTarget.value - kcalActual.value)
-/** 头卡进度条颜色（三色语义：80–100 绿 / <80 黄 / >100 红） */
-const kcalBarColor = computed(() => {
-  const rate = summary.value?.kcalRate ?? 0
-  if (rate > 100) return '#FF4747'
-  if (rate >= 80) return '#00AC7C'
-  return '#FFB020'
-})
+/** 能量环达成率（三色语言由 EnergyRing 承接：弧长=摄入、琥珀缺口=预算、红满环=超标） */
+const kcalRate = computed(() => summary.value?.kcalRate ?? 0)
 
 /** 模式标签：532 碳水渐降 / 碳循环 · 今日X碳日 */
 const modeTag = computed(() => {
@@ -229,16 +225,13 @@ function goPlan() {
         </view>
 
         <template v-if="recorded">
-          <!-- 三色环形进度 -->
+          <!-- 能量环（§8.6：弧长=摄入、琥珀缺口=预算、红满环=超标） -->
           <view class="ring-wrap">
-            <view class="ring-box">
-              <image class="ring-svg" :src="ringSrc(summary?.kcalRate ?? 0, kcalBarColor)" />
-              <view class="ring-center">
-                <text class="ring-label">已摄入</text>
-                <text class="ring-num">{{ kcalActual }}</text>
-                <text class="ring-target">/ {{ kcalTarget }} kcal</text>
-              </view>
-            </view>
+            <EnergyRing :percent="kcalRate" :size="360" :stroke="20" class="ring-box">
+              <text class="ring-label">已摄入</text>
+              <text class="ring-num">{{ kcalActual }}</text>
+              <text class="ring-target">/ {{ kcalTarget }} kcal</text>
+            </EnergyRing>
             <view class="hero-remain" :class="{ over: kcalRemain < 0 }">
               {{ kcalRemain >= 0 ? `还可吃 ${kcalRemain} kcal` : `已超标 ${-kcalRemain} kcal` }}
             </view>
@@ -418,7 +411,7 @@ function goPlan() {
 }
 
 .skeleton-hero {
-  height: 260rpx;
+  height: 640rpx;
   border-radius: $zhenxinjian-radius-lg;
 }
 
@@ -543,7 +536,7 @@ function goPlan() {
   margin-top: 4rpx;
 }
 
-/* 三色环形进度 */
+/* 能量环（EnergyRing 组件，360rpx 环径 §8.6） */
 .ring-wrap {
   display: flex;
   flex-direction: column;
@@ -551,26 +544,8 @@ function goPlan() {
 }
 
 .ring-box {
-  width: 260rpx;
-  height: 260rpx;
-  position: relative;
-}
-
-.ring-svg {
-  width: 100%;
-  height: 100%;
-}
-
-.ring-center {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  width: 360rpx;
+  height: 360rpx;
 }
 
 .ring-label {
