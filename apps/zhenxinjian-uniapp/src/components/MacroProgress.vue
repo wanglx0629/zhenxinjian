@@ -1,15 +1,23 @@
 <script setup lang="ts">
 /**
- * 三宏 + 总热量三色进度（F09/F26，口径与 P12 记录页一致）
+ * 三宏 + 总热量三色进度（F09/F26，口径单一来源 utils/macro.ts）
+ * excludeKeys：按 key 过滤进度项（P12 记录页排除 kcal——热量项由 EnergyRing 承接，energy-ring-record）
  * 作者: wanglx
  */
 import { computed } from 'vue'
 import { buildProgressItems } from '@/utils/macro'
+import type { ProgressItem } from '@/utils/macro'
 import type { DietSummaryVO } from '@/api/diet'
 
-const props = defineProps<{ summary: DietSummaryVO | null }>()
+const props = defineProps<{
+  summary: DietSummaryVO | null
+  excludeKeys?: ProgressItem['key'][]
+}>()
 
-const items = computed(() => buildProgressItems(props.summary))
+const items = computed(() => {
+  const all = buildProgressItems(props.summary)
+  return props.excludeKeys?.length ? all.filter(item => !props.excludeKeys!.includes(item.key)) : all
+})
 </script>
 
 <template>

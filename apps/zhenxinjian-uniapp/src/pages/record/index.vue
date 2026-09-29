@@ -13,6 +13,8 @@ import { ymd, md, week } from '@/utils/format'
 import { buildProgressItems, buildAdviceList } from '@/utils/macro'
 import type { DietRecordVO } from '@/api/diet'
 import EmptyState from '@/components/EmptyState.vue'
+import MacroProgress from '@/components/MacroProgress.vue'
+import EnergyRing from '@/components/EnergyRing.vue'
 import { track, trackPage } from '@/utils/track'
 import { TRACK_EVENT } from '@/config/track-events'
 import { iconSrc, type IconName } from '@/utils/icons'
@@ -44,6 +46,9 @@ const dateLabel = computed(() => {
 
 /** 进度条数据（三宏 + 总热量，口径单一来源 utils/macro.ts） */
 const progressItems = computed(() => buildProgressItems(dietStore.summary))
+
+/** 热量项（能量环数据源：percent=rate、环心=actual/target、超标态=overAmount） */
+const kcalItem = computed(() => progressItems.value.find(item => item.key === 'kcal'))
 
 /** 超标项列表 */
 const overItems = computed(() => progressItems.value.filter(item => item.overAmount > 0))
@@ -191,22 +196,25 @@ function goCycleSetting() {
       />
     </view>
 
-    <!-- 三色进度区 -->
+    <!-- 三色进度区（热量=能量环 + 三宏线性条，energy-ring-record） -->
     <view v-if="!dietStore.noProfile && progressItems.length" class="panel">
       <text class="panel-title">当日进度 · {{ targetLabel }}</text>
-      <view v-for="item in progressItems" :key="item.key" class="progress-row">
-        <view class="progress-info">
-          <text class="progress-label">{{ item.label }}</text>
-          <text class="progress-value">{{ item.actual }}/{{ item.target }}{{ item.unit }}</text>
-        </view>
-        <view class="progress-bar">
-          <view class="progress-fill" :style="{ width: item.displayRate + '%', background: item.color }"></view>
-        </view>
-        <view class="progress-status">
-          <text v-if="item.overAmount > 0" class="over-text" :style="{ color: item.color }">已超标 {{ item.overAmount }}{{ item.unit }}</text>
-          <text v-else class="rate-text" :style="{ color: item.color }">{{ Math.round(item.rate ?? 0) }}%</text>
+
+      <!-- 热量能量环（§8.6：弧长=摄入、琥珀缺口=预算、红满环=超标） -->
+      <view v-if="kcalItem" class="ring-block">
+        <EnergyRing :percent="kcalItem.rate" :size="280" :stroke="16">
+          <text class="ring-label">已摄入</text>
+          <text class="ring-num">{{ kcalItem.actual }}</text>
+          <text class="ring-target">/ {{ kcalItem.target }} kcal</text>
+        </EnergyRing>
+        <view class="ring-status">
+          <text v-if="kcalItem.overAmount > 0" class="ring-status-over">已超标 {{ kcalItem.overAmount }}kcal</text>
+          <text v-else class="ring-status-rate" :style="{ color: kcalItem.color }">达成率 {{ Math.round(kcalItem.rate) }}%</text>
         </view>
       </view>
+
+      <!-- 三宏线性条（MacroProgress 收敛，排除 kcal） -->
+      <MacroProgress :summary="dietStore.summary" :exclude-keys="['kcal']" />
     </view>
 
     <!-- 超标建议卡 -->
@@ -380,57 +388,45 @@ function goCycleSetting() {
   padding: 8rpx 0;
 }
 
-/* 进度条 */
-.progress-row {
-  margin-bottom: 24rpx;
-}
-
-.progress-row:last-child {
-  margin-bottom: 0;
-}
-
-.progress-info {
+/* 热量能量环（energy-ring-record：面板级信息单元，层级次于首页 hero 360rpx） */
+.ring-block {
   display: flex;
-  justify-content: space-between;
-  margin-bottom: 8rpx;
+  flex-direction: column;
+  align-items: center;
+  margin: $zhenxinjian-sp-3 0 $zhenxinjian-sp-4;
 }
 
-.progress-label {
-  font-size: 26rpx;
-  color: $zhenxinjian-text;
-}
-
-.progress-value {
-  font-size: 24rpx;
+.ring-label {
+  font-size: 22rpx;
   color: $zhenxinjian-text-secondary;
 }
 
-.progress-bar {
-  height: 16rpx;
-  background: $zhenxinjian-track;
-  border-radius: $zhenxinjian-radius-pill;
-  overflow: hidden;
+.ring-num {
+  font-size: 48rpx;
+  font-weight: 700;
+  font-family: $zhenxinjian-font-num;
+  font-variant-numeric: tabular-figures;
+  color: $zhenxinjian-text;
+  line-height: 1.2;
 }
 
-.progress-fill {
-  height: 100%;
-  border-radius: $zhenxinjian-radius-pill;
-  transition: width 0.3s;
+.ring-target {
+  font-size: 22rpx;
+  color: $zhenxinjian-text-secondary;
 }
 
-.progress-status {
-  margin-top: 8rpx;
-  display: flex;
-  justify-content: flex-end;
+.ring-status {
+  margin-top: $zhenxinjian-sp-2;
 }
 
-.rate-text {
+.ring-status-rate {
   font-size: 22rpx;
 }
 
-.over-text {
+.ring-status-over {
   font-size: 22rpx;
   font-weight: 600;
+  color: $zhenxinjian-danger-deep;
 }
 
 /* 建议卡（琥珀浅底，warning token） */
