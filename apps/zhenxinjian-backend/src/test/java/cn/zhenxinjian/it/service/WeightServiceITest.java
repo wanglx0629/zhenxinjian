@@ -2,6 +2,7 @@ package cn.zhenxinjian.it.service;
 
 import cn.zhenxinjian.domain.po.WeightRecord;
 import cn.zhenxinjian.domain.vo.WeightRecordVO;
+import cn.zhenxinjian.domain.vo.WeightTrendVO;
 import cn.zhenxinjian.it.TestConfig;
 import cn.zhenxinjian.mapper.WeightRecordMapper;
 import cn.zhenxinjian.service.impl.WeightService;
@@ -17,6 +18,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 /**
  * 体重记录 Service 集成测试 — 验证 DB + Service 全链路
@@ -64,26 +66,92 @@ class WeightServiceITest {
         assertEquals(null, found);
     }
 
-    /** 场景：按日期范围查询 */
+    /** 场景：同日多条共存，每日末值聚合只返回 id 最大者 */
     @Test
-    void list_returnsInDateRange() {
-        WeightRecord r1 = new WeightRecord();
-        r1.setUserId(1L);
-        r1.setRecordDate(LocalDate.now().minusDays(1));
-        r1.setWeight(70.0);
-        weightRecordMapper.insert(r1);
+    void selectDailyLast_sameDayMultiple_returnsLastOnly() {
+        LocalDate today = LocalDate.now();
+        insert(1L, today, 58.0);
+        insert(1L, today, 57.5);
+        insert(1L, today, 57.0);
 
-        WeightRecord r2 = new WeightRecord();
-        r2.setUserId(1L);
-        r2.setRecordDate(LocalDate.now());
-        r2.setWeight(71.0);
-        weightRecordMapper.insert(r2);
+        List<WeightRecord> dailyLast = weightRecordMapper.selectDailyLast(1L, today, today);
 
-        List<WeightRecord> list = weightRecordMapper.selectList(
-                new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<WeightRecord>()
-                        .eq(WeightRecord::getUserId, 1L)
-                        .ge(WeightRecord::getRecordDate, LocalDate.now().minusDays(2))
-                        .orderByDesc(WeightRecord::getRecordDate));
-        assertEquals(2, list.size());
+        assertEquals(1, dailyLast.size());
+        assertEquals(57.0, dailyLast.get(0).getWeight(), 0.01);
+    }
+
+    /** 场景：跨日每日末值各取一点，按日期升序 */
+    @Test
+    void selectDailyLast_multipleDays_onePointPerDay() {
+        LocalDate today = LocalDate.now();
+        insert(1L, today.minusDays(1), 58.0);
+        insert(1L, today.minusDays(1), 57.8);
+        insert(1L, today, 57.0);
+
+        List<WeightRecord> dailyLast =
+                weightRecordMapper.selectDailyLast(1L, today.minusDays(1), today);
+
+        assertEquals(2, dailyLast.size());
+        assertEquals(today.minusDays(1), dailyLast.get(0).getRecordDate());
+        assertEquals(57.8, dailyLast.get(0).getWeight(), 0.01);
+        assertEquals(57.0, dailyLast.get(1).getWeight(), 0.01);
+    }
+
+    /** 场景：同日多次称重不干扰平台判定（每日仅一点，波动按日末值） */
+    @Test
+    void isPlateau_sameDayNoise_ignored() {
+        LocalDate today = LocalDate.now();
+        insert(1L, today.minusDays(1), 57.0);
+        insert(1L, today, 58.0);
+        insert(1L, today, 57.1);
+
+        // 日末值为 57.0 与 57.1，波动 0.1 → 平台
+        assertEquals(true, weightService.isPlateau(1L));
+    }
+
+    /** 场景：列表不传 limit 返回全部（无条数上限） */
+    @Test
+    void list_noLimit_returnsAll() {
+        LocalDate today = LocalDate.now();
+        for (int i = 0; i < 3; i++) {
+            insert(1L, today, 57.0 + i);
+        }
+
+        List<WeightRecordVO> list = weightService.list(1L, null, null, null);
+
+        assertEquals(3, list.size());
+    }
+
+    /** 场景：趋势窗口每日末值点 + 体重差（正=下降） */
+    @Test
+    void trend_returnsPointsAndDelta() {
+        LocalDate today = LocalDate.now();
+        insert(1L, today.minusDays(1), 58.0);
+        insert(1L, today, 57.0);
+
+        WeightTrendVO vo = weightService.trend(1L, "7");
+
+        assertEquals(2, vo.getPoints().size());
+        assertEquals(1.0, vo.getDelta(), 0.001);
+        assertEquals(today.minusDays(6).toString(), vo.getStartDate());
+    }
+
+    /** 场景：窗口内不足两个不同日 → points/delta 为 null */
+    @Test
+    void trend_lessThanTwoDays_nullPoints() {
+        insert(1L, LocalDate.now(), 57.0);
+
+        WeightTrendVO vo = weightService.trend(1L, "30");
+
+        assertNull(vo.getPoints());
+        assertNull(vo.getDelta());
+    }
+
+    private void insert(Long userId, LocalDate date, double weight) {
+        WeightRecord r = new WeightRecord();
+        r.setUserId(userId);
+        r.setRecordDate(date);
+        r.setWeight(weight);
+        weightRecordMapper.insert(r);
     }
 }

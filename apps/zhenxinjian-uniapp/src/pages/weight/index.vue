@@ -1,12 +1,13 @@
 <script setup lang="ts">
 /**
- * P09 体重记录页：按日记录（kg/斤切换，同日覆盖）+ 平台期提示 + 调碳日志
- * 超过 7 条显示删除按钮；数据永久留存
+ * P09 体重记录页：随时称重（kg/斤切换，同日多条共存）+ 多窗口趋势曲线与体重差
+ * + 平台期提示 + 全量历史 + 调碳日志；数据永久留存
  * 作者: wanglx
  */
 import { computed, ref } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
 import { useWeightStore } from '@/store/weight'
+import WeightChart from '@/components/WeightChart.vue'
 import { ymd } from '@/utils/format'
 import { canSubmit } from '@/utils/throttle'
 import { track, trackPage } from '@/utils/track'
@@ -16,6 +17,16 @@ import { iconSrc } from '@/utils/icons'
 const plateauIcon = iconSrc('alert', '#d63333')
 
 const weightStore = useWeightStore()
+
+/** 趋势窗口按钮（值与后端 range 对齐） */
+const WINDOWS = [
+  { label: '近7天', value: '7' },
+  { label: '30天', value: '30' },
+  { label: '60天', value: '60' },
+  { label: '90天', value: '90' },
+  { label: '一年', value: '365' },
+  { label: '全部', value: 'all' }
+]
 
 /** 单位：0 kg / 1 斤 */
 const unit = ref(0)
@@ -29,6 +40,23 @@ const deleteTargetId = ref<number | null>(null)
 
 const records = computed(() => weightStore.records)
 const isEmpty = computed(() => weightStore.loaded && !records.value.length)
+const trendPoints = computed(() => weightStore.trend?.points ?? [])
+const trendDelta = computed(() => weightStore.trend?.delta ?? null)
+
+/** 体重差展示文案（正=下降叶绿，负=上升红，0 灰） */
+const deltaText = computed(() => {
+  const d = trendDelta.value
+  if (d === null) return ''
+  const abs = Math.abs(d).toFixed(1)
+  if (d > 0) return `下降 ${abs}kg`
+  if (d < 0) return `上升 ${abs}kg`
+  return '持平'
+})
+const deltaClass = computed(() => {
+  const d = trendDelta.value
+  if (d === null || Math.abs(d) < 0.001) return 'delta-flat'
+  return d > 0 ? 'delta-down' : 'delta-up'
+})
 
 /** kg → 当前单位展示 */
 function displayWeight(kg: number): string {
@@ -39,6 +67,7 @@ onShow(async () => {
   trackPage('pages/weight/index')
   try {
     await weightStore.fetchRecords()
+    await weightStore.fetchTrend().catch(() => undefined)
     if (weightStore.loaded) {
       await weightStore.fetchLogs().catch(() => undefined)
     }
@@ -52,12 +81,21 @@ function switchUnit(v: number) {
   unit.value = v
 }
 
+/** 切换趋势窗口 */
+async function handleRange(v: string) {
+  try {
+    await weightStore.changeRange(v)
+  } catch {
+    // request.ts 已统一 toast
+  }
+}
+
 /** 日期选择 */
 function onDateChange(e: { detail: { value: string } }) {
   recordDate.value = e.detail.value
 }
 
-/** 保存：kg/斤按当前单位换算为 kg 提交；同日覆盖 */
+/** 保存：kg/斤按当前单位换算为 kg 提交 */
 async function handleSave() {
   const v = Number(weight.value)
   if (!weight.value || Number.isNaN(v)) {
@@ -115,6 +153,33 @@ function cancelDelete() {
       </view>
     </view>
 
+    <!-- 体重趋势 -->
+    <view class="panel">
+      <text class="panel-title">体重趋势</text>
+      <view class="window-seg">
+        <view
+          v-for="w in WINDOWS"
+          :key="w.value"
+          class="window-item"
+          :class="{ active: weightStore.range === w.value }"
+          hover-class="window-item-hover"
+          @click="handleRange(w.value)"
+        >
+          {{ w.label }}
+        </view>
+      </view>
+      <template v-if="trendPoints.length">
+        <WeightChart :points="trendPoints" />
+        <view class="delta-row">
+          <text class="delta-label">区间体重差</text>
+          <text class="delta-value" :class="deltaClass">{{ deltaText }}</text>
+        </view>
+      </template>
+      <view v-else class="empty">
+        <text class="empty-text">至少记录两个不同日期后展示趋势</text>
+      </view>
+    </view>
+
     <!-- 录入卡 -->
     <view class="panel">
       <text class="panel-title">记录体重</text>
@@ -137,7 +202,7 @@ function cancelDelete() {
           :placeholder="unit === 0 ? '请输入体重 kg（25-200）' : '请输入体重斤（50-400）'"
         />
       </view>
-      <text class="field-tip">同日重复记录会覆盖；建议每周一空腹称重。</text>
+      <text class="field-tip">随时可称重，同日多条都会保存，曲线只取当日最后一条。</text>
       <button class="btn-primary" :loading="weightStore.submitting" @click="handleSave">保存</button>
     </view>
 
@@ -184,6 +249,64 @@ function cancelDelete() {
   padding: 24rpx 32rpx 64rpx;
   box-sizing: border-box;
   background: $zhenxinjian-bg;
+}
+
+/* 趋势窗口 */
+.window-seg {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+  margin-bottom: 24rpx;
+}
+
+.window-item {
+  padding: 10rpx 22rpx;
+  border: 1rpx solid $zhenxinjian-border;
+  border-radius: $zhenxinjian-radius-md;
+  font-size: 24rpx;
+  color: $zhenxinjian-text-secondary;
+}
+
+.window-item.active {
+  background: $zhenxinjian-primary-light;
+  border-color: $zhenxinjian-primary;
+  color: $zhenxinjian-primary;
+  font-weight: 600;
+}
+
+.window-item-hover {
+  opacity: 0.7;
+}
+
+.delta-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 16rpx;
+  padding-top: 20rpx;
+  border-top: 1rpx solid $zhenxinjian-divider;
+}
+
+.delta-label {
+  font-size: 26rpx;
+  color: $zhenxinjian-text-secondary;
+}
+
+.delta-value {
+  font-size: 30rpx;
+  font-weight: 700;
+}
+
+.delta-down {
+  color: $zhenxinjian-primary;
+}
+
+.delta-up {
+  color: $zhenxinjian-danger;
+}
+
+.delta-flat {
+  color: $zhenxinjian-text-secondary;
 }
 
 /* 平台提示 */

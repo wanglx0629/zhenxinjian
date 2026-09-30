@@ -11,6 +11,7 @@ import cn.zhenxinjian.domain.po.UserBody;
 import cn.zhenxinjian.domain.po.WeightRecord;
 import cn.zhenxinjian.domain.vo.AdjustLogVO;
 import cn.zhenxinjian.domain.vo.WeightRecordVO;
+import cn.zhenxinjian.domain.vo.WeightTrendVO;
 import cn.zhenxinjian.mapper.AdjustLogMapper;
 import cn.zhenxinjian.mapper.UserBodyMapper;
 import cn.zhenxinjian.mapper.WeightRecordMapper;
@@ -24,6 +25,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -82,11 +84,7 @@ public class WeightService {
         LocalDate recordDate = dto.getRecordDate();
         double weight = BigDecimal.valueOf(dto.getWeight()).setScale(1, RoundingMode.HALF_UP).doubleValue();
 
-        // 同日幂等覆盖：先软删当日既有记录，再插入新记录（业务层保证每日至多一条活跃）
-        weightRecordMapper.delete(Wrappers.<WeightRecord>lambdaQuery()
-                .eq(WeightRecord::getUserId, userId)
-                .eq(WeightRecord::getRecordDate, recordDate));
-
+        // 同日允许多条共存（随时可称重），直接插入；当日末值由 MAX(id) 决定
         WeightRecord record = new WeightRecord();
         record.setUserId(userId);
         record.setRecordDate(recordDate);
@@ -95,8 +93,8 @@ public class WeightService {
         record.setCreateBy(Operators.user(userId));
         weightRecordMapper.insert(record);
 
-        // 平台下调/恢复判定（以当日体重为触发参考）
-        applyPlatformAdjust(userId, weight);
+        // 平台下调/恢复判定（以「今日末值」为触发参考）
+        applyPlatformAdjust(userId);
 
         WeightRecordVO vo = new WeightRecordVO();
         vo.setId(record.getId());
@@ -107,24 +105,25 @@ public class WeightService {
     }
 
     /**
-     * 查询体重记录：按日期范围（含）过滤，按日期倒序；不传范围默认最近 30 条
+     * 查询体重记录：按日期范围（含）过滤，按日期倒序、同日按 id 倒序，不做条数上限（列表展示全部）。
      *
      * @param userId    当前用户ID
      * @param startDate 起始日期（含，可空）
      * @param endDate   结束日期（含，可空）
-     * @param limit     返回条数上限（默认 30，最大 100）
+     * @param limit     返回条数上限（仅显式传入正整数时生效，不传 = 不限制）
      * @return 记录列表（含平台标记）
      */
     public List<WeightRecordVO> list(Long userId, LocalDate startDate, LocalDate endDate, Integer limit) {
-        int size = limit == null || limit <= 0 ? 30 : Math.min(limit, 100);
-        List<WeightRecord> records = weightRecordMapper.selectList(
-                Wrappers.<WeightRecord>lambdaQuery()
-                        .eq(WeightRecord::getUserId, userId)
-                        .ge(startDate != null, WeightRecord::getRecordDate, startDate)
-                        .le(endDate != null, WeightRecord::getRecordDate, endDate)
-                        .orderByDesc(WeightRecord::getRecordDate)
-                        .orderByDesc(WeightRecord::getId)
-                        .last("LIMIT " + size));
+        var query = Wrappers.<WeightRecord>lambdaQuery()
+                .eq(WeightRecord::getUserId, userId)
+                .ge(startDate != null, WeightRecord::getRecordDate, startDate)
+                .le(endDate != null, WeightRecord::getRecordDate, endDate)
+                .orderByDesc(WeightRecord::getRecordDate)
+                .orderByDesc(WeightRecord::getId);
+        if (limit != null && limit > 0) {
+            query.last("LIMIT " + limit);
+        }
+        List<WeightRecord> records = weightRecordMapper.selectList(query);
 
         boolean plateau = isPlateau(userId);
         return records.stream().map(r -> {
@@ -135,6 +134,64 @@ public class WeightService {
             vo.setPlateau(plateau);
             return vo;
         }).collect(Collectors.toList());
+    }
+
+    /** 趋势窗口合法天数（all 单独处理） */
+    private static final Set<Integer> TREND_RANGES = Set.of(7, 30, 60, 90, 365);
+
+    /** 默认趋势窗口 */
+    private static final int DEFAULT_TREND_RANGE = 30;
+
+    /**
+     * 体重趋势：按窗口取「每日末值」（时间序）并计算体重差。
+     *
+     * @param userId 当前用户ID
+     * @param range  窗口 7/30/60/90/365/all；非法或空回退默认 30
+     * @return 趋势（不足 2 个不同日时 points/delta 为 null）
+     */
+    public WeightTrendVO trend(Long userId, String range) {
+        LocalDate today = LocalDate.now();
+        LocalDate start = resolveTrendStart(range, today);
+
+        List<WeightRecord> dailyLast = weightRecordMapper.selectDailyLast(userId, start, today);
+
+        WeightTrendVO vo = new WeightTrendVO();
+        vo.setStartDate(start == null ? null : start.toString());
+        vo.setEndDate(today.toString());
+        if (dailyLast.size() < 2) {
+            return vo;
+        }
+        boolean plateauNow = isPlateau(userId);
+        List<WeightTrendVO.Point> points = dailyLast.stream().map(r -> {
+            WeightTrendVO.Point p = new WeightTrendVO.Point();
+            p.setDate(r.getRecordDate().toString());
+            p.setWeight(r.getWeight());
+            // 仅当前（最新）点反映当下平台态，历史点不回溯判定
+            p.setPlateau(r.getRecordDate().equals(today) && plateauNow);
+            return p;
+        }).collect(Collectors.toList());
+        vo.setPoints(points);
+        double first = dailyLast.get(0).getWeight();
+        double last = dailyLast.get(dailyLast.size() - 1).getWeight();
+        vo.setDelta(BigDecimal.valueOf(first).subtract(BigDecimal.valueOf(last)).doubleValue());
+        return vo;
+    }
+
+    /** 解析趋势窗口起点；"all" 或非法值处理 */
+    private LocalDate resolveTrendStart(String range, LocalDate today) {
+        if ("all".equalsIgnoreCase(range)) {
+            return null;
+        }
+        Integer days = null;
+        try {
+            days = range == null ? null : Integer.valueOf(range);
+        } catch (NumberFormatException ignored) {
+            // 非数字且非 all → 默认窗口
+        }
+        if (days == null || !TREND_RANGES.contains(days)) {
+            days = DEFAULT_TREND_RANGE;
+        }
+        return today.minusDays((long) days - 1);
     }
 
     /**
@@ -168,40 +225,43 @@ public class WeightService {
     }
 
     /**
-     * 平台判定：近 7 天（含今日）体重记录（≥2 条）max − min < 0.3
+     * 平台判定：近 7 天（含今日）「每日末值」（≥2 个不同日）max − min < 0.3。
+     * 同日多次称重不影响判定（每日仅取 id 最大者）。
      *
      * @param userId 当前用户ID
-     * @return true=平台期；窗口内不足 2 条返回 false（不判定）
+     * @return true=平台期；窗口内不足 2 个不同日返回 false（不判定）
      */
     public boolean isPlateau(Long userId) {
         LocalDate today = LocalDate.now();
-        List<WeightRecord> records = weightRecordMapper.selectList(
-                Wrappers.<WeightRecord>lambdaQuery()
-                        .eq(WeightRecord::getUserId, userId)
-                        .ge(WeightRecord::getRecordDate, today.minusDays((long) PLATEAU_WINDOW_DAYS - 1))
-                        .le(WeightRecord::getRecordDate, today)
-                        .orderByDesc(WeightRecord::getRecordDate)
-                        .orderByDesc(WeightRecord::getId));
-        if (records.size() < 2) {
+        List<WeightRecord> dailyLast = weightRecordMapper.selectDailyLast(userId,
+                today.minusDays((long) PLATEAU_WINDOW_DAYS - 1), today);
+        if (dailyLast.size() < 2) {
             return false;
         }
-        double max = records.stream().mapToDouble(WeightRecord::getWeight).max().orElse(0);
-        double min = records.stream().mapToDouble(WeightRecord::getWeight).min().orElse(0);
+        double max = dailyLast.stream().mapToDouble(WeightRecord::getWeight).max().orElse(0);
+        double min = dailyLast.stream().mapToDouble(WeightRecord::getWeight).min().orElse(0);
         return BigDecimal.valueOf(max).subtract(BigDecimal.valueOf(min)).compareTo(PLATEAU_DELTA) < 0;
     }
 
     /**
-     * 平台下调/恢复判定（保存/修改体重后调用；单次门闩防连续下调）
+     * 平台下调/恢复判定（保存体重后调用；单次门闩防连续下调）。
+     * 触发/恢复参考统一为「今日末值」（同日 id 最大者）。
      *
-     * @param userId     当前用户ID
-     * @param todayWeight 当日体重 kg
+     * @param userId 当前用户ID
      */
-    private void applyPlatformAdjust(Long userId, double todayWeight) {
+    private void applyPlatformAdjust(Long userId) {
         UserBody body = userBodyMapper.selectOne(
                 Wrappers.<UserBody>lambdaQuery().eq(UserBody::getUserId, userId));
         if (body == null) {
             return;
         }
+        LocalDate today = LocalDate.now();
+        WeightRecord todayRecord = weightRecordMapper.selectDailyLast(userId, today, today).stream()
+                .findFirst().orElse(null);
+        if (todayRecord == null) {
+            return;
+        }
+        double todayWeight = todayRecord.getWeight();
         boolean adjusted = body.getIsAdjusted() != null && body.getIsAdjusted() == 1;
         if (!adjusted) {
             // 未下调且平台成立 → 下调

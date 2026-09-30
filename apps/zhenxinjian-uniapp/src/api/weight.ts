@@ -36,14 +36,41 @@ export interface WeightSaveRequest {
   weight: number
 }
 
-/** 保存体重记录（同日幂等覆盖，触发平台下调/恢复判定） */
+/** 体重趋势点（与后端 WeightTrendVO.Point 对齐） */
+export interface WeightTrendPoint {
+  /** 记录日期 YYYY-MM-DD */
+  date: string
+  /** 体重 kg（当日末值） */
+  weight: number
+  /** 当日是否处于平台期 */
+  plateau: boolean
+}
+
+/** 体重趋势（与后端 WeightTrendVO 对齐） */
+export interface WeightTrendVO {
+  /** 每日末值点（按日期升序，不足两日为 null） */
+  points: WeightTrendPoint[] | null
+  /** 体重差 kg = 最早日末值 − 最新日末值（正=下降，负=上升，不足两日为 null） */
+  delta: number | null
+  /** 窗口起始日期 */
+  startDate: string | null
+  /** 窗口结束日期 */
+  endDate: string
+}
+
+/** 保存体重记录（同日允许多条共存，触发平台下调/恢复判定） */
 export function saveWeight(data: WeightSaveRequest) {
   return http.put<WeightRecordVO>('/weight', data)
 }
 
-/** 查询体重记录（按日期范围过滤，默认最近 30 条） */
+/** 查询体重记录（按日期范围过滤；不传 limit 返回全部） */
 export function listWeights(params?: { startDate?: string; endDate?: string; limit?: number }) {
   return http.get<WeightRecordVO[]>('/weight', params)
+}
+
+/** 查询体重趋势（range: 7/30/60/90/365/all，默认 30） */
+export function getWeightTrend(range: string) {
+  return http.get<WeightTrendVO>('/weight/trend', { range })
 }
 
 /** 删除体重记录（逻辑删除） */
