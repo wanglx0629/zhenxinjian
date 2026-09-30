@@ -1,0 +1,4 @@
+schema: spec-driven
+created: 2026-09-29
+goal: '"后台 Web 版 EnergyRing 组件 + Dashboard DAU/MAU 粘性比环（纯视觉资产新增，零后端改动）"'
+skip_specs: true

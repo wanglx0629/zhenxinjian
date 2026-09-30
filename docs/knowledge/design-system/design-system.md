@@ -4,7 +4,7 @@
 | ---- | ---- |
 | 文档版本 | V2.0 |
 | 编写日期 | 2026-09-04 |
-| 最近更新 | 2026-09-28（能量环推广 P12 记录页 + 进度模板收敛，见 §8.6；P0 收尾：能量环组件与后台字体文件落地，见 §8.6/§8.10） |
+| 最近更新 | 2026-09-29（后台 Web 版 EnergyRing 落地 + dashboard DAU/MAU 粘性比环，见 §8.6/§8.7；2026-09-28：能量环推广 P12 记录页 + P0 收尾，见 §8.6/§8.10） |
 | 需求基准 | 高保真原型 `MRD-PRD/臻心减小程序V1.1高保真原型/`（16 页 / F01–F27）与 PRD 页面元素表 |
 
 ***
@@ -168,11 +168,12 @@ P01 游客引导 · P02 首页总览 · P03 身体数据 · P04 代谢结果 · 
 - 超标态：环满切 `#FF4747` 单色 + 超标文案
 - **已由 `components/EnergyRing.vue` 落地（design-system-v2-p0，2026-09-28）**：SVG data-uri 双端方案，进度弧为空间固定 linearGradient（绿→琥珀），上升时 300ms ease-out 闭合补间；首页热量头卡已接入
 - **P12 记录页当日进度面板已接入（energy-ring-record，2026-09-28）**：热量项升级为 280rpx/16 环（面板级层级，次于首页 hero 360/20），三宏线性条收敛至 `MacroProgress.vue`（新增 `excludeKeys` 过滤 prop，消除模板复制）
+- **后台 dashboard Web 版已接入（energy-ring-dashboard，2026-09-29）**：`apps/zhenxinjian-front/src/component/EnergyRing.vue`，Web 组件为原生内联 SVG（非 data-uri）、px 单位、`stroke-dasharray` CSS transition 补间；dashboard 新增 DAU/MAU 粘性比环卡（前端组合 `todayDau`/`mau`，零后端改动）。三端视觉语义同源，仅渲染层不同
 
 ### 8.7 动效原则
 
 - 动效只回应人的操作：记录成功→能量环闭合反馈（300ms 缓动）；按压→缩放 0.97；不做页面加载/环境动效
-- 后台侧尊重 `prefers-reduced-motion`
+- 后台侧尊重 `prefers-reduced-motion`（**已落地**：Web 版 EnergyRing 在 `@media (prefers-reduced-motion: reduce)` 下禁用补间直接定位，energy-ring-dashboard，2026-09-29）
 
 ### 8.8 反模式清单（自审通过项）
 
@@ -221,4 +222,4 @@ P01 游客引导 · P02 首页总览 · P03 身体数据 · P04 代谢结果 · 
 
 ***
 
-> **文档版本**：V2.2（能量环推广 P12 记录页 + 进度模板收敛）　**最后更新**：2026-09-28　**维护**：臻心减项目组
+> **文档版本**：V2.3（后台 Web 版 EnergyRing + dashboard 粘性比环）　**最后更新**：2026-09-29　**维护**：臻心减项目组

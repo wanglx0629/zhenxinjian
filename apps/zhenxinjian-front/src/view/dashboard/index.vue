@@ -3,7 +3,7 @@
  * 数据看板：KPI 卡片 + DAU 趋势（ECharts 统一主题）+ 功能/页面 TOP10
  * 作者: wanglx
  */
-import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import * as echarts from 'echarts/core'
 import { LineChart } from 'echarts/charts'
 import { GridComponent, LegendComponent, TooltipComponent } from 'echarts/components'
@@ -12,6 +12,7 @@ import { User, Calendar, TrendCharts, DataAnalysis } from '@element-plus/icons-v
 import { getActiveTrend, getEventRank, getOverview, getPageRank } from '@/api/stats'
 import type { DailyActive, EventRank, PageRank, StatsOverview } from '@/api/stats'
 import { areaGradient, baseEchartsOption, CHART_AXIS } from '@/utils/echarts-theme'
+import EnergyRing from '@/component/EnergyRing.vue'
 
 /** echarts 按需注册 */
 echarts.use([LineChart, GridComponent, LegendComponent, TooltipComponent, CanvasRenderer])
@@ -26,6 +27,14 @@ const pageRank = ref<PageRank[]>([])
 const rankLoading = ref(false)
 const trendRef = ref<HTMLElement>()
 let chart: ReturnType<typeof echarts.init> | null = null
+
+/** DAU/MAU 粘性比（今日 DAU / 近 30 天 MAU），封顶 100 兜底；mau=0 按无数据处理 */
+const stickiness = computed(() => {
+  const mau = overview.value?.mau ?? 0
+  if (mau <= 0) return 0
+  return Math.min((overview.value!.todayDau / mau) * 100, 100)
+})
+const hasStickiness = computed(() => (overview.value?.mau ?? 0) > 0)
 
 async function loadOverview() {
   overviewLoading.value = true
@@ -182,6 +191,21 @@ onBeforeUnmount(() => {
       </el-col>
     </el-row>
 
+    <el-row :gutter="16" class="cards" v-loading="overviewLoading">
+      <el-col :xs="24" :sm="12" :md="8">
+        <div class="stat-card tech-topline ring-card">
+          <div class="card-label">用户粘性比</div>
+          <EnergyRing :percent="stickiness" class="ring-wrap">
+            <div class="ring-pct num">
+              {{ hasStickiness ? `${stickiness.toFixed(1)}%` : '—' }}
+            </div>
+            <div class="ring-tag">DAU/MAU</div>
+          </EnergyRing>
+          <div class="ring-desc">今日 DAU / 近 30 天 MAU</div>
+        </div>
+      </el-col>
+    </el-row>
+
     <div class="block tech-topline" v-loading="trendLoading">
       <div class="block-header">
         <span class="block-title">DAU 趋势</span>
@@ -306,6 +330,35 @@ onBeforeUnmount(() => {
   color: var(--zhenxinjian-text-placeholder);
   margin: 0 6px;
   font-weight: 400;
+}
+
+.ring-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.ring-wrap {
+  margin: 10px auto 4px;
+}
+
+.ring-pct {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--zhenxinjian-text);
+  line-height: 1.1;
+}
+
+.ring-tag {
+  margin-top: 2px;
+  font-size: 11px;
+  color: var(--zhenxinjian-text-secondary);
+  letter-spacing: 0.5px;
+}
+
+.ring-desc {
+  font-size: 12px;
+  color: var(--zhenxinjian-text-placeholder);
+  text-align: center;
 }
 
 .block {
