@@ -173,7 +173,7 @@ public class AdminFoodService extends ServiceImpl<FoodMapper, Food> {
         Food max = getOne(Wrappers.<Food>lambdaQuery()
                 .select(Food::getCode)
                 .likeRight(Food::getCode, "F")
-                .last("ORDER BY CAST(SUBSTRING(code,2) AS UNSIGNED) DESC LIMIT 1"), false);
+                .last("ORDER BY LENGTH(code) DESC, code DESC LIMIT 1"), false);
         int next = BUILTIN_CODE_START;
         if (max != null && StringUtils.hasText(max.getCode()) && max.getCode().length() > 1) {
             try {

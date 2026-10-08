@@ -128,6 +128,17 @@ class AdminFoodServiceTest {
         verify(foodMapper).insert(argThat((Food f) -> "F201".equals(f.getCode()) && f.getSource() == 1));
     }
 
+    /** 场景：库中已有内置码 F205 → 新增 code 顺延 F206 */
+    @Test
+    void create_existingMaxCode_increment() {
+        when(foodMapper.selectCount(any(Wrapper.class))).thenReturn(0L);
+        Food max = new Food();
+        max.setCode("F205");
+        when(foodMapper.selectOne(any(Wrapper.class), any(Boolean.class))).thenReturn(max);
+        adminFoodService.create(validDto());
+        verify(foodMapper).insert(argThat((Food f) -> "F206".equals(f.getCode()) && f.getSource() == 1));
+    }
+
     /** 场景：分页带审核状态 + AI 结论筛选；共建行填提交人昵称，基础食物不填 */
     @Test
     void page_auditFiltersAndSubmitterName() {
