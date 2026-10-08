@@ -7,8 +7,9 @@ import { reactive, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import { Edit } from '@element-plus/icons-vue'
-import { addConfig, getConfigPage, updateConfig, valueTypeLabel } from '@/api/adminConfig'
+import { addConfig, getConfigPage, updateConfig } from '@/api/adminConfig'
 import type { ProjectConfig } from '@/api/adminConfig'
+import { CONFIG_VALUE_TYPE_OPTIONS, CONFIG_VALUE_TYPE_MAP } from '@/constants/dicts'
 import PagePager from '@/component/PagePager.vue'
 import { usePageQuery } from '@/composables/usePageQuery'
 
@@ -150,7 +151,7 @@ async function handleToggleStatus(row: ProjectConfig) {
         </template>
       </el-table-column>
       <el-table-column label="值类型" width="90">
-        <template #default="{ row }">{{ valueTypeLabel(row.valueType) }}</template>
+        <template #default="{ row }">{{ CONFIG_VALUE_TYPE_MAP[row.valueType]?.label ?? '-' }}</template>
       </el-table-column>
       <el-table-column prop="remark" label="备注" min-width="160" show-overflow-tooltip>
         <template #default="{ row }">{{ row.remark || '-' }}</template>
@@ -183,11 +184,12 @@ async function handleToggleStatus(row: ProjectConfig) {
         </el-form-item>
         <el-form-item label="值类型" prop="valueType">
           <el-select v-model="form.valueType" :disabled="!!form.id" style="width: 100%">
-            <el-option label="字符串" :value="1" />
-            <el-option label="数字" :value="2" />
-            <el-option label="布尔" :value="3" />
-            <el-option label="JSON" :value="4" />
-            <el-option label="密文" :value="5" />
+            <el-option
+              v-for="opt in CONFIG_VALUE_TYPE_OPTIONS"
+              :key="opt.value"
+              :label="opt.label"
+              :value="opt.value"
+            />
           </el-select>
         </el-form-item>
         <el-form-item label="配置值" prop="configValue">

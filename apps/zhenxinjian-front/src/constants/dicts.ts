@@ -138,3 +138,13 @@ export const RECORD_SOURCE_OPTIONS: DictItem[] = [
   { value: 3, label: '手动输入' }
 ]
 export const RECORD_SOURCE_MAP = dictMap(RECORD_SOURCE_OPTIONS)
+
+/** 配置值类型（后端 ConfigValueTypeEnum：1字符串 2数字 3布尔 4JSON 5密文） */
+export const CONFIG_VALUE_TYPE_OPTIONS: DictItem[] = [
+  { value: 1, label: '字符串' },
+  { value: 2, label: '数字' },
+  { value: 3, label: '布尔' },
+  { value: 4, label: 'JSON' },
+  { value: 5, label: '密文' }
+]
+export const CONFIG_VALUE_TYPE_MAP = dictMap(CONFIG_VALUE_TYPE_OPTIONS)

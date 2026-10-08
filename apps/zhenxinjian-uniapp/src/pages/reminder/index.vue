@@ -382,15 +382,6 @@ async function handleReAuth() {
   background: $zhenxinjian-primary-dark;
 }
 
-/* 面板 */
-.panel {
-  background: $zhenxinjian-white;
-  border: 1rpx solid $zhenxinjian-border;
-  border-radius: $zhenxinjian-radius-lg;
-  padding: 32rpx;
-  margin-bottom: 24rpx;
-}
-
 .panel-title {
   font-size: 30rpx;
   font-weight: 600;
@@ -458,13 +449,4 @@ async function handleReAuth() {
   line-height: 1.6;
 }
 
-.btn-primary {
-  width: 100%;
-  height: 88rpx;
-  line-height: 88rpx;
-  background: $zhenxinjian-primary;
-  color: $zhenxinjian-white;
-  border-radius: $zhenxinjian-radius-md;
-  font-size: 30rpx;
-}
 </style>

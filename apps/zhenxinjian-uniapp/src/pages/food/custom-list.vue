@@ -307,13 +307,4 @@ onShow(() => {
   margin-bottom: 32rpx;
 }
 
-.btn-primary {
-  width: 80%;
-  height: 88rpx;
-  line-height: 88rpx;
-  background: $zhenxinjian-primary;
-  color: $zhenxinjian-white;
-  border-radius: $zhenxinjian-radius-md;
-  font-size: 30rpx;
-}
 </style>

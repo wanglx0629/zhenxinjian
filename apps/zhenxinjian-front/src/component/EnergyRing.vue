@@ -30,8 +30,10 @@ const props = withDefaults(
   }
 )
 
-const r = 52
-const C = 2 * Math.PI * r
+/** 环几何单一真源（设计系统 §8.6）：viewBox=120/r=52 与小程序版 components/EnergyRing.vue 同源同值，改口径须双端同步 */
+const RING_VIEWBOX = 120
+const RING_RADIUS = 52
+const C = 2 * Math.PI * RING_RADIUS
 
 /** 渐变 id 逐实例唯一（同页多环不撞 id） */
 const gradientId = `eg-grad-${useId()}`
@@ -60,7 +62,7 @@ const boxStyle = computed(() => ({
 
 <template>
   <div class="energy-ring" :class="{ ready }" :style="boxStyle">
-    <svg viewBox="0 0 120 120" class="ring-svg">
+    <svg :viewBox="`0 0 ${RING_VIEWBOX} ${RING_VIEWBOX}`" class="ring-svg">
       <defs>
         <linearGradient
           :id="gradientId"
@@ -77,7 +79,7 @@ const boxStyle = computed(() => ({
       <circle
         cx="60"
         cy="60"
-        :r="r"
+        :r="RING_RADIUS"
         fill="none"
         :stroke="trackColor"
         :stroke-width="stroke"
@@ -86,7 +88,7 @@ const boxStyle = computed(() => ({
         class="arc"
         cx="60"
         cy="60"
-        :r="r"
+        :r="RING_RADIUS"
         fill="none"
         :stroke="over ? overColor : `url(#${gradientId})`"
         :stroke-width="stroke"

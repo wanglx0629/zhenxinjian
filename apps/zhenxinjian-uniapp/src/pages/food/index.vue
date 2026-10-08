@@ -348,15 +348,6 @@ onReachBottom(() => {
   margin-bottom: 20rpx;
 }
 
-/* B-T29 漂移覆盖：padding 28rpx 区别于全局 32rpx */
-.panel {
-  background: $zhenxinjian-white;
-  border: 1rpx solid $zhenxinjian-border;
-  border-radius: $zhenxinjian-radius-lg;
-  padding: 28rpx;
-  margin-bottom: 24rpx;
-}
-
 .custom-entry {
   display: flex;
   justify-content: space-between;

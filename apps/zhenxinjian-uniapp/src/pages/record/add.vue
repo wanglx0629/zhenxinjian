@@ -392,14 +392,6 @@ async function handleSubmit() {
   background: $zhenxinjian-bg;
 }
 
-.panel {
-  background: $zhenxinjian-white;
-  border: 1rpx solid $zhenxinjian-border;
-  border-radius: $zhenxinjian-radius-lg;
-  padding: 32rpx;
-  margin-bottom: 24rpx;
-}
-
 /* 拍照识别入口 */
 .ocr-entry {
   display: flex;

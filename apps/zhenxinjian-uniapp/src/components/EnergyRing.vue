@@ -7,6 +7,7 @@
  * 作者: wanglx
  */
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
+import { PROGRESS_COLORS } from '@/config/constants'
 
 const props = withDefaults(
   defineProps<{
@@ -21,16 +22,13 @@ const props = withDefaults(
     /** 超标满环色 */
     overColor?: string
   }>(),
-  { size: 360, stroke: 20, trackColor: 'rgba(255,176,32,0.45)', overColor: '#FF4747' }
+  { size: 360, stroke: 20, trackColor: 'rgba(255,176,32,0.45)', overColor: PROGRESS_COLORS.red }
 )
 
-/** 品牌令牌色（JS 侧无 SCSS 变量，取值与 uni.scss 严格一致，先例 icons.ts §9.3） */
-const LEAF = '#00AC7C' // 叶绿 = 充足端
-const AMBER = '#FFB020' // 琥珀 = 不足端
-
-const viewBox = 120
-const r = 52
-const C = 2 * Math.PI * r
+/** 环几何与令牌单一真源（设计系统 §8.6）：色值取 constants.PROGRESS_COLORS；viewBox=120/r=52 与 web 版 EnergyRing.vue 同源同值，改口径须双端同步 */
+const RING_VIEWBOX = 120
+const RING_RADIUS = 52
+const C = 2 * Math.PI * RING_RADIUS
 
 /** 当前渲染的达成率（补间目标） */
 const display = ref(props.percent)
@@ -85,21 +83,21 @@ const cache = new Map<string, string>()
 const ringSrc = computed(() => {
   const pct = Math.max(0, Math.min(100, display.value))
   const over = display.value > 100
-  const strokeW = (viewBox / props.size) * props.stroke // rpx → viewBox 坐标
+  const strokeW = (RING_VIEWBOX / props.size) * props.stroke // rpx → viewBox 坐标
   const key = `${pct.toFixed(1)}|${over}|${strokeW.toFixed(2)}|${props.trackColor}|${props.overColor}`
   const hit = cache.get(key)
   if (hit) return hit
   const len = C * (pct / 100)
   const offset = C - len
   const arc =
-    `<circle cx="60" cy="60" r="${r}" fill="none" stroke="${over ? props.overColor : 'url(#eg)'}" ` +
+    `<circle cx="60" cy="60" r="${RING_RADIUS}" fill="none" stroke="${over ? props.overColor : 'url(#eg)'}" ` +
     `stroke-width="${strokeW}" stroke-linecap="round" ` +
     `stroke-dasharray="${len} ${offset}" transform="rotate(-90 60 60)"/>`
   const svg =
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${viewBox} ${viewBox}">` +
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${RING_VIEWBOX} ${RING_VIEWBOX}">` +
     `<defs><linearGradient id="eg" gradientUnits="userSpaceOnUse" x1="8" y1="8" x2="112" y2="112">` +
-    `<stop offset="0" stop-color="${LEAF}"/><stop offset="1" stop-color="${AMBER}"/></linearGradient></defs>` +
-    `<circle cx="60" cy="60" r="${r}" fill="none" stroke="${props.trackColor}" stroke-width="${strokeW}"/>` +
+    `<stop offset="0" stop-color="${PROGRESS_COLORS.green}"/><stop offset="1" stop-color="${PROGRESS_COLORS.yellow}"/></linearGradient></defs>` +
+    `<circle cx="60" cy="60" r="${RING_RADIUS}" fill="none" stroke="${props.trackColor}" stroke-width="${strokeW}"/>` +
     arc +
     `</svg>`
   const uri = `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`

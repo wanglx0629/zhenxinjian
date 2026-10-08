@@ -7,7 +7,6 @@
 import { computed, ref } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
 import { useTaperStore } from '@/store/taper'
-import { generateTaper532Plan } from '@/api/taper'
 import { track, trackPage } from '@/utils/track'
 import { TRACK_EVENT } from '@/config/track-events'
 import { getToken } from '@/utils/storage'
@@ -62,9 +61,8 @@ async function handleGenerate() {
   if (generating.value) return
   generating.value = true
   try {
-    await generateTaper532Plan()
+    await taperStore.generate()
     uni.showToast({ title: '已生成当期计划', icon: 'success' })
-    await taperStore.fetch()
   } catch {
     // request.ts 已统一 toast
   } finally {

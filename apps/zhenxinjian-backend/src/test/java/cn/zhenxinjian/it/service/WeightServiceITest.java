@@ -5,6 +5,7 @@ import cn.zhenxinjian.domain.vo.WeightRecordVO;
 import cn.zhenxinjian.domain.vo.WeightTrendVO;
 import cn.zhenxinjian.it.TestConfig;
 import cn.zhenxinjian.mapper.WeightRecordMapper;
+import cn.zhenxinjian.service.impl.PlateauDetector;
 import cn.zhenxinjian.service.impl.WeightService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +37,9 @@ class WeightServiceITest {
 
     @Autowired
     private WeightRecordMapper weightRecordMapper;
+
+    @Autowired
+    private PlateauDetector plateauDetector;
 
     /** 场景：insert → selectById → 返回实体 */
     @Test
@@ -106,7 +110,7 @@ class WeightServiceITest {
         insert(1L, today, 57.1);
 
         // 日末值为 57.0 与 57.1，波动 0.1 → 平台
-        assertEquals(true, weightService.isPlateau(1L));
+        assertEquals(true, plateauDetector.isPlateau(1L));
     }
 
     /** 场景：列表不传 limit 返回全部（无条数上限） */

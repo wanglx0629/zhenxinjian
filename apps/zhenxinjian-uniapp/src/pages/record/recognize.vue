@@ -254,15 +254,6 @@ async function handleSave() {
   background: $zhenxinjian-bg;
 }
 
-.panel {
-  background: $zhenxinjian-white;
-  border: 1rpx solid $zhenxinjian-border;
-  border-radius: $zhenxinjian-radius-lg;
-  padding: 32rpx;
-  margin-bottom: 24rpx;
-  box-shadow: $zhenxinjian-shadow-card;
-}
-
 .panel-title {
   font-size: 30rpx;
   font-weight: 600;

@@ -48,17 +48,3 @@ export function addConfig(data: ProjectConfigCreatePayload) {
 export function updateConfig(id: number, data: ProjectConfigUpdatePayload) {
   return request.put<void>(`/admin/configs/${id}`, data)
 }
-
-/** 值类型选项（对应 ConfigValueTypeEnum） */
-export const CONFIG_VALUE_TYPE_OPTIONS = [
-  { value: 1, label: '字符串' },
-  { value: 2, label: '数字' },
-  { value: 3, label: '布尔' },
-  { value: 4, label: 'JSON' },
-  { value: 5, label: '密文' }
-]
-
-/** 值类型 label */
-export function valueTypeLabel(valueType: number) {
-  return CONFIG_VALUE_TYPE_OPTIONS.find(o => o.value === valueType)?.label ?? '未知'
-}

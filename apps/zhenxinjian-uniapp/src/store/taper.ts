@@ -4,7 +4,7 @@
  */
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { getTaper532Plan, type Taper532Plan } from '@/api/taper'
+import { getTaper532Plan, generateTaper532Plan, type Taper532Plan } from '@/api/taper'
 
 export const useTaperStore = defineStore('taper', () => {
   /** 532 四阶段计划卡与今日目标（未建档 today=null） */
@@ -19,6 +19,12 @@ export const useTaperStore = defineStore('taper', () => {
     return plan.value
   }
 
+  /** 生成/确认当期计划（幂等；调写接口后自动回流读状态） */
+  async function generate() {
+    await generateTaper532Plan()
+    return fetch()
+  }
+
   /** 清空本地状态（退出登录/切换身份时调用） */
   function reset() {
     plan.value = null
@@ -29,6 +35,7 @@ export const useTaperStore = defineStore('taper', () => {
     plan,
     loaded,
     fetch,
+    generate,
     reset
   }
 })

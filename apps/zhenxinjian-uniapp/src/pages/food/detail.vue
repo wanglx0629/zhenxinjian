@@ -196,14 +196,6 @@ function goAddRecord() {
   background: $zhenxinjian-bg;
 }
 
-.panel {
-  background: $zhenxinjian-white;
-  border: 1rpx solid $zhenxinjian-border;
-  border-radius: $zhenxinjian-radius-lg;
-  padding: 32rpx;
-  margin-bottom: 24rpx;
-}
-
 .head {
   display: flex;
   align-items: center;
