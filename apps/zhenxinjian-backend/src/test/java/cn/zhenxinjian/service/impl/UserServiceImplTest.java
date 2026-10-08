@@ -6,17 +6,23 @@ import cn.zhenxinjian.common.exception.BusinessException;
 import cn.zhenxinjian.common.sensitive.SensitiveWordFilter;
 import cn.zhenxinjian.common.utils.JwtUtils;
 import cn.zhenxinjian.common.utils.RedisUtils;
+import cn.zhenxinjian.common.utils.UserContext;
 import cn.zhenxinjian.config.ZhenxinjianProperties;
 import cn.zhenxinjian.domain.dto.LoginDTO;
 import cn.zhenxinjian.domain.dto.UserDTO;
 import cn.zhenxinjian.domain.po.User;
+import cn.zhenxinjian.domain.query.UserQuery;
 import cn.zhenxinjian.domain.vo.LoginResultVO;
+import cn.zhenxinjian.domain.vo.LoginUserVO;
+import cn.zhenxinjian.domain.vo.UserVO;
 import cn.zhenxinjian.mapper.UserMapper;
 import cn.zhenxinjian.service.SessionEvictor;
 import com.baomidou.mybatisplus.core.MybatisConfiguration;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.metadata.TableInfoHelper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,6 +34,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -165,12 +172,80 @@ class UserServiceImplTest {
         assertThrows(BusinessException.class, () -> service.login(dto, "127.0.0.1"));
     }
 
-    /** 场景：查询用户不存在 → 抛错 */
+/** 场景：查询用户不存在 → 抛错 */
     @Test
     void getUserById_notFound_throwsException() {
         when(userCacheService.getById(999L)).thenReturn(null);
 
         assertThrows(BusinessException.class, () -> service.getUserById(999L));
+    }
+
+    /** 场景：普通用户查看自身 → 脱敏（手机号/微信标识/备注隐藏） */
+    @Test
+    void getUserById_self_masksSensitiveFields() {
+        User user = userEntity();
+        user.setPhone("13800138000");
+        user.setWechatOpenid("openid-1");
+        user.setWechatUnionid("unionid-1");
+        user.setRemark("内部备注");
+        when(userCacheService.getById(1L)).thenReturn(user);
+
+        LoginUserVO current = new LoginUserVO();
+        current.setId(1L);
+        current.setRole("USER");
+        UserContext.set(current);
+        try {
+            UserVO vo = service.getUserById(1L);
+
+            assertNotNull(vo);
+            assertEquals("admin", vo.getUsername());
+            assertNull(vo.getPhone());
+            assertNull(vo.getWechatOpenid());
+            assertNull(vo.getWechatUnionid());
+            assertNull(vo.getRemark());
+        } finally {
+            UserContext.clear();
+        }
+    }
+
+    /** 场景：管理员查看 → 不脱敏（保留手机号供回显） */
+    @Test
+    void getUserById_admin_keepsPhone() {
+        User user = userEntity();
+        user.setPhone("13800138000");
+        when(userCacheService.getById(1L)).thenReturn(user);
+
+        LoginUserVO current = new LoginUserVO();
+        current.setId(2L);
+        current.setRole("ADMIN");
+        UserContext.set(current);
+        try {
+            UserVO vo = service.getUserById(1L);
+            assertEquals("13800138000", vo.getPhone());
+        } finally {
+            UserContext.clear();
+        }
+    }
+
+    /** 场景：pageUsers 经统一工厂构建，管理员列表保留手机号（不脱敏） */
+    @Test
+    void pageUsers_adminList_keepsPhone() {
+        User user = userEntity();
+        user.setPhone("13800138000");
+        Page<User> page = new Page<>(1, 10);
+        page.setRecords(List.of(user));
+        when(userMapper.selectPage(any(IPage.class), any())).thenReturn(page);
+
+        UserQuery query = new UserQuery();
+        query.setPage(1L);
+        query.setSize(10L);
+
+        IPage<UserVO> result = service.pageUsers(query);
+
+        assertNotNull(result);
+        assertNotNull(result.getRecords());
+        assertEquals(1, result.getRecords().size());
+        assertEquals("13800138000", result.getRecords().get(0).getPhone());
     }
 
     /** 场景：添加用户密码为空 → 抛错 */

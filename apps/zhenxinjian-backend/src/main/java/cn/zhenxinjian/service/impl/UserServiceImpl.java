@@ -92,9 +92,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         user.setLastLoginTime(LocalDateTime.now());
         user.setLastLoginIp(ip);
         updateById(user);
-        userCacheService.evict(user.getId());
-        UserVO userVO = BeanUtil.copyProperties(user, UserVO.class);
-        maskPublicUser(userVO);
+userCacheService.evict(user.getId());
+        UserVO userVO = toUserVO(user, true);
         LoginResultVO result = new LoginResultVO();
         result.setToken(token);
         result.setUser(userVO);
@@ -125,9 +124,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                     .or().like(User::getNickname, finalKeyword)
                     .or().like(User::getEmail, finalKeyword));
         }
-        wrapper.orderByDesc(User::getCreateTime);
+wrapper.orderByDesc(User::getCreateTime);
         return page(query.toPage(), wrapper)
-                .convert(user -> BeanUtil.copyProperties(user, UserVO.class));
+                .convert(user -> toUserVO(user, false));
     }
 
     @Override
@@ -141,11 +140,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (!isAdmin && (current == null || !id.equals(current.getId()))) {
             throw new BusinessException(CommonConstant.FORBIDDEN_CODE, ExceptionConstant.ACCESS_DENIED);
         }
-        UserVO vo = BeanUtil.copyProperties(user, UserVO.class);
-        if (!isAdmin) {
-            maskPublicUser(vo);
-        }
-        return vo;
+return toUserVO(user, !isAdmin);
     }
 
     @Override
@@ -257,10 +252,25 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return CommonConstant.ROLE_ADMIN.equals(role) ? CommonConstant.ROLE_ADMIN : CommonConstant.ROLE_USER;
     }
 
+/**
+     * 统一用户 VO 构建工厂（单一 copy 入口，脱敏口径集中）
+     *
+     * @param user   用户实体
+     * @param masked 是否脱敏（非 admin 查看他人或普通用户查看自身时为 true）
+     */
+    private UserVO toUserVO(User user, boolean masked) {
+        UserVO vo = BeanUtil.copyProperties(user, UserVO.class);
+        if (masked) {
+            maskPublicUser(vo);
+        }
+        return vo;
+    }
+
     /**
-     * 脱敏公开用户信息（隐藏微信标识等敏感字段）
+     * 脱敏公开用户信息（隐藏手机号、微信标识等敏感字段）
      */
     private void maskPublicUser(UserVO vo) {
+        vo.setPhone(null);
         vo.setWechatOpenid(null);
         vo.setWechatUnionid(null);
         vo.setRemark(null);
