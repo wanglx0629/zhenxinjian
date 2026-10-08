@@ -12,6 +12,7 @@ import {
   type FoodSearchParams, type FoodVO, type PageVO
 } from '@/api/food'
 import { BASE_URL } from '@/api/request'
+import { scalePer100g } from '@/utils/macro'
 
 /**
  * 真机调试适配：图片 MinIO 地址按 API host 重写
@@ -164,17 +165,12 @@ export const useFoodStore = defineStore('food', () => {
     }
   }
 
-  /** 本地试算（宏量保留 2 位小数，与后端口径一致） */
+/** 本地试算（宏量保留 2 位小数，与后端口径一致；收敛 utils/macro.scalePer100g） */
   function localCalc(food: FoodVO, grams: number): FoodCalcVO {
-    const ratio = grams / 100
-    const two = (v: number) => Math.round(v * 100) / 100
     return {
       foodId: food.id,
       grams,
-      carb: two(food.carb * ratio),
-      protein: two(food.protein * ratio),
-      fat: two(food.fat * ratio),
-      kcal: Math.round(food.kcal * ratio)
+      ...scalePer100g(food, grams)
     }
   }
 

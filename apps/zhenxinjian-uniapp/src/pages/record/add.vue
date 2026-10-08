@@ -9,7 +9,8 @@ import { useDietStore } from '@/store/diet'
 import { useFoodStore } from '@/store/food'
 import { MEAL_TYPES } from '@/config/constants'
 import type { FoodVO } from '@/api/food'
-import { ymd } from '@/utils/format'
+import { ymd, defaultMealType } from '@/utils/format'
+import { scalePer100g } from '@/utils/macro'
 import { checkKcalConsistency } from '@/utils/validate'
 import { track, trackPage } from '@/utils/track'
 import { TRACK_EVENT } from '@/config/track-events'
@@ -30,17 +31,6 @@ const GRAMS_MAX = 5000
 const MACRO_MAX = 2000
 /** 手动输入能量上限 kcal */
 const KCAL_MAX = 20000
-
-/**
- * 按当前时段取默认餐别（05–10 早 / 10–15 午 / 15–20:30 晚 / 其余加餐）
- */
-function defaultMealType(): number {
-  const h = new Date().getHours() + new Date().getMinutes() / 60
-  if (h >= 5 && h < 10) return 1
-  if (h >= 10 && h < 15) return 2
-  if (h >= 15 && h < 20.5) return 3
-  return 4
-}
 
 /** 模式：food 食物来源 / manual 手动输入 */
 const mode = ref<'food' | 'manual'>('food')
@@ -67,16 +57,10 @@ const grams = computed(() => {
   return Math.round(n)
 })
 
-/** 食物模式实时换算预览 */
+/** 食物模式实时换算预览（收敛 utils/macro.scalePer100g，口径同后端） */
 const foodPreview = computed(() => {
   if (!food.value || grams.value === null) return null
-  const r = grams.value / 100
-  return {
-    carb: Math.round(food.value.carb * r * 10) / 10,
-    protein: Math.round(food.value.protein * r * 10) / 10,
-    fat: Math.round(food.value.fat * r * 10) / 10,
-    kcal: Math.round(food.value.kcal * r)
-  }
+  return scalePer100g(food.value, grams.value)
 })
 
 /* ---------- 手动模式 ---------- */
@@ -87,8 +71,8 @@ const manualFat = ref('')
 const manualKcal = ref('')
 const manualErr = ref('')
 
-/** 手动模式能量守恒校验（±10%） */
-const manualValid = computed(() => {
+/** 手动模式校验（显式函数，提交时调用并写 manualErr，避免 computed 内副作用） */
+function validateManual(): boolean {
   manualErr.value = ''
   const name = manualName.value.trim()
   const carb = Number(manualCarb.value)
@@ -110,7 +94,7 @@ const manualValid = computed(() => {
     return false
   }
   return true
-})
+}
 
 /** 编辑模式ID（非空则为编辑） */
 const editId = ref<number | null>(null)
@@ -226,8 +210,8 @@ async function handleSubmit() {
     } catch {
       // 错误已由 request.ts toast
     }
-  } else {
-    if (!manualValid.value) return
+} else {
+    if (!validateManual()) return
     try {
       if (editId.value) {
         // 编辑：手动输入可改名称与三宏热量

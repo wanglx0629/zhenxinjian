@@ -1,3 +1,34 @@
+/** 每 100g 营养值（换算输入） */
+export interface Per100gMacros {
+  carb: number
+  protein: number
+  fat: number
+  kcal: number
+}
+
+/** 按克数换算后的实际摄入 */
+export interface ScaledMacros {
+  carb: number
+  protein: number
+  fat: number
+  kcal: number
+}
+
+/**
+ * 每 100g 值 × 克数 ÷ 100（DESIGN-T06 收敛三处重复实现）：
+ * 宏量保留 2 位小数、能量取整（与后端 FoodService.calc 权威口径一致）
+ */
+export function scalePer100g(m: Per100gMacros, grams: number): ScaledMacros {
+  const ratio = grams / 100
+  const two = (v: number) => Math.round(v * 100) / 100
+  return {
+    carb: two(m.carb * ratio),
+    protein: two(m.protein * ratio),
+    fat: two(m.fat * ratio),
+    kcal: Math.round(m.kcal * ratio)
+  }
+}
+
 /**
  * 三宏/热量进度计算（首页组件口径单一来源，与 P12 记录页逻辑一致）
  * 作者: wanglx

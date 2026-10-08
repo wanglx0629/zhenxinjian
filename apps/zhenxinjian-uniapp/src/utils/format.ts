@@ -44,6 +44,16 @@ export function greeting(d?: Date | string | number | null): string {
   return slot ? slot.text : GREETING_DEFAULT
 }
 
+/** 按当前时段取默认餐别（05–10 早 / 10–15 午 / 15–20:30 晚 / 其余加餐）；code 与 MEAL_TYPES 对齐 */
+export function defaultMealType(d?: Date | string | number | null): number {
+  const x = d ? new Date(d) : new Date()
+  const h = x.getHours() + x.getMinutes() / 60
+  if (h >= 5 && h < 10) return 1
+  if (h >= 10 && h < 15) return 2
+  if (h >= 15 && h < 20.5) return 3
+  return 4
+}
+
 /**
  * 游客体验剩余时长文案（首页与我的页统一口径）
  * ≥1 天 →「X 天」/「X 天 X 时」；不足 1 天 →「X 时」；≤0 →「已到期」

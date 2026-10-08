@@ -11,6 +11,8 @@ import { useDietStore } from '@/store/diet'
 import { MEAL_TYPES } from '@/config/constants'
 import { track, trackPage } from '@/utils/track'
 import { TRACK_EVENT } from '@/config/track-events'
+import { defaultMealType } from '@/utils/format'
+import { scalePer100g } from '@/utils/macro'
 import EmptyState from '@/components/EmptyState.vue'
 import { iconSrc } from '@/utils/icons'
 
@@ -38,14 +40,7 @@ interface Candidate extends FoodRecognizeVO {
 }
 const candidates = ref<Candidate[]>([])
 
-/** 餐别（默认按时段选中可改，与添加饮食页同口径） */
-function defaultMealType(): number {
-  const h = new Date().getHours() + new Date().getMinutes() / 60
-  if (h >= 5 && h < 10) return 1
-  if (h >= 10 && h < 15) return 2
-  if (h >= 15 && h < 20.5) return 3
-  return 4
-}
+/** 餐别（默认按时段选中可改，与添加饮食页同口径，收敛 utils/format.defaultMealType） */
 const mealType = ref(defaultMealType())
 
 /** 选中且克数合法的候选项 */
@@ -94,20 +89,9 @@ function handleGramsInput(item: Candidate) {
   item.invalid = item.gramsInput !== '' && (Number.isNaN(n) || n < GRAMS_MIN || n > GRAMS_MAX)
 }
 
-/** 1 位小数四舍五入 */
-function round1(v: number): number {
-  return Math.round(v * 10) / 10
-}
-
-/** 按克数换算实际摄入（每 100g 值 × 克数 ÷ 100） */
+/** 按克数换算实际摄入（每 100g 值 × 克数 ÷ 100，收敛 utils/macro.scalePer100g） */
 function scale(item: Candidate) {
-  const r = Number(item.gramsInput) / 100
-  return {
-    carb: round1(item.carb * r),
-    protein: round1(item.protein * r),
-    fat: round1(item.fat * r),
-    kcal: round1(item.kcal * r)
-  }
+  return scalePer100g(item, Number(item.gramsInput))
 }
 
 /** 勾选项逐条加入今日记录（source=3 手动链路；任一失败则中止，已成功的不回滚） */

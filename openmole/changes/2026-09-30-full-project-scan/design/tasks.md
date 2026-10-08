@@ -14,13 +14,13 @@
 | --- | --- | --- | --- | --- |
 | DESIGN-T01 | DESIGN-职责-001 | WeightService 四职责拆分 | 高 | 已完成 |
 | DESIGN-T02 | DESIGN-重复-001 | 小程序全局样式重复副本清理 | 高 | 已完成 |
-| DESIGN-T03 | DESIGN-上帝组件-001 | dashboard God 组件拆分 | 中 | 未开始 |
-| DESIGN-T04 | DESIGN-特征依恋-001 | 粘性比计算下沉统计工具层 | 中 | 未开始 |
-| DESIGN-T05 | DESIGN-重复-002 | 时段→餐别映射收敛公共工具 | 中 | 未开始 |
-| DESIGN-T06 | DESIGN-重复-003 | 每 100g 换算收敛公共函数 | 中 | 未开始 |
-| DESIGN-T07 | DESIGN-重复-004 | 食物弹窗表单抽象公共模型 | 中 | 未开始 |
-| DESIGN-T08 | DESIGN-特征依恋-002 | manualValid 副作用改纯函数 | 中 | 未开始 |
-| DESIGN-T09 | DESIGN-死代码-001 | MEAL_EMOJI 死常量删除 | 低 | 未开始 |
+| DESIGN-T03 | DESIGN-上帝组件-001 | dashboard God 组件拆分 | 中 | 已完成 |
+| DESIGN-T04 | DESIGN-特征依恋-001 | 粘性比计算下沉统计工具层 | 中 | 已完成 |
+| DESIGN-T05 | DESIGN-重复-002 | 时段→餐别映射收敛公共工具 | 中 | 已完成 |
+| DESIGN-T06 | DESIGN-重复-003 | 每 100g 换算收敛公共函数 | 中 | 已完成 |
+| DESIGN-T07 | DESIGN-重复-004 | 食物弹窗表单抽象公共模型 | 中 | 已完成 |
+| DESIGN-T08 | DESIGN-特征依恋-002 | manualValid 副作用改纯函数 | 中 | 已完成 |
+| DESIGN-T09 | DESIGN-死代码-001 | MEAL_EMOJI 死常量删除 | 低 | 已完成 |
 
 状态说明：**未开始** / 进行中 / 已完成。共 9 个任务（高 2 / 中 6 / 低 1）。
 
@@ -152,3 +152,10 @@
 | 版本 | 日期 | 提交版本 | 说明 |
 | --- | --- | --- | --- |
 | v1.0 | 2026-09-30 | `4f9dbf44ee5eb48838402b0643a6f93f4b8d081f` | 初版：DESIGN 级 9 条未清除 → 9 个任务 |
+| v1.1 | 2026-10-08 | — | DESIGN-T03（dashboard God 组件拆分）：抽 `StatCard` 子组件 + `useDashboardStats` composable，标记已完成 |
+| v1.2 | 2026-10-08 | — | DESIGN-T04（粘性比下沉）：抽 `computeStickiness` 到 utils/stats.ts + vitest 单测，标记已完成 |
+| v1.3 | 2026-10-08 | — | DESIGN-T05（时段→餐别映射收敛）：`defaultMealType` 下沉 utils/format.ts，两页改引用，标记已完成 |
+| v1.4 | 2026-10-08 | — | DESIGN-T06（每 100g 换算收敛）：抽 `scalePer100g` 到 utils/macro.ts + vitest 单测，三处改引用并统一后端口径（宏量 2 位、kcal 整数），标记已完成 |
+| v1.5 | 2026-10-08 | — | DESIGN-T07（食物弹窗表单抽象）：抽 `view/foods/foodForm.ts` 共享 `createFoodForm`/`foodFormRules`，两弹窗改引用，标记已完成 |
+| v1.6 | 2026-10-08 | — | DESIGN-T08（manualValid 副作用改显式函数）：`computed` 改 `validateManual()`，提交时调用并写 manualErr，标记已完成 |
+| v1.7 | 2026-10-08 | — | DESIGN-T09（MEAL_EMOJI 死常量删除）：删除 config/constants.ts 中全库零引用的 `MEAL_EMOJI`，标记已完成 |

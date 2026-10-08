@@ -5,10 +5,11 @@
  */
 import { reactive, ref } from 'vue'
 import { ElMessage } from 'element-plus'
-import type { FormInstance, FormRules } from 'element-plus'
+import type { FormInstance } from 'element-plus'
 import { auditFood } from '@/api/adminFood'
 import type { AdminFood } from '@/api/adminFood'
 import { FOOD_CATEGORY_OPTIONS } from '@/constants/dicts'
+import { createFoodForm, foodFormRules } from '@/view/foods/foodForm'
 
 const emit = defineEmits<{ audited: [] }>()
 
@@ -20,29 +21,12 @@ const target = ref<AdminFood | null>(null)
 const aiSuggestion = ref('')
 
 const form = reactive({
-  name: '',
-  alias: '',
-  categoryCode: '',
-  carb: 0,
-  protein: 0,
-  fat: 0,
-  kcal: 0,
+  ...createFoodForm(),
   kj: null as number | null,
-  unit: '',
-  serving: 100
+  unit: ''
 })
 
-const rules: FormRules = {
-  name: [
-    { required: true, message: '请输入食物名称', trigger: 'blur' },
-    { max: 100, message: '名称不超过 100 字', trigger: 'blur' }
-  ],
-  categoryCode: [{ required: true, message: '请选择分类', trigger: 'change' }],
-  carb: [{ required: true, message: '请输入碳水', trigger: 'blur' }],
-  protein: [{ required: true, message: '请输入蛋白质', trigger: 'blur' }],
-  fat: [{ required: true, message: '请输入脂肪', trigger: 'blur' }],
-  kcal: [{ required: true, message: '请输入热量', trigger: 'blur' }]
-}
+const rules = foodFormRules(100)
 
 /** 打开弹窗：预填当前值（未改动字段提交后等同沿用原值） */
 function open(row: AdminFood) {

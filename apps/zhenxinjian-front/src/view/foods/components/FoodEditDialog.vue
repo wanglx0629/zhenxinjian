@@ -5,10 +5,11 @@
  */
 import { reactive, ref } from 'vue'
 import { ElMessage } from 'element-plus'
-import type { FormInstance, FormRules } from 'element-plus'
+import type { FormInstance } from 'element-plus'
 import { addFood, updateFood } from '@/api/adminFood'
 import type { AdminFood } from '@/api/adminFood'
 import { FOOD_CATEGORY_OPTIONS, dictLabel } from '@/constants/dicts'
+import { createFoodForm, foodFormRules } from '@/view/foods/foodForm'
 
 const emit = defineEmits<{ saved: [] }>()
 
@@ -18,38 +19,14 @@ const submitting = ref(false)
 const formRef = ref<FormInstance>()
 const form = reactive({
   id: undefined as number | undefined,
-  name: '',
-  categoryCode: '',
-  alias: '',
-  carb: 0,
-  protein: 0,
-  fat: 0,
-  kcal: 0,
-  serving: 100
+  ...createFoodForm()
 })
 
-const rules: FormRules = {
-  name: [
-    { required: true, message: '请输入食物名称', trigger: 'blur' },
-    { max: 64, message: '名称不超过 64 字', trigger: 'blur' }
-  ],
-  categoryCode: [{ required: true, message: '请选择分类', trigger: 'change' }],
-  carb: [{ required: true, message: '请输入碳水', trigger: 'blur' }],
-  protein: [{ required: true, message: '请输入蛋白质', trigger: 'blur' }],
-  fat: [{ required: true, message: '请输入脂肪', trigger: 'blur' }],
-  kcal: [{ required: true, message: '请输入热量', trigger: 'blur' }]
-}
+const rules = foodFormRules(64)
 
 function resetForm() {
   form.id = undefined
-  form.name = ''
-  form.categoryCode = ''
-  form.alias = ''
-  form.carb = 0
-  form.protein = 0
-  form.fat = 0
-  form.kcal = 0
-  form.serving = 100
+  Object.assign(form, createFoodForm())
 }
 
 /** 打开弹窗：不传 row 为新增，传 row 为编辑 */

@@ -77,9 +77,6 @@ export const MEAL_TYPES: MealTypeCfg[] = [
   { code: 4, name: '加餐' }
 ]
 
-/** 餐别 emoji（code 与 MEAL_TYPES 对齐，首页餐次 chip / 记录页餐别头共用，兜底 🍽️） */
-export const MEAL_EMOJI: Record<number, string> = { 1: '🍳', 2: '🍱', 3: '🌙', 4: '🍎' }
-
 /** 三色进度阈值（达成率 %）：80–100 绿 / <80 黄 / >100 红 */
 export const PROGRESS_THRESHOLD = { green: 80, red: 100 } as const
 

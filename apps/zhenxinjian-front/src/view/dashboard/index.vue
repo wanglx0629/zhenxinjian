@@ -1,193 +1,53 @@
 <script setup lang="ts">
 /**
- * 数据看板：KPI 卡片 + DAU 趋势（ECharts 统一主题）+ 功能/页面 TOP10
+ * 数据看板：KPI 卡片 + DAU 趋势 + 功能/页面 TOP10
  * 作者: wanglx
  */
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
-import * as echarts from 'echarts/core'
-import { LineChart } from 'echarts/charts'
-import { GridComponent, LegendComponent, TooltipComponent } from 'echarts/components'
-import { CanvasRenderer } from 'echarts/renderers'
+import { ref } from 'vue'
 import { User, Calendar, TrendCharts, DataAnalysis } from '@element-plus/icons-vue'
-import { getActiveTrend, getEventRank, getOverview, getPageRank } from '@/api/stats'
-import type { DailyActive, EventRank, PageRank, StatsOverview } from '@/api/stats'
-import { areaGradient, baseEchartsOption, CHART_AXIS } from '@/utils/echarts-theme'
 import EnergyRing from '@/component/EnergyRing.vue'
+import StatCard from '@/component/StatCard.vue'
+import { useDashboardStats } from '@/composables/useDashboardStats'
 
-/** echarts 按需注册 */
-echarts.use([LineChart, GridComponent, LegendComponent, TooltipComponent, CanvasRenderer])
-
-const overview = ref<StatsOverview | null>(null)
-const overviewLoading = ref(false)
-const trendDays = ref(30)
-const trendData = ref<DailyActive[]>([])
-const trendLoading = ref(false)
-const eventRank = ref<EventRank[]>([])
-const pageRank = ref<PageRank[]>([])
-const rankLoading = ref(false)
 const trendRef = ref<HTMLElement>()
-let chart: ReturnType<typeof echarts.init> | null = null
 
-/** DAU/MAU 粘性比（今日 DAU / 近 30 天 MAU），封顶 100 兜底；mau=0 按无数据处理 */
-const stickiness = computed(() => {
-  const mau = overview.value?.mau ?? 0
-  if (mau <= 0) return 0
-  return Math.min((overview.value!.todayDau / mau) * 100, 100)
-})
-const hasStickiness = computed(() => (overview.value?.mau ?? 0) > 0)
-
-async function loadOverview() {
-  overviewLoading.value = true
-  try {
-    overview.value = await getOverview()
-  } finally {
-    overviewLoading.value = false
-  }
-}
-
-function renderTrend() {
-  if (!trendRef.value) return
-  if (!chart) {
-    chart = echarts.init(trendRef.value)
-  }
-  chart.setOption({
-    ...baseEchartsOption(),
-    legend: { data: ['DAU', '游客'] },
-    grid: { left: 8, right: 16, top: 40, bottom: 8, containLabel: true },
-    xAxis: {
-      type: 'category',
-      boundaryGap: false,
-      data: trendData.value.map((d) => d.statDate.slice(5)),
-      ...CHART_AXIS
-    },
-    yAxis: {
-      type: 'value',
-      minInterval: 1,
-      ...CHART_AXIS
-    },
-    series: [
-      {
-        name: 'DAU',
-        type: 'line',
-        smooth: true,
-        showSymbol: false,
-        data: trendData.value.map((d) => d.dau),
-        lineStyle: { width: 3 },
-        areaStyle: { color: areaGradient('#00AC7C') }
-      },
-      {
-        name: '游客',
-        type: 'line',
-        smooth: true,
-        showSymbol: false,
-        data: trendData.value.map((d) => d.guestDau),
-        lineStyle: { width: 3 },
-        areaStyle: { color: areaGradient('#FFB020', 0.24) }
-      }
-    ]
-  })
-}
-
-async function loadTrend() {
-  trendLoading.value = true
-  try {
-    trendData.value = await getActiveTrend(trendDays.value)
-    renderTrend()
-  } finally {
-    trendLoading.value = false
-  }
-}
-
-async function loadRanks() {
-  rankLoading.value = true
-  try {
-    const [events, pages] = await Promise.all([getEventRank(7, 10), getPageRank(7, 10)])
-    eventRank.value = events
-    pageRank.value = pages
-  } finally {
-    rankLoading.value = false
-  }
-}
-
-function handleResize() {
-  chart?.resize()
-}
-
-onMounted(() => {
-  loadOverview()
-  loadTrend()
-  loadRanks()
-  window.addEventListener('resize', handleResize)
-})
-
-onBeforeUnmount(() => {
-  window.removeEventListener('resize', handleResize)
-  chart?.dispose()
-  chart = null
-})
+const {
+  overview,
+  overviewLoading,
+  trendDays,
+  trendLoading,
+  eventRank,
+  pageRank,
+  rankLoading,
+  stickiness,
+  loadTrend
+} = useDashboardStats(trendRef)
 </script>
 
 <template>
   <div class="dashboard-page">
     <el-row :gutter="16" class="cards" v-loading="overviewLoading">
       <el-col :xs="12" :sm="6">
-        <div class="stat-card tech-topline">
-          <div class="stat-body">
-            <div class="stat-icon icon-leaf">
-              <el-icon :size="26"><User /></el-icon>
-            </div>
-            <div class="stat-main">
-              <div class="card-label">
-                今日 DAU
-                <el-tag size="small" type="warning" effect="light">实时</el-tag>
-              </div>
-              <div class="card-value num">{{ overview?.todayDau ?? '—' }}</div>
-            </div>
-          </div>
-        </div>
+        <StatCard label="今日 DAU" :icon="User" tone="leaf" :value="overview?.todayDau">
+          <template #tag>
+            <el-tag size="small" type="warning" effect="light">实时</el-tag>
+          </template>
+        </StatCard>
       </el-col>
       <el-col :xs="12" :sm="6">
-        <div class="stat-card tech-topline">
-          <div class="stat-body">
-            <div class="stat-icon icon-amber">
-              <el-icon :size="26"><Calendar /></el-icon>
-            </div>
-            <div class="stat-main">
-              <div class="card-label">昨日 DAU</div>
-              <div class="card-value num">{{ overview?.yesterdayDau ?? '—' }}</div>
-            </div>
-          </div>
-        </div>
+        <StatCard label="昨日 DAU" :icon="Calendar" tone="amber" :value="overview?.yesterdayDau" />
       </el-col>
       <el-col :xs="12" :sm="6">
-        <div class="stat-card tech-topline">
-          <div class="stat-body">
-            <div class="stat-icon icon-cyan">
-              <el-icon :size="26"><TrendCharts /></el-icon>
-            </div>
-            <div class="stat-main">
-              <div class="card-label">近 30 天 MAU</div>
-              <div class="card-value num">{{ overview?.mau ?? '—' }}</div>
-            </div>
-          </div>
-        </div>
+        <StatCard label="近 30 天 MAU" :icon="TrendCharts" tone="cyan" :value="overview?.mau" />
       </el-col>
       <el-col :xs="12" :sm="6">
-        <div class="stat-card tech-topline">
-          <div class="stat-body">
-            <div class="stat-icon icon-mix">
-              <el-icon :size="26"><DataAnalysis /></el-icon>
-            </div>
-            <div class="stat-main">
-              <div class="card-label">累计用户 / 饮食记录</div>
-              <div class="card-value num">
-                {{ overview?.totalUsers ?? '—' }}<span class="slash">/</span>{{
-                  overview?.totalDietRecords ?? '—'
-                }}
-              </div>
-            </div>
-          </div>
-        </div>
+        <StatCard
+          label="累计用户 / 饮食记录"
+          :icon="DataAnalysis"
+          tone="mix"
+          :value="overview?.totalUsers"
+          :sub="overview?.totalDietRecords"
+        />
       </el-col>
     </el-row>
 
@@ -195,9 +55,9 @@ onBeforeUnmount(() => {
       <el-col :xs="24" :sm="12" :md="8">
         <div class="stat-card tech-topline ring-card">
           <div class="card-label">用户粘性比</div>
-          <EnergyRing :percent="stickiness" class="ring-wrap">
+          <EnergyRing :percent="stickiness.value" class="ring-wrap">
             <div class="ring-pct num">
-              {{ hasStickiness ? `${stickiness.toFixed(1)}%` : '—' }}
+              {{ stickiness.hasData ? `${stickiness.value.toFixed(1)}%` : '—' }}
             </div>
             <div class="ring-tag">DAU/MAU</div>
           </EnergyRing>
@@ -256,80 +116,6 @@ onBeforeUnmount(() => {
 <style scoped>
 .cards {
   margin-bottom: 16px;
-}
-
-.stat-card {
-  height: 100%;
-  background: var(--zhenxinjian-white);
-  border: 1px solid var(--zhenxinjian-border);
-  border-radius: var(--zhenxinjian-radius-lg);
-  padding: 18px 18px 16px;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.stat-card:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--zhenxinjian-shadow-card);
-}
-
-.stat-body {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-
-.stat-icon {
-  width: 52px;
-  height: 52px;
-  border-radius: var(--zhenxinjian-radius-md);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  color: #fff;
-}
-
-.icon-leaf {
-  background: linear-gradient(135deg, #00AC7C, #33BD96);
-}
-
-.icon-amber {
-  background: linear-gradient(135deg, #FFB020, #FFC24D);
-}
-
-.icon-cyan {
-  background: linear-gradient(135deg, #0891B2, #22D3EE);
-}
-
-.icon-mix {
-  background: linear-gradient(135deg, #00AC7C, #FFB020);
-}
-
-.stat-main {
-  flex: 1;
-  min-width: 0;
-}
-
-.card-label {
-  font-size: 13px;
-  color: var(--zhenxinjian-text-secondary);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.card-value {
-  margin-top: 4px;
-  font-size: 30px;
-  font-weight: 700;
-  color: var(--zhenxinjian-text);
-  line-height: 1.1;
-}
-
-.slash {
-  color: var(--zhenxinjian-text-placeholder);
-  margin: 0 6px;
-  font-weight: 400;
 }
 
 .ring-card {
