@@ -52,8 +52,11 @@ public class ReminderService {
     /** 订阅上报幂等键前缀（同分钟内重复上报只记一次额度） */
     private static final String SUBSCRIBE_REPORT_KEY_PREFIX = "zhenxinjian:reminder:subscribe:";
 
-    /** 订阅上报幂等窗口 */
+/** 订阅上报幂等窗口 */
     private static final Duration SUBSCRIBE_REPORT_IDEMPOTENT_TTL = Duration.ofMinutes(1);
+
+    /** 订阅额度列名（.setSql 原子自增/自减引用，列漂移时集中一处修改） */
+    private static final String SUBSCRIBE_CREDIT_COLUMN = "subscribe_credit";
 
     private final UserReminderMapper userReminderMapper;
 
@@ -148,8 +151,8 @@ public class ReminderService {
             return;
         }
         getOrCreateEntity(userId);
-        userReminderMapper.update(null, Wrappers.<UserReminder>lambdaUpdate()
-                .setSql("subscribe_credit = subscribe_credit + 1")
+userReminderMapper.update(null, Wrappers.<UserReminder>lambdaUpdate()
+                .setSql(SUBSCRIBE_CREDIT_COLUMN + " = " + SUBSCRIBE_CREDIT_COLUMN + " + 1")
                 .eq(UserReminder::getUserId, userId));
         log.info("[ReminderService] 订阅授权上报，额度+1: userId={}", userId);
     }
@@ -164,8 +167,8 @@ public class ReminderService {
      */
     @Transactional(rollbackFor = Exception.class)
     public void onPushSuccess(Long userId, Integer mealType, LocalDate remindDate, String templateId) {
-        userReminderMapper.update(null, Wrappers.<UserReminder>lambdaUpdate()
-                .setSql("subscribe_credit = subscribe_credit - 1")
+userReminderMapper.update(null, Wrappers.<UserReminder>lambdaUpdate()
+                .setSql(SUBSCRIBE_CREDIT_COLUMN + " = " + SUBSCRIBE_CREDIT_COLUMN + " - 1")
                 .eq(UserReminder::getUserId, userId)
                 .gt(UserReminder::getSubscribeCredit, 0));
         insertLog(userId, mealType, remindDate, ReminderSendStatusEnum.SUCCESS, null, templateId);

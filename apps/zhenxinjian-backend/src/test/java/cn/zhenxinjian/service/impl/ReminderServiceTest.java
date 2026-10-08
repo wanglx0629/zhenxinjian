@@ -5,19 +5,25 @@ import cn.zhenxinjian.domain.po.UserReminder;
 import cn.zhenxinjian.mapper.ReminderSendLogMapper;
 import cn.zhenxinjian.mapper.UserReminderMapper;
 import com.baomidou.mybatisplus.core.MybatisConfiguration;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.TableInfoHelper;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 
 import java.time.LocalDate;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -28,8 +34,9 @@ import static org.mockito.Mockito.when;
  */
 class ReminderServiceTest {
 
-    private UserReminderMapper userReminderMapper;
+private UserReminderMapper userReminderMapper;
     private ReminderSendLogMapper reminderSendLogMapper;
+    private StringRedisTemplate stringRedisTemplate;
     private ReminderService service;
 
     @BeforeEach
@@ -41,8 +48,9 @@ class ReminderServiceTest {
 
         userReminderMapper = mock(UserReminderMapper.class);
         reminderSendLogMapper = mock(ReminderSendLogMapper.class);
+        stringRedisTemplate = mock(StringRedisTemplate.class);
         service = new ReminderService(userReminderMapper, reminderSendLogMapper,
-                new WxMaConfiguration.WxMaProperties(), mock(StringRedisTemplate.class));
+                new WxMaConfiguration.WxMaProperties(), stringRedisTemplate);
     }
 
     /** 场景：scanDueReminders 透传查询结果（窗口 IN 匹配 + 上限），命中列表原样返回 */
@@ -58,7 +66,7 @@ class ReminderServiceTest {
         verify(userReminderMapper).selectList(any());
     }
 
-    /** 场景：hasSuccessPushToday 已成功 → true；未推送/计数 null → false */
+/** 场景：hasSuccessPushToday 已成功 → true；未推送/计数 null → false */
     @Test
     void hasSuccessPushToday_branches() {
         when(reminderSendLogMapper.selectCount(any())).thenReturn(1L);
@@ -69,5 +77,36 @@ class ReminderServiceTest {
 
         when(reminderSendLogMapper.selectCount(any())).thenReturn(null);
         assertFalse(service.hasSuccessPushToday(1L, 3, LocalDate.now()));
+    }
+
+    /** 场景：订阅上报首次 → 额度 +1（setSql 走常量列名） */
+    @Test
+    void reportSubscribe_first_incrementsCredit() {
+        UserReminder existing = new UserReminder();
+        existing.setUserId(1L);
+        when(userReminderMapper.selectOne(any())).thenReturn(existing);
+        @SuppressWarnings("unchecked")
+        ValueOperations<String, String> valueOps = mock(ValueOperations.class);
+        when(stringRedisTemplate.opsForValue()).thenReturn(valueOps);
+        when(valueOps.setIfAbsent(anyString(), anyString(), any())).thenReturn(true);
+
+        service.reportSubscribe(1L);
+
+        verify(userReminderMapper).update(isNull(), any(LambdaUpdateWrapper.class));
+        ArgumentCaptor<LambdaUpdateWrapper<UserReminder>> captor = ArgumentCaptor.forClass(LambdaUpdateWrapper.class);
+        verify(userReminderMapper).update(isNull(), captor.capture());
+        assertEquals("subscribe_credit=subscribe_credit+1",
+                captor.getValue().getSqlSet().replace(" ", ""));
+    }
+
+    /** 场景：推送成功回调 → 额度 -1（条件更新防扣穿） */
+    @Test
+    void onPushSuccess_decrementsCreditWithGuard() {
+        service.onPushSuccess(1L, 1, LocalDate.now(), "tpl-1");
+
+        ArgumentCaptor<LambdaUpdateWrapper<UserReminder>> captor = ArgumentCaptor.forClass(LambdaUpdateWrapper.class);
+        verify(userReminderMapper).update(isNull(), captor.capture());
+        assertEquals("subscribe_credit=subscribe_credit-1",
+                captor.getValue().getSqlSet().replace(" ", ""));
     }
 }
