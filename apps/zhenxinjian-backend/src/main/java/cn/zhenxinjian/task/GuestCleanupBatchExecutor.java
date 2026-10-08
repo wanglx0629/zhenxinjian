@@ -2,6 +2,7 @@ package cn.zhenxinjian.task;
 
 import cn.zhenxinjian.common.constant.CommonConstant;
 import cn.zhenxinjian.common.utils.RedisUtils;
+import cn.zhenxinjian.common.utils.SqlLimit;
 import cn.zhenxinjian.domain.po.User;
 import cn.zhenxinjian.mapper.UserMapper;
 import cn.zhenxinjian.service.GuestMigrationOrchestrator;
@@ -42,8 +43,8 @@ public class GuestCleanupBatchExecutor {
         List<User> batch = userMapper.selectList(new LambdaQueryWrapper<User>()
                 .eq(User::getUserType, CommonConstant.USER_TYPE_GUEST)
                 .isNull(User::getMergedInto)
-                .lt(User::getGuestExpireAt, deadline)
-                .last("LIMIT " + batchSize));
+.lt(User::getGuestExpireAt, deadline)
+                .last(SqlLimit.fixed(batchSize)));
         for (User guest : batch) {
             // 业务数据清空钩子（由编排者统一驱动，顺序经 Ordered 契约化）
             guestMigrationOrchestrator.purgeAll(guest.getId());

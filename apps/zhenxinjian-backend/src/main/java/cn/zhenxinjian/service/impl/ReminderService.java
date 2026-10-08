@@ -4,6 +4,7 @@ import cn.zhenxinjian.common.constant.CommonConstant;
 import cn.zhenxinjian.common.constant.ExceptionConstant;
 import cn.zhenxinjian.common.enums.ReminderSendStatusEnum;
 import cn.zhenxinjian.common.exception.BusinessException;
+import cn.zhenxinjian.common.utils.SqlLimit;
 import cn.zhenxinjian.config.WxMaConfiguration;
 import cn.zhenxinjian.domain.dto.ReminderSaveDTO;
 import cn.zhenxinjian.domain.po.ReminderSendLog;
@@ -79,7 +80,7 @@ public class ReminderService {
                                 .in(UserReminder::getLunchTime, hhmmWindow))
                         .or(d -> d.eq(UserReminder::getDinnerSwitch, 1)
                                 .in(UserReminder::getDinnerTime, hhmmWindow)))
-                .last("LIMIT " + limit));
+                .last(SqlLimit.fixed(limit)));
     }
 
     /**

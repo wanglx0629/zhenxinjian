@@ -2,6 +2,7 @@ package cn.zhenxinjian.service.impl;
 
 import cn.zhenxinjian.common.enums.AdjustActionEnum;
 import cn.zhenxinjian.common.utils.Operators;
+import cn.zhenxinjian.common.utils.SqlLimit;
 import cn.zhenxinjian.domain.po.AdjustLog;
 import cn.zhenxinjian.domain.po.UserBody;
 import cn.zhenxinjian.domain.po.WeightRecord;
@@ -136,7 +137,7 @@ public class PlateauDetector {
                         Wrappers.<AdjustLog>lambdaQuery()
                                 .eq(AdjustLog::getUserId, userId)
                                 .orderByDesc(AdjustLog::getId)
-                                .last("LIMIT 100"))
+                                .last(SqlLimit.fixed(100)))
                 .stream().map(this::toLogVO).collect(Collectors.toList());
     }
 

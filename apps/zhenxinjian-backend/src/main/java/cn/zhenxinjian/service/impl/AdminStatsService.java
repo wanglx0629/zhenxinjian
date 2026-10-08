@@ -4,6 +4,7 @@ import cn.zhenxinjian.common.constant.CommonConstant;
 import cn.zhenxinjian.common.constant.ExceptionConstant;
 import cn.zhenxinjian.common.enums.TrackEventEnum;
 import cn.zhenxinjian.common.exception.BusinessException;
+import cn.zhenxinjian.common.utils.SqlLimit;
 import cn.zhenxinjian.domain.po.DietRecord;
 import cn.zhenxinjian.domain.po.StatDailyActive;
 import cn.zhenxinjian.domain.po.StatEventDaily;
@@ -65,8 +66,8 @@ public class AdminStatsService {
                 .ge("create_time", todayStart.minusDays(29)));
         StatDailyActive yesterday = statDailyActiveMapper.selectOne(Wrappers
                 .<StatDailyActive>lambdaQuery()
-                .eq(StatDailyActive::getStatDate, LocalDate.now().minusDays(1))
-                .last("LIMIT 1"));
+.eq(StatDailyActive::getStatDate, LocalDate.now().minusDays(1))
+                .last(SqlLimit.fixed(1)));
 
         StatsOverviewVO vo = new StatsOverviewVO();
         vo.setTodayDau(todayDau.intValue());
@@ -114,8 +115,8 @@ public class AdminStatsService {
                 .select("event_code", "event_name", "SUM(pv) AS pv", "SUM(uv) AS uv")
                 .ge("stat_date", start)
                 .groupBy("event_code", "event_name")
-                .orderByDesc("pv")
-                .last("LIMIT " + limit));
+.orderByDesc("pv")
+                .last(SqlLimit.fixed(limit)));
         return rows.stream().map(r -> {
             EventRankVO vo = new EventRankVO();
             vo.setEventCode((String) r.get("event_code"));
@@ -142,8 +143,8 @@ public class AdminStatsService {
                 .isNotNull("page")
                 .ge("create_time", start)
                 .groupBy("page")
-                .orderByDesc("pv")
-                .last("LIMIT " + limit));
+.orderByDesc("pv")
+                .last(SqlLimit.fixed(limit)));
         return rows.stream().map(r -> {
             PageRankVO vo = new PageRankVO();
             vo.setPage((String) r.get("page"));

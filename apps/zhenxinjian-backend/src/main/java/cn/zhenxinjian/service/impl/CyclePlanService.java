@@ -8,6 +8,7 @@ import cn.zhenxinjian.common.enums.DietModeEnum;
 import cn.zhenxinjian.common.exception.BusinessException;
 import cn.zhenxinjian.common.utils.Numbers;
 import cn.zhenxinjian.common.utils.Operators;
+import cn.zhenxinjian.common.utils.SqlLimit;
 import cn.zhenxinjian.domain.dto.CyclePlanCreateDTO;
 import cn.zhenxinjian.domain.po.CarbCycleDay;
 import cn.zhenxinjian.domain.po.CarbCyclePlan;
@@ -229,8 +230,8 @@ public class CyclePlanService {
         return carbCycleDayMapper.selectOne(
                 Wrappers.<CarbCycleDay>lambdaQuery()
                         .eq(CarbCycleDay::getPlanId, active.getId())
-                        .eq(CarbCycleDay::getDayDate, date)
-                        .last("LIMIT 1"));
+.eq(CarbCycleDay::getDayDate, date)
+                        .last(SqlLimit.fixed(1)));
     }
 
     /** 查当前活跃档案（逻辑删除由 MyBatis-Plus 全局过滤） */
@@ -245,8 +246,8 @@ public class CyclePlanService {
                 Wrappers.<CarbCyclePlan>lambdaQuery()
                         .eq(CarbCyclePlan::getUserId, userId)
                         .eq(CarbCyclePlan::getStatus, CyclePlanStatusEnum.ACTIVE.getCode())
-                        .orderByDesc(CarbCyclePlan::getId)
-                        .last("LIMIT 1"));
+.orderByDesc(CarbCyclePlan::getId)
+                        .last(SqlLimit.fixed(1)));
     }
 
     /** 查周期逐日计划（按日序升序） */

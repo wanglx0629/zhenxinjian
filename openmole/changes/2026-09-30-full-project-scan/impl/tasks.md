@@ -12,7 +12,7 @@
 
 | 任务 | 追溯 | 标题 | 严重度 | 状态 |
 | --- | --- | --- | --- | --- |
-| IMPL-T01 | IMPL-安全-001 | `.last("LIMIT "+var)` SQL 拼接治理 | 高 | 未开始 |
+| IMPL-T01 | IMPL-安全-001 | `.last("LIMIT "+var)` SQL 拼接治理 | 高 | 已完成 |
 | IMPL-T02 | IMPL-安全-002 | pageUsers 用户脱敏统一 | 中 | 未开始 |
 | IMPL-T03 | IMPL-语言惯用法-001 | `.setSql` 列名硬编码收敛 | 中 | 未开始 |
 | IMPL-T04 | IMPL-语言惯用法-002 | MySQL 方言编号生成可移植化 | 中 | 未开始 |

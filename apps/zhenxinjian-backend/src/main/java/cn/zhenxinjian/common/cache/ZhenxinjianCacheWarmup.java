@@ -1,5 +1,6 @@
 package cn.zhenxinjian.common.cache;
 
+import cn.zhenxinjian.common.utils.SqlLimit;
 import cn.zhenxinjian.config.ZhenxinjianProperties;
 import cn.zhenxinjian.domain.po.User;
 import cn.zhenxinjian.mapper.UserMapper;
@@ -31,8 +32,8 @@ public class ZhenxinjianCacheWarmup implements ApplicationRunner {
         try {
             // 优先预热 admin
             User admin = userMapper.selectOne(new LambdaQueryWrapper<User>()
-                    .eq(User::getUsername, "admin")
-                    .last("LIMIT 1"));
+.eq(User::getUsername, "admin")
+                    .last(SqlLimit.fixed(1)));
             if (admin == null) {
                 log.warn("[cache-warmup] 未找到 admin 用户，跳过预热");
                 return;

@@ -11,6 +11,7 @@ import cn.zhenxinjian.common.exception.BusinessException;
 import cn.zhenxinjian.common.sensitive.SensitiveWordFilter;
 import cn.zhenxinjian.common.utils.MacroConsistencyValidator;
 import cn.zhenxinjian.common.utils.Operators;
+import cn.zhenxinjian.common.utils.SqlLimit;
 import cn.zhenxinjian.domain.dto.CustomFoodSaveDTO;
 import cn.zhenxinjian.domain.po.Food;
 import cn.zhenxinjian.domain.vo.FoodVO;
@@ -108,7 +109,7 @@ public class CustomFoodService {
                         .eq(Food::getSource, FoodSourceEnum.CUSTOM.getCode())
                         .eq(Food::getUserId, userId)
                         .orderByDesc(Food::getId)
-                        .last("LIMIT " + CommonConstant.CUSTOM_FOOD_MINE_LIMIT));
+                        .last(SqlLimit.fixed(CommonConstant.CUSTOM_FOOD_MINE_LIMIT)));
         return foods.stream().map(this::toVO).collect(Collectors.toList());
     }
 

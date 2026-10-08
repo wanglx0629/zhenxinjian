@@ -4,6 +4,7 @@ import cn.zhenxinjian.common.constant.CommonConstant;
 import cn.zhenxinjian.common.constant.ExceptionConstant;
 import cn.zhenxinjian.common.exception.BusinessException;
 import cn.zhenxinjian.common.utils.Operators;
+import cn.zhenxinjian.common.utils.SqlLimit;
 import cn.zhenxinjian.domain.dto.WeightSaveDTO;
 import cn.zhenxinjian.domain.po.WeightRecord;
 import cn.zhenxinjian.domain.vo.AdjustLogVO;
@@ -106,7 +107,7 @@ public class WeightService {
                 .orderByDesc(WeightRecord::getRecordDate)
                 .orderByDesc(WeightRecord::getId);
         if (limit != null && limit > 0) {
-            query.last("LIMIT " + Math.min(limit, WEIGHT_LIST_LIMIT_MAX));
+            query.last(SqlLimit.bounded(limit, WEIGHT_LIST_LIMIT_MAX));
         }
         List<WeightRecord> records = weightRecordMapper.selectList(query);
 

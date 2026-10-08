@@ -3,6 +3,7 @@ package cn.zhenxinjian.service.impl;
 import cn.zhenxinjian.common.constant.CommonConstant;
 import cn.zhenxinjian.common.constant.ExceptionConstant;
 import cn.zhenxinjian.common.exception.BusinessException;
+import cn.zhenxinjian.common.utils.SqlLimit;
 import cn.zhenxinjian.domain.po.DietRecord;
 import cn.zhenxinjian.domain.po.User;
 import cn.zhenxinjian.domain.query.AdminDietRecordQuery;
@@ -72,8 +73,8 @@ public class AdminDietService {
         }
         return userMapper.selectList(Wrappers.<User>lambdaQuery()
                         .select(User::getId)
-                        .like(User::getNickname, keyword)
-                        .last("LIMIT " + CommonConstant.MAX_PAGE_SIZE))
+.like(User::getNickname, keyword)
+                        .last(SqlLimit.fixed(CommonConstant.MAX_PAGE_SIZE)))
                 .stream().map(User::getId).collect(Collectors.toList());
     }
 
