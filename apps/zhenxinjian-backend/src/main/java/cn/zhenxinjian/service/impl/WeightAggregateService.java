@@ -4,6 +4,7 @@ import cn.zhenxinjian.domain.po.WeightRecord;
 import cn.zhenxinjian.domain.vo.WeightTrendVO;
 import cn.zhenxinjian.mapper.WeightRecordMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -17,6 +18,7 @@ import java.util.stream.Collectors;
  * 拆自 WeightService（DESIGN-职责-001），独立承载趋势口径
  * 作者: wanglx
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class WeightAggregateService {
@@ -76,6 +78,7 @@ public class WeightAggregateService {
             days = range == null ? null : Integer.valueOf(range);
         } catch (NumberFormatException ignored) {
             // 非数字且非 all → 默认窗口
+            log.warn("[WeightAggregateService] 非法趋势窗口 range={}，回退默认 {} 天", range, DEFAULT_TREND_RANGE);
         }
         if (days == null || !TREND_RANGES.contains(days)) {
             days = DEFAULT_TREND_RANGE;

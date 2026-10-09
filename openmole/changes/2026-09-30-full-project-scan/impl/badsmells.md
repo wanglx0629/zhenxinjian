@@ -20,7 +20,7 @@
 | IMPL-语言惯用法-004 | 语言惯用法 | 中 | 已消除 |
 | IMPL-语言惯用法-005 | 语言惯用法 | 低 | 已消除 |
 | IMPL-魔法数字-001 | 魔法数字 | 中 | 已消除 |
-| IMPL-异常-001 | 异常 | 低 | 未清除 |
+| IMPL-异常-001 | 异常 | 低 | 已消除 |
 | IMPL-空值-001 | 空值 | 低 | 未清除 |
 | IMPL-硬编码-001 | 硬编码 | 中 | 未清除 |
 | IMPL-硬编码-002 | 硬编码 | 中 | 未清除 |
@@ -241,3 +241,4 @@
 | v1.3 | 2026-10-09 | — | IMPL-语言惯用法-004 置"已消除"（`MetaObjectHandler.updateFill` 强制刷新 updateTime，删除业务手动 `setUpdateTime`） |
 | v1.4 | 2026-10-09 | — | IMPL-语言惯用法-005 置"已消除"（`CacheValueGuard` 改 JDK 序列化字节估算，与 `valueEncoder=java` 对齐） |
 | v1.5 | 2026-10-09 | — | IMPL-魔法数字-001 置"已消除"（`ScheduleConfig` 外呼执行器容量抽具名常量、`ReminderService` 失败原因截断 255 抽 `FAIL_REASON_MAX_LENGTH`） |
+| v1.6 | 2026-10-09 | — | IMPL-异常-001 置"已消除"（`WeightAggregateService.resolveTrendStart` 空 catch 补 WARN，非法窗口回退默认 30 天） |
