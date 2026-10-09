@@ -42,7 +42,9 @@ public class MybatisPlusConfig {
 
             @Override
             public void updateFill(MetaObject metaObject) {
-                strictUpdateFill(metaObject, "updateTime", LocalDateTime::now, LocalDateTime.class);
+                // updateTime 统一强制刷新（非 strict）：查询出的旧值非空时也覆盖，
+                // 消除业务层手动 setUpdateTime 与自动填充分裂，保证审计时间语义一致
+                setFieldValByName("updateTime", LocalDateTime.now(), metaObject);
             }
         };
     }

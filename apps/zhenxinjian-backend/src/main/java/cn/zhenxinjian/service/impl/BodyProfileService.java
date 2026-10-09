@@ -142,8 +142,6 @@ public class BodyProfileService {
 
         applyProfile(existing, userId, dto, level, deficit, cfc, r);
         existing.setUpdateBy(Operators.user(userId));
-        // strictUpdateFill 仅在字段为空时填充，查询出的旧值需显式刷新
-        existing.setUpdateTime(LocalDateTime.now());
         userBodyMapper.updateById(existing);
     }
 
