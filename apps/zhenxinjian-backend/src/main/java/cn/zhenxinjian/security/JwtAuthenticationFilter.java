@@ -119,10 +119,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             throw new BusinessException(CommonConstant.GUEST_EXPIRED_CODE, ExceptionConstant.GUEST_EXPIRED);
         }
         String username = user.getUsername();
-        String role = StrUtil.blankToDefault(user.getRole(), CommonConstant.ROLE_USER);
-        if (!CommonConstant.ROLE_ADMIN.equals(role)) {
-            role = CommonConstant.ROLE_USER;
-        }
+        String role = normalizeRole(userId, user.getRole());
 
         if (jwtUtils.isNearExpire(claims)) {
             // 续期保留身份 claim（游客 userType/gexp 随新 token 延续）
@@ -147,6 +144,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 new UsernamePasswordAuthenticationToken(loginUser, null,
                         List.of(new SimpleGrantedAuthority("ROLE_" + role)));
         SecurityContextHolder.getContext().setAuthentication(authentication);
+    }
+
+    /**
+     * 角色白名单规范化：ADMIN/USER 原样保留，空值走 USER 默认，
+     * 其余非法值显式告警后安全降级 USER（勿静默改写覆盖脏数据）
+     */
+    private String normalizeRole(Long userId, String role) {
+        if (StrUtil.isBlank(role)) {
+            return CommonConstant.ROLE_USER;
+        }
+        if (CommonConstant.ROLE_ADMIN.equals(role) || CommonConstant.ROLE_USER.equals(role)) {
+            return role;
+        }
+        log.warn("用户角色非法，安全降级为 USER: userId={}, role={}", userId, role);
+        return CommonConstant.ROLE_USER;
     }
 
     /**

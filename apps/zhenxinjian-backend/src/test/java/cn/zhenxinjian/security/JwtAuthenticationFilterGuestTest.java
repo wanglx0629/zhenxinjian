@@ -9,10 +9,12 @@ import cn.zhenxinjian.config.ZhenxinjianProperties;
 import cn.zhenxinjian.domain.po.User;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.time.LocalDateTime;
 import java.util.Date;
@@ -51,6 +53,11 @@ class JwtAuthenticationFilterGuestTest {
         filter = new JwtAuthenticationFilter(jwtUtils, redisUtils,
                 new SecurityJsonWriter(new ObjectMapper()), properties, userCacheService);
         chain = mock(FilterChain.class);
+    }
+
+    @AfterEach
+    void clearSecurityContext() {
+        SecurityContextHolder.clearContext();
     }
 
     @Test
@@ -105,6 +112,29 @@ class JwtAuthenticationFilterGuestTest {
         assertEquals(200, response.getStatus());
         assertTrue(response.getContentAsString().contains("\"code\":40201"));
         assertTrue(response.getContentAsString().contains("游客体验已到期"));
+    }
+
+    @Test
+    void illegalRole_fallsBackToUserWithWarn() throws Exception {
+        // 库中角色为非法值 → 白名单校验安全降级 USER（非静默改写）
+        User member = new User();
+        member.setId(3L);
+        member.setUsername("member");
+        member.setRole("superadmin2");
+        member.setStatus(UserStatusEnum.NORMAL.getCode());
+        when(userCacheService.getById(3L)).thenReturn(member);
+        String token = jwtUtils.generateToken(3L, "member", CommonConstant.ROLE_USER);
+        when(redisUtils.getToken(3L)).thenReturn(token);
+
+        MockHttpServletRequest request = request(token);
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        filter.doFilter(request, response, chain);
+
+        assertEquals(200, response.getStatus());
+        verify(chain).doFilter(request, response);
+        assertTrue(SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
+                .anyMatch(a -> "ROLE_USER".equals(a.getAuthority())));
     }
 
     private MockHttpServletRequest request(String token) {
