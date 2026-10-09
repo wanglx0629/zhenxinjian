@@ -18,8 +18,8 @@
 | IMPL-T04 | IMPL-语言惯用法-002 | MySQL 方言编号生成可移植化 | 中 | 已完成 |
 | IMPL-T05 | IMPL-语言惯用法-003 | 角色静默降级改白名单校验 | 中 | 已完成 |
 | IMPL-T06 | IMPL-语言惯用法-004 | 时间字段填充策略统一 | 中 | 已完成 |
-| IMPL-T07 | IMPL-语言惯用法-005 | 缓存值体积估算精准化 | 低 | 未开始 |
-| IMPL-T08 | IMPL-魔法数字-001 | 容量/阈值魔法数字收敛 | 中 | 未开始 |
+| IMPL-T07 | IMPL-语言惯用法-005 | 缓存值体积估算精准化 | 低 | 已完成 |
+| IMPL-T08 | IMPL-魔法数字-001 | 容量/阈值魔法数字收敛 | 中 | 已完成 |
 | IMPL-T09 | IMPL-异常-001 | 空 catch 吞异常补日志 | 低 | 未开始 |
 | IMPL-T10 | IMPL-空值-001 | 枚举 of 返回 null 改 Optional | 低 | 未开始 |
 | IMPL-T11 | IMPL-硬编码-001 | 管理后台色值收敛 CHART_PALETTE | 中 | 未开始 |
@@ -218,3 +218,5 @@
 | v1.1 | 2026-10-08 | — | IMPL-T04（MySQL 方言编号生成可移植化）：`nextCode` 排序 `CAST(SUBSTRING(...) AS UNSIGNED)` 改 `LENGTH(code) DESC, code DESC` 可移植表达式，新增顺延测试，标记已完成 |
 | v1.2 | 2026-10-09 | — | IMPL-T05（角色静默降级改白名单校验）：`JwtAuthenticationFilter` 抽 `normalizeRole` 白名单校验，非法值 WARN 后安全降级 USER，新增非法角色降级测试，标记已完成 |
 | v1.3 | 2026-10-09 | — | IMPL-T06（时间字段填充策略统一）：`MetaObjectHandler.updateFill` 改 `setFieldValByName` 强制刷新 updateTime，删除 `BodyProfileService` 手动 `setUpdateTime`，标记已完成 |
+| v1.4 | 2026-10-09 | — | IMPL-T07（缓存值体积估算精准化）：`CacheValueGuard` 由 JSON 串化字节估算改 `SerializationUtils.serialize` JDK 序列化字节估算，与 `valueEncoder=java` 对齐，新增 CacheValueGuardTest，标记已完成 |
+| v1.5 | 2026-10-09 | — | IMPL-T08（容量/阈值魔法数字收敛）：`ScheduleConfig` 外呼执行器 core/max/queue 抽 `REMINDER_PUSH_CORE_POOL_SIZE`/`MAX`/`QUEUE_CAPACITY` 具名常量；`ReminderService` 失败原因截断 255 抽 `FAIL_REASON_MAX_LENGTH` 常量，标记已完成 |

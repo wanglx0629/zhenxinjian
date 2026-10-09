@@ -21,6 +21,15 @@ public class ScheduleConfig {
     /** 调度池线程数：当前 3 个 @Scheduled 任务（提醒推送/统计聚合/游客清理），留一余量 */
     private static final int SCHEDULER_POOL_SIZE = 4;
 
+    /** 外呼执行器核心线程数 */
+    private static final int REMINDER_PUSH_CORE_POOL_SIZE = 2;
+
+    /** 外呼执行器最大线程数 */
+    private static final int REMINDER_PUSH_MAX_POOL_SIZE = 4;
+
+    /** 外呼执行器队列容量 */
+    private static final int REMINDER_PUSH_QUEUE_CAPACITY = 200;
+
     /**
      * 多线程调度池（Bean 名 taskScheduler 被 Spring 调度自动识别）
      *
@@ -44,9 +53,9 @@ public class ScheduleConfig {
     @Bean
     public Executor reminderPushExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(2);
-        executor.setMaxPoolSize(4);
-        executor.setQueueCapacity(200);
+        executor.setCorePoolSize(REMINDER_PUSH_CORE_POOL_SIZE);
+        executor.setMaxPoolSize(REMINDER_PUSH_MAX_POOL_SIZE);
+        executor.setQueueCapacity(REMINDER_PUSH_QUEUE_CAPACITY);
         executor.setThreadNamePrefix("reminder-push-");
         executor.setWaitForTasksToCompleteOnShutdown(true);
         executor.setAwaitTerminationSeconds(30);
