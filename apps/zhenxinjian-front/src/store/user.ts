@@ -13,9 +13,6 @@ export const useUserStore = defineStore('user', () => {
   const token = ref(localStorage.getItem('token') || '')
   const userInfo = ref<UserInfo | null>(null)
 
-  /** 是否已登录 */
-  const isLoggedIn = () => !!token.value
-
   /** 登录 */
   async function login(data: LoginRequest) {
     const result = await loginApi(data)
@@ -52,5 +49,5 @@ export const useUserStore = defineStore('user', () => {
     userInfo.value = await getCurrentUser()
   }
 
-  return { token, userInfo, isLoggedIn, login, logout, clearSession, syncToken, fetchUserInfo }
+  return { token, userInfo, login, logout, clearSession, syncToken, fetchUserInfo }
 })

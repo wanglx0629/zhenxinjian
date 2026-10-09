@@ -138,11 +138,9 @@ public class AdminFoodAuditService {
             food.setAlias(fix.getAlias().trim());
         }
         if (fix.getCategoryCode() != null) {
-            FoodCategoryEnum category = FoodCategoryEnum.of(fix.getCategoryCode().trim());
-            if (category == null) {
-                throw new BusinessException(CommonConstant.ADMIN_FOOD_FIX_INVALID_CODE,
-                        ExceptionConstant.ADMIN_FOOD_FIX_INVALID);
-            }
+            FoodCategoryEnum category = FoodCategoryEnum.of(fix.getCategoryCode().trim())
+                    .orElseThrow(() -> new BusinessException(CommonConstant.ADMIN_FOOD_FIX_INVALID_CODE,
+                            ExceptionConstant.ADMIN_FOOD_FIX_INVALID));
             food.setCategoryCode(category.getCode());
             food.setCategoryName(category.getDesc());
         }

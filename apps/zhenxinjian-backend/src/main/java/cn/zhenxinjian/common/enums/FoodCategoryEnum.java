@@ -1,5 +1,7 @@
 package cn.zhenxinjian.common.enums;
 
+import java.util.Optional;
+
 /**
  * 食物分类字典枚举（对应 foods.category_code/category_name 列，TFDA 口径 18 大类，顺序固定 01–18）
  * 作者: wanglx
@@ -86,17 +88,17 @@ public enum FoodCategoryEnum {
      * 按分类编号查询枚举
      *
      * @param code 分类编号（01–18）
-     * @return 对应枚举；code 无效时返回 null
+     * @return 对应枚举；code 无效或 null 时返回 empty
      */
-    public static FoodCategoryEnum of(String code) {
+    public static Optional<FoodCategoryEnum> of(String code) {
         if (code == null) {
-            return null;
+            return Optional.empty();
         }
         for (FoodCategoryEnum value : values()) {
             if (value.code.equals(code)) {
-                return value;
+                return Optional.of(value);
             }
         }
-        return null;
+        return Optional.empty();
     }
 }

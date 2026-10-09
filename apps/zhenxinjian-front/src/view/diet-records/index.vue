@@ -6,7 +6,7 @@
 import { reactive, ref } from 'vue'
 import { getDietRecordPage } from '@/api/adminDiet'
 import PagePager from '@/component/PagePager.vue'
-import { usePageQuery } from '@/composables/usePageQuery'
+import { usePageQuery, type PageQueryBase } from '@/composables/usePageQuery'
 import {
   MEAL_TYPE_MAP,
   MEAL_TYPE_OPTIONS,
@@ -15,11 +15,17 @@ import {
 } from '@/constants/dicts'
 
 const dateRange = ref<[string, string] | null>(null)
-const query = reactive({
+
+interface DietListQuery extends PageQueryBase {
+  userKeyword: string
+  mealType: number | undefined
+}
+
+const query = reactive<DietListQuery>({
   page: 1,
   size: 20,
   userKeyword: '',
-  mealType: undefined as number | undefined
+  mealType: undefined
 })
 
 /** 列表查询骨架（B-T23：loading/数据/分页回调收敛 composable；只读页无删后回退） */

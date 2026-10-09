@@ -6,7 +6,7 @@
  */
 import { computed } from 'vue'
 import { buildAdviceList, buildProgressItems } from '@/utils/macro'
-import { OVER_ADVICE } from '@/config/constants'
+import { OVER_ADVICE, BRAND_COLORS } from '@/config/constants'
 import type { DietSummaryVO } from '@/api/diet'
 import { iconSrc } from '@/utils/icons'
 
@@ -18,9 +18,9 @@ const overItems = computed(() => items.value.filter(i => i.overAmount > 0))
 /** 微调建议列表 */
 const adviceList = computed(() => buildAdviceList(items.value))
 
-const alertIcon = iconSrc('alert', '#d63333')
+const alertIcon = iconSrc('alert', BRAND_COLORS.dangerDeep)
 const infoIcon = iconSrc('info', '#8a8f99')
-const bulletIcon = iconSrc('sparkles', '#d63333')
+const bulletIcon = iconSrc('sparkles', BRAND_COLORS.dangerDeep)
 </script>
 
 <template>

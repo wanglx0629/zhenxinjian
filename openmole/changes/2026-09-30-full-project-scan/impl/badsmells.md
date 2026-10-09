@@ -21,14 +21,14 @@
 | IMPL-语言惯用法-005 | 语言惯用法 | 低 | 已消除 |
 | IMPL-魔法数字-001 | 魔法数字 | 中 | 已消除 |
 | IMPL-异常-001 | 异常 | 低 | 已消除 |
-| IMPL-空值-001 | 空值 | 低 | 未清除 |
-| IMPL-硬编码-001 | 硬编码 | 中 | 未清除 |
-| IMPL-硬编码-002 | 硬编码 | 中 | 未清除 |
-| IMPL-参数-001 | 参数 | 低 | 未清除 |
-| IMPL-类型-001 | 类型 | 低 | 未清除 |
-| IMPL-死代码-001 | 死代码 | 低 | 未清除 |
+| IMPL-空值-001 | 空值 | 低 | 已消除 |
+| IMPL-硬编码-001 | 硬编码 | 中 | 已消除 |
+| IMPL-硬编码-002 | 硬编码 | 中 | 已消除 |
+| IMPL-参数-001 | 参数 | 低 | 已消除 |
+| IMPL-类型-001 | 类型 | 低 | 已消除 |
+| IMPL-死代码-001 | 死代码 | 低 | 已消除 |
 
-状态说明：**未清除** / 已消除 / 部分残余。共 15 条（高 1 / 中 8 / 低 6）。
+状态说明：**未清除** / 已消除 / 部分残余。共 15 条（高 1 / 中 8 / 低 6），已全部消除。
 
 ---
 
@@ -242,3 +242,9 @@
 | v1.4 | 2026-10-09 | — | IMPL-语言惯用法-005 置"已消除"（`CacheValueGuard` 改 JDK 序列化字节估算，与 `valueEncoder=java` 对齐） |
 | v1.5 | 2026-10-09 | — | IMPL-魔法数字-001 置"已消除"（`ScheduleConfig` 外呼执行器容量抽具名常量、`ReminderService` 失败原因截断 255 抽 `FAIL_REASON_MAX_LENGTH`） |
 | v1.6 | 2026-10-09 | — | IMPL-异常-001 置"已消除"（`WeightAggregateService.resolveTrendStart` 空 catch 补 WARN，非法窗口回退默认 30 天） |
+| v1.7 | 2026-10-09 | — | IMPL-空值-001 置"已消除"（`FoodCategoryEnum.of` 改 `Optional`，4 调用点 `orElseThrow`/`filter` 显式处理空态，附 FoodCategoryEnumTest） |
+| v1.8 | 2026-10-09 | — | IMPL-硬编码-001 置"已消除"（`useDashboardStats` 面积渐变改 `CHART_PALETTE[0]/[1]`，`StatCard` 图标渐变改 CSS 设计令牌） |
+| v1.9 | 2026-10-09 | — | IMPL-硬编码-002 置"已消除"（新增 `BRAND_COLORS` TS 单一色板并贯穿 `PROGRESS_COLORS`/`CYCLE_DAY_TYPES`，12 个组件/页面 iconSrc 色值与 switch/confirmColor/插画 SVG 全部改引用；pages.json 平台 JSON 无法引用 TS，已注释标注同步口径，`npm run type-check` 零错误） |
+| v1.10 | 2026-10-09 | — | IMPL-参数-001 置"已消除"（`custom-edit.vue` `handleEnergyUnitChange`/`handleCategoryChange` 事件参数 `any` 窄化为 `{ detail: { value: number } }`，`npm run type-check` 零错误） |
+| v1.11 | 2026-10-09 | — | IMPL-类型-001 置"已消除"（`users`/`foods`/`configs`/`diet-records` 四列表页 `query` 显式 `interface XxxListQuery extends PageQueryBase` 绑定，删除逐个 `as` 补丁；`npm run build` 零错误） |
+| v1.12 | 2026-10-09 | — | IMPL-死代码-001 置"已消除"（`store/user.ts` 删除零消费 `isLoggedIn`，`npm run build` 零错误） |

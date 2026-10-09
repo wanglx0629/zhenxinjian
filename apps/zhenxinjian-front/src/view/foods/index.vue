@@ -16,7 +16,7 @@ import {
 } from '@/api/adminFood'
 import type { AdminFood } from '@/api/adminFood'
 import PagePager from '@/component/PagePager.vue'
-import { usePageQuery } from '@/composables/usePageQuery'
+import { usePageQuery, type PageQueryBase } from '@/composables/usePageQuery'
 import FoodEditDialog from './components/FoodEditDialog.vue'
 import FoodAuditFixDialog from './components/FoodAuditFixDialog.vue'
 import {
@@ -32,19 +32,28 @@ import {
   dictLabel
 } from '@/constants/dicts'
 
-const query = reactive({
+interface FoodListQuery extends PageQueryBase {
+  keyword: string
+  categoryCode: string
+  source: number | undefined
+  status: number | undefined
+  auditStatus: number | undefined
+  aiVerdict: string | undefined
+}
+
+const query = reactive<FoodListQuery>({
   page: 1,
   size: 20,
   keyword: '',
   categoryCode: '',
-  source: undefined as number | undefined,
-  status: undefined as number | undefined,
-  auditStatus: undefined as number | undefined,
-  aiVerdict: undefined as string | undefined
+  source: undefined,
+  status: undefined,
+  auditStatus: undefined,
+  aiVerdict: undefined
 })
 
 /** 初始筛选快照（重置用） */
-const INITIAL_FILTERS = {
+const INITIAL_FILTERS: Omit<FoodListQuery, 'page' | 'size'> = {
   keyword: '',
   categoryCode: '',
   source: undefined,

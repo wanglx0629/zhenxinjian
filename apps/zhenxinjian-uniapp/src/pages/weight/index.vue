@@ -13,8 +13,9 @@ import { canSubmit } from '@/utils/throttle'
 import { track, trackPage } from '@/utils/track'
 import { TRACK_EVENT } from '@/config/track-events'
 import { iconSrc } from '@/utils/icons'
+import { BRAND_COLORS } from '@/config/constants'
 
-const plateauIcon = iconSrc('alert', '#d63333')
+const plateauIcon = iconSrc('alert', BRAND_COLORS.dangerDeep)
 
 const weightStore = useWeightStore()
 

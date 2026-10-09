@@ -7,15 +7,14 @@
  */
 import { computed } from 'vue'
 import type { WeightTrendPoint } from '@/api/weight'
+import { BRAND_COLORS } from '@/config/constants'
 
 const props = defineProps<{
   /** 每日末值点（按日期升序，调用方保证 ≥2 点） */
   points: WeightTrendPoint[]
 }>()
 
-/** 品牌令牌（JS 侧取值与 uni.scss 严格一致，先例 EnergyRing §9.3） */
-const LEAF = '#00AC7C'
-const AMBER = '#FFB020'
+/** 品牌令牌（单一真源 BRAND_COLORS，与 uni.scss 严格一致，先例 EnergyRing §9.3） */
 const GRID = '#EDF1EF'
 const MUTED = '#94A3B8'
 
@@ -57,7 +56,7 @@ const chartSrc = computed(() => {
 
   // 折线
   const linePts = pts.map((p, i) => `${x(i).toFixed(1)},${y(p.weight).toFixed(1)}`).join(' ')
-  const polyline = `<polyline points="${linePts}" fill="none" stroke="${LEAF}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>`
+  const polyline = `<polyline points="${linePts}" fill="none" stroke="${BRAND_COLORS.primary}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>`
 
   // 数据点：普通点小叶绿圆；平台点琥珀；末点放大 + 白描边
   const dots = pts
@@ -65,7 +64,7 @@ const chartSrc = computed(() => {
       const cx = x(i).toFixed(1)
       const cy = y(p.weight).toFixed(1)
       const isLast = i === pts.length - 1
-      const color = p.plateau ? AMBER : LEAF
+      const color = p.plateau ? BRAND_COLORS.cta : BRAND_COLORS.primary
       if (isLast) {
         return `<circle cx="${cx}" cy="${cy}" r="6" fill="#fff"/>` +
           `<circle cx="${cx}" cy="${cy}" r="4.2" fill="${color}"/>`

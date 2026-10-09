@@ -10,10 +10,11 @@ import { useBodyStore } from '@/store/body'
 import { trackPage } from '@/utils/track'
 import EmptyState from '@/components/EmptyState.vue'
 import { iconSrc } from '@/utils/icons'
+import { BRAND_COLORS } from '@/config/constants'
 
-const flameIcon = iconSrc('flame', '#00AC7C')
-const targetIcon = iconSrc('target', '#00AC7C')
-const riskIcon = iconSrc('alert', '#9a6b00')
+const flameIcon = iconSrc('flame', BRAND_COLORS.primary)
+const targetIcon = iconSrc('target', BRAND_COLORS.primary)
+const riskIcon = iconSrc('alert', BRAND_COLORS.ctaDeep)
 const infoIcon = iconSrc('info', '#8a8f99')
 
 const bodyStore = useBodyStore()

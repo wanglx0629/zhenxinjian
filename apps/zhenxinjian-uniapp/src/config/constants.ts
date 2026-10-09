@@ -80,8 +80,33 @@ export const MEAL_TYPES: MealTypeCfg[] = [
 /** 三色进度阈值（达成率 %）：80–100 绿 / <80 黄 / >100 红 */
 export const PROGRESS_THRESHOLD = { green: 80, red: 100 } as const
 
-/** 三色进度颜色（对齐设计系统 V2.0 充足绿/不足黄/超标红） */
-export const PROGRESS_COLORS = { green: '#00AC7C', yellow: '#FFB020', red: '#FF4747' } as const
+/**
+ * 品牌色板（单一真源，与 uni.scss §V2.0 严格一致；改色须三处同步：此处 / uni.scss /
+ * pages.json 的 tabBar.selectedColor 与 globalStyle 背景色——pages.json 为平台 JSON 无法引用 TS）
+ * 能量语义：叶绿=充足、琥珀=不足、警示红=超标（判定阈值不变，PRD §5.6.3）
+ */
+export const BRAND_COLORS = {
+  /** 品牌主色 叶绿（= 充足态） */
+  primary: '#00AC7C',
+  /** 品牌绿描边（浅底边框，CYCLE_DAY_TYPES 用） */
+  primaryBorder: '#E3EFE9',
+  /** CTA 琥珀（= 不足态） */
+  cta: '#FFB020',
+  ctaActive: '#E69A00',
+  /** CTA 深字（白底对比 ≥4.5:1） */
+  ctaDeep: '#9A6B00',
+  /** 警示红（= 超标态） */
+  danger: '#FF4747',
+  dangerDeep: '#D63333',
+  dangerBg: '#ffefef'
+} as const
+
+/** 三色进度颜色（充足绿/不足黄/超标红，单一真源 BRAND_COLORS） */
+export const PROGRESS_COLORS = {
+  green: BRAND_COLORS.primary,
+  yellow: BRAND_COLORS.cta,
+  red: BRAND_COLORS.danger
+} as const
 
 /** 微调建议文案（按超标项动态拼接，spec：超标微调建议） */
 export const OVER_ADVICE = {
@@ -118,8 +143,8 @@ export interface CycleDayTypeCfg {
 }
 
 export const CYCLE_DAY_TYPES: Record<number, CycleDayTypeCfg> = {
-  1: { code: 1, name: '高碳日', short: '高', color: '#FF4747', bg: '#ffefef' },
-  2: { code: 2, name: '中碳日', short: '中', color: '#00AC7C', bg: '#E3EFE9' },
+  1: { code: 1, name: '高碳日', short: '高', color: BRAND_COLORS.danger, bg: BRAND_COLORS.dangerBg },
+  2: { code: 2, name: '中碳日', short: '中', color: BRAND_COLORS.primary, bg: BRAND_COLORS.primaryBorder },
   3: { code: 3, name: '低碳日', short: '低', color: '#475569', bg: '#edf1ef' }
 }
 

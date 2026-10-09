@@ -87,10 +87,9 @@ public class TfdaFoodInitializer implements ApplicationRunner {
     private Food toFood(TfdaEntry entry) {
         String categoryCode = entry.getCategory().substring(0, 2);
         String categoryName = entry.getCategory().substring(3).trim();
-        FoodCategoryEnum category = FoodCategoryEnum.of(categoryCode);
-        if (category == null || !category.getDesc().equals(categoryName)) {
-            throw new IllegalStateException("[TfdaLibrary] 分类与字典不一致: " + entry.getCategory());
-        }
+        FoodCategoryEnum category = FoodCategoryEnum.of(categoryCode)
+                .filter(c -> c.getDesc().equals(categoryName))
+                .orElseThrow(() -> new IllegalStateException("[TfdaLibrary] 分类与字典不一致: " + entry.getCategory()));
         Food food = new Food();
         food.setCode(entry.getCode());
         food.setCategoryCode(categoryCode);

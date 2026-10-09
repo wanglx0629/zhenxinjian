@@ -80,16 +80,15 @@ public class FoodLibraryInitializer implements ApplicationRunner {
         try (InputStream in = new ClassPathResource(IMPORT_RESOURCE).getInputStream()) {
             return objectMapper.readValue(in, FoodLibraryFile.class);
         }
-    }
+}
 
     /** 导入条目 → 食物实体（分类编号/名称拆分并与字典枚举校验一致） */
     private Food toFood(FoodEntry entry) {
         String categoryCode = entry.getCategory().substring(0, 2);
         String categoryName = entry.getCategory().substring(3).trim();
-        FoodCategoryEnum category = FoodCategoryEnum.of(categoryCode);
-        if (category == null || !category.getDesc().equals(categoryName)) {
-            throw new IllegalStateException("[FoodLibrary] 分类与字典不一致: " + entry.getCategory());
-        }
+        FoodCategoryEnum category = FoodCategoryEnum.of(categoryCode)
+                .filter(c -> c.getDesc().equals(categoryName))
+                .orElseThrow(() -> new IllegalStateException("[FoodLibrary] 分类与字典不一致: " + entry.getCategory()));
         Food food = new Food();
         food.setCode(entry.getId());
         food.setCategoryCode(categoryCode);

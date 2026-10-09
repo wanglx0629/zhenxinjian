@@ -11,6 +11,7 @@ import type { FoodVO } from '@/api/food'
 import FoodThumb from '@/components/FoodThumb.vue'
 import { trackPage } from '@/utils/track'
 import { iconSrc } from '@/utils/icons'
+import { BRAND_COLORS } from '@/config/constants'
 
 const plusIcon = iconSrc('plus', '#ffffff')
 
@@ -62,7 +63,7 @@ function handleDelete(food: FoodVO) {
   uni.showModal({
     title: '删除食物',
     content: `确定删除「${food.name}」吗？删除后不可再使用该食物记录，已有饮食记录不受影响`,
-    confirmColor: '#FF4747',
+    confirmColor: BRAND_COLORS.danger,
     success: async (res) => {
       if (!res.confirm) return
       try {

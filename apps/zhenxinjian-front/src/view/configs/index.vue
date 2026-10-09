@@ -11,9 +11,13 @@ import { addConfig, getConfigPage, updateConfig } from '@/api/adminConfig'
 import type { ProjectConfig } from '@/api/adminConfig'
 import { CONFIG_VALUE_TYPE_OPTIONS, CONFIG_VALUE_TYPE_MAP } from '@/constants/dicts'
 import PagePager from '@/component/PagePager.vue'
-import { usePageQuery } from '@/composables/usePageQuery'
+import { usePageQuery, type PageQueryBase } from '@/composables/usePageQuery'
 
-const query = reactive({
+interface ConfigListQuery extends PageQueryBase {
+  keyword: string
+}
+
+const query = reactive<ConfigListQuery>({
   page: 1,
   size: 20,
   keyword: ''

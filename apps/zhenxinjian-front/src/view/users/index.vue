@@ -9,7 +9,7 @@ import { View, Edit, Delete } from '@element-plus/icons-vue'
 import { deleteUser, getUserPage } from '@/api/user'
 import type { UserInfo } from '@/api/types'
 import PagePager from '@/component/PagePager.vue'
-import { usePageQuery } from '@/composables/usePageQuery'
+import { usePageQuery, type PageQueryBase } from '@/composables/usePageQuery'
 import UserDetailDrawer from './components/UserDetailDrawer.vue'
 import UserEditDialog from './components/UserEditDialog.vue'
 import {
@@ -19,17 +19,26 @@ import {
   USER_STATUS_OPTIONS
 } from '@/constants/dicts'
 
-const query = reactive({
+interface UserListQuery extends PageQueryBase {
+  keyword: string
+  status: number | undefined
+  role: string
+}
+
+const query = reactive<UserListQuery>({
   page: 1,
   size: 10,
   keyword: '',
-  status: undefined as number | undefined,
+  status: undefined,
   role: ''
 })
 
-/** 列表查询骨架（B-T23：loading/数据/分页回调/删后回退收敛 composable） */
 /** 初始筛选快照（重置用） */
-const INITIAL_FILTERS = { keyword: '', status: undefined, role: '' }
+const INITIAL_FILTERS: Omit<UserListQuery, 'page' | 'size'> = {
+  keyword: '',
+  status: undefined,
+  role: ''
+}
 
 const {
   loading,

@@ -10,8 +10,9 @@ import { useUserStore } from '@/store/user'
 import { canSubmit } from '@/utils/throttle'
 import { trackPage } from '@/utils/track'
 import { iconSrc } from '@/utils/icons'
+import { BRAND_COLORS } from '@/config/constants'
 
-const expireIcon = iconSrc('alarm', '#E69A00')
+const expireIcon = iconSrc('alarm', BRAND_COLORS.ctaActive)
 const avatarPlaceholderIcon = iconSrc('body', '#94A3B8')
 
 const userStore = useUserStore()

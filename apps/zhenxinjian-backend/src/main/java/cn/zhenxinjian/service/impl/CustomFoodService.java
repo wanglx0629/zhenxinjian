@@ -251,12 +251,9 @@ public class CustomFoodService {
         if (categoryCode == null || categoryCode.isEmpty()) {
             return DEFAULT_CATEGORY;
         }
-        FoodCategoryEnum category = FoodCategoryEnum.of(categoryCode);
-        if (category == null) {
-            throw new BusinessException(CommonConstant.FOOD_MACRO_INVALID_CODE,
-                    "分类编号非法，仅支持01-10");
-        }
-        return category;
+        return FoodCategoryEnum.of(categoryCode)
+                .orElseThrow(() -> new BusinessException(CommonConstant.FOOD_MACRO_INVALID_CODE,
+                        "分类编号非法，仅支持01-10"));
     }
 
     /** 写入业务字段（名称/别名/分类/营养值/单份克数/千焦/单位/图片） */

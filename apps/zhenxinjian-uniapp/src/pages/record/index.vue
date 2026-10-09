@@ -8,7 +8,7 @@ import { onShow } from '@dcloudio/uni-app'
 import { useDietStore } from '@/store/diet'
 import { useBodyStore } from '@/store/body'
 import { useCycleStore } from '@/store/cycle'
-import { OVER_ADVICE, CYCLE_DAY_TYPES } from '@/config/constants'
+import { BRAND_COLORS, OVER_ADVICE, CYCLE_DAY_TYPES } from '@/config/constants'
 import { ymd, md, week } from '@/utils/format'
 import { buildProgressItems, buildAdviceList } from '@/utils/macro'
 import type { DietRecordVO } from '@/api/diet'
@@ -220,11 +220,11 @@ function goCycleSetting() {
     <!-- 超标建议卡 -->
     <view v-if="adviceList.length" class="panel advice-card">
       <view class="advice-title-row">
-        <image class="advice-title-icon" :src="iconSrc('alert', '#9a6b00')" />
+        <image class="advice-title-icon" :src="iconSrc('alert', BRAND_COLORS.ctaDeep)" />
         <text class="panel-title advice-title">微调建议</text>
       </view>
       <view v-for="(advice, i) in adviceList" :key="i" class="advice-item">
-        <image class="advice-bullet" :src="iconSrc('sparkles', '#9a6b00')" />
+        <image class="advice-bullet" :src="iconSrc('sparkles', BRAND_COLORS.ctaDeep)" />
         <text class="advice-text">{{ advice }}</text>
       </view>
       <view class="advice-disclaimer-row">
@@ -263,11 +263,11 @@ function goCycleSetting() {
           <text class="record-kcal">{{ record.kcal }}kcal</text>
           <view class="record-actions">
             <view class="action-btn" hover-class="action-btn-hover" @click="handleEdit(record)">
-              <image class="action-btn-icon" :src="iconSrc('edit', '#00AC7C')" />
+              <image class="action-btn-icon" :src="iconSrc('edit', BRAND_COLORS.primary)" />
               <text class="action-btn-text edit">编辑</text>
             </view>
             <view class="action-btn" hover-class="action-btn-hover" @click="handleDelete(record.id)">
-              <image class="action-btn-icon" :src="iconSrc('trash', '#d63333')" />
+              <image class="action-btn-icon" :src="iconSrc('trash', BRAND_COLORS.dangerDeep)" />
               <text class="action-btn-text delete">删除</text>
             </view>
           </view>

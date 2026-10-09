@@ -78,19 +78,19 @@ withDefaults(
 }
 
 .icon-leaf {
-  background: linear-gradient(135deg, #00AC7C, #33BD96);
+  background: linear-gradient(135deg, var(--zhenxinjian-primary), var(--zhenxinjian-primary-light));
 }
 
 .icon-amber {
-  background: linear-gradient(135deg, #FFB020, #FFC24D);
+  background: linear-gradient(135deg, var(--zhenxinjian-cta), var(--zhenxinjian-cta-hover));
 }
 
 .icon-cyan {
-  background: linear-gradient(135deg, #0891B2, #22D3EE);
+  background: linear-gradient(135deg, var(--zhenxinjian-tech-cyan), var(--zhenxinjian-tech-cyan-light));
 }
 
 .icon-mix {
-  background: linear-gradient(135deg, #00AC7C, #FFB020);
+  background: linear-gradient(135deg, var(--zhenxinjian-primary), var(--zhenxinjian-cta));
 }
 
 .stat-main {

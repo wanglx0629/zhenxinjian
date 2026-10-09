@@ -11,7 +11,7 @@ import { GridComponent, LegendComponent, TooltipComponent } from 'echarts/compon
 import { CanvasRenderer } from 'echarts/renderers'
 import { getActiveTrend, getEventRank, getOverview, getPageRank } from '@/api/stats'
 import type { DailyActive, EventRank, PageRank, StatsOverview } from '@/api/stats'
-import { areaGradient, baseEchartsOption, CHART_AXIS } from '@/utils/echarts-theme'
+import { areaGradient, baseEchartsOption, CHART_AXIS, CHART_PALETTE } from '@/utils/echarts-theme'
 import { computeStickiness } from '@/utils/stats'
 
 /** echarts 按需注册 */
@@ -68,7 +68,7 @@ export function useDashboardStats(trendEl: Ref<HTMLElement | undefined>) {
           showSymbol: false,
           data: trendData.value.map((d) => d.dau),
           lineStyle: { width: 3 },
-          areaStyle: { color: areaGradient('#00AC7C') }
+          areaStyle: { color: areaGradient(CHART_PALETTE[0]) }
         },
         {
           name: '游客',
@@ -77,7 +77,7 @@ export function useDashboardStats(trendEl: Ref<HTMLElement | undefined>) {
           showSymbol: false,
           data: trendData.value.map((d) => d.guestDau),
           lineStyle: { width: 3 },
-          areaStyle: { color: areaGradient('#FFB020', 0.24) }
+          areaStyle: { color: areaGradient(CHART_PALETTE[1], 0.24) }
         }
       ]
     })

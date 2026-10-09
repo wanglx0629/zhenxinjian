@@ -7,7 +7,7 @@
 import { computed, ref } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
 import { useMenstrualStore } from '@/store/menstrual'
-import { RANGES } from '@/config/constants'
+import { BRAND_COLORS, RANGES } from '@/config/constants'
 import { ymd } from '@/utils/format'
 import { canSubmit } from '@/utils/throttle'
 import { getToken } from '@/utils/storage'
@@ -134,7 +134,7 @@ async function handleSave() {
             <text class="row-title">开启经期管理</text>
             <text class="row-sub">开启后按阶段自动上浮碳水与热量</text>
           </view>
-          <switch :checked="enabled === 1" color="#00AC7C" @change="onEnabledChange" />
+          <switch :checked="enabled === 1" :color="BRAND_COLORS.primary" @change="onEnabledChange" />
         </view>
       </view>
 

@@ -21,14 +21,14 @@
 | IMPL-T07 | IMPL-语言惯用法-005 | 缓存值体积估算精准化 | 低 | 已完成 |
 | IMPL-T08 | IMPL-魔法数字-001 | 容量/阈值魔法数字收敛 | 中 | 已完成 |
 | IMPL-T09 | IMPL-异常-001 | 空 catch 吞异常补日志 | 低 | 已完成 |
-| IMPL-T10 | IMPL-空值-001 | 枚举 of 返回 null 改 Optional | 低 | 未开始 |
-| IMPL-T11 | IMPL-硬编码-001 | 管理后台色值收敛 CHART_PALETTE | 中 | 未开始 |
-| IMPL-T12 | IMPL-硬编码-002 | 小程序品牌色建立 TS 色板 | 中 | 未开始 |
-| IMPL-T13 | IMPL-参数-001 | picker 事件 any 类型窄化 | 低 | 未开始 |
-| IMPL-T14 | IMPL-类型-001 | 列表页 query 绑定 PageQueryBase | 低 | 未开始 |
-| IMPL-T15 | IMPL-死代码-001 | store isLoggedIn 死代码清理 | 低 | 未开始 |
+| IMPL-T10 | IMPL-空值-001 | 枚举 of 返回 null 改 Optional | 低 | 已完成 |
+| IMPL-T11 | IMPL-硬编码-001 | 管理后台色值收敛 CHART_PALETTE | 中 | 已完成 |
+| IMPL-T12 | IMPL-硬编码-002 | 小程序品牌色建立 TS 色板 | 中 | 已完成 |
+| IMPL-T13 | IMPL-参数-001 | picker 事件 any 类型窄化 | 低 | 已完成 |
+| IMPL-T14 | IMPL-类型-001 | 列表页 query 绑定 PageQueryBase | 低 | 已完成 |
+| IMPL-T15 | IMPL-死代码-001 | store isLoggedIn 死代码清理 | 低 | 已完成 |
 
-状态说明：**未开始** / 进行中 / 已完成。共 15 个任务（高 1 / 中 8 / 低 6）。
+状态说明：**未开始** / 进行中 / 已完成。共 15 个任务（高 1 / 中 8 / 低 6），已全部完成。
 
 ---
 
@@ -221,3 +221,9 @@
 | v1.4 | 2026-10-09 | — | IMPL-T07（缓存值体积估算精准化）：`CacheValueGuard` 由 JSON 串化字节估算改 `SerializationUtils.serialize` JDK 序列化字节估算，与 `valueEncoder=java` 对齐，新增 CacheValueGuardTest，标记已完成 |
 | v1.5 | 2026-10-09 | — | IMPL-T08（容量/阈值魔法数字收敛）：`ScheduleConfig` 外呼执行器 core/max/queue 抽 `REMINDER_PUSH_CORE_POOL_SIZE`/`MAX`/`QUEUE_CAPACITY` 具名常量；`ReminderService` 失败原因截断 255 抽 `FAIL_REASON_MAX_LENGTH` 常量，标记已完成 |
 | v1.6 | 2026-10-09 | — | IMPL-T09（空 catch 吞异常补日志）：`WeightAggregateService.resolveTrendStart` 空 catch 补 WARN（非法趋势窗口回退默认 30 天），标记已完成 |
+| v1.7 | 2026-10-09 | — | IMPL-T10（枚举 of 返回 null 改 Optional）：`FoodCategoryEnum.of` 改 `Optional<FoodCategoryEnum>`，`CustomFoodService`/`AdminFoodAuditService` 用 `orElseThrow`、`FoodLibraryInitializer`/`TfdaFoodInitializer` 用 `filter().orElseThrow` 显式处理空态，新增 FoodCategoryEnumTest，标记已完成 |
+| v1.8 | 2026-10-09 | — | IMPL-T11（管理后台色值收敛 CHART_PALETTE）：`useDashboardStats` DAU/游客面积渐变 `#00AC7C`/`#FFB020` 改 `CHART_PALETTE[0]/[1]`；`StatCard` 图标渐变 `#00AC7C` 等硬编码改 `--zhenxinjian-*` CSS 设计令牌，`npm run build` 零错误，标记已完成 |
+| v1.9 | 2026-10-09 | — | IMPL-T12（小程序品牌色建立 TS 色板）：`config/constants.ts` 新增 `BRAND_COLORS` 单一色板并贯穿 `PROGRESS_COLORS`/`CYCLE_DAY_TYPES`；`WeightChart`/`EmptyState`/`OverLimitCard` 及 9 个页面 iconSrc 色值、switch/`confirmColor`/插画 SVG 全改引用；pages.json 平台 JSON 注释标注同步口径，`npm run type-check` 零错误，标记已完成 |
+| v1.10 | 2026-10-09 | — | IMPL-T13（picker 事件 any 类型窄化）：`custom-edit.vue` 两个 picker 事件参数由 `any` 窄化为 `{ detail: { value: number } }`，`npm run type-check` 零错误，标记已完成 |
+| v1.11 | 2026-10-09 | — | IMPL-T14（列表页 query 绑定 PageQueryBase）：`users`/`foods`/`configs`/`diet-records` 四列表页 `query` 显式 `interface XxxListQuery extends PageQueryBase` 绑定并传入 `usePageQuery`，删除逐个 `as` 断言补丁，`npm run build` 零错误，标记已完成 |
+| v1.12 | 2026-10-09 | — | IMPL-T15（store isLoggedIn 死代码清理）：`store/user.ts` 删除零消费 `isLoggedIn`（登录态判断直读 `token`），`npm run build` 零错误，标记已完成 |

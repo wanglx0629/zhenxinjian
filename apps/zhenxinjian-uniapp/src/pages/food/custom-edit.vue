@@ -77,7 +77,7 @@ const counterpart = computed(() => {
 })
 
 /** 换算单位：已录入数值随单位切换（kcal→kJ 乘 4.184，反向除），空值仅切换 */
-function handleEnergyUnitChange(e: any) {
+function handleEnergyUnitChange(e: { detail: { value: number } }) {
   const next: 'KCAL' | 'KJ' = Number(e.detail.value) === 1 ? 'KJ' : 'KCAL'
   if (next === energyUnit.value) return
   const v = num(form.energy)
@@ -94,7 +94,7 @@ function resolvedKcal(): number | null {
   return energyUnit.value === 'KJ' ? Math.round(v / KJ_PER_KCAL) : v
 }
 
-function handleCategoryChange(e: any) {
+function handleCategoryChange(e: { detail: { value: number } }) {
   const idx = Number(e.detail.value)
   if (categories.value[idx]) {
     form.categoryCode = categories.value[idx].code

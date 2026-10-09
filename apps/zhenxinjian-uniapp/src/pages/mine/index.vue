@@ -11,7 +11,7 @@ import { useBodyStore } from '@/store/body'
 import { useWeightStore } from '@/store/weight'
 import { useMenstrualStore } from '@/store/menstrual'
 import { useReminderStore } from '@/store/reminder'
-import { DIET_MODES } from '@/config/constants'
+import { BRAND_COLORS, DIET_MODES } from '@/config/constants'
 import { guestLeftText } from '@/utils/format'
 import { getToken } from '@/utils/storage'
 import { trackPage } from '@/utils/track'
@@ -27,7 +27,7 @@ const LIST_ICONS: Record<string, IconName> = {
   privacy: 'lock'
 }
 function listIcon(key: string) {
-  return iconSrc(LIST_ICONS[key], '#00AC7C')
+  return iconSrc(LIST_ICONS[key], BRAND_COLORS.primary)
 }
 
 const userStore = useUserStore()
@@ -187,7 +187,7 @@ function handleLogout() {
 
     <!-- 游客数据迁移提示（F03，仅游客） -->
     <view v-if="userStore.isGuest" class="card migrate-card">
-      <image class="migrate-icon" :src="iconSrc('package', '#9a6b00')" />
+      <image class="migrate-icon" :src="iconSrc('package', BRAND_COLORS.ctaDeep)" />
       <view class="migrate-main">
         <text class="migrate-title">体验期数据将自动迁移</text>
         <text class="migrate-desc">
@@ -264,7 +264,7 @@ function handleLogout() {
     <!-- 数据留存说明（F04/F28） -->
     <view class="card">
       <view class="card-title-withicon">
-        <image class="card-title-icon" :src="iconSrc('cloud', '#00AC7C')" />
+        <image class="card-title-icon" :src="iconSrc('cloud', BRAND_COLORS.primary)" />
         <text class="card-title">数据留存说明</text>
       </view>
       <view class="note-list">
@@ -278,7 +278,7 @@ function handleLogout() {
     <!-- 关于 -->
     <view class="card">
       <view class="card-title-withicon">
-        <image class="card-title-icon" :src="iconSrc('info', '#00AC7C')" />
+        <image class="card-title-icon" :src="iconSrc('info', BRAND_COLORS.primary)" />
         <text class="card-title">关于</text>
       </view>
       <text class="about-text">臻心减 V1.1 · 生活化减脂计算器</text>

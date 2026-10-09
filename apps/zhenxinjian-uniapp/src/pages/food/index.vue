@@ -13,10 +13,11 @@ import FoodThumb from '@/components/FoodThumb.vue'
 import { track, trackPage } from '@/utils/track'
 import { TRACK_EVENT } from '@/config/track-events'
 import { iconSrc } from '@/utils/icons'
+import { BRAND_COLORS } from '@/config/constants'
 
-const historyIcon = iconSrc('history', '#00AC7C')
-const starIcon = iconSrc('star', '#00AC7C')
-const flameIcon = iconSrc('flame', '#00AC7C')
+const historyIcon = iconSrc('history', BRAND_COLORS.primary)
+const starIcon = iconSrc('star', BRAND_COLORS.primary)
+const flameIcon = iconSrc('flame', BRAND_COLORS.primary)
 const entryArrow = iconSrc('chevronRight', '#94A3B8')
 
 const foodStore = useFoodStore()

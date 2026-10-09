@@ -12,8 +12,9 @@ import FoodThumb from '@/components/FoodThumb.vue'
 import { track, trackPage } from '@/utils/track'
 import { TRACK_EVENT } from '@/config/track-events'
 import { iconSrc } from '@/utils/icons'
+import { BRAND_COLORS } from '@/config/constants'
 
-const calcIcon = iconSrc('target', '#00AC7C')
+const calcIcon = iconSrc('target', BRAND_COLORS.primary)
 
 const foodStore = useFoodStore()
 

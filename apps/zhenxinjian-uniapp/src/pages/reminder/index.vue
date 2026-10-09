@@ -14,9 +14,10 @@ import { canSubmit } from '@/utils/throttle'
 import { track, trackPage } from '@/utils/track'
 import { TRACK_EVENT } from '@/config/track-events'
 import { iconSrc } from '@/utils/icons'
+import { BRAND_COLORS } from '@/config/constants'
 
-const warnIcon = iconSrc('bell', '#E69A00')
-const dangerIcon = iconSrc('alert', '#d63333')
+const warnIcon = iconSrc('bell', BRAND_COLORS.ctaActive)
+const dangerIcon = iconSrc('alert', BRAND_COLORS.dangerDeep)
 
 const userStore = useUserStore()
 const reminderStore = useReminderStore()
@@ -235,7 +236,7 @@ async function handleReAuth() {
           <text class="row-title">饮食提醒总开关</text>
           <text class="row-sub">关闭后不再接收任何三餐提醒</text>
         </view>
-        <switch :checked="masterSwitch === 1" color="#00AC7C" @change="onMasterChange" />
+        <switch :checked="masterSwitch === 1" :color="BRAND_COLORS.primary" @change="onMasterChange" />
       </view>
     </view>
 
@@ -260,7 +261,7 @@ async function handleReAuth() {
         <switch
           :checked="breakfastSwitch === 1"
           :disabled="masterSwitch === 0"
-          color="#00AC7C"
+          :color="BRAND_COLORS.primary"
           @change="onBreakfastSwitch"
         />
       </view>
@@ -282,7 +283,7 @@ async function handleReAuth() {
         <switch
           :checked="lunchSwitch === 1"
           :disabled="masterSwitch === 0"
-          color="#00AC7C"
+          :color="BRAND_COLORS.primary"
           @change="onLunchSwitch"
         />
       </view>
@@ -304,7 +305,7 @@ async function handleReAuth() {
         <switch
           :checked="dinnerSwitch === 1"
           :disabled="masterSwitch === 0"
-          color="#00AC7C"
+          :color="BRAND_COLORS.primary"
           @change="onDinnerSwitch"
         />
       </view>

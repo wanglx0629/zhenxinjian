@@ -14,7 +14,7 @@ import MacroProgress from '@/components/MacroProgress.vue'
 import OverLimitCard from '@/components/OverLimitCard.vue'
 import EmptyState from '@/components/EmptyState.vue'
 import EnergyRing from '@/components/EnergyRing.vue'
-import { CYCLE_DAY_TYPES, MEAL_TYPES } from '@/config/constants'
+import { BRAND_COLORS, CYCLE_DAY_TYPES, MEAL_TYPES } from '@/config/constants'
 import { greeting, guestLeftText, mdWeek, ymd } from '@/utils/format'
 import { getToken } from '@/utils/storage'
 import { track, trackPage } from '@/utils/track'
@@ -271,7 +271,7 @@ function goPlan() {
         <view class="card">
           <view class="card-title-row">
             <view class="card-title-withicon">
-              <image class="title-icon" :src="iconSrc('chart', '#00AC7C')" />
+              <image class="title-icon" :src="iconSrc('chart', BRAND_COLORS.primary)" />
               <text class="card-title">今日宏量进度</text>
             </view>
             <text class="mode-switch" @click="goMode">换模式</text>
@@ -282,7 +282,7 @@ function goPlan() {
             <text class="body-brief">身体数据：{{ bodyBrief }}</text>
             <view class="body-edit">
               <text class="body-edit-text">修改</text>
-              <image class="body-edit-icon" :src="iconSrc('chevronRight', '#00AC7C')" />
+              <image class="body-edit-icon" :src="iconSrc('chevronRight', BRAND_COLORS.primary)" />
             </view>
           </view>
         </view>
@@ -325,7 +325,7 @@ function goPlan() {
       <!-- 今日餐次 -->
       <view class="card meals-card" hover-class="card-hover" @click="goRecord">
         <view class="card-title-withicon">
-          <image class="title-icon" :src="iconSrc('utensils', '#00AC7C')" />
+          <image class="title-icon" :src="iconSrc('utensils', BRAND_COLORS.primary)" />
           <text class="card-title">今日餐次</text>
         </view>
         <view v-for="meal in mealRows" :key="meal.code" class="meal-row">
